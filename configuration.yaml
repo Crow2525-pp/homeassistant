@@ -1,0 +1,67 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+frontend:
+  themes: !include_dir_merge_named themes
+
+smartir:
+
+climate:
+  - platform: smartir
+    name: Masterbed AC
+    unique_id: Masterbed_AC
+    device_code: 1123
+    controller_data: remote.ir_blaster_master_bedroom_remote
+    temperature_sensor: sensor.ble_temperature_masterbed_temp_humidity_sensor
+    humidity_sensor: sensor.ble_humidity_masterbed_temp_humidity_sensor
+  - platform: smartir
+    name: Otto's AC
+    unique_id: Otto_AC
+    device_code: 1123
+    controller_data: remote.otto_s_room_remote_control_remote
+    temperature_sensor: sensor.ottos_room_temp_humidity_sensor_temperature
+    humidity_sensor: sensor.ottos_room_temp_humidity_sensor_humidity
+  - platform: smartir
+    name: Study AC
+    unique_id: Henry AC
+    device_code: 1123
+    controller_data: remote.henrys_room_ir_blaster_remote
+    temperature_sensor: sensor.henrys_room_temp_humidity_sensor_temperature
+    humidity_sensor: sensor.henrys_room_temp_humidity_sensor_humidity
+  - platform: smartir
+    name: Living Room AC
+    unique_id: Living Room AC
+    device_code: 1022
+    controller_data: remote.livingroom_irblaster_remote
+    temperature_sensor: sensor.livingroom_irblaster_temperature
+    humidity_sensor: sensor.livingroom_irblaster_humidity
+fan:
+  - platform: smartir
+    name: MasterBedroom fan
+    unique_id: bedroom_fan
+    device_code: 1040
+    controller_data: remote.ir_blaster_master_bedroom_remote
+
+
+cover:
+  - platform: template
+    covers:
+      roller_blinds_chan1:
+        device_class: blind
+        friendly_name: "Roller blinds (MasterBedroom)"
+        unique_id: "roller_blinds_MasterBedroom"
+        position_template: 50
+        open_cover:
+          service: script.roller_blinds_up
+        close_cover:
+          service: script.roller_blinds_down
+        stop_cover:
+          service: script.roller_blinds_stop
