@@ -980,14 +980,16 @@
   description: ''
   trigger:
   - platform: template
-    value_template: '{{states(''sensor.masterbed_7989_temperature'')|float > states(''input_number.climate_temperature_home'')
-      | float + states(''input_number.climate_range'') | float}}'
+    value_template:
+        '{{states(''sensor.masterbed_7989_temperature'')|float >
+        states(''input_number.climate_temperature_home'') | float + states(''input_number.climate_range'') | float / 2}}'
     alias: 'Cooler: Sensor > Low Temp Threshold'
     enabled: true
     id: Too Hot ac on
   - platform: template
-    value_template: '{{states(''sensor.masterbed_7989_temperature'')|float < states(''input_number.climate_temperature_home'')
-      | float - states(''input_number.climate_range'') | float / 2}}'
+    value_template:
+        '{{states(''sensor.masterbed_7989_temperature'')|float <
+        states(''input_number.climate_temperature_home'') | float - states(''input_number.climate_range'') | float / 2}}'
     enabled: true
     id: Too Cold ac off
     alias: 'Cooler: Sensor < High temp Threshold'

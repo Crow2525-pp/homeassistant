@@ -50,7 +50,7 @@ fan:
     device_code: 1040
     controller_data: remote.ir_blaster_master_bedroom_remote
 
-
+#Roller Blinds
 cover:
   - platform: template
     covers:
