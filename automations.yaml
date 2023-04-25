@@ -975,8 +975,7 @@
     - platform: template
       value_template:
         "{{states('sensor.masterbed_7989_temperature')|float > states('input_number.climate_temperature_home')
-        | float + states('input_number.climate_range') | float / 2 + states('input_number.heater_cooler_offset')
-        | float}}"
+        | float + states('input_number.climate_range') | float / 2 + states('input_number.heater_cooler_offset') | float}}"
       alias: "Cooler: Sensor > Low Temp Threshold"
       enabled: true
       id: Too Hot ac on
@@ -997,8 +996,7 @@
     - platform: template
       value_template:
         "{{states('sensor.masterbed_7989_temperature')|float < states('input_number.climate_temperature_home')
-        | float - states('input_number.climate_range') | float / 2} - states('input_number.heater_cooler_offset')
-        | float}}"
+        | float - states('input_number.climate_range') | float / 2 - states('input_number.heater_cooler_offset') | float}}"
       alias: "Heater: Sensor > High Temp Threshold"
       enabled: true
       id: Too Cold heater on
@@ -1063,13 +1061,13 @@
             - service: climate.set_temperature
               data:
                 hvac_mode: heat
-                temperature: "{{states('input_number.climate_temperature_home')|float(0)}}"
+                temperature: "{{states('input_number.climate_temperature_home')|float}}"
                 target_temp_high:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) + states('input_number.climate_range') | float(0) / 2}}"
+                  float + states('input_number.climate_range') | float / 2}}"
                 target_temp_low:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) - states('input_number.climate_range') | float(0) / 2}}"
+                  float - states('input_number.climate_range') | float / 2}}"
               target:
                 entity_id: climate.masterbed_ac
             - service: climate.set_fan_mode
@@ -1103,13 +1101,13 @@
             - service: climate.set_temperature
               data:
                 hvac_mode: cool
-                temperature: "{{states('input_number.climate_temperature_home')|float(0)}}"
+                temperature: "{{states('input_number.climate_temperature_home')|float}}"
                 target_temp_high:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) + states('input_number.climate_range') | float(0) / 2}}"
+                  float + states('input_number.climate_range') | float / 2}}"
                 target_temp_low:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) - states('input_number.climate_range') | float(0) / 2}}"
+                  float - states('input_number.climate_range') | float / 2}}"
               target:
                 entity_id: climate.masterbed_ac
         - conditions:
@@ -1130,13 +1128,13 @@
             - service: climate.set_temperature
               data:
                 hvac_mode: cool
-                temperature: "{{states('input_number.climate_temperature_home')|float(0)}}"
+                temperature: "{{states('input_number.climate_temperature_home')|float}}"
                 target_temp_high:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) + states('input_number.climate_range') | float(0) / 2}}"
+                  float + states('input_number.climate_range') | float / 2}}"
                 target_temp_low:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) - states('input_number.climate_range') | float(0) / 2}}"
+                  float - states('input_number.climate_range') | float / 2}}"
               target:
                 entity_id: climate.masterbed_ac
         - conditions:
@@ -1157,13 +1155,13 @@
             - service: climate.set_temperature
               data:
                 hvac_mode: heat
-                temperature: "{{states('input_number.climate_temperature_home')|float(0)}}"
+                temperature: "{{states('input_number.climate_temperature_home')|float}}"
                 target_temp_high:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) + states('input_number.climate_range') | float(0) / 2}}"
+                  float + states('input_number.climate_range') | float / 2}}"
                 target_temp_low:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) - states('input_number.climate_range') | float(0) / 2}}"
+                  float - states('input_number.climate_range') | float / 2}}"
               target:
                 entity_id: climate.masterbed_ac
             - service: climate.set_fan_mode
@@ -2021,11 +2019,11 @@
                 target_temp_high:
                   "{{states('input_number.climate_temperature_home') |
                   float + states('input_number.climate_henry_offset') | float +  states('input_number.climate_range')
-                  | float(0)}}"
+                  | float}}"
                 target_temp_low:
                   "{{states('input_number.climate_temperature_home') |
                   float +  states('input_number.climate_henry_offset') | float -  states('input_number.climate_range')
-                  | float(0)}}"
+                  | float}}"
               target:
                 entity_id: climate.masterbed_ac
             - service: climate.set_fan_mode
@@ -2059,13 +2057,13 @@
             - service: climate.set_temperature
               data:
                 hvac_mode: cool
-                temperature: "{{states('input_number.climate_temperature_home')|float(0)}}"
+                temperature: "{{states('input_number.climate_temperature_home')|float}}"
                 target_temp_high:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) + states('input_number.climate_range') | float(0) / 2}}"
+                  float + states('input_number.climate_range') | float / 2}}"
                 target_temp_low:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) - states('input_number.climate_range') | float(0) / 2}}"
+                  float - states('input_number.climate_range') | float / 2}}"
               target:
                 entity_id: climate.masterbed_ac
         - conditions:
@@ -2086,13 +2084,13 @@
             - service: climate.set_temperature
               data:
                 hvac_mode: cool
-                temperature: "{{states('input_number.climate_temperature_home')|float(0)}}"
+                temperature: "{{states('input_number.climate_temperature_home')|float}}"
                 target_temp_high:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) + states('input_number.climate_range') | float(0) / 2}}"
+                  float + states('input_number.climate_range') | float / 2}}"
                 target_temp_low:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) - states('input_number.climate_range') | float(0) / 2}}"
+                  float - states('input_number.climate_range') | float / 2}}"
               target:
                 entity_id: climate.masterbed_ac
         - conditions:
@@ -2113,13 +2111,13 @@
             - service: climate.set_temperature
               data:
                 hvac_mode: heat
-                temperature: "{{states('input_number.climate_temperature_home')|float(0)}}"
+                temperature: "{{states('input_number.climate_temperature_home')|float}}"
                 target_temp_high:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) + states('input_number.climate_range') | float(0) / 2}}"
+                  float + states('input_number.climate_range') | float / 2}}"
                 target_temp_low:
                   "{{states('input_number.climate_temperature_home') |
-                  float(0) - states('input_number.climate_range') | float(0) / 2}}"
+                  float - states('input_number.climate_range') | float / 2}}"
               target:
                 entity_id: climate.masterbed_ac
             - service: climate.set_fan_mode
