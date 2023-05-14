@@ -959,6 +959,11 @@
     - conditions:
       - condition: trigger
         id: Too Cold heater on
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_boolean.cool_only
+          state: 'on'
       sequence:
       - service: climate.turn_on
         data: {}
@@ -997,6 +1002,11 @@
     - conditions:
       - condition: trigger
         id: Too Hot ac on
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_boolean.heat_only
+          state: 'on'
       sequence:
       - service: climate.turn_on
         data: {}
@@ -1011,11 +1021,11 @@
       - service: climate.set_temperature
         data:
           hvac_mode: cool
-          temperature: '{{max(states('input_number.climate_temperature_home')|float,18)}}'
-          target_temp_high: '{{max(states('input_number.climate_temperature_home') |
-            float + states('input_number.climate_range') | float / 2,18)}}'
-          target_temp_low: '{{max(states('input_number.climate_temperature_home') |
-            float - states('input_number.climate_range') | float / 2, 18)}}'
+          temperature: '{{max(states(''input_number.climate_temperature_home'')|float,18)}}'
+          target_temp_high: '{{max(states(''input_number.climate_temperature_home'')
+            | float + states(''input_number.climate_range'') | float / 2,18)}}'
+          target_temp_low: '{{max(states(''input_number.climate_temperature_home'')
+            | float - states(''input_number.climate_range'') | float / 2, 18)}}'
         target:
           entity_id: climate.masterbed_ac
     - conditions:
@@ -1023,10 +1033,17 @@
         id: Bedtime
         enabled: true
       - condition: template
-        value_template: >
-          '{{states('sensor.masterbed_7989_temperature')|float > states('input_number.climate_temperature_home')
-          | float + states('input_number.climate_range') | float / 2}}'
+        value_template: '''{{states(''sensor.masterbed_7989_temperature'')|float >
+          states(''input_number.climate_temperature_home'') | float + states(''input_number.climate_range'')
+          | float / 2}}''
+
+          '
         alias: Too Hot
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_boolean.heat_only
+          state: 'on'
       sequence:
       - service: climate.turn_on
         data: {}
@@ -1036,11 +1053,12 @@
       - service: climate.set_temperature
         data:
           hvac_mode: cool
-          temperature: '{{max(states(''input_number.climate_temperature_home'')|float, 18)}}'
-          target_temp_high: '{{max(states(''input_number.climate_temperature_home'') |
-            float + states(''input_number.climate_range'') | float / 2, 18)}}'
-          target_temp_low: '{{max(states(''input_number.climate_temperature_home'') |
-            float - states(''input_number.climate_range'') | float / 2,18)}}'
+          temperature: '{{max(states(''input_number.climate_temperature_home'')|float,
+            18)}}'
+          target_temp_high: '{{max(states(''input_number.climate_temperature_home'')
+            | float + states(''input_number.climate_range'') | float / 2, 18)}}'
+          target_temp_low: '{{max(states(''input_number.climate_temperature_home'')
+            | float - states(''input_number.climate_range'') | float / 2,18)}}'
         target:
           entity_id: climate.masterbed_ac
     - conditions:
@@ -1051,6 +1069,11 @@
         value_template: '{{states(''sensor.masterbed_7989_temperature'')|float < states(''input_number.climate_temperature_home'')
           | float - states(''input_number.climate_range'') | float / 2}}'
         alias: Too Cold
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_boolean.cool_only
+          state: 'on'
       sequence:
       - service: climate.turn_on
         data: {}
@@ -1061,10 +1084,10 @@
         data:
           hvac_mode: heat
           temperature: '{{max(states(''input_number.climate_temperature_home'')|float,18)}}'
-          target_temp_high: '{{max(states(''input_number.climate_temperature_home'') |
-            float + states(''input_number.climate_range'') | float / 2,18)}}'
-          target_temp_low: '{{max(states(''input_number.climate_temperature_home'') |
-            float - states(''input_number.climate_range'') | float / 2,18)}}'
+          target_temp_high: '{{max(states(''input_number.climate_temperature_home'')
+            | float + states(''input_number.climate_range'') | float / 2,18)}}'
+          target_temp_low: '{{max(states(''input_number.climate_temperature_home'')
+            | float - states(''input_number.climate_range'') | float / 2,18)}}'
         target:
           entity_id: climate.masterbed_ac
       - service: climate.set_fan_mode
@@ -1858,203 +1881,6 @@
         data:
           message: Garage door closed
   mode: single
-- id: '1682076507058'
-  alias: Henry's Night Setback - Heat/Cool
-  description: ''
-  trigger:
-  - platform: template
-    value_template: '{{states(''sensor.henrys_room_temp_humidity_sensor_temperature'')
-      |float > states(''input_number.climate_temperature_home'') | float + states(''input_number.climate_range'')
-      | float + states(''input_number.climate_henry_offset'') | float}}'
-    alias: 'Cooler: Sensor > Low Temp Threshold'
-    enabled: true
-    id: Too Hot ac on
-  - platform: template
-    value_template: '{{states(''sensor.henrys_room_temp_humidity_sensor_temperature'')
-      |float < states(''input_number.climate_temperature_home'') | float - states(''input_number.climate_range'')
-      | float / 2 + states(''input_number.climate_henry_offset'') | float}}'
-    enabled: true
-    id: Too Cold ac off
-    alias: 'Cooler: Sensor < High temp Threshold'
-  - platform: template
-    value_template: '{{states(''sensor.henrys_room_temp_humidity_sensor_temperature'')
-      |float > states(''input_number.climate_temperature_home'') | float + states(''input_number.climate_range'')
-      | float / 2 + states(''input_number.climate_henry_offset'') | float}}'
-    alias: 'Heater: Sensor < Low Temp Threshold'
-    enabled: true
-    id: Too Hot heater off
-  - platform: template
-    value_template: '{{states(''sensor.henrys_room_temp_humidity_sensor_temperature'')
-      |float < states(''input_number.climate_temperature_home'') | float + states(''input_number.climate_range'')
-      | float + states(''input_number.climate_henry_offset'') | float}}'
-    alias: 'Heater: Sensor > High Temp Threshold'
-    enabled: true
-    id: Too Cold heater on
-  - platform: time
-    at: input_datetime.bedtime_henry
-    id: Bedtime
-  condition:
-  - condition: state
-    entity_id: input_boolean.henry_s_room_a_c_sleep_night_setback
-    state: 'on'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-  action:
-  - choose:
-    - conditions:
-      - condition: or
-        conditions:
-        - type: is_open
-          condition: device
-          device_id: d5f7f632943251f64c4dedc486906b17
-          entity_id: binary_sensor.contact_sensor_2
-          domain: binary_sensor
-        - condition: state
-          entity_id: binary_sensor.contact_sensor_window_and_door_sensor
-          state: 'on'
-          for:
-            hours: 0
-            minutes: 5
-            seconds: 0
-      sequence:
-      - service: climate.turn_off
-        data: {}
-        target:
-          entity_id: climate.masterbed_ac
-    alias: If doors are open, turn off
-    enabled: false
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: Too Hot heater off
-      sequence:
-      - service: climate.set_hvac_mode
-        data:
-          hvac_mode: 'off'
-        target:
-          entity_id: climate.masterbed_ac
-    - conditions:
-      - condition: trigger
-        id: Too Cold heater on
-      sequence:
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.masterbed_ac
-        enabled: true
-      - service: climate.set_temperature
-        data:
-          hvac_mode: heat
-          temperature: '{{states(''input_number.climate_temperature_home'')|float
-            +  states(''input_number.climate_henry_offset'') | float }}'
-          target_temp_high: '{{states(''input_number.climate_temperature_home'') |
-            float + states(''input_number.climate_henry_offset'') | float +  states(''input_number.climate_range'')
-            | float}}'
-          target_temp_low: '{{states(''input_number.climate_temperature_home'') |
-            float +  states(''input_number.climate_henry_offset'') | float -  states(''input_number.climate_range'')
-            | float}}'
-        target:
-          entity_id: climate.masterbed_ac
-      - service: climate.set_fan_mode
-        data:
-          fan_mode: low
-        target:
-          entity_id: climate.masterbed_ac
-    - conditions:
-      - condition: trigger
-        id: Too Cold ac off
-      sequence:
-      - service: climate.set_hvac_mode
-        data:
-          hvac_mode: 'off'
-        target:
-          entity_id: climate.masterbed_ac
-    - conditions:
-      - condition: trigger
-        id: Too Hot ac on
-      sequence:
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.masterbed_ac
-        enabled: true
-      - service: climate.set_fan_mode
-        data:
-          fan_mode: low
-        target:
-          entity_id: climate.masterbed_ac
-      - service: climate.set_temperature
-        data:
-          hvac_mode: cool
-          temperature: '{{states(''input_number.climate_temperature_home'')|float}}'
-          target_temp_high: '{{states(''input_number.climate_temperature_home'') |
-            float + states(''input_number.climate_range'') | float / 2}}'
-          target_temp_low: '{{states(''input_number.climate_temperature_home'') |
-            float - states(''input_number.climate_range'') | float / 2}}'
-        target:
-          entity_id: climate.masterbed_ac
-    - conditions:
-      - condition: trigger
-        id: Bedtime
-        enabled: true
-      - condition: template
-        value_template: '{{states(''sensor.masterbed_7989_temperature'')|float > states(''input_number.climate_temperature_home'')
-          | float + states(''input_number.climate_range'') | float / 2}}'
-        alias: Too Hot
-      sequence:
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.masterbed_ac
-        enabled: true
-      - service: climate.set_temperature
-        data:
-          hvac_mode: cool
-          temperature: '{{states(''input_number.climate_temperature_home'')|float}}'
-          target_temp_high: '{{states(''input_number.climate_temperature_home'') |
-            float + states(''input_number.climate_range'') | float / 2}}'
-          target_temp_low: '{{states(''input_number.climate_temperature_home'') |
-            float - states(''input_number.climate_range'') | float / 2}}'
-        target:
-          entity_id: climate.masterbed_ac
-    - conditions:
-      - condition: trigger
-        id: Bedtime
-        enabled: true
-      - condition: template
-        value_template: '{{states(''sensor.masterbed_7989_temperature'')|float < states(''input_number.climate_temperature_home'')
-          | float - states(''input_number.climate_range'') | float / 2}}'
-        alias: Too Cold
-      sequence:
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.masterbed_ac
-        enabled: true
-      - service: climate.set_temperature
-        data:
-          hvac_mode: heat
-          temperature: '{{states(''input_number.climate_temperature_home'')|float}}'
-          target_temp_high: '{{states(''input_number.climate_temperature_home'') |
-            float + states(''input_number.climate_range'') | float / 2}}'
-          target_temp_low: '{{states(''input_number.climate_temperature_home'') |
-            float - states(''input_number.climate_range'') | float / 2}}'
-        target:
-          entity_id: climate.masterbed_ac
-      - service: climate.set_fan_mode
-        data:
-          fan_mode: low
-        target:
-          entity_id: climate.masterbed_ac
-    alias: Turn on or Off Masterbed HVAC if too hot or too cold
-    default: []
-  mode: single
 - id: '1682307816446'
   alias: Boys room too hot
   description: ''
@@ -2070,7 +1896,7 @@
     device_id: b537f27e291c84976b0e98d50753fa53
     entity_id: sensor.a4_c1_38_f1_20_5c_205c_temperature
     domain: sensor
-    below: 18
+    below: 17
   - type: temperature
     platform: device
     device_id: 965f33a45d886ffdb7f7fe01d1ee78bd
@@ -2082,7 +1908,7 @@
     device_id: 965f33a45d886ffdb7f7fe01d1ee78bd
     entity_id: sensor.henrys_room_temp_humidity_sensor_temperature
     domain: sensor
-    below: 18
+    below: 17
   condition:
   - condition: or
     conditions:
@@ -2110,194 +1936,6 @@
 
         '
   mode: single
-- id: '1682381868609'
-  alias: MasterBedroom Night Setback - Heat/Cool
-  description: Setback to control temperature.
-  trigger:
-  - platform: template
-    value_template: '{{states(''sensor.masterbed_7989_temperature'')|float > states(''input_number.climate_temperature_night'')
-      | float + states(''input_number.climate_range'') | float / 2 + states(''input_number.heater_cooler_offset'')
-      | float}}'
-    alias: 'Cooler: Sensor > Low Temp Threshold'
-    enabled: true
-    id: Too Hot ac on
-  - platform: template
-    value_template: '{{states(''sensor.masterbed_7989_temperature'')|float < states(''input_number.climate_temperature_night'')
-      | float - states(''input_number.climate_range'') | float / 2}}'
-    enabled: true
-    id: Too Cold ac off
-    alias: 'Cooler: Sensor < High temp Threshold'
-  - platform: template
-    value_template: '{{states(''sensor.masterbed_7989_temperature'')|float > states(''input_number.climate_temperature_night'')
-      | float + states(''input_number.climate_range'') | float / 2}}'
-    alias: 'Heater: Sensor < Low Temp Threshold'
-    enabled: true
-    id: Too Hot heater off
-  - platform: template
-    value_template: '{{states(''sensor.masterbed_7989_temperature'')|float < states(''input_number.climate_temperature_night'')
-      | float - states(''input_number.climate_range'') | float / 2 - states(''input_number.heater_cooler_offset'')
-      | float}}'
-    alias: 'Heater: Sensor > High Temp Threshold'
-    enabled: true
-    id: Too Cold heater on
-  - platform: time
-    at: input_datetime.bedtime_phil_steph
-    id: Bedtime
-  condition:
-  - condition: state
-    entity_id: input_boolean.masterbed_thermostat
-    state: 'on'
-  - condition: state
-    entity_id: input_select.occupancy
-    state: Sleeping
-  action:
-  - choose:
-    - conditions:
-      - condition: or
-        conditions:
-        - type: is_open
-          condition: device
-          device_id: d5f7f632943251f64c4dedc486906b17
-          entity_id: binary_sensor.contact_sensor_2
-          domain: binary_sensor
-        - condition: state
-          entity_id: binary_sensor.contact_sensor_window_and_door_sensor
-          state: 'on'
-          for:
-            hours: 0
-            minutes: 5
-            seconds: 0
-      sequence:
-      - service: climate.turn_off
-        data: {}
-        target:
-          entity_id: climate.masterbed_ac
-    alias: If doors are open, turn off
-    enabled: false
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: Too Hot heater off
-      sequence:
-      - service: climate.set_hvac_mode
-        data:
-          hvac_mode: 'off'
-        target:
-          entity_id: climate.masterbed_ac
-    - conditions:
-      - condition: trigger
-        id: Too Cold heater on
-      sequence:
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.masterbed_ac
-        enabled: true
-      - service: climate.set_temperature
-        data:
-          hvac_mode: heat
-          temperature: '{{states(''input_number.climate_temperature_night'')|float}}'
-          target_temp_high: '{{states(''input_number.climate_temperature_night'')
-            | float + states(''input_number.climate_range'') | float / 2}}'
-          target_temp_low: '{{states(''input_number.climate_temperature_night'') |
-            float - states(''input_number.climate_range'') | float / 2}}'
-        target:
-          entity_id: climate.masterbed_ac
-      - service: climate.set_fan_mode
-        data:
-          fan_mode: low
-        target:
-          entity_id: climate.masterbed_ac
-    - conditions:
-      - condition: trigger
-        id: Too Cold ac off
-      sequence:
-      - service: climate.set_hvac_mode
-        data:
-          hvac_mode: 'off'
-        target:
-          entity_id: climate.masterbed_ac
-    - conditions:
-      - condition: trigger
-        id: Too Hot ac on
-      sequence:
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.masterbed_ac
-        enabled: true
-      - service: climate.set_fan_mode
-        data:
-          fan_mode: low
-        target:
-          entity_id: climate.masterbed_ac
-      - service: climate.set_temperature
-        data:
-          hvac_mode: cool
-          temperature: '{{states(''input_number.climate_temperature_night'')|float}}'
-          target_temp_high: '{{states(''input_number.climate_temperature_night'')
-            | float + states(''input_number.climate_range'') | float / 2}}'
-          target_temp_low: '{{states(''input_number.climate_temperature_night'') |
-            float - states(''input_number.climate_range'') | float / 2}}'
-        target:
-          entity_id: climate.masterbed_ac
-    - conditions:
-      - condition: trigger
-        id: Bedtime
-        enabled: true
-      - condition: template
-        value_template: '{{states(''sensor.masterbed_7989_temperature'')|float > states(''input_number.climate_temperature_night'')
-          | float + states(''input_number.climate_range'') | float / 2}}'
-        alias: Too Hot
-      sequence:
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.masterbed_ac
-        enabled: true
-      - service: climate.set_temperature
-        data:
-          hvac_mode: cool
-          temperature: '{{states(''input_number.climate_temperature_night'')|float}}'
-          target_temp_high: '{{states(''input_number.climate_temperature_night'')
-            | float + states(''input_number.climate_range'') | float / 2}}'
-          target_temp_low: '{{states(''input_number.climate_temperature_night'') |
-            float - states(''input_number.climate_range'') | float / 2}}'
-        target:
-          entity_id: climate.masterbed_ac
-    - conditions:
-      - condition: trigger
-        id: Bedtime
-        enabled: true
-      - condition: template
-        value_template: '{{states(''sensor.masterbed_7989_temperature'')|float < states(''input_number.climate_temperature_night'')
-          | float - states(''input_number.climate_range'') | float / 2}}'
-        alias: Too Cold
-      sequence:
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.masterbed_ac
-        enabled: true
-      - service: climate.set_temperature
-        data:
-          hvac_mode: heat
-          temperature: '{{states(''input_number.climate_temperature_night'')|float}}'
-          target_temp_high: '{{states(''input_number.climate_temperature_night'')
-            | float + states(''input_number.climate_range'') | float / 2}}'
-          target_temp_low: '{{states(''input_number.climate_temperature_night'') |
-            float - states(''input_number.climate_range'') | float / 2}}'
-        target:
-          entity_id: climate.masterbed_ac
-      - service: climate.set_fan_mode
-        data:
-          fan_mode: low
-        target:
-          entity_id: climate.masterbed_ac
-    alias: Turn on or Off Masterbed HVAC if too hot or too cold
-    default: []
-  mode: queued
-  max: 2
 - id: '1682493497365'
   alias: Phil's left work
   description: ''
@@ -2482,4 +2120,466 @@
       - service: notify.mobile_app_samsung_galaxy_s22_ultra
         data:
           message: Garage door closed
+  mode: single
+- id: '1684056377214'
+  alias: MasterBedroom Night Setback - Heat/Cool
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{states(''sensor.masterbed_7989_temperature'')|float > states(''input_number.climate_temperature_home'')
+      | float + states(''input_number.climate_range'') | float / 2 + states(''input_number.heater_cooler_offset'')
+      | float}}'
+    alias: 'Cooler: Sensor > High Temp Threshold'
+    enabled: true
+    id: Too Hot ac on
+  - platform: template
+    value_template: '{{states(''sensor.masterbed_7989_temperature'')|float < states(''input_number.climate_temperature_home'')
+      | float - states(''input_number.climate_range'') | float / 2}}'
+    enabled: true
+    id: Too Cold ac off
+    alias: 'Cooler: Sensor < Low temp Threshold'
+  - platform: template
+    value_template: '{{states(''sensor.masterbed_7989_temperature'')|float > states(''input_number.climate_temperature_home'')
+      | float + states(''input_number.climate_range'') | float / 2}}'
+    alias: 'Heater: Sensor > High Temp Threshold'
+    enabled: true
+    id: Too Hot heater off
+  - platform: template
+    value_template: '{{states(''sensor.masterbed_7989_temperature'')|float < states(''input_number.climate_temperature_home'')
+      | float - states(''input_number.climate_range'') | float / 2 - states(''input_number.heater_cooler_offset'')
+      | float}}'
+    alias: 'Heater: Sensor < Low Temp Threshold'
+    enabled: true
+    id: Too Cold heater on
+  - platform: time
+    at: input_datetime.bedtime_phil_steph
+    id: Bedtime
+  condition:
+  - condition: state
+    entity_id: input_boolean.masterbed_thermostat
+    state: 'on'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+  action:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - type: is_open
+          condition: device
+          device_id: d5f7f632943251f64c4dedc486906b17
+          entity_id: binary_sensor.contact_sensor_2
+          domain: binary_sensor
+        - condition: state
+          entity_id: binary_sensor.contact_sensor_window_and_door_sensor
+          state: 'on'
+          for:
+            hours: 0
+            minutes: 5
+            seconds: 0
+      sequence:
+      - service: climate.turn_off
+        data: {}
+        target:
+          entity_id: climate.masterbed_ac
+    alias: If doors are open, turn off
+    enabled: false
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Too Hot heater off
+      - condition: state
+        entity_id: climate.masterbed_ac
+        attribute: last_on_operation
+        state: heat
+      sequence:
+      - service: climate.set_hvac_mode
+        data:
+          hvac_mode: 'off'
+        target:
+          entity_id: climate.masterbed_ac
+    - conditions:
+      - condition: trigger
+        id: Too Cold heater on
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_boolean.cool_only
+          state: 'on'
+        alias: Not (Cool Only is On)
+      sequence:
+      - service: climate.turn_on
+        data: {}
+        target:
+          entity_id: climate.masterbed_ac
+        enabled: true
+      - service: climate.set_temperature
+        data:
+          hvac_mode: heat
+          temperature: '{{states(''input_number.climate_temperature_night'')|float,
+            18 | max}}'
+          target_temp_high: '{{states(''input_number.climate_temperature_night'')
+            | float + states(''input_number.climate_range'') | float / 2}}'
+          target_temp_low: '{{states(''input_number.climate_temperature_night'') |
+            float - states(''input_number.climate_range'') | float / 2, 18|max}}'
+        target:
+          entity_id: climate.masterbed_ac
+      - service: climate.set_fan_mode
+        data:
+          fan_mode: auto
+        target:
+          entity_id: climate.masterbed_ac
+    - conditions:
+      - condition: trigger
+        id: Too Cold ac off
+      - condition: state
+        entity_id: climate.masterbed_ac
+        attribute: last_on_operation
+        state: cool
+      sequence:
+      - service: climate.set_hvac_mode
+        data:
+          hvac_mode: 'off'
+        target:
+          entity_id: climate.masterbed_ac
+    - conditions:
+      - condition: trigger
+        id: Too Hot ac on
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_boolean.heat_only
+          state: 'on'
+        alias: Not (Heat Only is On)
+      sequence:
+      - service: climate.turn_on
+        data: {}
+        target:
+          entity_id: climate.masterbed_ac
+        enabled: true
+      - service: climate.set_fan_mode
+        data:
+          fan_mode: auto
+        target:
+          entity_id: climate.masterbed_ac
+      - service: climate.set_temperature
+        data:
+          hvac_mode: cool
+          temperature: '{{max(states(''input_number.climate_temperature_night'')|float,18)}}'
+          target_temp_high: '{{max(states(''input_number.climate_temperature_night'')
+            | float + states(''input_number.climate_range'') | float / 2,18)}}'
+          target_temp_low: '{{max(states(''input_number.climate_temperature_night'')
+            | float - states(''input_number.climate_range'') | float / 2, 18)}}'
+        target:
+          entity_id: climate.masterbed_ac
+    - conditions:
+      - condition: trigger
+        id: Bedtime
+        enabled: true
+      - condition: template
+        value_template: '''{{states(''sensor.masterbed_7989_temperature'')|float >
+          states(''input_number.climate_temperature_night'') | float + states(''input_number.climate_range'')
+          | float / 2}}''
+
+          '
+        alias: Too Hot
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_boolean.heat_only
+          state: 'on'
+        alias: Not (Heat Only is On)
+      sequence:
+      - service: climate.turn_on
+        data: {}
+        target:
+          entity_id: climate.masterbed_ac
+        enabled: true
+      - service: climate.set_temperature
+        data:
+          hvac_mode: cool
+          temperature: '{{max(states(''input_number.climate_temperature_night'')|float,
+            18)}}'
+          target_temp_high: '{{max(states(''input_number.climate_temperature_night'')
+            | float + states(''input_number.climate_range'') | float / 2, 18)}}'
+          target_temp_low: '{{max(states(''input_number.climate_temperature_night'')
+            | float - states(''input_number.climate_range'') | float / 2,18)}}'
+        target:
+          entity_id: climate.masterbed_ac
+    - conditions:
+      - condition: trigger
+        id: Bedtime
+        enabled: true
+      - condition: template
+        value_template: '{{states(''sensor.masterbed_7989_temperature'')|float < states(''input_number.climate_temperature_night'')
+          | float - states(''input_number.climate_range'') | float / 2}}'
+        alias: Too Cold
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_boolean.cool_only
+          state: 'on'
+        alias: Not (Cool Only is On)
+      sequence:
+      - service: climate.turn_on
+        data: {}
+        target:
+          entity_id: climate.masterbed_ac
+        enabled: true
+      - service: climate.set_temperature
+        data:
+          hvac_mode: heat
+          temperature: '{{max(states(''input_number.climate_temperature_night'')|float,18)}}'
+          target_temp_high: '{{max(states(''input_number.climate_temperature_night'')
+            | float + states(''input_number.climate_range'') | float / 2,18)}}'
+          target_temp_low: '{{max(states(''input_number.climate_temperature_night'')
+            | float - states(''input_number.climate_range'') | float / 2,18)}}'
+        target:
+          entity_id: climate.masterbed_ac
+      - service: climate.set_fan_mode
+        data:
+          fan_mode: auto
+        target:
+          entity_id: climate.masterbed_ac
+    alias: Turn on or Off Masterbed HVAC if too hot or too cold
+    default: []
+  mode: single
+- id: '1684056473083'
+  alias: Henrys Room Night Setback - Heat/Cool
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{states(''sensor.henrys_room_temp_humidity_sensor_temperature'')|float
+      > states(''input_number.climate_temperature_home'') | float + states(''input_number.climate_range'')
+      | float / 2 + states(''input_number.climate_henry_offset'')|float + states(''input_number.heater_cooler_offset'')
+      | float}}'
+    alias: 'Cooler: Sensor > High Temp Threshold'
+    enabled: true
+    id: Too Hot ac on
+  - platform: template
+    value_template: '{{states(''sensor.henrys_room_temp_humidity_sensor_temperature'')|float
+      < states(''input_number.climate_temperature_home'') | float - states(''input_number.climate_range'')
+      | float / 2 + states(''input_number.climate_henry_offset'')|float}}'
+    enabled: true
+    id: Too Cold ac off
+    alias: 'Cooler: Sensor < Low temp Threshold'
+  - platform: template
+    value_template: '{{states(''sensor.henrys_room_temp_humidity_sensor_temperature'')|float
+      > states(''input_number.climate_temperature_home'') | float + states(''input_number.climate_range'')
+      | float / 2 + states(''input_number.climate_henry_offset'')|float}}'
+    alias: 'Heater: Sensor > High Temp Threshold'
+    enabled: true
+    id: Too Hot heater off
+  - platform: template
+    value_template: '{{states(''sensor.henrys_room_temp_humidity_sensor_temperature'')|float
+      < states(''input_number.climate_temperature_home'') | float - states(''input_number.climate_range'')
+      | float / 2 + states(''input_number.climate_henry_offset'')|float - states(''input_number.heater_cooler_offset'')
+      | float}}'
+    alias: 'Heater: Sensor < Low Temp Threshold'
+    enabled: true
+    id: Too Cold heater on
+  - platform: time
+    at: input_datetime.bedtime_henry
+    id: Bedtime
+  condition:
+  - condition: state
+    entity_id: input_boolean.masterbed_thermostat
+    state: 'on'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+  action:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - type: is_open
+          condition: device
+          device_id: d5f7f632943251f64c4dedc486906b17
+          entity_id: binary_sensor.contact_sensor_2
+          domain: binary_sensor
+        - condition: state
+          entity_id: binary_sensor.contact_sensor_window_and_door_sensor
+          state: 'on'
+          for:
+            hours: 0
+            minutes: 5
+            seconds: 0
+      sequence:
+      - service: climate.turn_off
+        data: {}
+        target:
+          entity_id: climate.masterbed_ac
+    alias: If doors are open, turn off
+    enabled: false
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Too Hot heater off
+      - condition: state
+        entity_id: climate.masterbed_ac
+        attribute: last_on_operation
+        state: heat
+      sequence:
+      - service: climate.set_hvac_mode
+        data:
+          hvac_mode: 'off'
+        target:
+          entity_id: climate.masterbed_ac
+    - conditions:
+      - condition: trigger
+        id: Too Cold heater on
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_boolean.cool_only
+          state: 'on'
+        alias: Not (Cool Only is On)
+      sequence:
+      - service: climate.turn_on
+        data: {}
+        target:
+          entity_id: climate.masterbed_ac
+        enabled: true
+      - service: climate.set_temperature
+        data:
+          hvac_mode: heat
+          temperature: '{{states(''input_number.climate_temperature_night'')|float
+            + states(''input_number.climate_henry_offset'')|float, 18 | max}}'
+          target_temp_high: '{{states(''input_number.climate_temperature_night'')
+            | float + states(''input_number.climate_range'') | float / 2 + states(''input_number.climate_henry_offset'')|float}}'
+          target_temp_low: '{{states(''input_number.climate_temperature_night'') |
+            float - states(''input_number.climate_range'') | float / 2 + states(''input_number.climate_henry_offset'')|float,
+            18|max}}'
+        target:
+          entity_id: climate.masterbed_ac
+      - service: climate.set_fan_mode
+        data:
+          fan_mode: auto
+        target:
+          entity_id: climate.masterbed_ac
+    - conditions:
+      - condition: trigger
+        id: Too Cold ac off
+      - condition: state
+        entity_id: climate.masterbed_ac
+        attribute: last_on_operation
+        state: cool
+      sequence:
+      - service: climate.set_hvac_mode
+        data:
+          hvac_mode: 'off'
+        target:
+          entity_id: climate.masterbed_ac
+    - conditions:
+      - condition: trigger
+        id: Too Hot ac on
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_boolean.heat_only
+          state: 'on'
+        alias: Not (Heat Only is On)
+      sequence:
+      - service: climate.turn_on
+        data: {}
+        target:
+          entity_id: climate.masterbed_ac
+        enabled: true
+      - service: climate.set_fan_mode
+        data:
+          fan_mode: auto
+        target:
+          entity_id: climate.masterbed_ac
+      - service: climate.set_temperature
+        data:
+          hvac_mode: cool
+          temperature: '{{max(states(''input_number.climate_temperature_night'')|float
+            + states(''input_number.climate_henry_offset'')|float,18)}}'
+          target_temp_high: '{{max(states(''input_number.climate_temperature_night'')
+            | float + states(''input_number.climate_range'') | float / 2 + states(''input_number.climate_henry_offset'')|float,18)}}'
+          target_temp_low: '{{max(states(''input_number.climate_temperature_night'')
+            | float - states(''input_number.climate_range'') | float / 2 + states(''input_number.climate_henry_offset'')|float,
+            18)}}'
+        target:
+          entity_id: climate.masterbed_ac
+    - conditions:
+      - condition: trigger
+        id: Bedtime
+        enabled: true
+      - condition: template
+        value_template: '''{{states(''sensor.henrys_room_temp_humidity_sensor_temperature'')|float
+          > states(''input_number.climate_temperature_night'') | float + states(''input_number.climate_range'')
+          | float / 2}}''
+
+          '
+        alias: Too Hot
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_boolean.heat_only
+          state: 'on'
+        alias: Not (Heat Only is On)
+      sequence:
+      - service: climate.turn_on
+        data: {}
+        target:
+          entity_id: climate.masterbed_ac
+        enabled: true
+      - service: climate.set_temperature
+        data:
+          hvac_mode: cool
+          temperature: '{{max(states(''input_number.climate_temperature_night'')|float
+            + states(''input_number.climate_henry_offset'')|float, 18)}}'
+          target_temp_high: '{{max(states(''input_number.climate_temperature_night'')
+            | float + states(''input_number.climate_range'') | float / 2 + states(''input_number.climate_henry_offset'')|float,
+            18)}}'
+          target_temp_low: '{{max(states(''input_number.climate_temperature_night'')
+            | float - states(''input_number.climate_range'') | float / 2 + states(''input_number.climate_henry_offset'')|float,18)}}'
+        target:
+          entity_id: climate.masterbed_ac
+    - conditions:
+      - condition: trigger
+        id: Bedtime
+        enabled: true
+      - condition: template
+        value_template: '{{states(''sensor.henrys_room_temp_humidity_sensor_temperature'')|float
+          < states(''input_number.climate_temperature_night'') | float - states(''input_number.climate_range'')
+          | float / 2 + states(''input_number.climate_henry_offset'')|float}}'
+        alias: Too Cold
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_boolean.cool_only
+          state: 'on'
+        alias: Not (Cool Only is On)
+      sequence:
+      - service: climate.turn_on
+        data: {}
+        target:
+          entity_id: climate.masterbed_ac
+        enabled: true
+      - service: climate.set_temperature
+        data:
+          hvac_mode: heat
+          temperature: '{{max(states(''input_number.climate_temperature_night'')|float
+            +states(''input_number.climate_henry_offset'')|float,18)}}'
+          target_temp_high: '{{max(states(''input_number.climate_temperature_night'')
+            | float + states(''input_number.climate_range'') | float / 2 +states(''input_number.climate_henry_offset'')|float,18)}}'
+          target_temp_low: '{{max(states(''input_number.climate_temperature_night'')
+            | float - states(''input_number.climate_range'') | float / 2 +states(''input_number.climate_henry_offset'')|float,18)}}'
+        target:
+          entity_id: climate.masterbed_ac
+      - service: climate.set_fan_mode
+        data:
+          fan_mode: auto
+        target:
+          entity_id: climate.masterbed_ac
+    alias: Turn on or Off Masterbed HVAC if too hot or too cold
+    default: []
   mode: single
