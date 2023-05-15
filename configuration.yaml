@@ -65,3 +65,112 @@ cover:
           service: script.roller_blinds_down
         stop_cover:
           service: script.roller_blinds_stop
+
+#Thermostat Helper Setup
+#Masterbed:
+template:
+  - binary_sensor:
+      - name: "Masterbed Optimal Temperature Night AC Cold Threshold"
+        unit_of_measurement: "°C"
+        state: >
+          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set target_temp = states('input_number.climate_temperature_night') | float %}
+          {% set range = states('input_number.climate_range') | float / 2 %}
+          {% set offset = states('input_number.heater_cooler_offset') | float%}
+          {{ sensor_temp < target_temp -  range}}
+      - name: "Masterbed Optimal Temperature Night AC Hot Threshold"
+        unit_of_measurement: "°C"
+        state: >
+          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set target_temp = states('input_number.climate_temperature_night') | float %}
+          {% set range = states('input_number.climate_range') | float / 2 %}
+          {% set offset = states('input_number.heater_cooler_offset') | float%}
+          {{ sensor_temp > target_temp +  range + offset}}
+      - name: "Masterbed Optimal Temperature Night Heater Cold Threshold"
+        unit_of_measurement: "°C"
+        state: >
+          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set target_temp = states('input_number.climate_temperature_night') | float %}
+          {% set range = states('input_number.climate_range') | float / 2 %}
+          {% set offset = states('input_number.heater_cooler_offset') | float%}
+          {{ sensor_temp < target_temp -  range - offset}}
+      - name: "Masterbed Optimal Temperature Night Heater Hot Threshold"
+        unit_of_measurement: "°C"
+        state: >
+          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set target_temp = states('input_number.climate_temperature_night') | float %}
+          {% set range = states('input_number.climate_range') | float / 2 %}
+          {% set offset = states('input_number.heater_cooler_offset') | float%}
+          {{ sensor_temp > target_temp +  range}}
+      - name: "Henrys Room Optimal Temperature Night AC Cold Threshold"
+        unit_of_measurement: "°C"
+        state: >
+          {% set sensor_temp= states('sensor.henrys_room_temp_humidity_sensor_temperature') | float %}
+          {% set target_temp = states('input_number.climate_temperature_night') | float %}
+          {% set range = states('input_number.climate_range') | float / 2 %}
+          {% set offset = states('input_number.heater_cooler_offset') | float%}
+          {% set henry_offset = states('input_number.climate_henry_offset') | float%}
+          {{ sensor_temp < target_temp + henry_offset-  range}}
+      - name: "Henrys Room Optimal Temperature Night AC Hot Threshold"
+        unit_of_measurement: "°C"
+        state: >
+          {% set sensor_temp= states('sensor.henrys_room_temp_humidity_sensor_temperature') | float %}
+          {% set target_temp = states('input_number.climate_temperature_night') | float %}
+          {% set range = states('input_number.climate_range') | float / 2 %}
+          {% set offset = states('input_number.heater_cooler_offset') | float%}
+          {% set henry_offset = states('input_number.climate_henry_offset') | float%}
+          {{ sensor_temp > target_temp +  henry_offset + range + offset}}
+      - name: "Henrys Room Optimal Temperature Night Heater Cold Threshold"
+        unit_of_measurement: "°C"
+        state: >
+          {% set sensor_temp= states('sensor.henrys_room_temp_humidity_sensor_temperature') | float %}
+          {% set target_temp = states('input_number.climate_temperature_night') | float %}
+          {% set range = states('input_number.climate_range') | float / 2 %}
+          {% set offset = states('input_number.heater_cooler_offset') | float%}
+          {% set henry_offset = states('input_number.climate_henry_offset') | float%}
+          {{ sensor_temp < target_temp + henry_offset -  range - offset}}
+      - name: "Henrys Room Optimal Temperature Night Heater Hot Threshold"
+        unit_of_measurement: "°C"
+        state: >
+          {% set sensor_temp= states('sensor.henrys_room_temp_humidity_sensor_temperature') | float %}
+          {% set target_temp = states('input_number.climate_temperature_night') | float %}
+          {% set range = states('input_number.climate_range') | float / 2 %}
+          {% set offset = states('input_number.heater_cooler_offset') | float%}
+          {% set henry_offset = states('input_number.climate_henry_offset') | float%}
+          {{ sensor_temp > target_temp + henry_offset +  range}}
+      - name: "Ottos Room Optimal Temperature Night AC Cold Threshold"
+        unit_of_measurement: "°C"
+        state: >
+          {% set sensor_temp= states('sensor.ottos_room_temp_humidity_sensor_temperature') | float %}
+          {% set target_temp = states('input_number.climate_temperature_night') | float %}
+          {% set range = states('input_number.climate_range') | float / 2 %}
+          {% set offset = states('input_number.heater_cooler_offset') | float%}
+          {% set henry_offset = states('input_number.climate_henry_offset') | float%}
+          {{ sensor_temp < target_temp + henry_offset-  range}}
+      - name: "Ottos Room Optimal Temperature Night AC Hot Threshold"
+        unit_of_measurement: "°C"
+        state: >
+          {% set sensor_temp= states('sensor.ottos_room_temp_humidity_sensor_temperature') | float %}
+          {% set target_temp = states('input_number.climate_temperature_night') | float %}
+          {% set range = states('input_number.climate_range') | float / 2 %}
+          {% set offset = states('input_number.heater_cooler_offset') | float%}
+          {% set henry_offset = states('input_number.climate_henry_offset') | float%}
+          {{ sensor_temp > target_temp +  henry_offset + range + offset}}
+      - name: "Ottos Room Optimal Temperature Night Heater Cold Threshold"
+        unit_of_measurement: "°C"
+        state: >
+          {% set sensor_temp= states('sensor.ottos_room_temp_humidity_sensor_temperature') | float %}
+          {% set target_temp = states('input_number.climate_temperature_night') | float %}
+          {% set range = states('input_number.climate_range') | float / 2 %}
+          {% set offset = states('input_number.heater_cooler_offset') | float%}
+          {% set henry_offset = states('input_number.climate_henry_offset') | float%}
+          {{ sensor_temp < target_temp + henry_offset -  range - offset}}
+      - name: "Ottos Room Optimal Temperature Night Heater Hot Threshold"
+        unit_of_measurement: "°C"
+        state: >
+          {% set sensor_temp= states('sensor.ottos_room_temp_humidity_sensor_temperature') | float %}
+          {% set target_temp = states('input_number.climate_temperature_night') | float %}
+          {% set range = states('input_number.climate_range') | float / 2 %}
+          {% set offset = states('input_number.heater_cooler_offset') | float%}
+          {% set henry_offset = states('input_number.climate_henry_offset') | float%}
+          {{ sensor_temp > target_temp + henry_offset +  range}}

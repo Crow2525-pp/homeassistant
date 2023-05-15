@@ -2583,3 +2583,102 @@
     alias: Turn on or Off Masterbed HVAC if too hot or too cold
     default: []
   mode: single
+- id: '1684094589393'
+  alias: Henry too Cold
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.henrys_thermometer
+    attribute: lower
+    id: Too Cold - Heater on
+  condition:
+  - condition: state
+    entity_id: input_select.occupancy
+    state: Home
+  action:
+  - service: climate.turn_on
+    data: {}
+    target:
+      entity_id: climate.study_ac_2
+  - service: climate.set_temperature
+    data:
+      temperature: 18
+      hvac_mode: heat
+    target:
+      entity_id: climate.study_ac_2
+  - service: climate.set_fan_mode
+    data:
+      fan_mode: Low
+    target:
+      entity_id: climate.study_ac_2
+  mode: single
+- id: '1684155603229'
+  alias: Henry & Otto's Heaters
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.henrys_room_optimal_temperature_night_heater_cold_threshold
+    id: Henry Too Cold - Heater On
+  - platform: state
+    entity_id:
+    - binary_sensor.ottos_room_optimal_temperature_night_heater_cold_threshold
+    id: Otto Too Cold - Heater On
+  - platform: state
+    entity_id:
+    - binary_sensor.henrys_room_optimal_temperature_night_heater_hot_threshold
+    id: Henry Too Hot - Heater Off
+  - platform: state
+    entity_id:
+    - binary_sensor.masterbed_optimal_temperature_night_heater_hot_threshold
+    id: Otto Too Hot - Heater Off
+  condition:
+  - condition: state
+    entity_id: input_boolean.henry_s_room_a_c_sleep_night_setback
+    state: 'on'
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Henry Too Cold - Heater On
+      sequence:
+      - service: climate.set_temperature
+        data:
+          hvac_mode: heat
+          temperature: 17.9
+        target:
+          entity_id: climate.study_ac_2
+      - service: climate.turn_on
+        data: {}
+        target:
+          entity_id: climate.study_ac_2
+    - conditions:
+      - condition: trigger
+        id: Henry Too Hot - Heater Off
+      sequence:
+      - service: climate.turn_off
+        data: {}
+        target:
+          entity_id: climate.study_ac_2
+    - conditions:
+      - condition: trigger
+        id: Otto Too Cold - Heater On
+      sequence:
+      - service: climate.set_temperature
+        data:
+          hvac_mode: heat
+          temperature: 18
+        target:
+          entity_id: climate.otto_s_ac
+      - service: climate.turn_on
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: Otto Too Hot - Heater Off
+      sequence:
+      - service: climate.turn_off
+        data: {}
+        target:
+          entity_id: climate.otto_s_ac
+  mode: single
