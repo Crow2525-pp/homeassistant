@@ -2619,19 +2619,19 @@
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.henrys_room_optimal_temperature_night_heater_cold_threshold
+    - binary_sensor.henrys_room_night_heater_cold_trigger
     id: Henry Too Cold - Heater On
   - platform: state
     entity_id:
-    - binary_sensor.ottos_room_optimal_temperature_night_heater_cold_threshold
+    - binary_sensor.ottos_room_night_heater_cold_trigger
     id: Otto Too Cold - Heater On
   - platform: state
     entity_id:
-    - binary_sensor.henrys_room_optimal_temperature_night_heater_hot_threshold
+    - binary_sensor.henrys_room_night_heater_hot_trigger
     id: Henry Too Hot - Heater Off
   - platform: state
     entity_id:
-    - binary_sensor.masterbed_optimal_temperature_night_heater_hot_threshold
+    - binary_sensor.ottos_room_night_heater_hot_trigger
     id: Otto Too Hot - Heater Off
   condition:
   - condition: state
