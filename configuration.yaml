@@ -70,22 +70,6 @@ cover:
 #Masterbed:
 template:
   - binary_sensor:
-    - name: "Test Master AC Triggered"
-      unit_of_measure: "°C"
-      device_class: heat
-      state: >
-          {% set current_state=this.state %}
-          {% set referenced_state=states('input_number.climate_temperature_night') | float %}
-          {% set limit_upper=states('input_number.climate_temperature_night') | float 
-          + states('input_number.climate_range') | float / 2 
-          + states('input_number.heater_cooler_offset') | float %}
-          {% set limit_lower=states('input_number.climate_temperature_night') | float 
-          - states('input_number.climate_range') | float %}
-          {% set hysteresis=1 %}
-          {% set threshold_upper = limit_upper - (hysteresis if (current_state=='off' and referenced_state>limit_upper) else -hysteresis)  %}
-          {% set threshold_lower = limit_lower + (hysteresis if (current_state=='off' and referenced_state<limit_lower) else -hysteresis)  %}
-          {{ (referenced_state >= threshold_lower) and (referenced_state <= threshold_upper) }}
-  - binary sensor:
       - name: "Masterbed Night AC Cold Trigger"
         unit_of_measurement: "°C"
         device_class: heat
