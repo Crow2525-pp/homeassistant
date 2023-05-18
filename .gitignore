@@ -1,8 +1,10 @@
 # Ignore everything:
-*
+/*
 
 # Do not ignore these files:
 !.gitignore
 !configuration.yaml
 !automations.yaml
-!.storage\input_number
+!/custom_components/smartir/codes/**
+!custom_components\smartir\codes\climate\1022.json
+!custom_components\smartir\codes\climate\1123.json
