@@ -58,7 +58,7 @@ cover:
         device_class: blind
         friendly_name: "Roller blinds (MasterBedroom)"
         unique_id: "roller_blinds_MasterBedroom"
-        position_template: 50
+        position_template: '50'
         open_cover:
           service: script.roller_blinds_up
         close_cover:
@@ -84,7 +84,7 @@ template:
       - name: "Masterbed Night AC Cold Trigger"
         device_class: cold
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_night') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -92,7 +92,7 @@ template:
       - name: "Masterbed Night AC Hot Trigger"
         device_class: heat
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_night') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -100,7 +100,7 @@ template:
       - name: "Masterbed Night Heater Cold Trigger"
         device_class: cold
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_night') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -108,7 +108,7 @@ template:
       - name: "Masterbed Night Heater Hot Trigger"
         device_class: heat
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_night') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -117,7 +117,7 @@ template:
       - name: "Masterbed Home AC Cold Trigger"
         device_class: cold
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_home') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -125,7 +125,7 @@ template:
       - name: "Masterbed Home AC Hot Trigger"
         device_class: heat
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_home') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -133,7 +133,7 @@ template:
       - name: "Masterbed Home Heater Cold Trigger"
         device_class: cold
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_home') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -141,7 +141,7 @@ template:
       - name: "Masterbed Home Heater Hot Trigger"
         device_class: heat
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_home') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -224,7 +224,7 @@ template:
       - name: "Masterbed Night AC Cold Threshold"
         unit_of_measurement: "°C"
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_night') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -232,7 +232,7 @@ template:
       - name: "Masterbed Night AC Hot Threshold"
         unit_of_measurement: "°C"
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_night') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -240,7 +240,7 @@ template:
       - name: "Masterbed Night Heater Cold Threshold"
         unit_of_measurement: "°C"
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_night') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -248,7 +248,7 @@ template:
       - name: "Masterbed Night Heater Hot Threshold"
         unit_of_measurement: "°C"
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_night') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -257,7 +257,7 @@ template:
       - name: "Masterbed Home AC Cold Threshold"
         unit_of_measurement: "°C"
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_home') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -265,7 +265,7 @@ template:
       - name: "Masterbed Home AC Hot Threshold"
         unit_of_measurement: "°C"
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_home') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -273,7 +273,7 @@ template:
       - name: "Masterbed Home Heater Cold Threshold"
         unit_of_measurement: "°C"
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_home') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
@@ -281,7 +281,7 @@ template:
       - name: "Masterbed Home Heater Hot Threshold"
         unit_of_measurement: "°C"
         state: >
-          {% set sensor_temp= states('sensor.masterbed_7989_temperature') | float %}
+          {% set sensor_temp= states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
           {% set target_temp = states('input_number.climate_temperature_home') | float %}
           {% set range = states('input_number.climate_range') | float / 2 %}
           {% set offset = states('input_number.heater_cooler_offset') | float%}
