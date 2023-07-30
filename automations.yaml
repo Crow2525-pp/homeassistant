@@ -1938,7 +1938,7 @@
           entity_id: climate.living_room_ac
       - service: climate.set_fan_mode
         data:
-          fan_mode: Auto
+          fan_mode: auto
         target:
           entity_id: climate.living_room_ac
       - wait_for_trigger:
@@ -1979,7 +1979,7 @@
       sequence:
       - service: climate.set_fan_mode
         data:
-          fan_mode: Auto
+          fan_mode: auto
         target:
           entity_id: climate.living_room_ac
       - service: climate.set_temperature
@@ -2522,8 +2522,8 @@
       sequence:
       - service: climate.set_temperature
         data:
-          temperature: 18
           hvac_mode: 'off'
+          temperature: 22
         target:
           entity_id: climate.masterbed_ac
   mode: single
@@ -2864,8 +2864,8 @@
   description: ''
   trigger:
   - platform: numeric_state
-    entity_id: sensor.livingroom_irblaster_temperature
-    above: 19
+    entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+    above: 19.5
     enabled: false
   - type: opened
     platform: device
@@ -2992,4 +2992,19 @@
           cache: false
           entity_id: media_player.master_bedroom_speaker
           message: Alarm triggered at Elique's House
+  mode: single
+- id: '1690150562163'
+  alias: Tag Masterbed desk left cnr is scanned
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: 38314bff-f8ff-4949-908c-eab6853d970e
+  condition: []
+  action:
+  - service: climate.set_temperature
+    data:
+      temperature: 22
+      hvac_mode: heat
+    target:
+      area_id: master_bedroom
   mode: single

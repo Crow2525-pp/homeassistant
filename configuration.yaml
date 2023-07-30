@@ -5,6 +5,7 @@ default_config:
 tts:
   - platform: google_translate
 
+sensor: !include mysensors.yaml
 group: !include groups.yaml
 automation: !include automations.yaml
 script: !include scripts.yaml
@@ -58,7 +59,7 @@ cover:
         device_class: blind
         friendly_name: "Roller blinds (MasterBedroom)"
         unique_id: "roller_blinds_MasterBedroom"
-        position_template: '50'
+        position_template: "50"
         open_cover:
           service: script.roller_blinds_up
         close_cover:
