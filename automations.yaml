@@ -136,7 +136,15 @@
     event: start
     offset: 0:0:0
     entity_id: calendar.early_to_bed
-  condition: []
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Sleeping
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
   action:
   - type: turn_off
     device_id: a4c9fa6c4205ff2778142853b379e0c5
@@ -526,16 +534,16 @@
     if it is after sundown
   trigger:
   - platform: device
+    device_id: 7e00438322d2e8976bb352c5532abfaf
+    domain: media_player
+    entity_id: 0d093209f1b938b80a43c5d80971cbf9
     type: turned_on
-    device_id: a4c9fa6c4205ff2778142853b379e0c5
-    entity_id: 27ca28c7eef7d68c4f9c4d195198e21f
-    domain: remote
-    id: tv on
+    id: Tv on
   - platform: device
+    device_id: 7e00438322d2e8976bb352c5532abfaf
+    domain: media_player
+    entity_id: 0d093209f1b938b80a43c5d80971cbf9
     type: turned_off
-    device_id: a4c9fa6c4205ff2778142853b379e0c5
-    entity_id: 27ca28c7eef7d68c4f9c4d195198e21f
-    domain: remote
     id: tv off
   condition: []
   action:
@@ -546,6 +554,9 @@
         device_id: a4c9fa6c4205ff2778142853b379e0c5
         entity_id: 27ca28c7eef7d68c4f9c4d195198e21f
         domain: remote
+      - condition: trigger
+        id:
+        - tv off
       sequence:
       - type: turn_off
         device_id: bf0eab15f70154e958b9515848a1c4d0
@@ -559,6 +570,9 @@
         device_id: a4c9fa6c4205ff2778142853b379e0c5
         entity_id: 27ca28c7eef7d68c4f9c4d195198e21f
         domain: remote
+      - condition: trigger
+        id:
+        - Tv on
       sequence:
       - type: turn_on
         device_id: bf0eab15f70154e958b9515848a1c4d0
@@ -778,6 +792,9 @@
     enabled: false
   - platform: time
     at: input_datetime.wakeup_time_phil_steph
+  - platform: state
+    entity_id:
+    - input_button.wake_up_start
   condition:
   - condition: state
     entity_id: input_select.occupancy
@@ -1313,7 +1330,7 @@
     device_id: f216500e7f05587e14e6db5e6f29248d
     entity_id: sensor.smart_plug_power
     domain: sensor
-    below: 100
+    below: 20
     for:
       hours: 0
       minutes: 20
@@ -1492,14 +1509,6 @@
   alias: Occupancy Away
   description: If nobody home
   trigger:
-  - platform: numeric_state
-    entity_id: zone.home
-    below: 1
-    attribute: persons
-    for:
-      hours: 0
-      minutes: 1
-      seconds: 0
   - platform: zone
     entity_id: person.phil_patterson
     zone: zone.home
@@ -1508,13 +1517,20 @@
     entity_id: person.stephanie_patterson
     zone: zone.home
     event: leave
+  - platform: state
+    entity_id:
+    - zone.home
+    to: '0'
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
   condition:
-  - condition: state
-    entity_id: zone.home
-    state: '1'
-  - condition: state
-    entity_id: input_select.occupancy
-    state: Away
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Away
   action:
   - service: input_select.select_option
     data:
@@ -1534,6 +1550,10 @@
     entity_id: device_tracker.sm_s908e
     zone: zone.home
     event: enter
+  - platform: state
+    entity_id:
+    - zone.home
+    from: '0'
   condition:
   - condition: not
     conditions:
@@ -1676,51 +1696,6 @@
       title: 'Action: are you coming home tonight?'
     enabled: false
   mode: single
-- id: '1682307816446'
-  alias: Boys room too hot
-  description: ''
-  trigger:
-  - type: temperature
-    platform: device
-    device_id: b537f27e291c84976b0e98d50753fa53
-    entity_id: sensor.study_esp32_ottosroom_temperature
-    domain: sensor
-    above: 22
-    below: 17
-  - type: temperature
-    platform: device
-    device_id: 965f33a45d886ffdb7f7fe01d1ee78bd
-    entity_id: sensor.study_esp32_henrysroom_temperature
-    domain: sensor
-    below: 17
-    above: 22
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-  action:
-  - service: notify.mobile_app_samsung_galaxy_s22_ultra
-    data:
-      title: Otto or Henrys room is too hot
-      message: 'Henrys Room Temp: {{states(''sensor.study_esp32_henrysroom_temperature'')}}
-
-        Ottos Room Temp: {{states(''sensor.study_esp32_ottosroom_temperature'')}}
-
-        '
-  - service: notify.mobile_app_slvdh
-    data:
-      title: Otto or Henrys room is too hot
-      message: 'Henrys Room Temp: {{states(''sensor.study_esp32_henrysroom_temperature'')}}
-
-        Ottos Room Temp: {{states(''sensor.study_esp32_ottosroom_temperature'')}}
-
-        '
-  mode: single
 - id: '1682493497365'
   alias: Phil's left work
   description: ''
@@ -1737,46 +1712,6 @@
     data:
       title: Phil's left work
   mode: single
-- id: '1682499465308'
-  alias: Setback - morning to home
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - input_select.occupancy
-    from: Sleeping
-    to: Home
-  condition: []
-  action:
-  - service: input_boolean.turn_off
-    data: {}
-    target:
-      entity_id: input_boolean.masterbed_thermostat
-  - service: input_boolean.turn_on
-    data: {}
-    target:
-      entity_id: input_boolean.masterbed_a_c_sleep_day_setback
-  mode: single
-- id: '1682499477403'
-  alias: Setback - morning to home
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - input_select.occupancy
-    from: Sleeping
-    to: Home
-  condition: []
-  action:
-  - service: input_boolean.turn_off
-    data: {}
-    target:
-      entity_id: input_boolean.masterbed_thermostat
-  - service: input_boolean.turn_on
-    data: {}
-    target:
-      entity_id: input_boolean.masterbed_a_c_sleep_day_setback
-  mode: single
 - id: '1682548783368'
   alias: Blinds open, if windy
   description: ''
@@ -1792,30 +1727,15 @@
   - service: script.roller_blinds_up
     data: {}
   mode: single
-- id: '1682646839118'
-  alias: Washing Machine Finished
-  description: ''
-  trigger:
-  - type: energy
-    platform: device
-    device_id: f216500e7f05587e14e6db5e6f29248d
-    entity_id: sensor.smart_plug_energy
-    domain: sensor
-    below: 20
-    for:
-      hours: 0
-      minutes: 10
-      seconds: 0
-  condition: []
-  action:
-  - service: notify.mobile_app_samsung_galaxy_s22_ultra
-    data:
-      title: Washing Machine or Dryer are done
-  mode: single
 - id: '1682671706426'
   alias: Wake Up Routine
   description: ''
   trigger:
+  - platform: template
+    value_template: '"{{ now() >= today_at(states(''input_button.wake_up_phil_steph''))
+      - timedelta(minutes = 60) }}"'
+    alias: -60min Wakeup Phil/Steph
+    id: -1hr Offset
   - platform: time
     at: input_datetime.wakeup_time_phil_steph
     id: Phil/Steph
@@ -1825,15 +1745,15 @@
   - platform: time
     at: input_datetime.otto_s_wake_up
     id: Otto
-  - platform: template
-    value_template: '"{{ now() >= today_at(states(''input_datetime.wakeup_time_phil_steph''))
-      - timedelta(minutes = 60) }}"'
-    alias: -60min Wakeup Phil/Steph
-    id: -1hr Offset
   - platform: state
     entity_id:
     - input_button.wake_up_phil_steph
-    id: Phil/Steph
+    id: Phil/Steph but
+  - platform: template
+    value_template: '"{{ now() >= today_at(states(''input_button.wake_up_phil_steph''))
+      - timedelta(minutes = 240) }}"'
+    alias: -60min Wakeup Phil/Steph
+    id: -1hr Offset 2
   condition:
   - condition: or
     conditions:
@@ -1857,7 +1777,8 @@
       - condition: trigger
         id: Otto
       - condition: trigger
-        id: Phil/Steph but
+        id:
+        - Phil/Steph but
     then:
     - service: input_boolean.turn_off
       data: {}
@@ -1865,17 +1786,18 @@
         entity_id: input_boolean.sleep_night_setback
   - choose:
     - conditions:
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: input_select.occupancy
-          state: Home
       - condition: or
         conditions:
         - condition: trigger
           id: Phil/Steph
         - condition: trigger
           id: Phil/Steph but
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        enabled: false
       sequence:
       - service: climate.set_temperature
         data:
@@ -1896,8 +1818,6 @@
         data: {}
         target:
           entity_id: input_boolean.sleep_night_setback
-      - service: script.roller_blinds_up
-        data: {}
       - if:
         - condition: sun
           before: sunrise
@@ -1941,15 +1861,13 @@
           fan_mode: auto
         target:
           entity_id: climate.living_room_ac
-      - wait_for_trigger:
-        - platform: sun
-          event: sunrise
-          offset: '10'
-        timeout:
-          hours: 2
-          minutes: 0
+      - delay:
+          hours: 0
+          minutes: 15
           seconds: 0
           milliseconds: 0
+      - service: script.roller_blinds_up
+        data: {}
     - conditions:
       - condition: trigger
         id: Henry
@@ -1971,11 +1889,12 @@
         target:
           entity_id: climate.otto_s_ac
     - conditions:
+      - condition: trigger
+        id: -1hr Offset
       - condition: numeric_state
         entity_id: sensor.livingroom_irblaster_temperature
         below: 17
-      - condition: trigger
-        id: -1hr Offset
+        enabled: false
       sequence:
       - service: climate.set_fan_mode
         data:
@@ -1988,44 +1907,6 @@
           hvac_mode: heat
         target:
           entity_id: climate.living_room_ac
-  mode: single
-- id: '1683277884758'
-  alias: Study desk on at wakeup
-  description: ''
-  trigger:
-  - platform: time
-    at: input_datetime.wakeup_time_phil_steph
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-  action:
-  - service: input_boolean.turn_on
-    data: {}
-    target:
-      entity_id: input_boolean.computer_switch
-  - service: climate.set_temperature
-    data:
-      hvac_mode: 'off'
-    target:
-      entity_id:
-      - climate.study_ac_2
-      - climate.masterbed_ac
-      - climate.otto_s_ac
-  - service: input_boolean.turn_off
-    data: {}
-    target:
-      entity_id: input_boolean.henry_s_room_a_c_sleep_night_setback
-  - service: input_boolean.turn_on
-    data: {}
-    target:
-      entity_id: input_boolean.masterbed_a_c_sleep_day_setback
-    enabled: false
   mode: single
 - id: '1684056377214'
   alias: MasterBedroom Night Setback - Heat/Cool
@@ -2624,6 +2505,10 @@
           data: {}
           target:
             entity_id: input_boolean.computer_switch
+      - service: light.turn_off
+        data: {}
+        target:
+          area_id: master_bedroom
   mode: single
 - id: '1684787591500'
   alias: Send actionable notifications for Alarmo
@@ -2705,7 +2590,7 @@
       message_text: Let Phil know you received
       badge_type: -1
       interruption_level: active
-      message_attachment: Camera Stream
+      message_attachment: Disabled
       camera_camera_entity: camera.bi_door_camera
       dummy_4: true
       action_1_action_enabled: true
@@ -2849,16 +2734,6 @@
       camera: camera.bi_door_camera
       notify_device: c054264b79e6739a057236f3a3c512b4
       blocker_entity: input_boolean.people_home
-- id: '1686906542458'
-  description: ''
-  trigger:
-  - platform: numeric_state
-    entity_id: sun.sun
-    attribute: elevation
-    below: -10
-  condition: []
-  action: []
-  mode: single
 - id: '1687857088060'
   alias: Climate.Living Room.TurnOff
   description: ''
@@ -2956,43 +2831,6 @@
     target:
       entity_id: climate.study_ac_2
   mode: single
-- id: '1688163612181'
-  alias: Elique security
-  description: ''
-  trigger:
-  - type: opened
-    platform: device
-    device_id: 0750db1fa85d6ac5edc79e11756a462d
-    entity_id: binary_sensor.garagesidepathdoor_window_and_door_sensor_4
-    domain: binary_sensor
-  condition:
-  - condition: time
-    after: '21:00:00'
-    before: 06:00:00
-    weekday:
-    - sat
-    - fri
-    - thu
-    - wed
-    - tue
-    - mon
-    - sun
-    enabled: true
-  action:
-  - service: light.turn_on
-    data:
-      brightness_pct: 100
-    target:
-      entity_id: light.gld064ha
-  - repeat:
-      count: '3'
-      sequence:
-      - service: tts.google_translate_say
-        data:
-          cache: false
-          entity_id: media_player.master_bedroom_speaker
-          message: Alarm triggered at Elique's House
-  mode: single
 - id: '1690150562163'
   alias: Tag Masterbed desk left cnr is scanned
   description: ''
@@ -3007,4 +2845,100 @@
       hvac_mode: heat
     target:
       area_id: master_bedroom
+  - delay:
+      hours: 3
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - service: script.roller_blinds_up
+    data: {}
+  mode: single
+- id: '1693433717718'
+  alias: Tag Masterbed desk left cnr is scanned
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: 9d687fe2-e6f7-4d6f-838a-cee2712e3fdb
+  condition: []
+  action:
+  - service: script.1693262268843
+    data: {}
+  mode: single
+- id: '1694133288157'
+  alias: Heaters Off When Leave
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.occupancy
+    from: Home
+    to: Away
+    for:
+      hours: 0
+      minutes: 20
+      seconds: 0
+  condition: []
+  action:
+  - service: climate.set_fan_mode
+    data:
+      fan_mode: 'Off'
+    target:
+      entity_id:
+      - climate.study_ac_2
+      - climate.living_room_ac
+      - climate.masterbed_ac
+      - climate.otto_s_ac
+  - service: light.turn_off
+    data:
+      transition: 57
+    target:
+      area_id:
+      - kitchen
+      - living_room
+      - master_bedroom
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      message: Heaters and Lights switched off.
+      title: 'Auto-Off: nobody home'
+  mode: single
+- id: '1694242386120'
+  alias: Heaters on when home
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.occupancy
+    from: Away
+    to: Home
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  condition: []
+  action:
+  - service: climate.turn_on
+    data: {}
+    target:
+      entity_id:
+      - climate.living_room_ac
+      - climate.masterbed_ac
+  - service: climate.set_fan_mode
+    data:
+      fan_mode: Heat
+    target:
+      entity_id:
+      - climate.living_room_ac
+      - climate.masterbed_ac
+  - service: light.turn_on
+    data:
+      transition: 20
+    target:
+      area_id:
+      - kitchen
+      - living_room
+      - master_bedroom
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      message: Heaters and Lights switched on
+      title: 'Auto-on: arrived home'
   mode: single
