@@ -8,13 +8,6 @@
     minutes: '30'
   - platform: time_pattern
     minutes: '45'
-  - platform: state
-    entity_id:
-    - sensor.masterbed_7989_temperature
-    for:
-      hours: 0
-      minutes: 10
-      seconds: 0
   condition:
   - type: is_not_open
     condition: device
@@ -22,52 +15,57 @@
     entity_id: binary_sensor.contact_sensor_2
     domain: binary_sensor
   - condition: time
-    after: 08:00:00
-    before: 06:00:00
-  - condition: state
-    entity_id: climate.masterbed_ac
-    attribute: last_on_operation
-    state: 'off'
+    after: '11:00:00'
+    before: '18:00:00'
   action:
   - choose:
     - conditions:
       - condition: and
         conditions:
-        - condition: numeric_state
-          entity_id: sensor.masterbed_7989_temperature
-          above: 22
         - type: is_temperature
           condition: device
           device_id: d16ddd0fb889addc551414cc0cb19749
           entity_id: sensor.openweathermap_temperature
           domain: sensor
           above: 20
+          enabled: true
+        - type: is_humidity
+          condition: device
+          device_id: 9904a0122b1c1edc01e954d58c97e826
+          entity_id: dce670b9de8e2d94d4d11c0563ee2aac
+          domain: sensor
+          above: 20
       sequence:
-        service: remote.send_command
-        data:
-          device: Roller Blinds
-          command: Down
-        target:
-          device_id: 3d7542325305f19a1d70e5b14947b2a9
+      - service: script.roller_blinds_down
+        data: {}
+      - if:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        then:
+        - service: script.fan_speed_1
+          data: {}
     - conditions:
       - condition: and
         conditions:
-        - condition: numeric_state
-          entity_id: sensor.masterbed_7989_temperature
-          below: 22
         - type: is_temperature
           condition: device
           device_id: d16ddd0fb889addc551414cc0cb19749
           entity_id: sensor.openweathermap_temperature
           domain: sensor
           below: 17
+          enabled: true
+        - type: is_temperature
+          condition: device
+          device_id: 9904a0122b1c1edc01e954d58c97e826
+          entity_id: 285c92fd806469a80a6e925666f27d3f
+          domain: sensor
+          below: 20
       sequence:
-      - service: remote.send_command
-        data:
-          device: Roller Blinds
-          command: Up
-        target:
-          device_id: 3d7542325305f19a1d70e5b14947b2a9
+      - service: script.roller_blinds_up
+        data: {}
+      - service: script.fan_off
+        data: {}
   mode: single
 - id: '1644318832858'
   alias: Turn on MastBed AC If > 22 Degrees
@@ -103,7 +101,12 @@
     entity_id: sun.sun
     attribute: elevation
     below: '5'
-  condition: []
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
   action:
   - service: scene.turn_on
     target:
@@ -1248,49 +1251,17 @@
       entity_id: climate.living_room_ac
   - service: climate.set_temperature
     data:
-      temperature: 18
       target_temp_high: 18
       target_temp_low: 16
       hvac_mode: heat
+      temperature: 21
     target:
       entity_id: climate.living_room_ac
   - service: climate.set_fan_mode
     data:
-      fan_mode: low
+      fan_mode: Auto
     target:
       entity_id: climate.living_room_ac
-  - choose:
-    - conditions:
-      - condition: time
-        after: 05:30:00
-        before: 08:30:00
-        weekday:
-        - sun
-        - mon
-        - tue
-        - wed
-        - thu
-        - fri
-        - sat
-      sequence:
-      - service: climate.set_fan_mode
-        data:
-          fan_mode: Low
-        target:
-          entity_id: climate.living_room_ac
-      - service: climate.set_hvac_mode
-        data:
-          hvac_mode: heat
-        target:
-          entity_id: climate.living_room_ac
-      - service: climate.set_temperature
-        data:
-          temperature: 18
-          target_temp_high: 22
-          target_temp_low: 18
-          hvac_mode: heat
-        target:
-          entity_id: climate.living_room_ac
   mode: single
 - id: '1669679693928'
   alias: Party flash
@@ -1343,91 +1314,6 @@
   - service: notify.mobile_app_slvdh
     data:
       message: Washing or dryer are done
-  mode: single
-- id: '1673655293444'
-  alias: Heat Kids Rooms at 530
-  description: Doors closed, temp must be too cold
-  trigger:
-  - platform: time
-    at: '17:30:00'
-  condition:
-  - condition: or
-    conditions:
-    - type: is_temperature
-      condition: device
-      device_id: 015e3a46da56611688fcae2c46660b8c
-      entity_id: sensor.study_esp32_ottosroom_temperature
-      domain: sensor
-      above: 22
-      below: 18
-    - type: is_temperature
-      condition: device
-      device_id: d4eaa5ed286ebb61f0e60e64a9103bb8
-      entity_id: sensor.ble_temperature_studysensor
-      domain: sensor
-      above: 22
-      below: 18
-    - type: is_temperature
-      condition: device
-      device_id: d16ddd0fb889addc551414cc0cb19749
-      entity_id: sensor.openweathermap_temperature
-      domain: sensor
-      below: 16
-      above: 20
-  action:
-  - choose:
-    - conditions:
-      - condition: and
-        conditions:
-        - condition: state
-          entity_id: binary_sensor.contact_sensor_window_and_door_sensor_3
-          state: 'off'
-        - type: is_temperature
-          condition: device
-          device_id: 015e3a46da56611688fcae2c46660b8c
-          entity_id: sensor.study_esp32_ottosroom_temperature
-          domain: sensor
-          below: 18
-      sequence:
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.otto_s_ac
-      - service: climate.set_temperature
-        data:
-          target_temp_high: 20
-          target_temp_low: 18
-          hvac_mode: heat
-          temperature: 18
-        target:
-          entity_id: climate.otto_s_ac
-        alias: Climate heat Otto's room
-    - conditions:
-      - condition: and
-        conditions:
-        - condition: state
-          entity_id: binary_sensor.contact_sensor_window_and_door_sensor_2
-          state: 'off'
-        - type: is_temperature
-          condition: device
-          device_id: d4eaa5ed286ebb61f0e60e64a9103bb8
-          entity_id: sensor.ble_temperature_studysensor
-          domain: sensor
-          below: 18
-      sequence:
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.study_ac
-      - service: climate.set_temperature
-        data:
-          temperature: 20
-          target_temp_high: 22
-          target_temp_low: 19
-          hvac_mode: heat
-        target:
-          entity_id: climate.study_ac
-    default: []
   mode: single
 - id: '1673864135673'
   alias: Masterbedroom Fan Temperature High
@@ -1716,26 +1602,43 @@
   alias: Blinds open, if windy
   description: ''
   trigger:
-  - type: wind_speed
-    platform: device
-    device_id: d16ddd0fb889addc551414cc0cb19749
-    entity_id: sensor.openweathermap_forecast_wind_speed
-    domain: sensor
-    above: 7
+  - platform: template
+    value_template: '{{ state_attr(''weather.home'', ''wind_speed'') > 40}}'
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
   condition: []
   action:
-  - service: script.roller_blinds_up
+  - variables:
+      original_position: '{{ states(''cover.roller_blinds_chan1'') }}'
+  - service: cover.open_cover
     data: {}
+    target:
+      entity_id: cover.roller_blinds_chan1
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: 'Safety alert: high winds'
+      message: Roller blinds up
+  - wait_for_trigger:
+    - platform: template
+      value_template: '{{ state_attr(''weather.home'', ''wind_speed'') < 25 }}'
+    continue_on_timeout: false
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: Wind speed reduced
+      message: Blinds can go back down
+  - service_template: "{% if original_state == 'closed' %}\n  cover.close_cover\n{%
+      elif original_state == 'open' %}\n  cover.open_cover\n{% else %}\n  cover.stop_cover\n{%
+      endif %} \n"
+    target:
+      entity_id: cover.roller_blinds_chan1
+    alias: Return blinds to prev state
   mode: single
 - id: '1682671706426'
   alias: Wake Up Routine
   description: ''
   trigger:
-  - platform: template
-    value_template: '"{{ now() >= today_at(states(''input_button.wake_up_phil_steph''))
-      - timedelta(minutes = 60) }}"'
-    alias: -60min Wakeup Phil/Steph
-    id: -1hr Offset
   - platform: time
     at: input_datetime.wakeup_time_phil_steph
     id: Phil/Steph
@@ -1749,11 +1652,6 @@
     entity_id:
     - input_button.wake_up_phil_steph
     id: Phil/Steph but
-  - platform: template
-    value_template: '"{{ now() >= today_at(states(''input_button.wake_up_phil_steph''))
-      - timedelta(minutes = 240) }}"'
-    alias: -60min Wakeup Phil/Steph
-    id: -1hr Offset 2
   condition:
   - condition: or
     conditions:
@@ -1792,12 +1690,6 @@
           id: Phil/Steph
         - condition: trigger
           id: Phil/Steph but
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: input_select.occupancy
-          state: Home
-        enabled: false
       sequence:
       - service: climate.set_temperature
         data:
@@ -1846,28 +1738,33 @@
           entity_id:
           - light.light_kitchen_socket_1
           - light.lounge
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.living_room_ac
-      - service: climate.set_temperature
-        data:
-          temperature: 21
-          hvac_mode: heat
-        target:
-          entity_id: climate.living_room_ac
-      - service: climate.set_fan_mode
-        data:
-          fan_mode: auto
-        target:
-          entity_id: climate.living_room_ac
       - delay:
           hours: 0
           minutes: 15
           seconds: 0
           milliseconds: 0
-      - service: script.roller_blinds_up
-        data: {}
+      - if:
+        - condition: state
+          entity_id: automation.hot_today
+          state: 'off'
+        then:
+        - service: script.roller_blinds_up
+          data: {}
+        else:
+        - service: script.roller_blinds_up
+          data: {}
+        - service: script.1693262268843
+          data: {}
+        - if:
+          - condition: state
+            entity_id: climate.living_room_ac
+            state: heat
+          then:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: 'off'
+            target:
+              entity_id: climate.living_room_ac
     - conditions:
       - condition: trigger
         id: Henry
@@ -1888,25 +1785,6 @@
           temperature: 20
         target:
           entity_id: climate.otto_s_ac
-    - conditions:
-      - condition: trigger
-        id: -1hr Offset
-      - condition: numeric_state
-        entity_id: sensor.livingroom_irblaster_temperature
-        below: 17
-        enabled: false
-      sequence:
-      - service: climate.set_fan_mode
-        data:
-          fan_mode: auto
-        target:
-          entity_id: climate.living_room_ac
-      - service: climate.set_temperature
-        data:
-          temperature: 20
-          hvac_mode: heat
-        target:
-          entity_id: climate.living_room_ac
   mode: single
 - id: '1684056377214'
   alias: MasterBedroom Night Setback - Heat/Cool
@@ -2451,8 +2329,8 @@
       sequence:
       - service: climate.set_temperature
         data:
-          temperature: 18
-          hvac_mode: heat
+          hvac_mode: cool
+          temperature: 21
         target:
           entity_id: climate.study_ac_2
     - conditions:
@@ -2461,8 +2339,8 @@
       sequence:
       - service: climate.set_temperature
         data:
-          temperature: 18
-          hvac_mode: heat
+          hvac_mode: cool
+          temperature: 21
         target:
           entity_id: climate.otto_s_ac
     - conditions:
@@ -2611,6 +2489,9 @@
   condition:
   - condition: time
     before: 09:00:00
+  - condition: state
+    entity_id: input_boolean.working_from_home
+    state: 'on'
   action:
   - service: input_boolean.turn_on
     data: {}
@@ -2879,9 +2760,9 @@
       seconds: 0
   condition: []
   action:
-  - service: climate.set_fan_mode
+  - service: climate.set_hvac_mode
     data:
-      fan_mode: 'Off'
+      hvac_mode: 'off'
     target:
       entity_id:
       - climate.study_ac_2
@@ -2900,6 +2781,10 @@
     data:
       message: Heaters and Lights switched off.
       title: 'Auto-Off: nobody home'
+  - service: notify.mobile_app_slvdh
+    data:
+      message: Heaters and Lights switched off.
+      title: 'Auto-Off: nobody home'
   mode: single
 - id: '1694242386120'
   alias: Heaters on when home
@@ -2909,19 +2794,30 @@
     entity_id:
     - input_select.occupancy
     from: Away
-    to: Home
     for:
       hours: 0
       minutes: 0
       seconds: 10
-  condition: []
+  - platform: state
+    entity_id:
+    - input_select.occupancy
+    from: Holiday
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  condition:
+  - condition: and
+    conditions:
+    - condition: sun
+      after: sunset
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Sleeping
+      alias: Not Sleeping
   action:
-  - service: climate.turn_on
-    data: {}
-    target:
-      entity_id:
-      - climate.living_room_ac
-      - climate.masterbed_ac
   - service: climate.set_fan_mode
     data:
       fan_mode: Heat
@@ -2929,6 +2825,10 @@
       entity_id:
       - climate.living_room_ac
       - climate.masterbed_ac
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      message: Heaters and Lights switched on
+      title: 'Auto-on: arrived home'
   - service: light.turn_on
     data:
       transition: 20
@@ -2937,8 +2837,187 @@
       - kitchen
       - living_room
       - master_bedroom
-  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+  - service: climate.turn_on
+    data: {}
+    target:
+      entity_id:
+      - climate.living_room_ac
+      - climate.masterbed_ac
+  mode: single
+- id: '1694292629807'
+  alias: Heater on in morning
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '"{{ now() >= today_at(states(''input_button.wake_up_phil_steph''))
+      - timedelta(minutes = 60) }}"'
+    alias: -60min Wakeup Phil/Steph
+    id: -1hr Offset
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Sleeping
+  - condition: numeric_state
+    entity_id: sensor.livingroom_irblaster_temperature
+    below: 17
+  action:
+  - service: climate.turn_on
+    data: {}
+    target:
+      entity_id: climate.living_room_ac
+  - service: climate.set_fan_mode
     data:
-      message: Heaters and Lights switched on
-      title: 'Auto-on: arrived home'
+      fan_mode: Auto
+    target:
+      entity_id: climate.living_room_ac
+  - service: climate.set_temperature
+    data:
+      temperature: 21
+      hvac_mode: heat
+    target:
+      entity_id: climate.living_room_ac
+  mode: single
+- id: '1694596580092'
+  alias: Tv On/Off
+  description: ''
+  trigger:
+  - platform: device
+    type: turned_on
+    device_id: a54fb9a78133e7eec040eef4ca052fc9
+    entity_id: d909cd5581bd5b7a73feef1654706ba8
+    domain: remote
+    id: 'On'
+  - platform: device
+    type: turned_off
+    device_id: a54fb9a78133e7eec040eef4ca052fc9
+    entity_id: d909cd5581bd5b7a73feef1654706ba8
+    domain: remote
+    id: 'Off'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 'On'
+      sequence:
+      - type: turn_on
+        device_id: eda310c53d64fbfed9908fd266dc8635
+        entity_id: f9c445a5c33e26e2b2d9ef2addd13858
+        domain: switch
+      - if:
+        - condition: sun
+          after: sunset
+        then:
+        - service: script.tv_lights_on
+          data: {}
+    - conditions:
+      - condition: trigger
+        id:
+        - 'Off'
+      sequence:
+      - service: script.tv_lights_off
+        data: {}
+      - type: turn_off
+        device_id: eda310c53d64fbfed9908fd266dc8635
+        entity_id: f9c445a5c33e26e2b2d9ef2addd13858
+        domain: switch
+  mode: single
+- id: '1695506875922'
+  alias: Turn off living room heater at 7am
+  description: ''
+  trigger:
+  - platform: time
+    at: 07:00:00
+  condition:
+  - condition: state
+    entity_id: input_boolean.hot_today_flag
+    state: 'on'
+  action:
+  - service: climate.set_fan_mode
+    data:
+      fan_mode: 'Off'
+    target:
+      entity_id: climate.living_room_ac
+  - service: climate.set_hvac_mode
+    data:
+      hvac_mode: 'off'
+    target:
+      entity_id: climate.living_room_ac
+  mode: single
+- id: '1695509359232'
+  alias: Hot today
+  description: ''
+  trigger:
+  - platform: time
+    at: 05:30:00
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ state_attr(''weather.home'', ''forecast'')[0][''temperature'']
+          > 21 }}'
+        alias: If forecast > 21
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.hot_today_flag
+    - conditions:
+      - condition: template
+        value_template: '{{ state_attr(''weather.home'', ''forecast'')[0][''temperature'']
+          <= 21 }}'
+        alias: If forecast <= 21
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.hot_today_flag
+  mode: single
+- id: '1696468250955'
+  alias: Otto or Henry up at night. Wake up Parents
+  description: ''
+  trigger:
+  - type: opened
+    platform: device
+    device_id: 1de12d19a83380ecf9399059e690dd2b
+    entity_id: ddbbcf8e6b35f6b4a0752dc79463798b
+    domain: binary_sensor
+  - type: opened
+    platform: device
+    device_id: 09bf1990e8257ab0447bd135a8c802c5
+    entity_id: cbc1bf38fcceb14b61fae037351859b6
+    domain: binary_sensor
+  condition:
+  - condition: time
+    after: '19:45:00'
+    before: 06:30:00
+    weekday:
+    - sun
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+  - type: is_not_open
+    condition: device
+    device_id: 7f984a9865384aaf72047b57b99bf499
+    entity_id: 4f7235f7f61d09c27442a9afe0042242
+    domain: binary_sensor
+  action:
+  - type: turn_on
+    device_id: 3cf9c8bc5367cd26edc9b128e7303916
+    entity_id: c0696c96326546dbb113c5b3d97482a8
+    domain: light
+  - service: light.turn_on
+    data: {}
+    target:
+      area_id: master_bedroom
   mode: single
