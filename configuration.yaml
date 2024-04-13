@@ -12,6 +12,18 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 frontend:
   themes: !include_dir_merge_named themes
+  javascript_version: latest
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 192.168.1.103
+    - 192.168.1.90
+    - 192.168.1.14
+    - 192.168.1.16
+    - 192.168.1.98
+    - 172.30.33.0/24
+    - 127.0.0.1
 
 smartir:
 
@@ -50,6 +62,8 @@ fan:
     unique_id: bedroom_fan
     device_code: 1040
     controller_data: remote.ir_blaster_master_bedroom_remote
+
+
 
 #Roller Blinds
 cover:
@@ -360,3 +374,13 @@ template:
           {% set offset = states('input_number.heater_cooler_offset') | float%}
           {% set henry_offset = states('input_number.climate_henry_offset') | float%}
           {{ target_temp + henry_offset +  range}}
+      
+
+ 
+        
+        
+        
+        
+        
+        
+        
