@@ -27,6 +27,57 @@ http:
 
 smartir:
 
+media_player:
+  - platform: universal
+    name: Sony TV
+    unique_id: sony_tv_combined
+    device_class: tv
+    children:
+      - media_player.sony_kd_55x8500c
+      - media_player.living_room_tv
+    active_child_template: >
+      {% if state_attr('media_player.sony_kd_55x8500c', 'media_content_id') %}
+         media_player.sony_kd_55x8500c
+      {% endif %}
+    attributes:
+      source: media_player.sony_kd_55x8500c|source
+      source_list: media_player.sony_kd_55x8500c|source_list
+    browse_media_entity: media_player.sony_kd_55x8500c
+    commands:
+      turn_off:
+        service: media_player.turn_off
+        data:
+          entity_id: media_player.sony_kd_55x8500c
+      turn_on:
+        service: media_player.turn_on
+        data:
+          entity_id: media_player.sony_kd_55x8500c
+      select_source:
+        service: media_player.select_source
+        data:
+          entity_id: media_player.sony_kd_55x8500c
+          source: "{{ source }}"
+      media_play:
+        service: media_player.media_play
+        target:
+          entity_id: media_player.sony_kd_55x8500c
+      media_pause:
+        service: media_player.media_pause
+        target:
+          entity_id: media_player.sony_kd_55x8500c
+      media_play_pause:
+        service: media_player.media_play_pause
+        target:
+          entity_id: media_player.sony_kd_55x8500c
+      media_previous_track:
+        service: media_player.media_previous_track
+        target:
+          entity_id: media_player.sony_kd_55x8500c
+      media_next_track:
+        service: media_player.media_next_track
+        target:
+          entity_id: media_player.sony_kd_55x8500c
+
 climate:
   - platform: smartir
     name: Masterbed AC
