@@ -330,13 +330,13 @@
   trigger:
   - platform: state
     entity_id:
-    - media_player.living_room_tv_3
+    - remote.sony_kd_55x8500c
     from: 'off'
     to: 'on'
     id: tv on
   - platform: state
     entity_id:
-    - media_player.living_room_tv_3
+    - remote.sony_kd_55x8500c
     from: 'on'
     to: 'off'
     id: tv off
@@ -470,101 +470,6 @@
         alias: 1% reading light
     alias: Check which light is on and turn it to 1%
   mode: single
-- id: '1662706834110'
-  alias: 'Livingroom Thermostat '
-  description: ''
-  trigger:
-  - type: temperature
-    platform: device
-    device_id: ebf0379e33b2ccccd4ee6b6c351f4ce5
-    entity_id: sensor.ble_temperature_kitchensensor
-    domain: sensor
-    for:
-      hours: 0
-      minutes: 2
-      seconds: 0
-    above: 19.5
-  - type: temperature
-    platform: device
-    device_id: ebf0379e33b2ccccd4ee6b6c351f4ce5
-    entity_id: sensor.ble_temperature_kitchensensor
-    domain: sensor
-    below: 17
-    for:
-      hours: 0
-      minutes: 2
-      seconds: 0
-  condition:
-  - condition: state
-    entity_id: input_boolean.thermostat_on_off
-    state: 'on'
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: zone.home
-      attribute: persons
-      state: '0'
-      for:
-        hours: 0
-        minutes: 0
-        seconds: 0
-    alias: Someone must be home
-  action:
-  - choose:
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: binary_sensor.livingroomdoorsensor_3
-          state: 'on'
-          for:
-            hours: 0
-            minutes: 2
-            seconds: 0
-        - condition: state
-          entity_id: binary_sensor.frontdoordoorsensor
-          state: 'on'
-          for:
-            hours: 0
-            minutes: 2
-            seconds: 0
-      sequence:
-      - service: climate.turn_off
-        data: {}
-        target:
-          entity_id: climate.living_room_ac
-    alias: If doors are open, turn off
-  - choose:
-    - conditions:
-      - type: is_temperature
-        condition: device
-        device_id: ebf0379e33b2ccccd4ee6b6c351f4ce5
-        entity_id: sensor.ble_temperature_kitchensensor
-        domain: sensor
-        above: 19.5
-      sequence:
-      - service: climate.turn_off
-        data: {}
-        target:
-          entity_id: climate.living_room_ac
-    - conditions:
-      - type: is_temperature
-        condition: device
-        device_id: ebf0379e33b2ccccd4ee6b6c351f4ce5
-        entity_id: sensor.ble_temperature_kitchensensor
-        domain: sensor
-        below: 17
-      sequence:
-      - service: climate.set_temperature
-        data:
-          temperature: 18
-          target_temp_high: 17
-          target_temp_low: 15
-          hvac_mode: heat
-        target:
-          entity_id: climate.living_room_ac
-    alias: Turn on or Off Living Room HVAC if too hot or too cold
-  mode: single
 - id: '1662761539613'
   alias: Occupancy State from Sleep to Home
   description: At sunrise
@@ -595,82 +500,6 @@
       option: Home
     target:
       entity_id: input_select.occupancy
-  mode: single
-- id: '1662848629328'
-  alias: 'Study thermostat '
-  description: ''
-  trigger:
-  - type: temperature
-    platform: device
-    device_id: d4eaa5ed286ebb61f0e60e64a9103bb8
-    entity_id: sensor.ble_temperature_studysensor
-    domain: sensor
-    below: 17
-    for:
-      hours: 0
-      minutes: 10
-      seconds: 0
-  - type: humidity
-    platform: device
-    device_id: d4eaa5ed286ebb61f0e60e64a9103bb8
-    entity_id: sensor.ble_humidity_studysensor
-    domain: sensor
-    above: 19
-  condition:
-  - condition: numeric_state
-    entity_id: sun.sun
-    below: -10
-  action:
-  - service: climate.turn_on
-    target:
-      entity_id: climate.study_ac
-    data: {}
-  - service: climate.set_temperature
-    data:
-      temperature: 19
-      target_temp_high: 20
-      target_temp_low: 18
-      hvac_mode: heat
-    target:
-      entity_id: climate.study_ac
-  - choose:
-    - conditions:
-      - type: is_temperature
-        condition: device
-        device_id: d4eaa5ed286ebb61f0e60e64a9103bb8
-        entity_id: sensor.ble_temperature_studysensor
-        domain: sensor
-        below: 17
-      sequence:
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.study_ac
-      - service: climate.set_temperature
-        data:
-          temperature: 18
-          hvac_mode: heat
-        target:
-          entity_id: climate.study_ac
-    - conditions:
-      - type: is_temperature
-        condition: device
-        device_id: d4eaa5ed286ebb61f0e60e64a9103bb8
-        entity_id: sensor.ble_temperature_studysensor
-        domain: sensor
-        above: 19
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: climate.study_ac
-          attribute: last_on_operation
-          state: 'off'
-      sequence:
-      - service: climate.set_hvac_mode
-        data:
-          hvac_mode: 'off'
-        target:
-          entity_id: climate.study_ac
   mode: single
 - id: '1662899680054'
   alias: MasterBedroom Day Setback - Heat/Cool
@@ -1380,8 +1209,8 @@
         data: {}
         target:
           entity_id:
-          - light.light_kitchen_socket_1
           - light.lounge
+          - light.kitchen_light_socket_1
       - if:
         - condition: state
           entity_id: calendar.working_from_home
@@ -1724,143 +1553,6 @@
     alias: Turn on or Off Masterbed HVAC if too hot or too cold
     default: []
   mode: single
-- id: '1684155603229'
-  alias: Heater Night
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.henrys_room_night_heater_cold_trigger
-    id: Henry Too Cold - Heater On
-  - platform: state
-    entity_id:
-    - binary_sensor.ottos_room_night_heater_cold_trigger
-    id: Otto Too Cold - Heater On
-  - platform: state
-    entity_id:
-    - binary_sensor.henrys_room_night_heater_hot_trigger
-    id: Henry Too Hot - Heater Off
-  - platform: state
-    entity_id:
-    - binary_sensor.ottos_room_night_heater_hot_trigger
-    id: Otto Too Hot - Heater Off
-  - platform: state
-    entity_id:
-    - binary_sensor.masterbed_night_heater_cold_trigger
-    id: Master too cold, Heater On
-  - platform: state
-    entity_id:
-    - binary_sensor.masterbed_night_heater_hot_trigger
-    id: Master too hot, Heater Off
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-  - condition: state
-    state: 'on'
-    entity_id: input_boolean.sleep_night_setback
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: Henry Too Cold - Heater On
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: climate.study_ac_2
-          state: heat
-        alias: Not Condition - Henry's Heater isn't on
-      sequence:
-      - service: climate.set_temperature
-        data:
-          hvac_mode: heat
-          temperature: 18
-        target:
-          entity_id: climate.study_ac_2
-        alias: Turn on Henry's Heater
-      alias: When Henry's room is too cold, turn on the heater
-    - conditions:
-      - condition: trigger
-        id: Henry Too Hot - Heater Off
-      - condition: state
-        entity_id: climate.study_ac_2
-        state: heat
-      sequence:
-      - service: climate.set_temperature
-        data:
-          hvac_mode: 'off'
-          temperature: 18
-        target:
-          entity_id: climate.study_ac_2
-      alias: When Henry's room is too hot, turn off the heater
-    - conditions:
-      - condition: trigger
-        id: Otto Too Cold - Heater On
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: climate.otto_s_ac
-          state: heat
-        alias: Not heat
-      sequence:
-      - service: climate.set_temperature
-        data:
-          hvac_mode: heat
-          temperature: 18
-        target:
-          entity_id: climate.otto_s_ac
-      alias: When Otto's room is too cold, turn on the heater
-    - conditions:
-      - condition: trigger
-        id: Otto Too Hot - Heater Off
-      - condition: state
-        entity_id: climate.otto_s_ac
-        state: heat
-      sequence:
-      - service: climate.set_temperature
-        data:
-          hvac_mode: 'off'
-          temperature: 18
-        target:
-          entity_id: climate.otto_s_ac
-      alias: When Otto's room is too hot, turn off heater
-    - conditions:
-      - condition: trigger
-        id: Master too cold, Heater On
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: climate.masterbed_ac
-          state: heat
-        alias: Not heat
-      sequence:
-      - service: climate.set_temperature
-        data:
-          temperature: 18
-          hvac_mode: heat
-        target:
-          entity_id: climate.masterbed_ac
-      alias: When Master is too cold, turn on the heater
-    - conditions:
-      - condition: trigger
-        id: Master too hot, Heater Off
-      - condition: state
-        entity_id: climate.masterbed_ac
-        state: heat
-      sequence:
-      - service: climate.set_temperature
-        data:
-          hvac_mode: 'off'
-          temperature: 18
-        target:
-          entity_id: climate.masterbed_ac
-      alias: When Master is too hot, turn off the heater
-  mode: single
 - id: '1684410637520'
   alias: Send actionable notifications for workday
   description: ''
@@ -1900,103 +1592,6 @@
           minutes: 5
           seconds: 0
           milliseconds: 0
-- id: '1684580642830'
-  alias: Day Heater On
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.masterbed_home_heater_cold_trigger
-    id: Master, Too Cold, Heater On
-  - platform: state
-    entity_id:
-    - binary_sensor.masterbed_home_heater_hot_trigger
-    id: Master, Too Hot, Heater Off
-  - platform: state
-    entity_id:
-    - binary_sensor.masterbed_home_ac_cold_trigger
-    id: Master, Too Cool, AC Off
-  - platform: state
-    entity_id:
-    - binary_sensor.masterbed_home_ac_hot_trigger
-    id: Master, Too Hot, AC On
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-  - condition: state
-    state: 'on'
-    entity_id: input_boolean.masterbed_a_c_sleep_day_setback
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: Master, Too Hot, Heater Off
-      - condition: state
-        entity_id: climate.masterbed_ac
-        state: heat
-      sequence:
-      - service: climate.set_temperature
-        data:
-          temperature: 18
-          hvac_mode: 'off'
-        target:
-          entity_id: climate.masterbed_ac
-    - conditions:
-      - condition: trigger
-        id: Master, Too Cold, Heater On
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: climate.masterbed_ac
-          state: heat
-        - condition: state
-          entity_id: input_boolean.cool_only
-          state: 'off'
-      sequence:
-      - service: climate.set_temperature
-        data:
-          hvac_mode: heat
-          temperature: 22
-        target:
-          entity_id: climate.masterbed_ac
-    - conditions:
-      - condition: trigger
-        id: Master, Too Hot, AC On
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: climate.masterbed_ac
-          state: cool
-        - condition: state
-          entity_id: input_boolean.heat_only
-          state: 'off'
-      sequence:
-      - service: climate.set_temperature
-        data:
-          temperature: 22
-          hvac_mode: cool
-        target:
-          entity_id: climate.masterbed_ac
-    - conditions:
-      - condition: trigger
-        id: Master, Too Cool, AC Off
-      - condition: state
-        entity_id: climate.masterbed_ac
-        state: cool
-      sequence:
-      - service: climate.set_temperature
-        data:
-          hvac_mode: 'off'
-          temperature: 22
-        target:
-          entity_id: climate.masterbed_ac
-  mode: single
 - id: '1684659554584'
   alias: Bedtime Routine
   description: ''
@@ -2326,7 +1921,7 @@
     path: Stan-Gobien/CriticalCollapseOptionNotHomeMotionCameraSnapshotWithClickAction.yaml
     input:
       motion_sensor: binary_sensor.front_door_cam_motion_2
-      camera: camera.bi_door_camera
+      camera: camera.bi_front_door_camera
       notify_device: c054264b79e6739a057236f3a3c512b4
       blocker_entity: input_boolean.people_home
 - id: '1687857088060'
@@ -2765,148 +2360,6 @@
     target:
       area_id: master_bedroom
   mode: single
-- id: '1699434289866'
-  alias: Cooler Night
-  description: AC for hot weather
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.henrys_room_night_ac_cold_trigger
-    id: Henry Too Cold - AC off
-  - platform: state
-    entity_id:
-    - binary_sensor.ottos_room_night_ac_cold_trigger
-    id: Otto Too Cold - AC off
-  - platform: state
-    entity_id:
-    - binary_sensor.henrys_room_night_ac_hot_trigger
-    id: Henry Too Hot - AC On
-  - platform: state
-    entity_id:
-    - binary_sensor.ottos_room_night_ac_hot_trigger
-    id: Otto Too Hot - AC On
-  - platform: state
-    entity_id:
-    - binary_sensor.masterbed_night_ac_cold_trigger
-    id: Master too cold, AC Off
-  - platform: state
-    entity_id:
-    - binary_sensor.masterbed_night_ac_hot_trigger
-    id: Master too hot, AC On
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-  - condition: state
-    state: 'on'
-    entity_id: input_boolean.cooler_sleep_night_auto
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - Henry Too Cold - AC off
-      - condition: state
-        entity_id: climate.study_ac_2
-        state: cool
-      sequence:
-      - alias: Turn off Henry's AC
-        service: climate.set_temperature
-        data:
-          hvac_mode: 'off'
-          temperature: 21
-        target:
-          entity_id: climate.study_ac_2
-      alias: When Henry's room is too cold, turn off the AC
-    - conditions:
-      - condition: trigger
-        id:
-        - Henry Too Hot - AC On
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: climate.study_ac_2
-          state: cool
-      sequence:
-      - service: climate.set_temperature
-        data:
-          hvac_mode: cool
-          temperature: 21
-        target:
-          entity_id: climate.study_ac_2
-      alias: When Henry's room is too hot, turn on the AC
-    - conditions:
-      - condition: trigger
-        id:
-        - Otto Too Cold - AC off
-      - condition: state
-        entity_id: climate.otto_s_ac
-        state: cool
-      sequence:
-      - service: climate.set_temperature
-        data:
-          hvac_mode: 'off'
-          temperature: 21
-        target:
-          entity_id: climate.otto_s_ac
-      alias: When Otto's room is too cold, turn off the AC
-    - conditions:
-      - condition: trigger
-        id:
-        - Otto Too Hot - AC On
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: climate.otto_s_ac
-          state: cool
-      sequence:
-      - service: climate.set_temperature
-        data:
-          hvac_mode: cool
-          temperature: 21
-        target:
-          entity_id: climate.otto_s_ac
-      alias: When Otto's room is too hot, turn on AC
-    - conditions:
-      - condition: trigger
-        id:
-        - Master too cold, AC Off
-      - condition: state
-        entity_id: climate.masterbed_ac
-        state: cool
-      sequence:
-      - service: climate.set_temperature
-        data:
-          temperature: 18
-          hvac_mode: 'off'
-        target:
-          entity_id: climate.masterbed_ac
-      alias: When Master is too cold, turn off the AC
-    - conditions:
-      - condition: trigger
-        id:
-        - Master too hot, AC On
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: climate.masterbed_ac
-          state: cool
-      - condition: time
-        after: '22:00:00'
-      sequence:
-      - service: climate.set_temperature
-        data:
-          hvac_mode: cool
-          temperature: 18
-        target:
-          entity_id: climate.masterbed_ac
-      alias: When Master is too hot, turn on AC
-  mode: single
 - id: '1699526539731'
   alias: Fan Helper
   description: Turn on Fan to speed 1 if AC is turned on
@@ -3085,10 +2538,7 @@
       hours: 0
       minutes: 5
       seconds: 0
-  condition:
-  - condition: state
-    entity_id: select.dishwasher_power_on_state
-    state: 'On'
+  condition: []
   action:
   - service: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
@@ -3331,3 +2781,31 @@
           title: Toilets need cleaning
           message: Toilets need cleaning
       rolling_completion: false
+- id: '1713092115962'
+  alias: Nightly Garage Door Check
+  description: ''
+  trigger:
+  - platform: time
+    at: '21:00:00'
+  condition:
+  - condition: and
+    conditions:
+    - condition: state
+      entity_id: binary_sensor.garage_door_alert_active
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.garage_door_notify
+      state: 'on'
+  action:
+  - service: notify.STD_Information
+    data:
+      message: 'Garage Door open for {{ relative_time(states.binary_sensor.garage_door_alert_active.last_changed)
+        }} \   Alerts on: Alerts on: {{ states.cover | selectattr(''entity_id'', ''eq'',
+        ''cover.smart_garage_door_garage'') | selectattr(''state'', ''eq'', ''on'')
+        | map(attribute=''attributes.friendly_name'') | list | join('', '') }} \  Triggered:
+        {{ as_timestamp(states.binary_sensor.garage_door_alert_active.last_changed)
+        | timestamp_custom(''%A %I:%M%p (%d-%b-%Y)'') }}
+
+        '
+      title: 7580 Info - Garage Door Open
+  mode: single
