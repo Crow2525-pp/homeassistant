@@ -43,6 +43,7 @@ cover:
         friendly_name: "Roller blinds (MasterBedroom)"
         unique_id: "roller_blinds_MasterBedroom"
         position_template: "50"
+        
         open_cover:
           service: script.roller_blinds_up
         close_cover:
@@ -55,6 +56,7 @@ light:
     lights:
       tv_backlight:
         friendly_name: "TV Back Lightstrip"
+        entity_id: light.tv_backlight
         icon_template: "mdi:television-ambient-light"
         turn_on:
           service: script.tv_lights_on
@@ -82,12 +84,15 @@ notify:
 input_boolean:
   garage_door_notify:
     name: Garage Door Notify
+    
     icon: mdi:information
   network_device_down_notify:
     name: Network Device Down Notify
+    
     icon: mdi:alert
   wan_down_notify:
     name: WAN Down Notify
+    
     icon: mdi:alert
 
 
