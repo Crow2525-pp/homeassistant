@@ -97,25 +97,26 @@
 - id: '1644398227874'
   alias: turn on lounge lights at 20 min before sunset
   description: ''
-  trigger:
-  - platform: numeric_state
-    entity_id: sun.sun
+  triggers:
+  - entity_id: sun.sun
     attribute: elevation
     below: '5'
-  condition:
+    trigger: numeric_state
+  conditions:
   - condition: not
     conditions:
     - condition: state
       entity_id: input_select.occupancy
       state: Holiday
-  action:
-  - service: light.turn_on
-    target:
+  actions:
+  - target:
       area_id:
-      - master_bedroom
-      - henry_s_room
       - living_room
+      - henry_s_room
+      - kitchen
+      - front_entrance
     data: {}
+    action: light.turn_on
   mode: single
 - id: '1644398278136'
   alias: lounge lights off at night
@@ -141,24 +142,24 @@
     device_id: a4c9fa6c4205ff2778142853b379e0c5
     entity_id: remote.sony_kd_55x8500c
     domain: remote
-  - service: climate.turn_off
-    data: {}
+  - data: {}
     target:
       entity_id: climate.living_room_ac
-  - service: input_select.select_option
-    data:
+    action: climate.turn_off
+  - data:
       option: Sleeping
     target:
       entity_id: input_select.occupancy
-  - service: light.turn_off
-    data:
-      transition: 120
+    action: input_select.select_option
+  - data:
+      transition: 300
     target:
       area_id:
       - kitchen
       - living_room
       - henry_s_room
       - master_bedroom
+    action: light.turn_off
   mode: single
 - id: '1644402690423'
   alias: Close blinds at night
@@ -474,10 +475,10 @@
 - id: '1665308479762'
   alias: Heater at 530am living room if cold
   description: ''
-  trigger:
-  - platform: time
-    at: 05:30:00
-  condition:
+  triggers:
+  - at: 05:30:00
+    trigger: time
+  conditions:
   - condition: or
     conditions:
     - type: is_temperature
@@ -485,13 +486,16 @@
       device_id: ebf0379e33b2ccccd4ee6b6c351f4ce5
       entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
       domain: sensor
-      below: 17.5
+      below: 19
     - type: is_temperature
       condition: device
       device_id: 4d7546906b50573a9ce56a4a8c04ff90
       entity_id: sensor.livingroom_irblaster_temperature
       domain: sensor
       below: 17.5
+  - condition: state
+    entity_id: input_boolean.super_hot_today
+    state: 'off'
   - condition: or
     conditions:
     - condition: state
@@ -500,10 +504,11 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Sleeping
-  - condition: state
-    entity_id: input_boolean.hot_today_flag
-    state: 'off'
-  action:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Guest
+    alias: Someone Home
+  actions:
   - data:
       preset_mode: comfort
     target:
@@ -515,29 +520,12 @@
       - climate.living_room_versatile_thermastat
     data:
       hvac_mode: heat
-  - wait_for_trigger:
-    - platform: numeric_state
-      entity_id:
-      - sensor.livingroom_irblaster_temperature
-      above: 19
-    continue_on_timeout: true
-    timeout:
-      hours: 2
-      minutes: 0
-      seconds: 0
-      milliseconds: 0
-  - action: climate.turn_off
-    metadata: {}
-    data: {}
-    target:
-      entity_id: climate.living_room_versatile_thermastat
   mode: single
 - id: '1672988382648'
   alias: Laundry Notification
   description: Notify when the laundry is done
-  trigger:
+  triggers:
   - type: power
-    platform: device
     device_id: 838c3ad5fd43301b577c135fa3c773da
     entity_id: 3ffa5b81f4bf2306b02b6123bbbddea8
     domain: sensor
@@ -547,8 +535,8 @@
       minutes: 20
       seconds: 0
     id: Laundry_On
+    trigger: device
   - type: power
-    platform: device
     device_id: 838c3ad5fd43301b577c135fa3c773da
     entity_id: 3ffa5b81f4bf2306b02b6123bbbddea8
     domain: sensor
@@ -558,14 +546,19 @@
       seconds: 0
     id: Laundry_Off
     below: 50
-  condition: []
-  action:
+    trigger: device
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: state
         entity_id: input_boolean.laundry_on
         state: 'on'
       sequence:
+      - target:
+          entity_id: input_boolean.laundry_on
+        action: input_boolean.turn_off
+        data: {}
       - data:
           message: Laundry is done
         action: notify.mobile_app_samsung_galaxy_s22_ultra
@@ -577,10 +570,6 @@
           entity_id: media_player.kitchen
           message: Drier or washing machine have finished.
         action: tts.google_translate_say
-      - target:
-          entity_id: input_boolean.laundry_on
-        action: input_boolean.turn_off
-        data: {}
     - conditions:
       - condition: state
         entity_id: input_boolean.laundry_on
@@ -643,35 +632,27 @@
 - id: '1681337163617'
   alias: Occupancy Away
   description: If nobody home
-  trigger:
-  - platform: zone
-    entity_id: person.phil_patterson
-    zone: zone.home
-    event: leave
-  - platform: zone
-    entity_id: person.stephanie_patterson
-    zone: zone.home
-    event: leave
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - zone.home
     to: '0'
     for:
       hours: 0
       minutes: 10
       seconds: 0
-  condition:
+    trigger: state
+  conditions:
   - condition: not
     conditions:
     - condition: state
       entity_id: input_select.occupancy
       state: Away
-  action:
-  - service: input_select.select_option
-    data:
+  actions:
+  - data:
       option: Away
     target:
       entity_id: input_select.occupancy
+    action: input_select.select_option
   mode: single
 - id: '1681548980319'
   alias: Occupancy Home
@@ -755,21 +736,36 @@
 - id: '1681731859692'
   alias: Arm Night Alarm
   description: ''
-  trigger:
-  - platform: time
-    at: '21:00:00'
+  triggers:
+  - at: '21:00:00'
     enabled: false
-  - platform: state
-    entity_id:
+    trigger: time
+  - entity_id:
     - input_select.occupancy
     from: Home
     to: Sleeping
-  - platform: time
-    at: input_datetime.bedtime_phil_steph
-  condition:
+    trigger: state
+  - at: input_datetime.bedtime_phil_steph
+    trigger: time
+  - type: value
+    device_id: c054264b79e6739a057236f3a3c512b4
+    entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
+    domain: sensor
+    trigger: device
+    above: 80
+  conditions:
   - condition: time
+    before: 06:00:00
+    weekday:
+    - mon
+    - sun
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
     after: '19:00:00'
-  action:
+  actions:
   - choose:
     - conditions:
       - condition: state
@@ -777,8 +773,7 @@
         state: Away
       sequence:
       - wait_for_trigger:
-        - platform: state
-          entity_id:
+        - entity_id:
           - input_select.occupancy
           from: Away
           to: Home
@@ -786,6 +781,7 @@
             hours: 4
             minutes: 0
             seconds: 0
+          trigger: state
         continue_on_timeout: false
       - device_id: d0246dd7b63468505017ec29f63e3d86
         domain: alarm_control_panel
@@ -823,13 +819,13 @@
   - device_id: c054264b79e6739a057236f3a3c512b4
     domain: mobile_app
     type: notify
-    message: ''
-    enabled: false
-  - service: notify.mobile_app_samsung_galaxy_s22_ultra
-    data:
+    message: Alarmo Armed
+    enabled: true
+  - data:
       message: Home has detected youre not at home. Are you coming home?
       title: 'Action: are you coming home tonight?'
     enabled: false
+    action: notify.mobile_app_samsung_galaxy_s22_ultra
   mode: single
 - id: '1682493497365'
   alias: Phil's left work
@@ -884,168 +880,6 @@
     target:
       entity_id: cover.roller_blinds_chan1
     alias: Return blinds to prev state
-  mode: single
-- id: '1682671706426'
-  alias: Wake Up Routine
-  description: ''
-  trigger:
-  - platform: time
-    at: input_datetime.wakeup_time_phil_steph
-    id: Phil/Steph
-  - platform: time
-    at: input_datetime.henry_wake_up
-    id: Henry
-  - platform: time
-    at: input_datetime.otto_s_wake_up
-    id: Otto
-  - platform: state
-    entity_id:
-    - input_button.wake_up_phil_steph
-    id: Phil/Steph but
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-  action:
-  - choose:
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: Phil/Steph
-        - condition: trigger
-          id: Phil/Steph but
-      sequence:
-      - data:
-          hvac_mode: 'off'
-          temperature: 18
-        target:
-          entity_id:
-          - climate.masterbed_ac
-        action: climate.set_temperature
-      - data: {}
-        target:
-          entity_id: fan.masterbedroom_fan
-        action: fan.turn_off
-      - data: {}
-        target:
-          entity_id:
-          - input_boolean.sleep_night_setback
-          - input_boolean.cooler_sleep_night_auto
-        enabled: false
-        action: input_boolean.turn_off
-      - if:
-        - condition: sun
-          before: sunrise
-        then:
-        - data: {}
-          enabled: false
-          action: script.1686171686731
-        - data:
-            transition: 200
-            brightness: 255
-          target:
-            entity_id: light.lounge
-          action: light.turn_on
-      - device_id: d0246dd7b63468505017ec29f63e3d86
-        domain: alarm_control_panel
-        entity_id: alarm_control_panel.alarmo
-        type: disarm
-      - data:
-          option: Home
-        target:
-          entity_id: input_select.occupancy
-        action: input_select.select_option
-      - data: {}
-        target:
-          entity_id:
-          - light.lounge
-          - light.kitchen_light_socket_1
-        action: light.turn_off
-      - if:
-        - condition: state
-          entity_id: calendar.working_from_home
-          attribute: all_day
-          state: ''
-        then:
-        - data: {}
-          target:
-            entity_id: input_boolean.computer_switch
-          action: input_boolean.turn_on
-      - delay:
-          hours: 0
-          minutes: 15
-          seconds: 0
-          milliseconds: 0
-      - if:
-        - condition: state
-          entity_id: climate.living_room_ac
-          state: heat
-        then:
-        - data:
-            hvac_mode: 'off'
-          target:
-            entity_id: climate.living_room_ac
-          action: climate.set_hvac_mode
-        enabled: false
-    - conditions:
-      - condition: trigger
-        id: Henry
-        enabled: false
-      sequence:
-      - data:
-          hvac_mode: 'off'
-          temperature: 20
-        target:
-          entity_id: climate.study_ac_2
-        enabled: false
-        action: climate.set_temperature
-    - conditions:
-      - condition: trigger
-        id: Otto
-        enabled: false
-      sequence:
-      - data:
-          hvac_mode: 'off'
-          temperature: 20
-        target:
-          entity_id: climate.otto_s_ac
-        enabled: false
-        action: climate.set_temperature
-  - if:
-    - condition: or
-      conditions:
-      - condition: trigger
-        id: Phil/Steph
-      - condition: trigger
-        id: Henry
-      - condition: trigger
-        id: Otto
-      - condition: trigger
-        id:
-        - Phil/Steph but
-    - condition: or
-      conditions:
-      - condition: state
-        entity_id: input_boolean.cooler_sleep_night_auto
-        state: 'on'
-      - condition: state
-        entity_id: input_boolean.sleep_night_setback
-        state: 'on'
-    then:
-    - data: {}
-      target:
-        entity_id:
-        - input_boolean.sleep_night_setback
-        - input_boolean.cooler_sleep_night_auto
-      enabled: false
-      action: input_boolean.turn_off
-    enabled: false
   mode: single
 - id: '1684410637520'
   alias: Send actionable notifications for workday
@@ -1134,31 +968,6 @@
       - master_bedroom
       - henry_s_room
   mode: single
-- id: '1684838584422'
-  alias: Tag Test is scanned
-  description: Lounge lights on/off
-  trigger:
-  - platform: tag
-    tag_id: 3580b443-baad-4632-b40e-14b8effeddab
-  condition: []
-  action:
-  - if:
-    - condition: state
-      entity_id: light.lounge
-      state: 'on'
-    then:
-    - service: light.turn_off
-      data:
-        transition: 10
-      target:
-        entity_id: light.lounge
-    else:
-    - service: light.turn_on
-      data:
-        brightness: 20
-      target:
-        entity_id: light.lounge
-  mode: single
 - id: '1684973809451'
   alias: IOS Actionable Notifications
   description: ''
@@ -1203,13 +1012,25 @@
 - id: '1685005001174'
   alias: End of Workday
   description: Turn off computer and AC after workday
-  trigger:
-  - platform: time
-    at: input_datetime.workday_end
-  condition:
+  triggers:
+  - at: input_datetime.workday_end
+    trigger: time
+  conditions:
   - condition: time
     after: input_datetime.workday_end
-  action:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Sleeping
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Guest
+    alias: Someone Home
+  actions:
   - if:
     - condition: state
       state: 'on'
@@ -1608,19 +1429,37 @@
 - id: '1695506875922'
   alias: Turn off living room heater at 7am
   description: ''
-  trigger:
-  - platform: time
-    at: 07:00:00
-  condition:
-  - condition: state
-    entity_id: input_boolean.hot_today_flag
-    state: 'on'
-  action:
-  - service: climate.set_hvac_mode
-    data:
+  triggers:
+  - at: 07:00:00
+    trigger: time
+  - at: 07:30:00
+    trigger: time
+  - at: 08:00:00
+    trigger: time
+  - trigger: time
+    at: 06:30:00
+  - trigger: time
+    at: 06:00:00
+  - trigger: time
+    at: 05:45:00
+  conditions:
+  - condition: or
+    conditions:
+    - condition: numeric_state
+      entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+      above: 20
+    - condition: state
+      entity_id: input_boolean.hot_today_flag
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.super_hot_today
+      state: 'on'
+  actions:
+  - data:
       hvac_mode: 'off'
     target:
       entity_id: climate.living_room_ac
+    action: climate.set_hvac_mode
   mode: single
 - id: '1695509359232'
   alias: Hot today
@@ -1753,7 +1592,7 @@
         target:
           entity_id:
           - light.led_strip_office_light
-          - light.kitchen_light_socket_1_2
+          - light.kitchen_light_socket_1
     - conditions:
       - condition: state
         state: 'off'
@@ -1766,31 +1605,6 @@
           - light.led_strip_office_light
           - light.kitchen_light_socket_1
   mode: restart
-- id: '1704141233232'
-  alias: Green flash with Otto's door open
-  description: ''
-  trigger:
-  - type: opened
-    platform: device
-    device_id: b7087e9e857a7f8d8cf761de0bc5ed2f
-    entity_id: 779451d27e807842e1b6b29e9834eb17
-    domain: binary_sensor
-    id: Open
-  condition:
-  - condition: numeric_state
-    entity_id: sun.sun
-    attribute: elevation
-    below: 5
-  - condition: time
-    after: '19:15:00'
-    before: 08:00:00
-  action:
-  - service: light.turn_on
-    target:
-      device_id: fee3e1405cfa62d116d3f31ec12a9618
-    data:
-      flash: short
-  mode: single
 - id: '1705440129170'
   alias: ZHA - Mijia Wireless Remote Switch (WXKG01LM)
   description: ''
@@ -1869,9 +1683,8 @@
   alias: Dishwasher done
   description: Power change less than 50w resultingnin sending notification to s23
     phil and iphone steph
-  trigger:
+  triggers:
   - type: power
-    platform: device
     device_id: 6061744ba3656ae82e93e33c02f2d070
     entity_id: 616d141a6ad937b14ac1f65b5fe12c62
     domain: sensor
@@ -1880,14 +1693,51 @@
       hours: 0
       minutes: 20
       seconds: 0
-  condition: []
-  action:
-  - data:
-      message: Dishwasher is done
-    action: notify.mobile_app_samsung_galaxy_s22_ultra
-  - data:
-      message: Dishwasher is done
-    action: notify.mobile_app_slvdh
+    id: Dishwasher Off
+    trigger: device
+  - type: power
+    device_id: 6061744ba3656ae82e93e33c02f2d070
+    entity_id: 616d141a6ad937b14ac1f65b5fe12c62
+    domain: sensor
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    id: Dishwasher On
+    above: 20
+    trigger: device
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Dishwasher On
+      sequence:
+      - action: input_boolean.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.dishwasher_on
+    - conditions:
+      - condition: trigger
+        id:
+        - Dishwasher Off
+      - condition: state
+        entity_id: input_boolean.dishwasher_on
+        state: 'on'
+      sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.dishwasher_on
+        data: {}
+      - data:
+          message: Dishwasher is done
+        action: notify.mobile_app_slvdh
+      - data:
+          message: Dishwasher is done
+        action: notify.mobile_app_samsung_galaxy_s22_ultra
   mode: single
 - id: '1706063916168'
   alias: Water detected
@@ -2108,29 +1958,128 @@
 - id: '1711621732424'
   alias: Maintenance - clean toilet
   description: Weekly reminder to clean toilets
-  use_blueprint:
-    path: nwithan8/track_and_remind_task.yaml
-    input:
-      task_name: Clean Toilets
-      task_interval: 7
-      nfc_tag: 14544260-abc9-4e84-be5b-20b3df57978d
-      date_tracker: input_datetime.clean_toielts
-      status_check_time: 08:00:00
-      due_action:
-      - service: notify.mobile_app_slvdh
+  triggers:
+  - alias: On schedule
+    id: schedule
+    at: 08:00:00
+    trigger: time
+  - alias: When associated NFC tag is scanned
+    id: tag_scan
+    tag_id: 14544260-abc9-4e84-be5b-20b3df57978d
+    trigger: tag
+  conditions:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Sleeping
+  actions:
+  - choose:
+    - conditions:
+      - alias: NFC tag scanned
+        condition: trigger
+        id: tag_scan
+      sequence:
+      - alias: Update date tracker to next due date
+        entity_id: input_datetime.clean_toielts
         data:
-          message: Toilets need cleaning
-          title: Job Job Job
-      - service: notify.mobile_app_samsung_galaxy_s22_ultra
-        metadata: {}
-        data:
-          title: Toilets need cleaning
-          message: Toilets need cleaning
-      rolling_completion: false
+          datetime: "{% if rolling_completion %}\n  {% set last_date = states(date_tracker)
+            | as_datetime %}\n  {{ last_date.date() + timedelta(days=task_interval)
+            }}\n{% else %}\n  {{ now().date() + timedelta(days=task_interval) }}\n{%
+            endif %}\n"
+        action: input_datetime.set_datetime
+      - alias: Execute "on completion" action if set
+        choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ true }}'
+          sequence: []
+    - conditions:
+      - alias: At scheduled time
+        condition: trigger
+        id: schedule
+      - alias: Today is not a skip day
+        condition: template
+        value_template: '{{ now().date().weekday() | string not in skip_days_of_week
+          }}'
+      sequence:
+      - choose:
+        - conditions:
+          - alias: Task is due today
+            condition: template
+            value_template: '{{ task_is_due }}'
+          sequence:
+          - data:
+              message: Toilets need cleaning
+              title: Job Job Job
+            action: notify.mobile_app_slvdh
+          - metadata: {}
+            data:
+              title: Toilets need cleaning
+              message: Toilets need cleaning
+            action: notify.mobile_app_samsung_galaxy_s22_ultra
+        - conditions:
+          - alias: Task is overdue
+            condition: template
+            value_template: '{{ task_is_overdue }}'
+          sequence:
+          - if:
+            - alias: Custom overdue action
+              condition: template
+              value_template: '{{ overdue_action != [] }}'
+            then:
+            - alias: Execute overdue action
+              choose:
+              - conditions:
+                - condition: template
+                  value_template: '{{ true }}'
+                sequence: []
+            else:
+            - alias: Execute due action
+              choose:
+              - conditions:
+                - condition: template
+                  value_template: '{{ true }}'
+                sequence:
+                - data:
+                    message: Toilets need cleaning
+                    title: Job Job Job
+                  action: notify.mobile_app_slvdh
+                - metadata: {}
+                  data:
+                    title: Toilets need cleaning
+                    message: Toilets need cleaning
+                  action: notify.mobile_app_samsung_galaxy_s22_ultra
+  mode: single
+  max_exceeded: silent
+  variables:
+    task_name: Clean Toilets
+    task_interval: 7
+    date_tracker: input_datetime.clean_toielts
+    rolling_completion: false
+    overdue_action: []
+    skip_days_of_week: []
+    days_since_last_completed: '{% set last_date = states(date_tracker) | as_datetime
+      %} {{ (now().date() - last_date.date()).days }}
+
+      '
+    task_due_date: '{% set last_date = states(date_tracker) | as_datetime %}   {{
+      last_date.date() + timedelta(days=task_interval) }}
+
+      '
+    task_is_due: '{{ days_since_last_completed == task_interval }}'
+    task_is_overdue: '{{ days_since_last_completed > task_interval }}'
 - id: '1713092115962'
   alias: Nightly Garage Door Check
   description: ''
   trigger:
+  - platform: state
+    entity_id:
+    - cover.garage_door_msg100_main_channel
+    to: open
   - platform: state
     entity_id:
     - cover.garage_door_msg100_main_channel
@@ -2244,20 +2193,20 @@
 - id: '1714337117111'
   alias: Master AC off when wake up
   description: ''
-  trigger:
+  triggers:
   - type: value
-    platform: device
     device_id: c054264b79e6739a057236f3a3c512b4
     entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
     domain: sensor
     below: 80
+    trigger: device
   - type: value
-    platform: device
     device_id: 58e2eb1fec0eb5ec9ce450433d074fcf
     entity_id: sensor.slvdh_floors_descended
     domain: sensor
     above: 1
-  condition:
+    trigger: device
+  conditions:
   - condition: or
     conditions:
     - condition: state
@@ -2273,18 +2222,23 @@
   - condition: time
     after: 06:00:00
     before: 09:00:00
-  action:
-  - service: climate.set_hvac_mode
-    metadata: {}
+  actions:
+  - metadata: {}
     data:
       hvac_mode: 'off'
     target:
       entity_id: climate.masterbed_versatile_thermostate
-  - service: fan.turn_off
-    metadata: {}
+    action: climate.set_hvac_mode
+  - metadata: {}
     data: {}
     target:
       entity_id: fan.masterbedroom_fan
+    action: fan.turn_off
+  - action: climate.turn_off
+    metadata: {}
+    data: {}
+    target:
+      area_id: henry_s_room
   mode: single
 - id: '1714349672273'
   alias: Heater on in Living Room daytime
@@ -2949,4 +2903,74 @@
           entity_id: input_boolean.masterbed_sleeping
         action: input_boolean.turn_off
         data: {}
+  mode: single
+- id: '1730921531314'
+  alias: Keep on
+  description: Ensure that usb controller in living room for it blaster is always
+    on
+  triggers:
+  - trigger: time_pattern
+    minutes: '15'
+  conditions:
+  - condition: device
+    type: is_off
+    device_id: 232fc839ce53ebd06b58a471c2412ad2
+    entity_id: 5988af91837e47236db524998627e65e
+    domain: switch
+  actions:
+  - type: turn_on
+    device_id: 232fc839ce53ebd06b58a471c2412ad2
+    entity_id: 5988af91837e47236db524998627e65e
+    domain: switch
+  mode: single
+- id: '1731229090269'
+  alias: Solar AC or Heater
+  description: 'Turn on heater or AC if solar is on.
+
+    No need for a time Condtion as solar is only during the day'
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.gosungrow_virtual_1205796_1_1_1_p24
+    above: 1
+    id: Solar Yielding
+  - trigger: numeric_state
+    entity_id:
+    - sensor.ble_temperature_masterbed_temp_humidity_sensor
+    id: Hot Temp
+    above: 22
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: and
+        conditions:
+        - condition: numeric_state
+          entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+          above: 22
+        - condition: numeric_state
+          entity_id: sensor.gosungrow_virtual_1205796_1_1_1_p24
+          above: 1
+      sequence:
+      - action: climate.set_hvac_mode
+        metadata: {}
+        data:
+          hvac_mode: cool
+        target:
+          device_id: 935bc8d3f284fef6ba036d8bbab1e1cf
+      - action: climate.turn_on
+        metadata: {}
+        data: {}
+        target:
+          device_id: 935bc8d3f284fef6ba036d8bbab1e1cf
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        below: 20
+      sequence:
+      - action: climate.turn_off
+        metadata: {}
+        data: {}
+        target:
+          device_id: 935bc8d3f284fef6ba036d8bbab1e1cf
   mode: single
