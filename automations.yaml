@@ -112,23 +112,24 @@
   - target:
       area_id:
       - living_room
-      - henry_s_room
       - kitchen
       - front_entrance
-    data: {}
+    data:
+      kelvin: 2000
+      brightness_pct: 100
     action: light.turn_on
   mode: single
 - id: '1644398278136'
   alias: lounge lights off at night
   description: ''
-  trigger:
-  - platform: time
-    at: '22:15:00'
-  - platform: calendar
-    event: start
+  triggers:
+  - at: '22:15:00'
+    trigger: time
+  - event: start
     offset: 0:0:0
     entity_id: calendar.early_to_bed
-  condition:
+    trigger: calendar
+  conditions:
   - condition: or
     conditions:
     - condition: state
@@ -137,7 +138,7 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Home
-  action:
+  actions:
   - type: turn_off
     device_id: a4c9fa6c4205ff2778142853b379e0c5
     entity_id: remote.sony_kd_55x8500c
@@ -157,7 +158,6 @@
       area_id:
       - kitchen
       - living_room
-      - henry_s_room
       - master_bedroom
     action: light.turn_off
   mode: single
@@ -278,21 +278,37 @@
 - id: '1649147714100'
   alias: Phil/steph home open garage
   description: ''
-  trigger:
-  - platform: device
-    device_id: c054264b79e6739a057236f3a3c512b4
+  triggers:
+  - device_id: c054264b79e6739a057236f3a3c512b4
     domain: device_tracker
     entity_id: device_tracker.sm_s908e
     type: enters
     zone: zone.home
-  - platform: device
-    device_id: 58e2eb1fec0eb5ec9ce450433d074fcf
+    trigger: device
+  - device_id: 58e2eb1fec0eb5ec9ce450433d074fcf
     domain: device_tracker
     entity_id: device_tracker.slvdh_2
     type: enters
     zone: zone.home
-  condition: []
-  action:
+    trigger: device
+  conditions:
+  - type: is_connected
+    condition: device
+    device_id: c054264b79e6739a057236f3a3c512b4
+    entity_id: 39a721a1e67ec5758cce90959b3d8a25
+    domain: binary_sensor
+  - condition: not
+    conditions:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.automation_killswitch
+        state: Exit/Entry Automations Off
+      - condition: state
+        entity_id: input_select.automation_killswitch
+        state: All Automations Off
+    alias: Ensure Killswitch Not Activated
+  actions:
   - device_id: 7edad8ef01a718694f8a423cbfdca0c0
     domain: cover
     entity_id: cover.smart_garage_door_garage
@@ -545,7 +561,7 @@
       minutes: 20
       seconds: 0
     id: Laundry_Off
-    below: 50
+    below: 10
     trigger: device
   conditions: []
   actions:
@@ -752,7 +768,7 @@
     entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
     domain: sensor
     trigger: device
-    above: 80
+    above: 95
   conditions:
   - condition: time
     before: 06:00:00
@@ -950,23 +966,21 @@
 - id: '1684789400363'
   alias: Lights off if on in morning
   description: ''
-  trigger:
-  - platform: sun
-    event: sunrise
+  triggers:
+  - event: sunrise
     offset: 00:15:00
-  condition:
-  - condition: state
-    entity_id: light.lounge
-    state: 'on'
-  action:
-  - service: light.turn_off
-    data: {}
+    trigger: sun
+  - trigger: time
+    at: 05:30:00
+  conditions: []
+  actions:
+  - data: {}
     target:
       area_id:
       - living_room
       - kitchen
       - master_bedroom
-      - henry_s_room
+    action: light.turn_off
   mode: single
 - id: '1684973809451'
   alias: IOS Actionable Notifications
@@ -1246,9 +1260,8 @@
 - id: '1694133288157'
   alias: Heaters Off When Leave
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - input_select.occupancy
     from: Home
     to: Away
@@ -1256,10 +1269,21 @@
       hours: 0
       minutes: 20
       seconds: 0
-  condition: []
-  action:
-  - service: climate.set_hvac_mode
-    data:
+    trigger: state
+  conditions:
+  - condition: not
+    conditions:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.automation_killswitch
+        state: Exit/Entry Automations Off
+      - condition: state
+        entity_id: input_select.automation_killswitch
+        state: All Automations Off
+    alias: Ensure Killswitch Not Activated
+  actions:
+  - data:
       hvac_mode: 'off'
     target:
       entity_id:
@@ -1267,44 +1291,46 @@
       - climate.living_room_ac
       - climate.masterbed_ac
       - climate.otto_s_ac
-  - service: light.turn_off
-    data:
+    action: climate.set_hvac_mode
+    enabled: false
+  - data:
       transition: 57
     target:
       area_id:
       - kitchen
       - living_room
       - master_bedroom
-  - service: notify.mobile_app_samsung_galaxy_s22_ultra
-    data:
+    action: light.turn_off
+  - data:
       message: Heaters and Lights switched off.
       title: 'Auto-Off: nobody home'
-  - service: notify.mobile_app_slvdh
-    data:
+    action: notify.mobile_app_samsung_galaxy_s22_ultra
+  - data:
       message: Heaters and Lights switched off.
       title: 'Auto-Off: nobody home'
+    action: notify.mobile_app_slvdh
   mode: single
 - id: '1694242386120'
   alias: Heaters on when home
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - input_select.occupancy
     from: Away
     for:
       hours: 0
       minutes: 0
       seconds: 10
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - input_select.occupancy
     from: Holiday
     for:
       hours: 0
       minutes: 0
       seconds: 10
-  condition:
+    trigger: state
+  conditions:
   - condition: and
     conditions:
     - condition: sun
@@ -1315,32 +1341,43 @@
         entity_id: input_select.occupancy
         state: Sleeping
       alias: Not Sleeping
-  action:
-  - service: climate.set_fan_mode
-    data:
+  - condition: not
+    conditions:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.automation_killswitch
+        state: Exit/Entry Automations Off
+      - condition: state
+        entity_id: input_select.automation_killswitch
+        state: All Automations Off
+    alias: Ensure Killswitch Not Activated
+  actions:
+  - data:
       fan_mode: Heat
     target:
       entity_id:
       - climate.living_room_ac
       - climate.masterbed_ac
-  - service: notify.mobile_app_samsung_galaxy_s22_ultra
-    data:
+    action: climate.set_fan_mode
+  - data:
       message: Heaters and Lights switched on
       title: 'Auto-on: arrived home'
-  - service: light.turn_on
-    data:
+    action: notify.mobile_app_samsung_galaxy_s22_ultra
+  - data:
       transition: 20
     target:
       area_id:
       - kitchen
       - living_room
       - master_bedroom
-  - service: climate.turn_on
-    data: {}
+    action: light.turn_on
+  - data: {}
     target:
       entity_id:
       - climate.living_room_ac
       - climate.masterbed_ac
+    action: climate.turn_on
   mode: single
 - id: '1694292629807'
   alias: Heater on in morning
@@ -1454,6 +1491,9 @@
     - condition: state
       entity_id: input_boolean.super_hot_today
       state: 'on'
+    - condition: numeric_state
+      entity_id: sensor.livingroom_irblaster_temperature
+      above: 22
   actions:
   - data:
       hvac_mode: 'off'
@@ -1465,44 +1505,41 @@
   alias: Hot today
   description: Helper automation that changes and input var to on if it is hot today
     depending on the forecast
-  trigger:
-  - platform: time
-    at: 05:30:00
-  condition: []
-  action:
+  triggers:
+  - at: 04:30:00
+    trigger: time
+  conditions: []
+  actions:
   - choose:
     - conditions:
-      - alias: If forecast > 25
-        condition: template
-        value_template: '{{ state_attr(''weather.home'', ''forecast'')[0][''temperature'']
-          > 25 }}'
+      - condition: numeric_state
+        entity_id: sensor.braybrook_temp_max_0
+        above: 25
       sequence:
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.super_hot_today
+        action: input_boolean.turn_on
     - conditions:
-      - condition: template
-        value_template: '{{ state_attr(''weather.home'', ''forecast'')[0][''temperature'']
-          > 21 }}'
-        alias: If forecast > 21
+      - condition: numeric_state
+        entity_id: sensor.braybrook_temp_max_0
+        above: 21
       sequence:
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.hot_today_flag
+        action: input_boolean.turn_on
     - conditions:
-      - condition: template
-        value_template: '{{ state_attr(''weather.home'', ''forecast'')[0][''temperature'']
-          <= 21 }}'
-        alias: If forecast <= 21
+      - condition: numeric_state
+        entity_id: sensor.braybrook_temp_max_0
+        below: 21
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id:
           - input_boolean.hot_today_flag
           - input_boolean.super_hot_today
+        action: input_boolean.turn_off
   mode: single
 - id: '1699526539731'
   alias: Master Fan on if AC on
@@ -1529,30 +1566,21 @@
 - id: '1700272627906'
   alias: Stream cam to home nest
   description: ''
-  trigger:
+  triggers:
   - type: motion
-    platform: device
-    device_id: c6e863033a6aa01db5e69f287b01088d
-    entity_id: 2ff34789d939d75e89d5bfac2ec897a3
+    device_id: 323193309f2af00ef6853c8b84e00a9f
+    entity_id: cc238a811938c75648c19a89e545d1b1
     domain: binary_sensor
-  - type: motion
-    platform: device
-    device_id: 4cadedd6aad3623038c4725e3f43188f
-    entity_id: 276953dc5f8a866603f203f272a448a3
-    domain: binary_sensor
-  - type: motion
-    platform: device
-    device_id: 25185c0148fc9b5b58b30c968ed8268d
-    entity_id: d9d648a77cd47757741d7451351a0f70
-    domain: binary_sensor
-  condition: []
-  action:
-  - service: camera.play_stream
-    data:
+    trigger: device
+  conditions: []
+  actions:
+  - data:
       format: hls
       media_player: media_player.kitchen
     target:
-      device_id: 323193309f2af00ef6853c8b84e00a9f
+      device_id:
+      - 323193309f2af00ef6853c8b84e00a9f
+    action: camera.play_stream
   mode: single
 - id: '1703583740639'
   alias: Motion-Activated Light
@@ -1608,12 +1636,12 @@
 - id: '1705440129170'
   alias: ZHA - Mijia Wireless Remote Switch (WXKG01LM)
   description: ''
-  trigger:
-  - platform: event
-    event_type: zha_event
+  triggers:
+  - event_type: zha_event
     event_data:
       device_id: 5858e6f215e4bc4f5876cb1e82be3dd5
-  action:
+    trigger: event
+  actions:
   - variables:
       click_type: '{{ trigger.event.data.args.click_type }}'
       attrname: '{{ trigger.event.data.args.attribute_name }}'
@@ -1627,8 +1655,7 @@
         value_template: '{{ value == true }}'
       sequence:
       - wait_for_trigger:
-        - platform: event
-          event_type: zha_event
+        - event_type: zha_event
           event_data:
             device_id: 5858e6f215e4bc4f5876cb1e82be3dd5
             command: attribute_updated
@@ -1636,6 +1663,7 @@
               attribute_id: 0
               attribute_name: on_off
               value: false
+          trigger: event
         continue_on_timeout: true
         timeout: 0.6
       - choose:
@@ -1652,6 +1680,10 @@
           device_id: 1237768e2dd98b4fd8a60455b374908d
           entity_id: 7341353cf94f589e859b6d7a8d463077
           domain: light
+        - action: light.toggle
+          metadata: {}
+          data: {}
+          enabled: false
     - conditions:
       - condition: template
         value_template: '{{ command == ''click'' }}'
@@ -2607,32 +2639,6 @@
           entity_id: light.tv_backlight
         data: {}
   mode: single
-- id: '1721440736884'
-  alias: Blanket on reminder
-  description: Remind every 30 minutes if the blanket is on
-  trigger:
-  - platform: state
-    entity_id:
-    - switch.blanket_smart_plug_socket_1
-    to: 'on'
-    for:
-      minutes: 30
-  condition:
-  - condition: device
-    type: is_on
-    device_id: 71a70a1b4f966e3f97a2168d18d29a14
-    entity_id: 20475efa0446e26eada83773dc59101b
-    domain: switch
-  action:
-  - service: notify.mobile_app_samsung_galaxy_s22_ultra
-    data:
-      message: 'Reminder: The electric blanket has been on for another 30 minutes.'
-      title: Electric Blanket Reminder
-  - service: notify.mobile_app_slvdh
-    data:
-      message: 'Reminder: The electric blanket has been on for another 30 minutes.'
-      title: 'Electric Blanket '
-  mode: single
 - id: '1721641437270'
   alias: Periodic Roller Blind Position Update
   description: ''
@@ -2973,4 +2979,245 @@
         data: {}
         target:
           device_id: 935bc8d3f284fef6ba036d8bbab1e1cf
+  mode: single
+- id: '1732241510110'
+  alias: Adjust Floorlamp Based on Solar Production
+  description: 'This automation adjusts the brightness of the Yeelight (green color)
+    based on the solar production from the 5.5 kW solar system. The brightness scales
+    dynamically with production levels. It only runs between 6:00 AM and 4:00 PM.
+
+    '
+  triggers:
+  - entity_id: sensor.gosungrow_virtual_1205796_1_1_1_p24
+    trigger: state
+  - at: '16:00:00'
+    trigger: time
+  conditions:
+  - condition: time
+    after: 06:00:00
+    before: '16:00:00'
+  actions:
+  - choose:
+    - conditions:
+      - condition: time
+        after: 06:00:00
+        before: '16:00:00'
+      sequence:
+      - target:
+          device_id: fee3e1405cfa62d116d3f31ec12a9618
+        data:
+          rgb_color:
+          - 0
+          - 255
+          - 0
+          brightness_pct: '{% set production = states(''sensor.gosungrow_virtual_1205796_1_1_1_p24'')
+            | float %} {{ (production / 5.5 * 100) | int if production >= 0 else 0
+            }}
+
+            '
+        action: light.turn_on
+    - conditions: []
+      sequence:
+      - target:
+          device_id: fee3e1405cfa62d116d3f31ec12a9618
+        action: light.turn_off
+  mode: single
+- id: '1732435588125'
+  alias: Appliance Notifications & Actions
+  description: Washing/Laundry notification
+  use_blueprint:
+    path: Blackshome/appliance-notifications.yaml
+    input:
+      power_sensor: sensor.laundry_power_switch_power
+      running_dead_zone: 19
+      start_notify_device:
+      - c054264b79e6739a057236f3a3c512b4
+      include_end_notify: enable_end_notify_options
+      end_notify_device:
+      - c054264b79e6739a057236f3a3c512b4
+      end_reminder_notification: disable_reminder_notification
+      include_power_tracking: enable_power_tracking
+      include_duration_tracking: enable_duration_tracking
+- id: '1732614031949'
+  alias: Sprinkler On at sunrise if superhot
+  description: Superhot is >25 degrees
+  triggers:
+  - trigger: sun
+    event: sunrise
+    offset: 0
+  conditions:
+  - condition: state
+    entity_id: input_boolean.super_hot_today
+    state: 'on'
+  actions:
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      device_id: 7f15e0de838d7d32254c9598ce75aa10
+  - delay:
+      hours: 0
+      minutes: 20
+      seconds: 0
+      milliseconds: 0
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      device_id: 7f15e0de838d7d32254c9598ce75aa10
+  mode: single
+- id: '1733528764416'
+  alias: Turn On house on arrival home daytime summer
+  description: 'Hvac, lights, Xmas lights.
+
+
+    '
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_select.occupancy
+    from: Away
+    to: Home
+  conditions:
+  - condition: state
+    entity_id: input_boolean.super_hot_today
+    state: 'on'
+  - condition: not
+    conditions:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.automation_killswitch
+        state: Exit/Entry Automations Off
+      - condition: state
+        entity_id: input_select.automation_killswitch
+        state: All Automations Off
+    alias: Ensure Killswitch Not Activated
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.xmas_lights_plug_socket_1
+  - alias: HVAC
+    choose:
+    - conditions:
+      - condition: state
+        entity_id: climate.living_room_versatile_thermastat
+        attribute: is_on
+        state: 'false'
+      sequence:
+      - action: climate.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: climate.living_room_versatile_thermastat
+      - action: climate.set_hvac_mode
+        metadata: {}
+        data:
+          hvac_mode: cool
+        target:
+          entity_id: climate.living_room_versatile_thermastat
+      - action: climate.set_preset_mode
+        metadata: {}
+        data:
+          preset_mode: Boost
+        target:
+          entity_id: climate.living_room_versatile_thermastat
+    - conditions:
+      - condition: state
+        state: 'false'
+        entity_id: climate.masterbed_versatile_thermostate
+      sequence:
+      - action: climate.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: climate.masterbed_versatile_thermostate
+      - action: climate.set_hvac_mode
+        metadata: {}
+        data:
+          hvac_mode: cool
+        target:
+          entity_id: climate.masterbed_versatile_thermostate
+      - action: climate.set_preset_mode
+        metadata: {}
+        data:
+          preset_mode: Boost
+        target:
+          entity_id: climate.masterbed_versatile_thermostate
+    - conditions:
+      - condition: state
+        state: 'false'
+        entity_id: climate.otto_s_room
+      sequence:
+      - action: climate.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: climate.otto_s_room
+      - action: climate.set_hvac_mode
+        metadata: {}
+        data:
+          hvac_mode: cool
+        target:
+          entity_id: climate.otto_s_room
+      - action: climate.set_preset_mode
+        metadata: {}
+        data:
+          preset_mode: Boost
+        target:
+          entity_id: climate.otto_s_room
+  mode: single
+- id: '1733691257280'
+  alias: Turn on Xmas Lights in am
+  description: ''
+  triggers:
+  - trigger: time
+    at: 05:30:00
+  conditions: []
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.xmas_lights_plug_socket_1
+  mode: single
+- id: '1735426056624'
+  alias: Change occupancy to holiday if alarmo is
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - alarm_control_panel.alarmo
+    to: armed_vacation
+  conditions: []
+  actions:
+  - action: input_select.select_option
+    metadata: {}
+    data:
+      option: Holiday
+    target:
+      entity_id: input_select.occupancy
+  mode: single
+- id: '1735867240188'
+  alias: Water 10min only
+  description: Allow the water hose to be turned on for 10min ony
+  triggers:
+  - type: turned_on
+    device_id: 7f15e0de838d7d32254c9598ce75aa10
+    entity_id: 9b99b8ca53b6982903c65cd267091adf
+    domain: switch
+    trigger: device
+  conditions: []
+  actions:
+  - delay:
+      hours: 0
+      minutes: 10
+      seconds: 0
+      milliseconds: 0
+  - type: turn_off
+    device_id: 7f15e0de838d7d32254c9598ce75aa10
+    entity_id: 9b99b8ca53b6982903c65cd267091adf
+    domain: switch
   mode: single

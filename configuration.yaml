@@ -63,6 +63,9 @@ light:
         turn_off:
           service: script.tv_lights_off
 
+zha_toolkit:
+
+adaptive_lighting:
 
 notify:
   - name: STD_Information
@@ -107,6 +110,8 @@ template:
         state: "{{ (is_state('group.network_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.network_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.network_device_down_notify', 'on') }}"
       - name: WAN Down Alert Active
         state: "{{ (is_state('group.wan_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.wan_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.wan_down_notify', 'on') }}"
+
+battery_notes:
 
 alert:
   garage_door_info_alert_active:
