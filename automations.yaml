@@ -3023,12 +3023,12 @@
         action: light.turn_off
   mode: single
 - id: '1732435588125'
-  alias: Appliance Notifications & Actions
+  alias: Washing machine Notifications & Actions
   description: Washing/Laundry notification
   use_blueprint:
     path: Blackshome/appliance-notifications.yaml
     input:
-      power_sensor: sensor.laundry_power_switch_power
+      power_sensor: sensor.washing_machine_power_plug_power
       running_dead_zone: 19
       start_notify_device:
       - c054264b79e6739a057236f3a3c512b4
@@ -3038,6 +3038,23 @@
       end_reminder_notification: disable_reminder_notification
       include_power_tracking: enable_power_tracking
       include_duration_tracking: enable_duration_tracking
+      start_notify_data:
+      - channel
+      start_notify_channel: Laundry
+      end_notify_data:
+      - channel
+      end_notify_channel: Laundry
+      power_consumption_sensor: sensor.washing_machine_power_plug_power
+      include_custom_actions:
+      - enable_end_custom_actions
+      start_custom_actions: []
+      end_custom_actions:
+      - action: tts.speak
+        metadata: {}
+        data:
+          cache: true
+          media_player_entity_id: media_player.kitchen
+          message: Washing machine is done
 - id: '1732614031949'
   alias: Sprinkler On at sunrise if superhot
   description: Superhot is >25 degrees
@@ -3221,3 +3238,38 @@
     entity_id: 9b99b8ca53b6982903c65cd267091adf
     domain: switch
   mode: single
+- id: '1735955632537'
+  alias: Dryer Appliance Notifications & Actions
+  description: ''
+  use_blueprint:
+    path: Blackshome/appliance-notifications.yaml
+    input:
+      power_sensor: sensor.dryer_power_plug_power
+      start_notify_device:
+      - c054264b79e6739a057236f3a3c512b4
+      include_start_notify: enable_start_notify_options
+      start_notify_data:
+      - channel
+      start_notify_channel: Washing
+      include_end_notify: enable_end_notify_options
+      end_notify_device:
+      - c054264b79e6739a057236f3a3c512b4
+      - 58e2eb1fec0eb5ec9ce450433d074fcf
+      end_notify_interruption_level: passive
+      end_notify_data:
+      - channel
+      end_notify_channel: Washing
+      end_message: Dryer is finished!
+      start_message: YES! Another dryer load is ON :)
+      include_power_tracking: enable_power_tracking
+      power_consumption_sensor: sensor.dryer_power_plug_power
+      include_duration_tracking: enable_duration_tracking
+      include_custom_actions:
+      - enable_end_custom_actions
+      end_custom_actions:
+      - action: tts.speak
+        metadata: {}
+        data:
+          cache: true
+          media_player_entity_id: media_player.kitchen
+          message: Dryer is done
