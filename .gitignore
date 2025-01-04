@@ -6,7 +6,7 @@
 !.gitignore
 !configuration.yaml
 !automations.yaml
-!custom_components/smartir/codes/climate/**
+!custom_components/smartir/codes/**
 
 custom_components/dwains_dashboard/*
 custom_components/ui_lovelace_minimalist/*
