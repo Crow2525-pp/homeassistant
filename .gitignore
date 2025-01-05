@@ -6,6 +6,13 @@
 !.gitignore
 !configuration.yaml
 !automations.yaml
+!climate.yaml
+!fan.yaml
+!groups.yaml
+!scenes.yaml
+!scripts.yaml
+!mysensors.yaml
+!notifications.yaml
 !custom_components/smartir/codes/**
 
 custom_components/dwains_dashboard/*

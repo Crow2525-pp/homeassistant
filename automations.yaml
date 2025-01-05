@@ -2843,10 +2843,11 @@
       - auto_brightness_enabled
       - auto_sun_enabled
       - auto_lockout_protection_enabled
-      cover_status_options: cover_helper_disabled
+      cover_status_options: cover_helper_enabled
       ignore_after_manual_config:
       - ignore_closing_after_manual
       contact_sensor_lockout: binary_sensor.balcony_door_sensor_magnet_opening_2
+      cover_status_helper: input_text.cover_status_helper
 - id: '1724225427107'
   alias: Masters are Sleeping
   description: Adjusts the boolean to true if both devices are sleeping, otherwise
@@ -3035,6 +3036,7 @@
       include_end_notify: enable_end_notify_options
       end_notify_device:
       - c054264b79e6739a057236f3a3c512b4
+      - 58e2eb1fec0eb5ec9ce450433d074fcf
       end_reminder_notification: disable_reminder_notification
       include_power_tracking: enable_power_tracking
       include_duration_tracking: enable_duration_tracking

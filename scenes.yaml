@@ -1,0 +1,174 @@
+- id: '1644439098949'
+  name: blinds up
+  entities:
+    script.roller_blinds_up:
+      last_triggered: '2022-02-09T20:38:27.135593+00:00'
+      mode: single
+      current: 0
+      icon: mdi:blinds-open
+      friendly_name: Roller Blinds Up
+      state: 'off'
+  icon: mdi:blinds-open
+- id: '1650698727990'
+  name: Spotify
+  entities:
+    media_player.spotify_philip_patterson:
+      source_list:
+      - Living Room TV
+      friendly_name: Spotify Philip Patterson
+      supported_features: 444983
+      volume_level: 0
+      media_content_id: spotify:track:1KOvMqTti6wDKF56zJPdUg
+      media_content_type: music
+      media_duration: 196.748
+      media_position: 12.699
+      media_position_updated_at: '2024-04-13T23:39:32.401399+00:00'
+      media_title: Laura
+      media_artist: Stimming x Lambert
+      media_album_name: Positive
+      media_track: 4
+      source: Living Room TV
+      shuffle: false
+      repeat: 'off'
+      entity_picture: /api/media_player_proxy/media_player.spotify_philip_patterson?token=3ea696586dc3f9d0671d1e638973a2c17b9037f557f460e4654b8b8b37ae59c4&cache=9741487450db2815
+      state: playing
+    media_player.sony_kd_55x8500c:
+      assumed_state: true
+      device_class: tv
+      friendly_name: Sony KD-55X8500C
+      supported_features: 155581
+      state: 'off'
+    remote.sony_kd_55x8500c:
+      friendly_name: Sony KD-55X8500C
+      supported_features: 0
+      state: 'off'
+  metadata: {}
+  icon: mdi:music
+- id: '1653707497537'
+  name: 'Low Brightness Lights '
+  entities:
+    light.sleeping_light:
+      supported_color_modes:
+      - brightness
+      color_mode:
+      brightness:
+      friendly_name: Sleeping Light
+      supported_features: 0
+      state: 'off'
+    light.reading_light_none:
+      supported_color_modes:
+      - brightness
+      color_mode:
+      brightness:
+      friendly_name: Reading Light
+      supported_features: 0
+      state: 'off'
+  metadata: {}
+- id: '1653716175022'
+  name: Master bedroom lights on
+  entities:
+    light.reading_light_none:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 255
+      friendly_name: Reading Light
+      supported_features: 0
+      state: 'on'
+    light.sleeping_light:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 255
+      friendly_name: Sleeping Light
+      supported_features: 0
+      state: 'on'
+  metadata: {}
+- id: '1655607357468'
+  name: Master Bedroom Dimming
+  entities:
+    light.reading_light_none:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 3
+      friendly_name: Reading Light
+      supported_features: 0
+      state: 'on'
+    light.sleeping_light:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 3
+      friendly_name: Sleeping Light
+      supported_features: 0
+      state: 'on'
+  metadata: {}
+- id: '1659861038863'
+  name: OttoSleep(heat)
+  entities:
+    climate.otto_s_ac:
+      hvac_modes:
+      - 'off'
+      - cool
+      - heat
+      min_temp: 18
+      max_temp: 26
+      target_temp_step: 1
+      fan_modes:
+      - auto
+      - low
+      - mid
+      - high
+      - highest
+      current_temperature: 18.8
+      temperature: 18
+      current_humidity: 51.68
+      fan_mode: auto
+      last_on_operation: heat
+      device_code: 1123
+      manufacturer: Mitsubishi Electric
+      supported_models:
+      - SRK25ZSX-SRC25ZSX
+      supported_controller: Broadlink
+      commands_encoding: Base64
+      friendly_name: Otto's AC
+      supported_features: 9
+      state: heat
+  metadata:
+    climate.otto_s_ac:
+      entity_only: true
+- id: '1659861088889'
+  name: OttoSleep(Cool)
+  entities:
+    climate.otto_s_ac:
+      hvac_modes:
+      - 'off'
+      - cool
+      - heat
+      min_temp: 18
+      max_temp: 26
+      target_temp_step: 1
+      fan_modes:
+      - auto
+      - low
+      - mid
+      - high
+      - highest
+      current_temperature: 18.8
+      temperature: 18
+      current_humidity: 51.68
+      fan_mode: auto
+      last_on_operation: cool
+      device_code: 1123
+      manufacturer: Mitsubishi Electric
+      supported_models:
+      - SRK25ZSX-SRC25ZSX
+      supported_controller: Broadlink
+      commands_encoding: Base64
+      friendly_name: Otto's AC
+      supported_features: 9
+      state: cool
+  metadata:
+    climate.otto_s_ac:
+      entity_only: true

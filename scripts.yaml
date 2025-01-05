@@ -1,0 +1,394 @@
+roller_blinds_up:
+  alias: Roller Blinds Up
+  sequence:
+  - service: remote.send_command
+    data:
+      device: Roller Blinds
+      command: Up
+    target:
+      device_id: 3d7542325305f19a1d70e5b14947b2a9
+  mode: single
+  icon: mdi:blinds-open
+roller_blinds_down:
+  alias: Roller Blinds Down
+  sequence:
+  - service: remote.send_command
+    data:
+      device: Roller Blinds
+      command: Down
+    target:
+      device_id: 3d7542325305f19a1d70e5b14947b2a9
+  mode: single
+  icon: mdi:blinds
+roller_blinds_stop:
+  alias: Roller Blinds Stop
+  sequence:
+  - service: remote.send_command
+    data:
+      device: Roller Blinds
+      command: Stop
+    target:
+      device_id: 3d7542325305f19a1d70e5b14947b2a9
+  mode: single
+  icon: mdi:blinds
+spotify_music_tv:
+  alias: Spotify_channel
+  sequence:
+  - type: turn_on
+    device_id: a4c9fa6c4205ff2778142853b379e0c5
+    entity_id: remote.sony_bravia_tv
+    domain: remote
+  - target:
+      entity_id: scene.new_scene
+    metadata: {}
+    action: scene.turn_on
+  mode: single
+tv_lights_on:
+  alias: Tv lights on
+  sequence:
+  - service: remote.send_command
+    data:
+      device: Tv_light
+      command: turnon
+    target:
+      entity_id: remote.livingroom_irblaster_remote
+  mode: single
+  icon: mdi:led-strip-variant
+tv_lights_off:
+  alias: Tv lights off
+  sequence:
+  - service: remote.send_command
+    data:
+      device: Tv_light
+      command: turnoff
+    target:
+      entity_id: remote.livingroom_irblaster_remote
+  mode: single
+  icon: mdi:led-strip-variant-off
+tvlightbrightdown:
+  alias: TVlightbrightdown
+  sequence:
+  - service: remote.send_command
+    data:
+      device: Tv_light
+      command: bright-down
+      num_repeats: 15
+    target:
+      entity_id: remote.livingroom_irblaster_remote
+  mode: single
+  icon: mdi:brightness-5
+tvbrightup:
+  alias: Tvbrightup
+  sequence:
+  - service: remote.send_command
+    data:
+      device: Tv_light
+      command: bright-up
+      num_repeats: 15
+    target:
+      entity_id: remote.livingroom_irblaster_remote
+  mode: single
+  icon: mdi:brightness-4
+garage_door_toggle:
+  alias: Garage door toggle
+  sequence:
+  - choose:
+    - conditions:
+      - condition: state
+        state: open
+        entity_id: cover.garage_door_msg100_main_channel
+      sequence:
+      - device_id: 406074b25db99bde730f3605a2795a3e
+        domain: cover
+        entity_id: f88c2e0d87d9b41771b966865b362a50
+        type: close
+    - conditions:
+      - condition: state
+        state: closed
+        entity_id: cover.garage_door_msg100_main_channel
+      sequence:
+      - device_id: 406074b25db99bde730f3605a2795a3e
+        domain: cover
+        entity_id: f88c2e0d87d9b41771b966865b362a50
+        type: open
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: cover.garage_door_msg100_main_channel
+          state: closing
+        - condition: state
+          state: opening
+          entity_id: cover.garage_door_msg100_main_channel
+        - condition: state
+          state: unavailable
+          entity_id: cover.garage_door_msg100_main_channel
+        - condition: state
+          state: unknown
+          entity_id: cover.garage_door_msg100_main_channel
+      sequence:
+      - stop: Error
+        error: true
+  mode: single
+  icon: mdi:garage
+fan_speed_3:
+  alias: Fan - Speed 3
+  sequence:
+  - service: remote.send_command
+    data:
+      device: Ceiling Fan
+      command: 3
+    target:
+      device_id: 3d7542325305f19a1d70e5b14947b2a9
+  mode: single
+  icon: mdi:air-conditioner
+fan_speed_1:
+  alias: Fan - Speed 1
+  sequence:
+  - service: remote.send_command
+    data:
+      device: Ceiling Fan
+      command: 1
+    target:
+      device_id: 3d7542325305f19a1d70e5b14947b2a9
+  mode: single
+  icon: mdi:air-conditioner
+fan_speed_6:
+  alias: Fan - Speed 6
+  sequence:
+  - service: remote.send_command
+    data:
+      device: Ceiling Fan
+      command: 6
+    target:
+      device_id: 3d7542325305f19a1d70e5b14947b2a9
+  mode: single
+  icon: mdi:air-conditioner
+fan_off:
+  alias: Fan - Off
+  sequence:
+  - service: remote.send_command
+    data:
+      device: Ceiling Fan
+      command: On/Off
+    target:
+      device_id: 3d7542325305f19a1d70e5b14947b2a9
+  mode: single
+  icon: mdi:air-conditioner
+led_off_henry:
+  alias: LED Off - Henry
+  sequence:
+  - service: remote.send_command
+    data:
+      num_repeats: 1
+      delay_secs: 0.4
+      hold_secs: 0
+      device: Airconditioner
+      command: LED-OFF
+    target:
+      entity_id: remote.henrys_room_ir_blaster_remote
+  mode: single
+'1686171686731':
+  alias: Master Slow On
+  sequence:
+  - service: light.turn_on
+    data:
+      brightness: 1
+    target:
+      device_id:
+      - 18551c9b3c72efc901c3e35633c1e3c7
+      - 3cf9c8bc5367cd26edc9b128e7303916
+  - repeat:
+      count: '100'
+      sequence:
+      - service: light.turn_on
+        data:
+          brightness_step: 1
+        target:
+          device_id:
+          - 18551c9b3c72efc901c3e35633c1e3c7
+          - 3cf9c8bc5367cd26edc9b128e7303916
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 0
+          milliseconds: 50
+  mode: single
+'1693262268843':
+  alias: Blinds Close Halfway
+  sequence:
+  - service: script.roller_blinds_down
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 9
+      milliseconds: 0
+  - service: script.roller_blinds_stop
+    data: {}
+  mode: single
+  icon: mdi:roller-shade
+curtains_half_way:
+  alias: Curtains half way
+  sequence:
+  - target:
+      device_id: []
+      area_id: []
+      entity_id: cover.windowcovering_cover
+    data:
+      position: 50
+    action: cover.set_cover_position
+  mode: single
+  icon: mdi:curtains
+spotify_tv:
+  alias: Spotify Tv On
+  sequence:
+  - type: turn_on
+    device_id: 8533a36763883cb9bde6099bbac23f51
+    entity_id: da9cf3f4657b2c2a6fe37f4c23350031
+    domain: remote
+  - action: remote.turn_on
+    target:
+      entity_id: remote.google_tv
+    data:
+      activity: spotify://
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 7
+      milliseconds: 0
+    enabled: true
+  - metadata: {}
+    data: {}
+    action: media_player.media_play
+    target:
+      entity_id: media_player.google_tv_2
+  - metadata: {}
+    data: {}
+    action: media_player.media_play
+    target:
+      entity_id: media_player.google_tv_2
+  mode: single
+  icon: mdi:spotify
+volume_talking:
+  alias: Volume Talking
+  sequence:
+  - metadata: {}
+    data:
+      volume_level: 0.2
+    action: media_player.volume_set
+    target:
+      entity_id: media_player.sony_bravia
+  mode: single
+  icon: mdi:volume-low
+volume_medium:
+  alias: Volume Medium
+  sequence:
+  - metadata: {}
+    data:
+      volume_level: 0.4
+    action: media_player.volume_set
+    target:
+      entity_id: media_player.sony_bravia
+  mode: single
+  icon: mdi:volume-medium
+volume_high:
+  alias: Volume High
+  sequence:
+  - metadata: {}
+    data:
+      volume_level: 0.59
+    action: media_player.volume_set
+    target:
+      entity_id: media_player.sony_bravia
+  mode: single
+  icon: mdi:volume-high
+spotify_off:
+  alias: Spotify Tv Off
+  sequence:
+  - type: turn_off
+    device_id: 8533a36763883cb9bde6099bbac23f51
+    entity_id: da9cf3f4657b2c2a6fe37f4c23350031
+    domain: remote
+  mode: single
+  icon: mdi:spotify
+new_script:
+  alias: YouTube
+  sequence:
+  - type: turn_on
+    device_id: 8533a36763883cb9bde6099bbac23f51
+    entity_id: da9cf3f4657b2c2a6fe37f4c23350031
+    domain: remote
+  - action: remote.turn_on
+    target:
+      entity_id: remote.google_tv
+    data:
+      activity: com.google.android.youtube.tv
+  icon: mdi:youtube
+  mode: single
+spotify:
+  alias: Spotify
+  sequence:
+  - action: remote.turn_on
+    metadata: {}
+    data:
+      activity: spotify://
+    target:
+      entity_id: remote.google_tv
+  icon: mdi:spotify
+  mode: single
+volume_quiet:
+  alias: Volume Quiet
+  sequence:
+  - metadata: {}
+    data:
+      volume_level: 0.1
+    action: media_player.volume_set
+    target:
+      entity_id: media_player.sony_bravia
+  mode: single
+  icon: mdi:volume-vibrate
+new_roller_blind_stop:
+  sequence:
+  - service: cover.stop_cover
+    entity_id: cover.roller_blinds_chan1
+  - service: timer.cancel
+    entity_id: timer.roller_blind_timer
+  - service: input_select.select_option
+    data:
+      option: unknown
+    target:
+      entity_id: input_select.roller_blind_state
+  alias: New Roller Blind Stop
+  description: ''
+new_roller_blind_down:
+  sequence:
+  - service: input_select.select_option
+    data:
+      entity_id: input_select.roller_blind_state
+      option: closing
+  - service: timer.start
+    data:
+      entity_id: timer.roller_blind_timer
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id: cover.roller_blinds_chan1
+  alias: New Roller Blind Down
+  description: ''
+new_roller_blind_up:
+  sequence:
+  - service: input_select.select_option
+    data:
+      entity_id: input_select.roller_blind_state
+      option: opening
+  - service: timer.start
+    data:
+      entity_id: timer.roller_blind_timer
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.roller_blinds_chan1
+  alias: New Roller Blind Up
+  description: ''

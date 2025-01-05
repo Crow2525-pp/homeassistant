@@ -1,0 +1,5 @@
+  - platform: smartir
+    name: MasterBedroom fan
+    unique_id: bedroom_fan
+    device_code: 1040
+    controller_data: remote.ir_blaster_master_bedroom_remote
