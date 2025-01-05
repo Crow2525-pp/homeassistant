@@ -14,6 +14,7 @@
 !mysensors.yaml
 !notifications.yaml
 !custom_components/smartir/codes/**
+!broadlink_remote*
 
 custom_components/dwains_dashboard/*
 custom_components/ui_lovelace_minimalist/*
