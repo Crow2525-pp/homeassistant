@@ -14,6 +14,7 @@ climate: !include climate.yaml
 fan: !include fan.yaml
 media_player: !include media_player.yaml
 
+
 frontend:
   themes: !include_dir_merge_named themes
   javascript_version: latest

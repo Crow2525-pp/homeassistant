@@ -1,14 +1,14 @@
 - id: '1644318707340'
   alias: 'Close Blinds > 22 Degrees '
   description: During hot daylight hours only
-  trigger:
-  - platform: time_pattern
-    minutes: '15'
-  - platform: time_pattern
-    minutes: '30'
-  - platform: time_pattern
-    minutes: '45'
-  condition:
+  triggers:
+  - minutes: '15'
+    trigger: time_pattern
+  - minutes: '30'
+    trigger: time_pattern
+  - minutes: '45'
+    trigger: time_pattern
+  conditions:
   - type: is_not_open
     condition: device
     device_id: 73d77b02a3b8c93387e8cd225b08eb91
@@ -17,7 +17,7 @@
   - condition: time
     after: '11:00:00'
     before: '18:00:00'
-  action:
+  actions:
   - choose:
     - conditions:
       - condition: and
@@ -61,12 +61,12 @@
             metadata: {}
             data: {}
             target:
-              entity_id: climate.masterbed_versatile_thermostate
+              area_id: master_bedroom
           - action: climate.set_hvac_mode
-            target:
-              entity_id: climate.masterbed_versatile_thermostate
             data:
               hvac_mode: cool
+            target:
+              area_id: master_bedroom
       alias: Too Hot, Blinds Down Fan On
     - conditions:
       - condition: and
@@ -91,7 +91,7 @@
         metadata: {}
         data: {}
         target:
-          entity_id: climate.masterbed_versatile_thermostate
+          area_id: master_bedroom
       alias: Too cold, blinds up, fan off
   mode: single
 - id: '1644398227874'
@@ -1184,9 +1184,8 @@
 - id: '1687857643147'
   alias: Climate.HenrysRoom.TurnOff
   description: ''
-  trigger:
+  triggers:
   - type: opened
-    platform: device
     device_id: be01f257a5bdfe026e658a2e9d6dbdea
     entity_id: 3ee5adc163f673d1b6a04cec08669f90
     domain: binary_sensor
@@ -1194,19 +1193,20 @@
       hours: 0
       minutes: 10
       seconds: 0
-  condition:
+    trigger: device
+  conditions:
   - condition: not
     conditions:
     - condition: state
-      entity_id: climate.study_ac_2
+      entity_id: climate.study_ac
       state: 'off'
   - condition: sun
     after: sunrise
-  action:
-  - service: climate.turn_off
-    data: {}
+  actions:
+  - data: {}
+    action: climate.turn_off
     target:
-      entity_id: climate.study_ac_2
+      entity_id: climate.study_ac
   - if:
     - condition: or
       conditions:
@@ -1217,12 +1217,12 @@
         entity_id: input_boolean.sleep_night_setback
         state: 'on'
     then:
-    - service: input_boolean.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id:
         - input_boolean.masterbed_a_c_sleep_day_setback
         - input_boolean.cooler_sleep_night_auto
+      action: input_boolean.turn_off
   mode: single
 - id: '1690150562163'
   alias: Tag Masterbed desk left cnr is scanned
@@ -1287,10 +1287,10 @@
       hvac_mode: 'off'
     target:
       entity_id:
-      - climate.study_ac_2
       - climate.living_room_ac
       - climate.masterbed_ac
       - climate.otto_s_ac
+      - climate.study_ac
     action: climate.set_hvac_mode
     enabled: false
   - data:
@@ -1544,24 +1544,24 @@
 - id: '1699526539731'
   alias: Master Fan on if AC on
   description: Turn on Fan to speed 1 if AC is turned on
-  trigger:
-  - platform: state
-    entity_id:
-    - climate.masterbed_versatile_thermostate
+  triggers:
+  - entity_id:
+    - climate.masterbed_versatile_thermostat
     to: cool
-  condition:
+    trigger: state
+  conditions:
   - condition: not
     conditions:
     - condition: state
       entity_id: fan.masterbedroom_fan
       state: 'on'
-  action:
-  - service: fan.set_percentage
-    metadata: {}
+  actions:
+  - metadata: {}
     data:
       percentage: 33
     target:
       entity_id: fan.masterbedroom_fan
+    action: fan.set_percentage
   mode: single
 - id: '1700272627906'
   alias: Stream cam to home nest
@@ -1826,21 +1826,21 @@
 - id: '1707562883987'
   alias: Workday
   description: ''
-  trigger:
-  - platform: device
-    type: turned_on
+  triggers:
+  - type: turned_on
     device_id: dc326b28df2064ab9f7d9e983e6824e6
     entity_id: 63cfcb8c97058003e378eefffdaa028b
     domain: switch
     id: 'On'
-  - platform: device
-    type: turned_off
+    trigger: device
+  - type: turned_off
     device_id: dc326b28df2064ab9f7d9e983e6824e6
     entity_id: 63cfcb8c97058003e378eefffdaa028b
     domain: switch
     id: 'Off'
-  condition: []
-  action:
+    trigger: device
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -1851,12 +1851,12 @@
         device_id: ac27c1acd87d567603e54ed90f046a50
         entity_id: 41d147d319aab7615baeff5015237de7
         domain: switch
-      - service: climate.set_temperature
-        target:
-          entity_id: climate.study_ac_2
-        data:
+      - data:
           temperature: 23
           hvac_mode: cool
+        action: climate.set_temperature
+        target:
+          entity_id: climate.study_ac
     - conditions:
       - condition: trigger
         id:
@@ -1866,11 +1866,11 @@
         device_id: ac27c1acd87d567603e54ed90f046a50
         entity_id: 41d147d319aab7615baeff5015237de7
         domain: switch
-      - service: climate.set_temperature
-        target:
-          entity_id: climate.study_ac_2
-        data:
+      - data:
           hvac_mode: 'off'
+        action: climate.set_temperature
+        target:
+          entity_id: climate.study_ac
   mode: single
 - id: '1708414101011'
   alias: Maintenance - HVAC filters
@@ -2258,14 +2258,14 @@
   - metadata: {}
     data:
       hvac_mode: 'off'
-    target:
-      entity_id: climate.masterbed_versatile_thermostate
     action: climate.set_hvac_mode
+    target:
+      area_id: master_bedroom
   - metadata: {}
     data: {}
-    target:
-      entity_id: fan.masterbedroom_fan
     action: fan.turn_off
+    target:
+      area_id: master_bedroom
   - action: climate.turn_off
     metadata: {}
     data: {}
@@ -2406,9 +2406,8 @@
   alias: Masterbed Heater on at night
   description: If it's too hot or cold at night make sure the heater is on or off.
     Winter automation.
-  trigger:
-  - platform: numeric_state
-    entity_id:
+  triggers:
+  - entity_id:
     - sensor.ble_temperature_masterbed_temp_humidity_sensor
     for:
       hours: 0
@@ -2416,8 +2415,8 @@
       seconds: 0
     above: 18.2
     id: Hot
-  - platform: numeric_state
-    entity_id:
+    trigger: numeric_state
+  - entity_id:
     - sensor.ble_temperature_masterbed_temp_humidity_sensor
     for:
       hours: 0
@@ -2425,7 +2424,8 @@
       seconds: 0
     below: 17.8
     id: Cold
-  condition:
+    trigger: numeric_state
+  conditions:
   - condition: time
     after: '18:00:00'
     before: 06:00:00
@@ -2453,7 +2453,7 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Holiday
-  action:
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -2463,10 +2463,9 @@
       - metadata: {}
         data:
           hvac_mode: 'off'
-        target:
-          entity_id:
-          - climate.masterbed_versatile_thermostate
         action: climate.set_hvac_mode
+        target:
+          area_id: master_bedroom
     - conditions:
       - condition: trigger
         id:
@@ -2476,14 +2475,14 @@
         data:
           preset_mode: eco
         target:
-          entity_id: climate.masterbed_versatile_thermostate
+          area_id: master_bedroom
         action: climate.set_preset_mode
       - metadata: {}
         data:
           hvac_mode: heat
-        target:
-          entity_id: climate.masterbed_versatile_thermostate
         action: climate.set_hvac_mode
+        target:
+          area_id: master_bedroom
   mode: single
 - id: '1716712023665'
   alias: Henry Daytime Work heater
@@ -2964,12 +2963,12 @@
         data:
           hvac_mode: cool
         target:
-          device_id: 935bc8d3f284fef6ba036d8bbab1e1cf
+          area_id: master_bedroom
       - action: climate.turn_on
         metadata: {}
         data: {}
         target:
-          device_id: 935bc8d3f284fef6ba036d8bbab1e1cf
+          area_id: master_bedroom
     - conditions:
       - condition: numeric_state
         entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
@@ -2979,7 +2978,7 @@
         metadata: {}
         data: {}
         target:
-          device_id: 935bc8d3f284fef6ba036d8bbab1e1cf
+          area_id: master_bedroom
   mode: single
 - id: '1732241510110'
   alias: Adjust Floorlamp Based on Solar Production
@@ -3146,25 +3145,25 @@
     - conditions:
       - condition: state
         state: 'false'
-        entity_id: climate.masterbed_versatile_thermostate
+        entity_id: climate.masterbed_versatile_thermostat
       sequence:
       - action: climate.turn_on
         metadata: {}
         data: {}
         target:
-          entity_id: climate.masterbed_versatile_thermostate
+          area_id: master_bedroom
       - action: climate.set_hvac_mode
         metadata: {}
         data:
           hvac_mode: cool
         target:
-          entity_id: climate.masterbed_versatile_thermostate
+          area_id: master_bedroom
       - action: climate.set_preset_mode
         metadata: {}
         data:
           preset_mode: Boost
         target:
-          entity_id: climate.masterbed_versatile_thermostate
+          area_id: master_bedroom
     - conditions:
       - condition: state
         state: 'false'
@@ -3174,19 +3173,19 @@
         metadata: {}
         data: {}
         target:
-          entity_id: climate.otto_s_room
+          area_id: baby_room
       - action: climate.set_hvac_mode
         metadata: {}
         data:
           hvac_mode: cool
         target:
-          entity_id: climate.otto_s_room
+          area_id: baby_room
       - action: climate.set_preset_mode
         metadata: {}
         data:
           preset_mode: Boost
         target:
-          entity_id: climate.otto_s_room
+          area_id: baby_room
   mode: single
 - id: '1733691257280'
   alias: Turn on Xmas Lights in am

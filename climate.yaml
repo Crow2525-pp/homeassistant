@@ -35,5 +35,5 @@
   controller_data:
     controller_type: Broadlink
     remote_entity: remote.livingroom_irblaster_remote
-  temperature_sensor: sensor.ble_temperature_kitchen_temp_humidity_sensor #sensor.livingroom_irblaster_temperature  #sensor.ble_temperature_kitchen_temp_humidity_sensor
+  temperature_sensor: sensor.livingroom_irblaster_temperature  #sensor.ble_temperature_kitchen_temp_humidity_sensor 
   humidity_sensor: sensor.ble_humidity_kitchen_temp_humidity_sensor
