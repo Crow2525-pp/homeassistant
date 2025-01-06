@@ -13,7 +13,7 @@
 !scripts.yaml
 !mysensors.yaml
 !notifications.yaml
-!custom_components/smartir/codes/**
+!custom_components/smartir/custom_codes/**
 !broadlink_remote*
 
 custom_components/dwains_dashboard/*

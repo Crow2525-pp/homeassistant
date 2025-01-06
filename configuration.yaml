@@ -27,7 +27,6 @@ http:
     - 127.0.0.1
 
 # Air Conditioners and Remote Fans using IR blasters
-smartir:
 climate: !include climate.yaml
 fan: !include fan.yaml
 
