@@ -10,7 +10,7 @@
 
 - platform: smartir
   name: Otto's AC
-  unique_id: Otto_AC
+  unique_id: otto_ac
   device_code: 1003
   controller_data:
     controller_type: Broadlink
@@ -20,7 +20,7 @@
 
 - platform: smartir
   name: Study AC
-  unique_id: Henry AC
+  unique_id: henry_ac
   device_code: 1003
   controller_data:
     controller_type: Broadlink
@@ -30,7 +30,7 @@
 
 - platform: smartir
   name: Living Room AC
-  unique_id: Living Room AC
+  unique_id: living_room_ac
   device_code: 1002
   controller_data:
     controller_type: Broadlink

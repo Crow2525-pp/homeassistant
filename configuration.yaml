@@ -10,6 +10,10 @@ group: !include groups.yaml
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
+climate: !include climate.yaml
+fan: !include fan.yaml
+media_player: !include media_player.yaml
+
 frontend:
   themes: !include_dir_merge_named themes
   javascript_version: latest
@@ -26,13 +30,6 @@ http:
     - 172.30.33.0/24
     - 127.0.0.1
 
-# Air Conditioners and Remote Fans using IR blasters
-climate: !include climate.yaml
-fan: !include fan.yaml
-
-# Combines Sony Bravia Cast and Native controller into one.
-media_player: !include media_player.yaml
-
 #Roller Blinds
 cover:
   - platform: template
@@ -42,29 +39,31 @@ cover:
         friendly_name: "Roller blinds (MasterBedroom)"
         unique_id: "roller_blinds_MasterBedroom"
         position_template: "50"
-        
+
         open_cover:
-          service: script.roller_blinds_up
+          action: script.roller_blinds_up
         close_cover:
-          service: script.roller_blinds_down
+          action: script.roller_blinds_down
         stop_cover:
-          service: script.roller_blinds_stop
+          action: script.roller_blinds_stop
 
 light:
   - platform: template
     lights:
       tv_backlight:
         friendly_name: "TV Back Lightstrip"
-        entity_id: light.tv_backlight
+        unique_id: light.tv_backlight
         icon_template: "mdi:television-ambient-light"
         turn_on:
-          service: script.tv_lights_on
+          action: script.tv_lights_on
         turn_off:
-          service: script.tv_lights_off
+          action: script.tv_lights_off
 
 zha_toolkit:
 
 adaptive_lighting:
+
+battery_notes:
 
 notify:
   - name: STD_Information
@@ -86,17 +85,16 @@ notify:
 input_boolean:
   garage_door_notify:
     name: Garage Door Notify
-    
+
     icon: mdi:information
   network_device_down_notify:
     name: Network Device Down Notify
-    
+
     icon: mdi:alert
   wan_down_notify:
     name: WAN Down Notify
-    
-    icon: mdi:alert
 
+    icon: mdi:alert
 
 template:
   - binary_sensor:
@@ -109,8 +107,6 @@ template:
         state: "{{ (is_state('group.network_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.network_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.network_device_down_notify', 'on') }}"
       - name: WAN Down Alert Active
         state: "{{ (is_state('group.wan_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.wan_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.wan_down_notify', 'on') }}"
-
-battery_notes:
 
 alert:
   garage_door_info_alert_active:
