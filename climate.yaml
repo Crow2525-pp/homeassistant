@@ -1,28 +1,43 @@
 - platform: smartir
   name: Masterbed AC
-  unique_id: Masterbed_AC
+  unique_id: masterbed_ac
   device_code: 1003
-  controller_data: remote.ir_blaster_master_bedroom_remote
+  delay: 0.5
+  controller_data:
+    controller_type: Broadlink
+    remote_entity: remote.ir_blaster_master_bedroom_remote
   temperature_sensor: sensor.ble_temperature_masterbed_temp_humidity_sensor
   humidity_sensor: sensor.ble_humidity_masterbed_temp_humidity_sensor
+
 - platform: smartir
   name: Otto's AC
-  unique_id: Otto_AC
+  unique_id: otto_ac
   device_code: 1003
-  controller_data: remote.otto_s_room_remote_control_remote
+  delay: 0.5
+  controller_data:
+    controller_type: Broadlink
+    remote_entity: remote.otto_s_room_remote_control_remote
   temperature_sensor: sensor.study_esp32_ottosroom_temperature
   humidity_sensor: sensor.study_esp32_ottosroom_humidity
+
 - platform: smartir
   name: Study AC
-  unique_id: Henry AC
+  unique_id: henry_ac
   device_code: 1003
-  controller_data: remote.henrys_room_ir_blaster_remote
+  delay: 0.5
+  controller_data:
+    controller_type: Broadlink
+    remote_entity: remote.henrys_room_ir_blaster_remote
   temperature_sensor: sensor.study_esp32_henrysroom_temperature
   humidity_sensor: sensor.study_esp32_henrysroom_humidity
+
 - platform: smartir
   name: Living Room AC
-  unique_id: Living Room AC
+  unique_id: living_room_ac
   device_code: 1002
-  controller_data: remote.livingroom_irblaster_remote
-  temperature_sensor: sensor.ble_temperature_kitchen_temp_humidity_sensor #sensor.livingroom_irblaster_temperature  #sensor.ble_temperature_kitchen_temp_humidity_sensor
+  delay: 0.5
+  controller_data:
+    controller_type: Broadlink
+    remote_entity: remote.livingroom_irblaster_remote
+  temperature_sensor: sensor.livingroom_irblaster_temperature #sensor.ble_temperature_kitchen_temp_humidity_sensor
   humidity_sensor: sensor.ble_humidity_kitchen_temp_humidity_sensor
