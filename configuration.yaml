@@ -14,6 +14,14 @@ climate: !include climate.yaml
 fan: !include fan.yaml
 media_player: !include media_player.yaml
 
+logger:
+  default: info
+  logs:
+    custom_components.smartir.climate: debug
+    custom_components.smartir.fan: debug
+    custom_components.smartir.media_player: debug
+    custom_components.smartir.light: debug
+
 
 frontend:
   themes: !include_dir_merge_named themes

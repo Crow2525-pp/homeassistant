@@ -1023,68 +1023,14 @@
     target:
       entity_id: input_boolean.working_from_home
   mode: single
-- id: '1685005001174'
-  alias: End of Workday
-  description: Turn off computer and AC after workday
-  triggers:
-  - at: input_datetime.workday_end
-    trigger: time
-  conditions:
-  - condition: time
-    after: input_datetime.workday_end
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Guest
-    alias: Someone Home
-  actions:
-  - if:
-    - condition: state
-      state: 'on'
-      entity_id: switch.henrys_room_plug_switch
-    then:
-    - data: {}
-      target:
-        entity_id: input_boolean.computer_switch
-      action: input_boolean.turn_on
-  - if:
-    - condition: device
-      type: is_off
-      device_id: ac27c1acd87d567603e54ed90f046a50
-      entity_id: 41d147d319aab7615baeff5015237de7
-      domain: switch
-    - condition: time
-      before: input_datetime.bedtime_phil_steph
-    then:
-    - data: {}
-      target:
-        entity_id: input_boolean.masterbed_a_c_sleep_day_setback
-      enabled: true
-      action: input_boolean.turn_off
-    - data: {}
-      target:
-        entity_id: climate.henry_s_room_versatile_thermostat
-      action: climate.turn_off
-  mode: single
 - id: '1685157513874'
   alias: Tag Study Desk is scanned
   description: ''
-  trigger:
-  - platform: tag
-    tag_id: c99ee431-d1d8-497c-9f0f-214994610aa6
-  condition: []
-  action:
-  - type: toggle
-    device_id: dc326b28df2064ab9f7d9e983e6824e6
-    entity_id: 63cfcb8c97058003e378eefffdaa028b
-    domain: switch
+  triggers:
+  - tag_id: c99ee431-d1d8-497c-9f0f-214994610aa6
+    trigger: tag
+  conditions: []
+  actions:
   - type: toggle
     device_id: ac27c1acd87d567603e54ed90f046a50
     entity_id: 41d147d319aab7615baeff5015237de7
