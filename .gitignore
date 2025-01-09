@@ -14,6 +14,10 @@
 !mysensors.yaml
 !notifications.yaml
 !custom_components/smartir/custom_codes/**
+!custom_components/smartir/codes/climate/1002.json
+!custom_components/smartir/codes/climate/1003.json
+!custom_components/smartir/codes/fan/1001.json
+
 !broadlink_remote*
 
 custom_components/dwains_dashboard/*
