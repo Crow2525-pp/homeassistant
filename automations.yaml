@@ -1531,18 +1531,18 @@
 - id: '1703583740639'
   alias: Motion-Activated Light
   description: Turns on the light with motion and off after no motion for 2 minutes.
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - binary_sensor.motion_sensor_motion
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.motion_sensor_motion
     to: 'off'
     for:
       minutes: 2
-  condition:
+    trigger: state
+  conditions:
   - condition: numeric_state
     entity_id: sun.sun
     attribute: elevation
@@ -1554,7 +1554,7 @@
     entity_id: bbcd14c8d6ec6c74d00290784818aa79
     domain: sensor
     below: 10
-  action:
+  actions:
   - choose:
     - conditions:
       - condition: state
@@ -1566,7 +1566,7 @@
         target:
           entity_id:
           - light.led_strip_office_light
-          - light.kitchen_light_socket_1
+          - light.study_nook_lamp_socket_1
     - conditions:
       - condition: state
         state: 'off'
@@ -1577,7 +1577,7 @@
         target:
           entity_id:
           - light.led_strip_office_light
-          - light.kitchen_light_socket_1
+          - light.study_nook_lamp_socket_1
   mode: restart
 - id: '1705440129170'
   alias: ZHA - Mijia Wireless Remote Switch (WXKG01LM)
@@ -1934,7 +1934,7 @@
       data: {}
   mode: single
 - id: '1711621732424'
-  alias: Maintenance - clean toilet
+  alias: Maintenance - clean master toilets
   description: Weekly reminder to clean toilets
   triggers:
   - alias: On schedule
