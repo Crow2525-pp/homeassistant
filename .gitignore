@@ -13,6 +13,11 @@
 !scripts.yaml
 !mysensors.yaml
 !notifications.yaml
+
+# Dashboard
+.storage/lovelace
+
+# Smart IR
 !custom_components/smartir/custom_codes/**
 !custom_components/smartir/codes/climate/1002.json
 !custom_components/smartir/codes/climate/1003.json

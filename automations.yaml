@@ -114,8 +114,8 @@
       - living_room
       - kitchen
       - front_entrance
+      - master_bedroom
     data:
-      kelvin: 2000
       brightness_pct: 100
     action: light.turn_on
   mode: single
@@ -411,51 +411,46 @@
     metadata: {}
   mode: single
 - id: '1662634152654'
-  alias: 'Master bedroom lights 1% brightness '
-  description: Between 8pm-8am lights are low brightness
-  trigger:
-  - platform: device
-    type: turned_on
-    device_id: 1d56affa255e58f16de182a278c4965f
-    entity_id: fda71f9209c97e761f7d018643b4d0b8
+  alias: Master bedroom lights 1% brightness
+  description: Between 8pm-8am, lights should be at 1% brightness.
+  triggers:
+  - type: turned_on
+    device_id: 18551c9b3c72efc901c3e35633c1e3c7
+    entity_id: 796eb3a2a943532f618ea9933efbfad6
     domain: light
-  - platform: device
-    type: turned_on
-    device_id: 85033fd25fd770cd2ec0ffc76e107d3d
-    entity_id: 78dfba29350243dbccf4dfcc7cc8492a
+    id: Reading
+    trigger: device
+  - type: turned_on
+    device_id: 3cf9c8bc5367cd26edc9b128e7303916
+    entity_id: c0696c96326546dbb113c5b3d97482a8
     domain: light
-  condition:
+    id: Sleeping
+    trigger: device
+  conditions:
   - condition: time
     before: 08:00:00
     after: '20:00:00'
-  action:
-  - alias: Check which light is on and turn it to 1%
+  actions:
+  - alias: Set light to 1% brightness
     choose:
     - conditions:
-      - condition: device
-        type: is_on
-        device_id: 1d56affa255e58f16de182a278c4965f
-        entity_id: fda71f9209c97e761f7d018643b4d0b8
-        domain: light
+      - condition: trigger
+        id: Reading
       sequence:
-      - service: light.turn_on
-        target:
-          entity_id:
-          - light.reading_light_none
+      - target:
+          entity_id: light.reading_light
         data:
-          brightness: 1
+          brightness_pct: 1
+        action: light.turn_on
     - conditions:
-      - condition: device
-        type: is_on
-        device_id: 85033fd25fd770cd2ec0ffc76e107d3d
-        entity_id: 78dfba29350243dbccf4dfcc7cc8492a
-        domain: light
+      - condition: trigger
+        id: Sleeping
       sequence:
-      - service: light.turn_on
-        target:
-          entity_id: light.sleeping_light
+      - target:
+          entity_id: light.sleeping_light_2
         data:
-          brightness: 1
+          brightness_pct: 1
+        action: light.turn_on
   mode: single
 - id: '1662761539613'
   alias: Occupancy State from Sleep to Home
@@ -1478,7 +1473,7 @@
     - conditions:
       - condition: numeric_state
         entity_id: sensor.braybrook_temp_max_0
-        below: 21
+        below: 22
       sequence:
       - data: {}
         target:
@@ -2793,6 +2788,9 @@
       - ignore_closing_after_manual
       contact_sensor_lockout: binary_sensor.balcony_door_sensor_magnet_opening_2
       cover_status_helper: input_text.cover_status_helper
+      time_up_early: 07:00:00
+      time_up_early_non_workday: 08:00:00
+      time_up_late_non_workday: 09:00:00
 - id: '1724225427107'
   alias: Masters are Sleeping
   description: Adjusts the boolean to true if both devices are sleeping, otherwise
@@ -2975,7 +2973,7 @@
     path: Blackshome/appliance-notifications.yaml
     input:
       power_sensor: sensor.washing_machine_power_plug_power
-      running_dead_zone: 19
+      running_dead_zone: 4
       start_notify_device:
       - c054264b79e6739a057236f3a3c512b4
       include_end_notify: enable_end_notify_options
@@ -3002,6 +3000,9 @@
           cache: true
           media_player_entity_id: media_player.kitchen
           message: Washing machine is done
+      start_appliance_power: 6
+      include_start_notify: enable_start_notify_options
+      end_appliance_power: 20
 - id: '1732614031949'
   alias: Sprinkler On at sunrise if superhot
   description: Superhot is >25 degrees
@@ -3220,3 +3221,199 @@
           cache: true
           media_player_entity_id: media_player.kitchen
           message: Dryer is done
+      end_appliance_power: 10
+- id: '1738224719290'
+  alias: Reading light switch
+  description: Turns on or off the reading light
+  triggers:
+  - device_id: f085406cb09d1a8a9f10f0b500c48ebe
+    domain: zha
+    type: remote_button_short_press
+    subtype: button_1
+    trigger: device
+    id: Once
+  - device_id: f085406cb09d1a8a9f10f0b500c48ebe
+    domain: zha
+    type: remote_button_long_press
+    subtype: button_1
+    trigger: device
+    id: Held
+  - device_id: f085406cb09d1a8a9f10f0b500c48ebe
+    domain: zha
+    type: remote_button_double_press
+    subtype: button_1
+    trigger: device
+    id: Double
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Once
+      sequence:
+      - action: light.toggle
+        metadata: {}
+        data: {}
+        target:
+          device_id: 18551c9b3c72efc901c3e35633c1e3c7
+    - conditions:
+      - condition: trigger
+        id:
+        - Double
+      sequence:
+      - choose:
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: light.computer_desk_light_socket_1
+              state: 'on'
+            - condition: state
+              entity_id: light.reading_light
+              state: 'on'
+            - condition: state
+              entity_id: light.sleeping_light_2
+              state: 'on'
+          sequence:
+          - action: light.turn_off
+            metadata: {}
+            data: {}
+            target:
+              area_id: master_bedroom
+        default:
+        - action: light.turn_on
+          metadata: {}
+          data: {}
+          target:
+            area_id: master_bedroom
+  mode: single
+- id: '1738226362136'
+  alias: Sleeping Light Switch
+  description: Turns on or off the reading light
+  triggers:
+  - device_id: 8c730c300afc8f900acf8e9782eb6d62
+    domain: zha
+    type: remote_button_short_press
+    subtype: button_1
+    trigger: device
+    id: Once
+  - device_id: 8c730c300afc8f900acf8e9782eb6d62
+    domain: zha
+    type: remote_button_double_press
+    subtype: button_1
+    trigger: device
+    id: Double
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Once
+      sequence:
+      - action: light.toggle
+        metadata: {}
+        data: {}
+        target:
+          device_id:
+          - 3cf9c8bc5367cd26edc9b128e7303916
+    - conditions:
+      - condition: trigger
+        id:
+        - Double
+      sequence:
+      - choose:
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: light.computer_desk_light_socket_1
+              state: 'on'
+            - condition: state
+              entity_id: light.reading_light
+              state: 'on'
+            - condition: state
+              entity_id: light.sleeping_light_2
+              state: 'on'
+          sequence:
+          - action: light.turn_off
+            metadata: {}
+            data: {}
+            target:
+              area_id: master_bedroom
+        default:
+        - action: light.turn_on
+          metadata: {}
+          data: {}
+          target:
+            area_id: master_bedroom
+  mode: single
+- id: '1738720805420'
+  alias: Turn on lights in master bedroom
+  description: Turns on or off the reading light
+  triggers:
+  - device_id: f085406cb09d1a8a9f10f0b500c48ebe
+    domain: zha
+    type: remote_button_short_press
+    subtype: button
+    trigger: device
+    enabled: false
+  - device_id: 8cb8be820d24cc85cc448e17a28fb15d
+    domain: zha
+    type: remote_button_short_press
+    subtype: button
+    trigger: device
+    id: Once
+  - device_id: 8cb8be820d24cc85cc448e17a28fb15d
+    domain: zha
+    type: remote_button_short_press
+    subtype: button_1
+    trigger: device
+    id: Held
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: light.reading_light
+          state: 'on'
+        - condition: state
+          entity_id: light.sleeping_light_2
+          state: 'on'
+        - condition: state
+          entity_id: switch.computer_desk_light_child_lock
+          state: 'on'
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          area_id: master_bedroom
+    default:
+    - action: light.turn_on
+      metadata: {}
+      data: {}
+      target:
+        area_id: master_bedroom
+  mode: single
+- id: '1738899778775'
+  alias: Switch toggle of computer desk
+  description: Temp automation to quickly turn the computer on and off again without
+    having to pull out a phone.
+  triggers:
+  - device_id: a957c4c649b876f99732f7bd44193c43
+    domain: zha
+    type: remote_button_short_press
+    subtype: button_1
+    trigger: device
+  conditions: []
+  actions:
+  - action: switch.toggle
+    metadata: {}
+    data: {}
+    target:
+      device_id: ac27c1acd87d567603e54ed90f046a50
+  mode: single
