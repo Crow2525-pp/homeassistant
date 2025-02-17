@@ -1,0 +1,19 @@
+title: Main Dashboard
+path: main
+icon: mdi:home
+type: sections
+sections:
+  - type: grid
+    cards: !include ../cards/alerts.yaml
+
+  - type: grid
+    cards: !include ../cards/network.yaml
+
+  - type: grid
+    cards: !include ../cards/cameras.yaml
+
+  - type: grid
+    cards: !include ../cards/solar.yaml
+
+  - type: grid
+    cards: !include ../cards/lights.yaml

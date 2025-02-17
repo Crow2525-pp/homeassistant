@@ -1,0 +1,10 @@
+title: Climate Dashboard
+path: climate
+icon: mdi:thermostat
+type: sections
+sections:
+  - type: grid
+    cards: !include ../cards/climate.yaml
+
+  - type: grid
+    cards: !include ../cards/temperature.yaml

@@ -1,0 +1,32 @@
+- type: heading
+  heading: "Climate Control"
+  icon: mdi:home-thermometer
+  heading_style: title
+  badges:
+    - type: entity
+      entity: weather.braybrook
+      show_icon: true
+      show_state: true
+      state_content:
+        - temperature
+        - humidity
+        - wind_speed
+      icon: mdi:weather-partly-cloudy
+
+- type: history-graph
+  title: "Temperature Trends"
+  entities:
+    - entity: sensor.ble_temperature_masterbed_temp_humidity_sensor
+      name: Master Bedroom
+    - entity: sensor.study_esp32_ottosroom_temperature
+      name: Otto's Room
+    - entity: sensor.study_esp32_henrysroom_temperature
+      name: Henry's Room
+    - entity: sensor.livingroom_irblaster_temperature
+      name: Living Room
+  hours_to_show: 24
+  show_names: true
+
+- type: weather-forecast
+  entity: weather.braybrook
+  forecast_type: daily

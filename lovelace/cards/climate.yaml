@@ -1,0 +1,58 @@
+- type: tile
+  entity: climate.living_room_versatile_thermastat
+  name: Living Room
+  features:
+    - type: climate-hvac-modes
+    - type: climate-preset-modes
+      style: dropdown
+    - type: target-temperature
+  layout_options:
+    grid_columns: 2
+  card_mod:
+    style: |
+      ha-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+- type: tile
+  entity: climate.masterbed_versatile_thermostat
+  name: Master Bedroom
+  features:
+    - type: climate-hvac-modes
+    - type: climate-preset-modes
+      style: dropdown
+    - type: target-temperature
+  card_mod:
+    style: |
+      ha-card {
+        background-color: {% if states('binary_sensor.master_bedroom_door_sensor_opening') == 'on' %} #fff9c4 {% else %} inherit {% endif %};
+      }
+
+- type: tile
+  entity: climate.otto_s_room
+  name: Otto’s Room
+  features:
+    - type: climate-hvac-modes
+    - type: climate-preset-modes
+      style: dropdown
+    - type: target-temperature
+  card_mod:
+    style: |
+      ha-card {
+        background-color: {% if states('binary_sensor.otto_room_door_sensor_opening') == 'on' %} #fff9c4 {% else %} inherit {% endif %};
+      }
+
+- type: tile
+  entity: climate.henry_s_room_versatile_thermostat
+  name: Henry’s Room
+  features:
+    - type: climate-hvac-modes
+    - type: climate-preset-modes
+      style: dropdown
+    - type: target-temperature
+  card_mod:
+    style: |
+      ha-card {
+        background-color: {% if states('binary_sensor.henry_door_sensor_magnet_opening') == 'on' %} #fff9c4 {% else %} inherit {% endif %};
+      }

@@ -1,12 +1,8 @@
 title: Home Dashboard
 views:
-  - !include lovelace/alerts.yaml
-  - !include lovelace/climate.yaml
-  - !include lovelace/lights.yaml
-  - !include lovelace/media.yaml
-  - !include lovelace/solar.yaml
-  - !include lovelace/network.yaml
-  - !include lovelace/cameras.yaml
+  - !include lovelace/views/main.yaml
+  - !include lovelace/views/climate.yaml
+  - !include lovelace/views/media.yaml
 
   - title: .
     path: test2

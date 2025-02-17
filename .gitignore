@@ -17,6 +17,7 @@
 # Dashboard
 !.storage/lovelace
 !ui-lovelace.yaml
+!lovelace/**
 
 # Smart IR
 !custom_components/smartir/custom_codes/**

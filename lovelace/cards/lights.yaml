@@ -1,0 +1,63 @@
+- type: heading
+  heading: "Lights Control"
+  heading_style: title
+  icon: mdi:lightbulb
+
+- type: tile
+  entity: light.computer_desk_light_socket_1
+  name: Computer Desk Light
+  icon: mdi:desk-lamp
+
+- type: tile
+  entity: light.living_room_light_socket_1
+  name: Living Room Light
+  icon: mdi:sofa
+
+- type: tile
+  entity: light.yeelight_color_0x7e3b638
+  name: Yeelight Color
+  icon: mdi:led-strip
+
+- type: tile
+  entity: light.reading_light
+  name: Reading Light
+  icon: mdi:book-open-variant
+
+- type: tile
+  entity: light.sleeping_light_2
+  name: Sleeping Light
+  icon: mdi:bed
+
+- type: tile
+  entity: light.study_nook_lamp_socket_1
+  name: Study Nook Lamp
+  icon: mdi:desk
+
+- type: tile
+  entity: light.tv_backlight
+  name: TV Backlight
+  icon: mdi:television
+
+- type: tile
+  entity: light.led_strip_office_light
+  name: Office LED Strip
+  icon: mdi:led-outline
+
+- type: tile
+  entity: light.xmas_lights_plug_socket_1
+  name: Christmas Lights
+  icon: mdi:string-lights
+
+- type: history-graph
+  title: "Lights Usage History"
+  entities:
+    - entity: light.computer_desk_light_socket_1
+      name: Computer Desk Light
+    - entity: light.living_room_light_socket_1
+      name: Living Room Light
+    - entity: light.reading_light
+      name: Reading Light
+    - entity: light.sleeping_light_2
+      name: Sleeping Light
+  hours_to_show: 24
+  show_names: true
