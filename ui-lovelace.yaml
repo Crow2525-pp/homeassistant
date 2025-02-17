@@ -1,0 +1,1461 @@
+title: Home Dashboard
+views:
+  - !include lovelace/alerts.yaml
+  - !include lovelace/climate.yaml
+  - !include lovelace/lights.yaml
+  - !include lovelace/media.yaml
+  - !include lovelace/solar.yaml
+  - !include lovelace/network.yaml
+  - !include lovelace/cameras.yaml
+
+  - title: .
+    path: test2
+    type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading_style: title
+            heading: Alerts
+          - type: entities
+            entities:
+              - entity: sensor.laundry_last_changed
+                name: Last Started
+            visibility:
+              - condition: state
+                entity: input_boolean.laundry_on
+                state: "on"
+              - condition: numeric_state
+                entity: sensor.laundry_last_changed
+                below: 2
+            title: Get Laundry
+            card_mod:
+              style: |
+                ha-card {
+                  padding: 16px;
+                  border: 1px solid var(--primary-color);
+                  border-radius: 12px;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                  background-color: var(--card-background-color);
+                }
+                .entities .state-card {
+                  background-color: #f7f7f7;
+                  border-radius: 8px;
+                  padding: 8px;
+                  margin-bottom: 8px;
+                }
+                .entities .state-card .info {
+                  font-weight: bold;
+                  color: var(--primary-text-color);
+                }
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: cover.garage_door_msg100_main_channel
+                state: open
+            card:
+              type: button
+              entity: cover.garage_door_msg100_main_channel
+              name: Garage
+              show_name: true
+              show_icon: true
+              show_state: true
+              tap_action:
+                action: toggle
+              theme: waves
+              icon_height: 60px
+              card_mod:
+                style: |
+                  ha-card {
+                    background-color: #44739d; /* Dark blue background */
+                    color: white; /* White text color for better contrast */
+                    border-radius: 12px; /* Rounded corners */
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
+                    padding: 16px; /* Add padding for better spacing */
+                  }
+                  ha-icon {
+                    color: white; /* White icon color for better visibility */
+                  }
+                  .state {
+                    font-weight: bold; /* Bold state text for emphasis */
+                    margin-top: 8px; /* Margin for spacing */
+                  }
+          - states: []
+            type: alarm-panel
+            entity: alarm_control_panel.alarmo
+            visibility:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: alarm_control_panel.alarmo
+                    state: triggered
+            theme: waves
+            name: Alarm Active!
+            card_mod:
+              style: |
+                ha-card {
+                  background-color: #b33a3a; /* Darker red background */
+                  color: white; /* Use white text for better contrast */
+                  padding: 16px; /* Add padding inside the card */
+                  border-radius: 10px; /* Round the corners of the card */
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow for a 3D effect */
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                  align-items: center;
+                }
+                ha-card h1 {
+                  color: white; /* Ensure header text is also white */
+                }
+                .disarm {
+                  background-color: rgba(255, 255, 255, 0.1);
+                  color: white;
+                  border: 2px solid white;
+                  border-radius: 5px;
+                  padding: 10px 20px;
+                  text-align: center;
+                  margin-top: 10px;
+                  cursor: pointer;
+                }
+                .disarm:hover {
+                  background-color: rgba(255, 255, 255, 0.2);
+                }
+          - type: entities
+            entities:
+              - entity: sensor.dishwasher_last_changed
+                name: Last Started
+            visibility:
+              - condition: state
+                entity: input_boolean.dishwasher_on
+                state: "on"
+              - condition: numeric_state
+                entity: sensor.dishwasher_last_changed
+                below: 2
+            title: Get Dishwasher
+            card_mod:
+              style: |
+                ha-card {
+                  padding: 16px;
+                  border: 1px solid var(--primary-color);
+                  border-radius: 12px;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                  background-color: var(--card-background-color);
+                }
+                .entities .state-card {
+                  background-color: #f7f7f7;
+                  border-radius: 8px;
+                  padding: 8px;
+                  margin-bottom: 8px;
+                }
+                .entities .state-card .info {
+                  font-weight: bold;
+                  color: var(--primary-text-color);
+                }
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: alert.network_device_down_warn_alert_active
+                    state: "on"
+                  - condition: state
+                    entity: alert.wan_down_warn_alert_active
+                    state: "on"
+            card:
+              type: entities
+              entities:
+                - entity: binary_sensor.wan_down_alert_active
+                  icon: mdi:wan
+                  secondary_info: last-changed
+                - entity: binary_sensor.network_device_down_alert_active
+                  icon: mdi:access-point-network
+                  secondary_info: last-changed
+              title: Network Issues
+              state_color: false
+              card_mod:
+                style: |
+                  ha-card {
+                    background-color: #cc6601;
+                  }
+      - type: grid
+        cards:
+          - type: heading
+            heading_style: title
+            badges:
+              - type: entity
+                show_state: true
+                show_icon: true
+                entity: binary_sensor.driveway_cam_motion
+                state_content: last_changed
+                icon: mdi:car
+              - type: entity
+                show_state: true
+                show_icon: true
+                entity: binary_sensor.front_door_cam_motion_2
+                state_content: last_changed
+                icon: mdi:door
+            heading: Cameras
+            icon: mdi:cctv
+          - type: grid
+            square: false
+            columns: 1
+            cards:
+              - show_state: true
+                show_name: true
+                camera_view: auto
+                type: picture-entity
+                entity: camera.security_cameras_driveway
+                hold_action:
+                  action: url
+                  url_path: http://192.168.1.101:81
+                tap_action:
+                  action: url
+                  url_path: http://192.168.1.101:81
+              - type: picture-entity
+                entity: camera.security_cameras_front_door_camera
+          - type: heading
+            icon: mdi:alarm-light
+            heading: Alarm
+            heading_style: subtitle
+            badges:
+              - type: entity
+                entity: input_select.occupancy
+              - type: entity
+                entity: alarm_control_panel.alarmo
+              - type: entity
+                show_state: true
+                show_icon: true
+                entity: zone.home
+                icon: mdi:account-multiple
+          - type: tile
+            entity: alarm_control_panel.alarmo
+          - type: tile
+            entity: input_select.occupancy
+          - type: history-graph
+            entities:
+              - entity: zone.home
+            min_y_axis: 0
+            fit_y_data: false
+            layout_options:
+              grid_columns: full
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Dishwasher
+          - type: tile
+            entity: sensor.dishwasher_power_sensor_mss310_voltage_v_main_channel
+          - type: tile
+            entity: sensor.dishwasher_power_sensor_mss310_energy_kwh_main_channel
+          - type: tile
+            entity: sensor.dishwasher_power_sensor_mss310_current_a_main_channel
+        column_span: 1
+        visibility:
+          - condition: state
+            entity: input_boolean.dishwasher_on
+            state: "on"
+      - type: grid
+        cards:
+          - type: heading
+            heading: Lights
+            heading_style: title
+            icon: mdi:lamps
+            badges: []
+          - type: tile
+            entity: light.computer_desk_light_socket_1
+          - type: tile
+            entity: light.living_room_light_socket_1
+          - type: tile
+            entity: light.yeelight_color_0x7e3b638
+          - type: tile
+            entity: light.reading_light
+          - type: tile
+            entity: light.sleeping_light_2
+          - type: tile
+            entity: light.study_nook_lamp_socket_1
+          - type: tile
+            entity: light.tv_backlight
+          - type: tile
+            entity: light.led_strip_office_light
+          - type: tile
+            entity: light.xmas_lights_plug_socket_1
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: "Air Conditioning "
+          - type: tile
+            entity: climate.living_room_versatile_thermastat
+            name: Living Room
+            hide_state: false
+            vertical: false
+            show_entity_picture: false
+            layout_options:
+              grid_columns: 2
+              grid_rows: 1
+            features:
+              - type: climate-hvac-modes
+              - type: climate-preset-modes
+                style: dropdown
+              - type: target-temperature
+          - type: tile
+            entity: climate.henry_s_room_versatile_thermostat
+            features:
+              - type: climate-hvac-modes
+              - type: climate-preset-modes
+                style: dropdown
+              - type: target-temperature
+          - features:
+              - type: climate-hvac-modes
+              - type: climate-preset-modes
+                style: dropdown
+              - type: target-temperature
+            type: tile
+            entity: climate.masterbed_versatile_thermostat
+          - type: tile
+            entity: climate.otto_s_room
+            features:
+              - type: climate-hvac-modes
+              - type: climate-preset-modes
+                style: dropdown
+              - type: target-temperature
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading_style: title
+            heading: Master
+            icon: mdi:bed-king
+            badges:
+              - type: entity
+                show_state: true
+                show_icon: false
+                entity: sensor.ble_temperature_masterbed_temp_humidity_sensor
+              - type: entity
+                show_state: true
+                show_icon: false
+                entity: sensor.ble_humidity_masterbed_temp_humidity_sensor
+              - type: entity
+                show_state: true
+                show_icon: false
+                entity: sensor.temperaturesensor_temperature
+              - type: entity
+                show_state: true
+                show_icon: true
+                entity: sensor.hub_2_0be5_light_level
+                color: state
+          - type: tile
+            entity: light.reading_light
+          - type: tile
+            entity: light.sleeping_light_2
+          - features:
+              - type: climate-preset-modes
+                style: dropdown
+            type: tile
+            entity: climate.masterbed_versatile_thermostat
+            name: Themostat
+            state_content:
+              - state
+              - current_temperature
+            vertical: false
+          - type: tile
+            entity: binary_sensor.balcony_door_sensor_magnet_opening_2
+            name: Balcony
+          - type: tile
+            name: Door
+            entity: binary_sensor.master_bedroom_door_sensor_opening
+          - type: tile
+            entity: switch.computer_plug_switch
+            icon: mdi:desktop-classic
+            show_entity_picture: false
+            vertical: false
+            grid_options:
+              columns: full
+          - type: tile
+            entity: light.computer_desk_light_socket_1
+          - features:
+              - type: fan-speed
+            type: tile
+            entity: fan.masterbedroom_fan
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            layout_options:
+              grid_columns: full
+          - features:
+              - type: cover-open-close
+            type: tile
+            entity: cover.roller_blinds_chan1
+            hide_state: true
+            name: Roller Blinds
+            color: primary
+            layout_options:
+              grid_columns: full
+          - features:
+              - type: cover-open-close
+              - type: cover-position
+            type: tile
+            entity: cover.windowcovering_cover
+            name: Curtains
+            layout_options:
+              grid_columns: full
+              grid_rows: 3
+      - type: grid
+        cards:
+          - type: heading
+            heading: Open Doors
+            heading_style: title
+          - type: tile
+            name: Master Door
+            visibility:
+              - condition: state
+                entity: binary_sensor.master_bedroom_door_sensor_opening
+                state: "on"
+            icon: mdi:door
+            entity: binary_sensor.master_bedroom_door_sensor_opening
+            state_content: last_changed
+          - type: tile
+            entity: binary_sensor.balcony_door_sensor_magnet_opening_2
+            visibility:
+              - condition: state
+                entity: binary_sensor.balcony_door_sensor_magnet_opening_2
+                state: "on"
+            name: Balcony Door
+            state_content: last_changed
+          - type: tile
+            entity: binary_sensor.henry_door_sensor_magnet_opening
+            name: Henry's Door
+            visibility:
+              - condition: state
+                entity: binary_sensor.henry_door_sensor_magnet_opening
+                state: "on"
+          - type: tile
+            entity: binary_sensor.interior_garage_door_sensor_magnet_opening
+            name: Interior Garage Door
+            visibility:
+              - condition: state
+                entity: binary_sensor.interior_garage_door_sensor_magnet_opening
+                state: "on"
+            state_content: last_changed
+          - type: tile
+            entity: binary_sensor.living_room_door_sensor_opening
+            visibility:
+              - condition: state
+                entity: binary_sensor.living_room_door_sensor_opening
+                state: "on"
+            state_content: last_changed
+          - type: tile
+            entity: binary_sensor.front_door_sensor_opening
+            name: Front Door
+            visibility:
+              - condition: state
+                entity: binary_sensor.front_door_sensor_opening
+                state: "on"
+            state_content: last_changed
+          - type: tile
+            entity: binary_sensor.otto_room_door_sensor_opening
+            visibility:
+              - condition: state
+                entity: binary_sensor.otto_s_room_door_sensor_opening
+                state: "on"
+            name: Otto's Door
+            state_content: last_changed
+          - type: tile
+            entity: binary_sensor.side_garage_door_sensor_magnet_opening
+            visibility:
+              - condition: state
+                entity: binary_sensor.side_garage_door_sensor_magnet_opening
+                state: "on"
+            name: Side Garage Door
+            color: red
+            state_content: last_changed
+          - type: tile
+            entity: binary_sensor.bi_front_door_camera_motion
+            show_entity_picture: false
+            name: Door Motion
+            visibility:
+              - condition: state
+                entity: binary_sensor.bi_front_door_camera_motion
+                state: "on"
+            color: green
+            state_content: last_changed
+          - type: tile
+            entity: binary_sensor.bi_driveway_motion
+            name: Driveway Motion
+            visibility:
+              - condition: state
+                entity: binary_sensor.bi_driveway_motion
+                state: "on"
+            color: green
+          - type: tile
+            entity: binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture
+            name: Laundry Leak
+            visibility:
+              - condition: state
+                entity: binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture
+                state: "on"
+            color: red
+          - type: tile
+            entity: binary_sensor.front_door_water_sensor_moisture
+            name: Front Door Leak
+            visibility:
+              - condition: state
+                entity: binary_sensor.front_door_water_sensor_moisture
+                state: "on"
+            color: red
+            state_content: state
+          - type: tile
+            entity: sensor.motion_sensor_illuminance
+          - type: tile
+            entity: binary_sensor.motion_sensor_motion
+            state_content: last_changed
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Kids Room
+            heading_style: title
+            badges:
+              - type: entity
+                show_state: true
+                show_icon: true
+                entity: sensor.study_esp32_ottosroom_temperature
+              - type: entity
+                entity: sensor.study_esp32_ottosroom_humidity
+            icon: mdi:teddy-bear
+          - features:
+              - type: climate-preset-modes
+                style: dropdown
+            type: tile
+            entity: climate.otto_s_room
+            name: Themostat
+            state_content:
+              - state
+              - current_temperature
+            vertical: false
+          - type: tile
+            entity: binary_sensor.otto_room_door_sensor_opening
+            state_content: last_changed
+            name: Kid's Door
+      - type: grid
+        cards:
+          - type: heading
+            heading_style: title
+            heading: Lounge
+            icon: mdi:sofa
+            badges:
+              - type: entity
+                entity: sensor.ble_temperature_kitchen_temp_humidity_sensor
+              - type: entity
+                entity: sensor.ble_humidity_kitchen_temp_humidity_sensor
+              - type: entity
+                entity: sensor.livingroom_irblaster_temperature
+              - type: entity
+                entity: sensor.livingroom_irblaster_humidity
+          - features:
+              - type: climate-preset-modes
+                style: dropdown
+            type: tile
+            entity: climate.living_room_versatile_thermastat
+            name: Themostat
+            state_content:
+              - state
+              - current_temperature
+            vertical: false
+          - type: tile
+            entity: light.yeelight_color_0x7e3b638
+          - type: tile
+            entity: light.living_room_light_socket_1
+          - type: tile
+            entity: light.tv_backlight
+          - type: tile
+            entity: media_player.google_tv_2
+      - type: grid
+        cards:
+          - type: heading
+            icon: mdi:server
+            heading: Server
+            heading_style: title
+          - type: heading
+            heading: SpeedTest
+            heading_style: subtitle
+            badges: []
+            icon: mdi:speedometer
+          - type: tile
+            entity: sensor.speedtest_ping
+            vertical: false
+            show_entity_picture: false
+            hide_state: false
+            state_content:
+              - state
+              - last_updated
+            layout_options:
+              grid_columns: full
+              grid_rows: 1
+          - type: tile
+            entity: sensor.speedtest_upload
+            layout_options:
+              grid_columns: full
+              grid_rows: 1
+            state_content:
+              - state
+              - last_updated
+          - type: tile
+            entity: sensor.speedtest_download
+            layout_options:
+              grid_columns: full
+            state_content:
+              - state
+              - last_updated
+          - type: heading
+            heading: USG 3P
+            heading_style: subtitle
+            badges:
+              - type: entity
+                entity: sensor.usg_3p_cpu_utilization
+              - type: entity
+                entity: sensor.usg_3p_memory_utilization
+              - type: entity
+                entity: sensor.usg_3p_state
+            icon: mdi:ethernet
+          - type: heading
+            icon: mdi:lan
+            heading: USW 16 PoE
+            heading_style: subtitle
+            badges:
+              - type: entity
+                show_state: true
+                show_icon: true
+                entity: sensor.usw_16_poe_cpu_utilization
+              - type: entity
+                entity: sensor.usw_16_poe_memory_utilization
+              - type: entity
+                entity: sensor.usw_16_poe_state
+          - type: heading
+            icon: mdi:wifi
+            heading_style: subtitle
+            heading: HomeNetwork
+            badges:
+              - type: entity
+                show_state: true
+                show_icon: true
+                entity: sensor.homenetwork
+                icon: mdi:account-multiple
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Solar
+            heading_style: title
+            icon: mdi:solar-power-variant-outline
+            badges:
+              - type: entity
+                show_state: true
+                show_icon: true
+                entity: binary_sensor.gosungrow_getpslist_devices_1205796_ps_status
+                color: state
+          - graph: line
+            type: sensor
+            entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
+            detail: 2
+            hours_to_show: 24
+            layout_options:
+              grid_columns: full
+          - graph: line
+            type: sensor
+            detail: 1
+            entity: sensor.gosungrow_getpslist_devices_1205796_today_energy
+            layout_options:
+              grid_columns: full
+          - graph: line
+            type: sensor
+            entity: sensor.gosungrow_virtual_1205796_7_1_1_p8063
+            detail: 1
+          - graph: line
+            type: sensor
+            entity: sensor.gosungrow_virtual_1205796_7_1_1_p8062
+            detail: 1
+          - graph: line
+            type: sensor
+            entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
+            detail: 1
+            layout_options:
+              grid_columns: full
+            name: Current Energy Use
+      - type: grid
+        cards:
+          - type: heading
+            heading_style: title
+            heading: ☁️ Weather
+            icon: ""
+            badges:
+              - type: entity
+                show_state: true
+                show_icon: true
+                entity: weather.braybrook_hourly
+                state_content:
+                  - state
+                  - temperature
+                  - humidity
+                  - wind_bearing
+                  - wind_speed
+          - type: entities
+            entities:
+              - entity: switch.water_switch_switch
+                name: "Sprinkler "
+      - type: grid
+        cards:
+          - type: heading
+            heading_style: title
+            heading: Laundry
+            badges:
+              - type: entity
+                show_state: true
+                show_icon: true
+                entity: automation.appliance_notifications_actions
+                icon: mdi:washing-machine
+                state_content: last_triggered
+                name: Washing Machine
+              - type: entity
+                show_state: true
+                show_icon: true
+                entity: automation.dryer_appliance_notifications_actions
+                icon: mdi:tumble-dryer
+                state_content: last_triggered
+            icon: ""
+    badges:
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        entity: person.phil_patterson
+        visibility:
+          - condition: user
+            users:
+              - 9698c3b9047a439cadc6b24f0455adf8
+              - e104d00f0f6d4b459273ce6c45cf232f
+        color: indigo
+        tap_action:
+          action: more-info
+        show_entity_picture: true
+        state_content:
+          - state
+        name: Phil
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        entity: person.stephanie_patterson
+        tap_action:
+          action: more-info
+        show_entity_picture: true
+        visibility:
+          - condition: user
+            users:
+              - 307832576127404887f4525f27f45536
+              - e104d00f0f6d4b459273ce6c45cf232f
+        state_content:
+          - state
+        name: Steph
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        entity: person.wendy
+        state_content:
+          - state
+          - last_changed
+        color: indigo
+        tap_action:
+          action: more-info
+        name: Wendy Home
+        show_entity_picture: true
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
+        name: Solar Yield
+        color: ""
+        visibility:
+          - condition: numeric_state
+            entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
+            above: 0
+      - type: entity
+        entity: alarm_control_panel.alarmo
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        entity: binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture
+        color: ""
+        visibility:
+          - condition: state
+            entity: binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture
+            state: "on"
+        name: Laundry
+        state_content: last_updated
+      - type: entity
+        show_name: true
+        show_state: true
+        show_icon: true
+        entity: binary_sensor.front_door_water_sensor_moisture
+        color: state
+        name: Front Door
+        state_content: last_changed
+        visibility:
+          - condition: state
+            entity: binary_sensor.front_door_water_sensor_moisture
+            state: "on"
+    max_columns: 4
+    icon: mdi:home
+    cards: []
+  - type: sections
+    path: hvac-2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: HVAC
+          - type: tile
+            entity: climate.living_room_versatile_thermastat
+            features:
+              - type: climate-fan-modes
+                style: dropdown
+                fan_modes:
+                  - lowest
+                  - low
+                  - mid
+                  - high
+                  - highest
+                  - auto
+              - type: climate-hvac-modes
+                hvac_modes:
+                  - "off"
+                  - cool
+                  - heat
+                  - dry
+                  - fan_only
+              - type: climate-preset-modes
+                style: dropdown
+                preset_modes:
+                  - none
+                  - frost
+                  - eco
+                  - comfort
+                  - boost
+                  - activity
+              - type: target-temperature
+          - type: tile
+            entity: climate.masterbed_versatile_thermostat
+            features:
+              - type: climate-fan-modes
+                style: dropdown
+                fan_modes:
+                  - auto
+                  - low
+                  - mid
+                  - high
+                  - highest
+              - type: climate-hvac-modes
+                hvac_modes:
+                  - "off"
+                  - cool
+                  - heat
+                  - dry
+                  - fan_only
+              - type: climate-preset-modes
+                style: dropdown
+                preset_modes:
+                  - none
+                  - frost
+                  - eco
+                  - comfort
+                  - boost
+              - type: target-temperature
+            card_mod:
+              style: |
+                ha-card {
+                  background-color: {% if states('binary_sensor.master_bedroom_door_sensor_opening') == 'on' %} #fff9c4 {% else %}  {% endif %}; 
+                  border-radius: 12px;
+                  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+                }
+          - type: tile
+            entity: climate.otto_s_room
+            hide_state: false
+            features:
+              - type: climate-fan-modes
+                style: dropdown
+                fan_modes:
+                  - auto
+                  - low
+                  - mid
+                  - high
+                  - highest
+              - type: climate-hvac-modes
+                hvac_modes:
+                  - "off"
+                  - cool
+                  - heat
+                  - dry
+                  - fan_only
+              - type: climate-preset-modes
+                style: dropdown
+                preset_modes:
+                  - none
+                  - frost
+                  - eco
+                  - comfort
+                  - boost
+              - type: target-temperature
+            card_mod:
+              style: |
+                ha-card {
+                  {% if states('binary_sensor.otto_room_door_sensor_opening') == 'on' %}
+                  background-color: #fff9c4;
+                  {% endif %}
+                  border-radius: 12px;
+                  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+                }
+          - type: tile
+            entity: climate.henry_s_room_versatile_thermostat
+            features:
+              - type: climate-fan-modes
+                style: dropdown
+                fan_modes:
+                  - auto
+                  - low
+                  - mid
+                  - high
+                  - highest
+              - type: climate-hvac-modes
+                hvac_modes:
+                  - "off"
+                  - cool
+                  - heat
+                  - dry
+                  - fan_only
+              - type: climate-preset-modes
+                style: dropdown
+                preset_modes:
+                  - none
+                  - frost
+                  - eco
+                  - comfort
+                  - boost
+              - type: target-temperature
+            card_mod:
+              style: |
+                ha-card {
+                  background-color: {% if states('binary_sensor.henry_door_sensor_magnet_opening') == 'on' %} #fff9c4 {% else %}  {% endif %}; 
+                  border-radius: 12px;
+                  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+                }
+          - show_current: true
+            show_forecast: false
+            type: weather-forecast
+            entity: weather.braybrook
+            forecast_type: daily
+          - show_name: false
+            show_icon: true
+            show_state: true
+            type: glance
+            entities:
+              - entity: sensor.essendon_airport_max_temp
+              - entity: sensor.essendon_airport_min_temp
+              - entity: sensor.essendon_airport_rain_since_9am
+              - entity: sensor.essendon_airport_wind_speed_kilometre
+            title: Outside Temp
+          - type: tile
+            entity: climate.masterbed_versatile_thermostat
+            features:
+              - type: climate-fan-modes
+                style: dropdown
+                fan_modes:
+                  - auto
+                  - low
+                  - mid
+                  - high
+                  - highest
+              - type: climate-hvac-modes
+                hvac_modes:
+                  - "off"
+                  - cool
+                  - heat
+                  - dry
+                  - fan_only
+              - type: climate-preset-modes
+                style: dropdown
+                preset_modes:
+                  - none
+                  - frost
+                  - eco
+                  - comfort
+                  - boost
+              - type: target-temperature
+            card_mod:
+              style: |
+                ha-card {
+                  background-color: {% if states('binary_sensor.master_bedroom_door_sensor_opening') == 'on' %} lightgoldenrodyellow {% else %} inherit {% endif %};
+                }
+      - type: grid
+        cards:
+          - type: entities
+            entities:
+              - entity: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                name: Masterbed
+                secondary_info: last-updated
+              - entity: sensor.ble_temperature_wendys_room
+                name: Wendy's Room
+                secondary_info: last-updated
+              - entity: sensor.ble_temperature_front_door
+                secondary_info: last-updated
+                name: Front Door
+              - entity: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                secondary_info: last-updated
+                name: Kitchen
+              - entity: sensor.study_esp32_ottosroom_temperature
+                name: Otto's Room
+                secondary_info: last-updated
+              - entity: sensor.study_esp32_henrysroom_temperature
+                secondary_info: last-updated
+                name: Henry's Room
+              - entity: sensor.livingroom_irblaster_temperature
+                name: Living Room
+                secondary_info: last-updated
+            title: Temperature
+      - type: grid
+        cards:
+          - type: heading
+            heading: New section
+          - type: tile
+            entity: climate.masterbed_ac
+          - type: tile
+            entity: climate.masterbed_versatile_thermostat
+          - type: thermostat
+            entity: climate.masterbed_ac
+            features:
+              - type: climate-hvac-modes
+              - type: climate-preset-modes
+                style: dropdown
+              - type: climate-fan-modes
+                style: dropdown
+            theme: minimalist-mobile
+          - type: thermostat
+            entity: climate.otto_s_ac
+            features:
+              - type: climate-hvac-modes
+              - type: climate-preset-modes
+                style: dropdown
+              - type: climate-fan-modes
+                style: dropdown
+            theme: minimalist-mobile
+          - type: thermostat
+            entity: climate.study_ac
+            features:
+              - type: climate-hvac-modes
+              - type: climate-preset-modes
+                style: dropdown
+              - type: climate-fan-modes
+                style: dropdown
+            theme: minimalist-mobile
+          - type: thermostat
+            entity: climate.living_room_ac
+            features:
+              - type: climate-hvac-modes
+              - type: climate-preset-modes
+                style: dropdown
+              - type: climate-fan-modes
+                style: dropdown
+            theme: minimalist-mobile-tapbar
+    icon: mdi:hvac
+    cards: []
+    max_columns: 4
+  - title: Alarm
+    icon: mdi:alarm-light
+    visible:
+      - user: 307832576127404887f4525f27f45536
+      - user: 9698c3b9047a439cadc6b24f0455adf8
+      - user: b5db5124f06f44f88a5793eb6da372fe
+      - user: e104d00f0f6d4b459273ce6c45cf232f
+    theme: waves
+    type: sidebar
+    cards:
+      - type: grid
+        square: false
+        columns: 1
+        cards:
+          - show_state: true
+            show_name: true
+            camera_view: auto
+            type: picture-entity
+            entity: camera.bi_driveway
+          - show_state: true
+            show_name: true
+            camera_view: auto
+            type: picture-entity
+            entity: camera.bi_front_door_camera
+        view_layout:
+          position: sidebar
+      - states:
+          - arm_away
+          - arm_night
+        type: alarm-panel
+        entity: alarm_control_panel.alarmo
+      - type: entities
+        entities:
+          - entity: person.phil_patterson
+          - entity: person.stephanie_patterson
+          - entity: person.wendy
+      - type: entities
+        entities:
+          - entity: binary_sensor.otto_room_door_sensor_opening
+            name: Otto's Room
+            secondary_info: last-changed
+          - entity: binary_sensor.side_garage_door_sensor_magnet_opening
+            name: Side Garage Path
+            secondary_info: last-changed
+          - entity: binary_sensor.front_door_sensor_opening
+            name: Front Door
+            secondary_info: last-changed
+          - entity: binary_sensor.balcony_door_sensor_magnet_opening_2
+            name: Balcony Door
+          - entity: binary_sensor.living_room_door_sensor_opening
+            name: Living Room
+          - entity: binary_sensor.motion_sensor_motion
+            name: Front Hallway Motion
+        title: Doors
+        theme: minimalist-desktop
+        view_layout:
+          position: sidebar
+      - type: history-graph
+        entities:
+          - entity: person.phil_patterson
+          - entity: person.stephanie_patterson
+          - entity: input_select.occupancy
+          - entity: alarm_control_panel.alarmo
+          - entity: zone.home
+        hours_to_show: 18
+      - type: entity
+        entity: input_select.occupancy
+      - type: entities
+        entities:
+          - input_select.occupancy
+      - type: entities
+        entities:
+          - entity: binary_sensor.front_door_water_sensor_moisture
+            name: Front Door Moisture
+            secondary_info: last-changed
+          - entity: binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture
+            name: Laundry sensor
+            secondary_info: last-updated
+        title: Water Sensors
+      - type: entities
+        entities:
+          - sensor.braybrook_warnings
+      - type: grid
+        square: false
+        columns: 1
+        cards:
+          - type: picture-entity
+            entity: camera.security_cameras_driveway
+          - type: picture-entity
+            entity: camera.security_cameras_front_door_camera
+  - title: Homelab
+    path: homelab
+    icon: mdi:server
+    badges: []
+    cards:
+      - type: entities
+        title: Homelab
+        entities:
+          - entity: t
+            name: SABnzbd
+            type: weblink
+            url: http://192.168.1.103:8082/sabnzbd/
+          - entity: t
+            name: Radarr
+            type: weblink
+            url: http://192.168.1.103:7878/
+          - entity: t
+            name: Sonarr
+            type: weblink
+            url: http://192.168.1.103:8989/
+          - entity: t
+            name: Plex
+            type: weblink
+            url: http://192.168.1.103:32400/web/index.html#!/
+          - entity: t
+            name: Portainer
+            type: weblink
+            url: https://192.168.1.103:9443/#!/2/docker/containers
+          - entity: t
+            name: Readarr
+            type: weblink
+            url: http://192.168.1.103:8788/
+          - entity: t
+            name: qBitTorrent
+            type: weblink
+            url: http://192.168.1.103:8070/
+          - entity: t
+            name: Calibre Web
+            type: weblink
+            url: http://192.168.1.103:8083/
+          - entity: t
+            name: Blue Iris Security Cams
+            type: weblink
+            url: http://192.168.1.101:81
+          - entity: t
+            name: Calibre WebUi
+            type: weblink
+            url: http://admin:timisanidiot@192.168.1.103:8061/
+          - entity: t
+            name: Calibre
+            type: weblink
+            url: http://192.168.1.103:8060/
+          - entity: t
+            name: Prowlarr
+            type: weblink
+            url: http://192.168.1.103:9696/
+          - entity: t
+            name: NextCloud
+            type: weblink
+            url: https://192.168.1.103:441
+          - entity: t
+            name: Proxmox
+            type: weblink
+            url: https://192.168.1.100:8006/
+          - entity: t
+            name: PhotoPrism
+            type: weblink
+            url: https://192.168.1.103:2342
+          - entity: t
+            name: Unifi Gateway
+            type: weblink
+            url: https://192.168.1.1
+          - entity: t
+            name: Mobility Print
+            type: weblink
+            url: http://192.168.1.101:9163/
+          - entity: t
+            name: SyncThing
+            type: weblink
+            url: http://192.168.1.103:8384/
+          - entity: t
+            name: Nginx
+            type: weblink
+            url: http://192.168.1.103:84/login
+          - entity: t
+            name: Bazar
+            type: weblink
+            url: http://192.168.1.103:6767
+          - entity: t
+            name: reader audiobooks
+            type: weblink
+            url: http://192.168.1.103:8789
+          - entity: t
+            name: Dagster Webserver
+            type: weblink
+            url: http://192.168.1.103:3000
+          - entity: t
+            name: lidar
+            type: weblink
+            url: http://192.168.1.103:8686
+      - type: custom:upcoming-media-card
+        entity: sensor.sonarr_upcoming_media
+        title: Upcoming TV
+      - type: entities
+        entities:
+          - sensor.sonarr_disk_space
+          - sensor.sonarr_queue
+          - sensor.sonarr_shows
+          - sensor.sonarr_upcoming
+          - sensor.sonarr_upcoming_media
+  - title: Settings
+    path: settings
+    icon: mdi:account-settings
+    theme: waves
+    type: custom:vertical-layout
+    cards:
+      - type: entities
+        entities:
+          - entity: input_datetime.bedtime_henry
+          - entity: input_datetime.bedtime_phil_steph
+          - entity: input_datetime.bedtime_henry_2
+          - entity: input_datetime.henry_wake_up
+          - entity: input_datetime.wakeup_time_phil_steph
+          - entity: input_datetime.otto_s_wake_up
+          - entity: input_button.wake_up_phil_steph
+          - entity: input_boolean.hot_today_flag
+          - entity: input_boolean.super_hot_today
+    visible:
+      - user: e104d00f0f6d4b459273ce6c45cf232f
+  - title: Media
+    path: media
+    icon: mdi:music
+    theme: waves
+    cards:
+      - type: media-control
+        entity: media_player.sony_bravia
+      - type: media-control
+        entity: media_player.spotify_philip_patterson
+      - show_name: true
+        show_icon: true
+        type: button
+        tap_action:
+          action: call-service
+          service: script.spotify_tv
+          target: {}
+        entity: script.spotify_tv
+        show_state: false
+        name: Turn on TV and Start Spotify; Hold for off
+        icon_height: 30px
+        hold_action:
+          action: call-service
+          service: script.spotify_off
+          target: {}
+      - show_name: true
+        show_icon: true
+        type: button
+        tap_action:
+          action: perform-action
+          perform_action: script.volume_quiet
+          target: {}
+        entity: script.volume_quiet
+        show_state: false
+        icon_height: 30px
+        hold_action:
+          action: perform-action
+          perform_action: ""
+        name: TV Volume Quiet
+      - show_name: true
+        show_icon: true
+        type: button
+        tap_action:
+          action: call-service
+          service: script.volume_talking
+          target: {}
+        entity: script.volume_talking
+        show_state: false
+        icon_height: 30px
+        hold_action:
+          action: call-service
+          service: ""
+        name: TV Volume Low
+      - show_name: true
+        show_icon: true
+        type: button
+        tap_action:
+          action: call-service
+          service: script.volume_medium
+          target: {}
+        entity: script.volume_medium
+        show_state: false
+        icon_height: 30px
+        name: TV Volume Med
+      - show_name: true
+        show_icon: true
+        type: button
+        tap_action:
+          action: call-service
+          service: script.volume_high
+          target: {}
+        entity: script.volume_high
+        show_state: false
+        icon_height: 30px
+        name: TV Volume High
+      - show_name: true
+        show_icon: true
+        type: button
+        tap_action:
+          action: toggle
+        entity: script.spotify
+        show_state: false
+        icon_height: 30px
+        name: "Media: Spotify TV"
+      - show_name: true
+        show_icon: true
+        type: button
+        tap_action:
+          action: toggle
+        entity: script.new_script
+        show_state: false
+        name: "Media: YouTube TV"
+        icon_height: 30px
+      - show_name: true
+        show_icon: true
+        type: button
+        tap_action:
+          action: toggle
+        entity: scene.new_scene
+        name: Phil's Playlist
+        theme: waves
+        icon_height: 20px
+      - type: media-control
+        entity: media_player.master_bedroom_speaker
+      - type: media-control
+        entity: media_player.kitchen
+      - entity: media_player.study_speaker
+        type: media-control
+      - type: grid
+        square: false
+        columns: 1
+        cards:
+          - type: media-control
+            entity: media_player.google_tv_2
+      - type: grid
+        square: false
+        columns: 1
+        cards:
+          - type: entities
+            entities:
+              - update.plex_media_server_media_server
+          - type: media-control
+            entity: media_player.plex_otto_plex_for_android_tv_chromecast_google_tv
+  - title: Jobs
+    path: jobs
+    icon: mdi:briefcase
+    theme: waves
+    type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Jobs
+          - type: tile
+            entity: input_datetime.clean_toielts
+            hide_state: false
+            show_entity_picture: false
+            vertical: true
+          - type: tile
+            entity: input_datetime.air_conditioner_henry_s_room
+            vertical: true
+      - type: grid
+        cards: []
+      - type: grid
+        cards: []
+    max_columns: 4
+    visible:
+      - user: e104d00f0f6d4b459273ce6c45cf232f
+    cards: []
+  - title: Schedule
+    path: schedule
+    icon: mdi:calendar
+    cards:
+      - type: custom:scheduler-card
+        include:
+          - climate
+          - input_select
+          - light
+          - sun
+          - switch
+        exclude: []
+      - type: entities
+        entities:
+          - entity: number.front_door_cam_motion_sensitivity
+          - entity: switch.front_door_cam_record
+          - entity: binary_sensor.front_door_cam_motion_2
+          - entity: number.driveway_cam_motion_sensitivity
+    visible:
+      - user: e104d00f0f6d4b459273ce6c45cf232f
+      - user: 307832576127404887f4525f27f45536
