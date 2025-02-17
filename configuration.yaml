@@ -14,6 +14,12 @@ climate: !include climate.yaml
 fan: !include fan.yaml
 media_player: !include media_player.yaml
 
+lovelace:
+  mode: yaml
+  resources:
+    - url: /hacsfiles/lovelace-card-mod/card-mod.js
+      type: module
+
 logger:
   default: info
   logs:
