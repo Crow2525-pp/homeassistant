@@ -3,17 +3,6 @@ path: media
 icon: mdi:music
 type: sections
 sections:
-  - type: grid
-    cards: !include ../cards/media_control.yaml
-  - type: grid
-    columns: 2
-    square: false
-    cards: !include ../cards/media_quick_actions.yaml
-
-  - type: history-graph
-    title: "Recent Media Activity"
-    entities:
-      - entity: media_player.sony_bravia
-      - entity: media_player.spotify_philip_patterson
-      - entity: media_player.master_bedroom_speaker
-    hours_to_show: 12
+  - !include ../sections/media_control.yaml
+  - !include ../sections/media_quick_actions.yaml
+  - !include ../sections/media_recent_played.yaml

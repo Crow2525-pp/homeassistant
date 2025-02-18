@@ -1,19 +1,31 @@
+# /lovelace/views/main.yaml
 title: Main Dashboard
 path: main
 icon: mdi:home
-type: sections
-sections:
-  - type: grid
-    cards: !include ../cards/alerts.yaml
+badges:
+  - entity: input_boolean.washing_machine_on
+    name: "Washer"
+    icon: mdi:washing-machine
+    show_state: true
+    state_content:
+      - state # Show ON/OFF state
+      - last_changed
 
-  - type: grid
-    cards: !include ../cards/network.yaml
+  - entity: input_boolean.dryer_on
+    name: "Dryer"
+    icon: mdi:tumble-dryer
+    show_state: true
+    state_content:
+      - state
+      - last_changed
 
-  - type: grid
-    cards: !include ../cards/cameras.yaml
+cards:
+  - type: horizontal-stack
+    cards: !include ../cards/laundry.yaml
 
-  - type: grid
-    cards: !include ../cards/solar.yaml
-
-  - type: grid
-    cards: !include ../cards/lights.yaml
+  # !include_dir_merge_list ../cards/
+  # cards: !include ../cards/alerts.yaml
+  # - !include ../cards/network.yaml
+  # - !include ../cards/cameras.yaml
+  # - !include ../cards/solar.yaml
+  # - !include ../cards/lights.yaml

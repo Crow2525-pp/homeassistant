@@ -1,0 +1,66 @@
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+    - type: heading
+      heading: "Media Quick Actions"
+      heading_style: subtitle
+      icon: mdi:play-circle-outline
+
+    - type: button
+      show_name: true
+      show_icon: true
+      entity: script.spotify_tv
+      tap_action:
+        action: call-service
+        service: script.spotify_tv
+      hold_action:
+        action: call-service
+        service: script.spotify_off
+      name: Spotify TV
+      icon: mdi:spotify
+      icon_height: 30px
+
+    - type: button
+      show_name: true
+      show_icon: true
+      entity: script.volume_quiet
+      tap_action:
+        action: call-service
+        service: script.volume_quiet
+      name: TV Volume Quiet
+      icon: mdi:volume-low
+      icon_height: 30px
+
+    - type: button
+      show_name: true
+      show_icon: true
+      entity: script.volume_talking
+      tap_action:
+        action: call-service
+        service: script.volume_talking
+      name: TV Volume Low
+      icon: mdi:volume-medium
+      icon_height: 30px
+
+    - type: button
+      show_name: true
+      show_icon: true
+      entity: script.volume_medium
+      tap_action:
+        action: call-service
+        service: script.volume_medium
+      name: TV Volume Med
+      icon: mdi:volume-high
+      icon_height: 30px
+
+    - type: button
+      show_name: true
+      show_icon: true
+      entity: script.volume_high
+      tap_action:
+        action: call-service
+        service: script.volume_high
+      name: TV Volume High
+      icon: mdi:volume-source
+      icon_height: 30px

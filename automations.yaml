@@ -532,65 +532,6 @@
     data:
       hvac_mode: heat
   mode: single
-- id: '1672988382648'
-  alias: Laundry Notification
-  description: Notify when the laundry is done
-  triggers:
-  - type: power
-    device_id: 838c3ad5fd43301b577c135fa3c773da
-    entity_id: 3ffa5b81f4bf2306b02b6123bbbddea8
-    domain: sensor
-    above: 50
-    for:
-      hours: 0
-      minutes: 20
-      seconds: 0
-    id: Laundry_On
-    trigger: device
-  - type: power
-    device_id: 838c3ad5fd43301b577c135fa3c773da
-    entity_id: 3ffa5b81f4bf2306b02b6123bbbddea8
-    domain: sensor
-    for:
-      hours: 0
-      minutes: 20
-      seconds: 0
-    id: Laundry_Off
-    below: 10
-    trigger: device
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_boolean.laundry_on
-        state: 'on'
-      sequence:
-      - target:
-          entity_id: input_boolean.laundry_on
-        action: input_boolean.turn_off
-        data: {}
-      - data:
-          message: Laundry is done
-        action: notify.mobile_app_samsung_galaxy_s22_ultra
-      - data:
-          message: Laundry is done
-        action: notify.mobile_app_slvdh
-      - data:
-          cache: false
-          entity_id: media_player.kitchen
-          message: Drier or washing machine have finished.
-        action: tts.google_translate_say
-    - conditions:
-      - condition: state
-        entity_id: input_boolean.laundry_on
-        state: 'off'
-      sequence:
-      - target:
-          entity_id: input_boolean.laundry_on
-        action: input_boolean.turn_on
-        data: {}
-  mode: single
 - id: '1673864135673'
   alias: Masterbedroom Fan Temperature High
   description: ''
@@ -2992,7 +2933,12 @@
       power_consumption_sensor: sensor.washing_machine_power_plug_power
       include_custom_actions:
       - enable_end_custom_actions
-      start_custom_actions: []
+      start_custom_actions:
+      - action: input_boolean.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.washing_machine_on
       end_custom_actions:
       - action: tts.speak
         metadata: {}
@@ -3000,9 +2946,15 @@
           cache: true
           media_player_entity_id: media_player.kitchen
           message: Washing machine is done
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.washing_machine_on
       start_appliance_power: 6
       include_start_notify: enable_start_notify_options
-      end_appliance_power: 20
+      end_appliance_power: 8
+      end_time_delay: 2
 - id: '1732614031949'
   alias: Sprinkler On at sunrise if superhot
   description: Superhot is >25 degrees
@@ -3214,6 +3166,7 @@
       include_duration_tracking: enable_duration_tracking
       include_custom_actions:
       - enable_end_custom_actions
+      - enable_start_custom_actions
       end_custom_actions:
       - action: tts.speak
         metadata: {}
@@ -3221,7 +3174,20 @@
           cache: true
           media_player_entity_id: media_player.kitchen
           message: Dryer is done
-      end_appliance_power: 10
+      end_appliance_power: 6
+      start_custom_actions:
+      - action: input_boolean.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.dryer_on
+      watchdog_custom_actions:
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.dryer_on
+      end_time_delay: 1.5
 - id: '1738224719290'
   alias: Reading light switch
   description: Turns on or off the reading light

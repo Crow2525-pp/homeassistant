@@ -6,13 +6,10 @@
     - type: climate-preset-modes
       style: dropdown
     - type: target-temperature
-  layout_options:
-    grid_columns: 2
   card_mod:
     style: |
       ha-card {
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        background-color: {% if states('binary_sensor.living_room_door_sensor_opening') == 'on' %} #fff9c4 {% else %} inherit {% endif %};
       }
 
 - type: tile
