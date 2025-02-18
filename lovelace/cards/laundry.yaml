@@ -13,37 +13,37 @@
         - state # Show ON/OFF state
         - last_changed
 
-- type: custom:bar-card
-  entity: sensor.washing_machine_estimated_remaining
-  title: "Washer Time Remaining"
-  min: 0
-  max: 50 # Set max to match cycle time
-  icon: mdi:washing-machine
-  positions:
-    icon: outside
-    name: outside
-    value: inside
-  severity:
-    - from: 20
-      to: 50
-      color: green
-    - from: 10
-      to: 19
-      color: yellow
-    - from: 0
-      to: 9
-      color: red
-  # state_display: |
-  #   [[[
-  #     let time = parseInt(entity.state);
-  #     if (isNaN(time) || time === 0) return "Not Running";
-  #     return time + " min";
-  #   ]]]
-  # visibility: |
-  #   [[[
-  #     let time = parseInt(entity.state);
-  #     return !isNaN(time) && time > 0;  // Hide when machine is off
-  #   ]]]
+- type: conditional
+  conditions:
+    - entity: sensor.washing_machine_estimated_remaining
+      state_not: "0" # Only show when it's NOT 0
+  card:
+    type: custom:bar-card
+    entity: sensor.washing_machine_estimated_remaining
+    title: "Washer Time Remaining"
+    min: 0
+    max: 50 # Set max to match cycle time
+    icon: mdi:washing-machine
+    positions:
+      icon: outside
+      name: outside
+      value: inside
+    severity:
+      - from: 20
+        to: 50
+        color: green
+      - from: 10
+        to: 19
+        color: yellow
+      - from: 0
+        to: 9
+        color: red
+    state_display: |
+      [[[
+        let time = parseFloat(entity.state);
+        if (isNaN(time) || time <= 0) return "Not Running";
+        return time + " min";
+      ]]]
 
 - type: entities
   entities:
@@ -102,37 +102,37 @@
         - state
         - last_changed
 
-- type: custom:bar-card
-  entity: sensor.dryer_estimated_remaining
-  title: "Dryer Time Remaining"
-  min: 0
-  max: 60 # Adjust for your dryer's cycle time
-  icon: mdi:tumble-dryer
-  positions:
-    icon: outside
-    name: outside
-    value: inside
-  severity:
-    - from: 30
-      to: 60
-      color: green
-    - from: 10
-      to: 29
-      color: yellow
-    - from: 0
-      to: 9
-      color: red
-  # state_display: |
-  #   [[[
-  #     let time = parseInt(entity.state);
-  #     if (isNaN(time) || time === 0 min) return "Not Running";
-  #     return time + " min";
-  #   ]]]
-  # visibility: |
-  #   [[[
-  #     let time = parseInt(entity.state);
-  #     return !isNaN(time) && time > 0;  // Hide when machine is off
-  #   ]]]
+- type: conditional
+  conditions:
+    - entity: sensor.dryer_estimated_remaining
+      state_not: "0"
+  card:
+    type: custom:bar-card
+    entity: sensor.dryer_estimated_remaining
+    title: "Dryer Time Remaining"
+    min: 0
+    max: 120 # Set max to match cycle time
+    icon: mdi:tumble-dryer
+    positions:
+      icon: outside
+      name: outside
+      value: inside
+    severity:
+      - from: 60
+        to: 120
+        color: green
+      - from: 20
+        to: 59
+        color: yellow
+      - from: 0
+        to: 19
+        color: red
+    state_display: |
+      [[[
+        let time = parseFloat(entity.state);
+        if (isNaN(time) || time <= 0) return "Not Running";
+        return time + " min";
+      ]]]
 
 - type: entities
   entities:
