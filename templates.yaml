@@ -1,0 +1,53 @@
+- binary_sensor:
+    - name: Garage Door Alert Active
+      state: "{{ is_state('cover.smart_garage_door_garage', 'open')}}"
+
+- binary_sensor:
+    ## Down alerts have 250 second delay built in before activating
+    - name: Network Device Down Alert Active
+      state: "{{ (is_state('group.network_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.network_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.network_device_down_notify', 'on') }}"
+    - name: WAN Down Alert Active
+      state: "{{ (is_state('group.wan_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.wan_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.wan_down_notify', 'on') }}"
+
+- sensor:
+    - name: "Washing Machine Estimated Remaining"
+      unique_id: washing_machine_estimated_remaining
+      state: >
+        {% set cycle_time = 50 %}
+        {% if is_state('input_boolean.washing_machine_on', 'on') and states.input_boolean.washing_machine_on.last_changed %}
+          {% set last_changed = as_timestamp(states.input_boolean.washing_machine_on.last_changed) %}
+          {% if last_changed is not none %}
+            {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
+            {% set remaining = cycle_time - elapsed %}
+            {{ [remaining | round(0), 0] | max }}  # Ensures 0 min is the lowest value
+          {% else %}
+            0
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+      attributes:
+        friendly_name: "Washing Machine Estimated Remaining"
+        unit_of_measurement: "min"
+      icon: mdi:timer
+
+    - name: "Dryer Estimated Remaining"
+      unique_id: dryer_estimated_remaining
+      state: >
+        {% set cycle_time = 120 %}
+        {% if is_state('input_boolean.dryer_on', 'on') and states.input_boolean.dryer_on.last_changed %}
+          {% set last_changed = as_timestamp(states.input_boolean.dryer_on.last_changed) %}
+          {% if last_changed is not none %}
+            {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
+            {% set remaining = cycle_time - elapsed %}
+            {{ [remaining | round(0), 0] | max }}
+          {% else %}
+            0
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+      attributes:
+        friendly_name: "Dryer Estimated Remaining"
+        unit_of_measurement: "min"
+      icon: mdi:timer

@@ -13,6 +13,9 @@
 !scripts.yaml
 !mysensors.yaml
 !notifications.yaml
+!templates.yaml
+!media_player.yaml
+
 
 # Dashboard
 !.storage/lovelace

@@ -13,11 +13,14 @@ scene: !include scenes.yaml
 climate: !include climate.yaml
 fan: !include fan.yaml
 media_player: !include media_player.yaml
+template: !include templates.yaml
 
 lovelace:
   mode: yaml
   resources:
     - url: /hacsfiles/lovelace-card-mod/card-mod.js
+      type: module
+    - url: /hacsfiles/bar-card/bar-card.js
       type: module
 
 logger:
@@ -105,18 +108,6 @@ input_boolean:
     name: WAN Down Notify
 
     icon: mdi:alert
-
-template:
-  - binary_sensor:
-      - name: Garage Door Alert Active
-        state: "{{ is_state('cover.smart_garage_door_garage', 'open')}}"
-
-  - binary_sensor:
-      ## Down alerts have 250 second delay built in before activating
-      - name: Network Device Down Alert Active
-        state: "{{ (is_state('group.network_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.network_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.network_device_down_notify', 'on') }}"
-      - name: WAN Down Alert Active
-        state: "{{ (is_state('group.wan_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.wan_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.wan_down_notify', 'on') }}"
 
 alert:
   garage_door_info_alert_active:

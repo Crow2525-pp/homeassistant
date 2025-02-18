@@ -19,8 +19,9 @@ badges:
       - state
       - last_changed
 
-cards:
-  - type: horizontal-stack
+type: sections
+sections:
+  - type: grid
     cards: !include ../cards/laundry.yaml
 
   # !include_dir_merge_list ../cards/

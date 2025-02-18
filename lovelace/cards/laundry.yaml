@@ -1,66 +1,170 @@
 # lovelace/cards/laundry.yaml
 
 # Washer Column
-- type: vertical-stack
-  cards:
-    - type: entities
-      title: "Laundry Monitor"
-      entities:
-        - entity: sensor.washing_machine_power_plug_current
-          name: "Current Usage"
-        - entity: sensor.washing_machine_power_plug_power
-          name: "Power Consumption"
-        - entity: sensor.washing_machine_power_plug_summation_delivered
-          name: "Total Energy Used"
-        - entity: sensor.washing_machine_power_plug_voltage
-          name: "Voltage"
-      card_mod: &card_style
-        style: |
-          ha-card {
-            width: auto;  /* Allows cards to resize dynamically */
-            max-width: 100%;  /* Ensures it doesn't grow too large */
-            padding: 16px;
-            border: 1px solid var(--primary-color);
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            background-color: var(--card-background-color);
-          }
+- type: heading
+  heading_style: title
+  heading: "Laundry Monitor"
+  badges:
+    - entity: input_boolean.washing_machine_on
+      name: "Washer"
+      icon: mdi:washing-machine
+      show_state: true
+      state_content:
+        - state # Show ON/OFF state
+        - last_changed
 
-    - type: history-graph
-      title: "Laundry Power History"
-      entities:
-        - entity: sensor.washing_machine_power_plug_power
-          name: "Power Consumption"
-        - entity: sensor.washing_machine_power_plug_current
-          name: "Current Usage"
-        - entity: sensor.washing_machine_power_plug_voltage
-          name: "Voltage"
-      hours_to_show: 6
-      refresh_interval: 30
+- type: custom:bar-card
+  entity: sensor.washing_machine_estimated_remaining
+  title: "Washer Time Remaining"
+  min: 0
+  max: 50 # Set max to match cycle time
+  icon: mdi:washing-machine
+  positions:
+    icon: outside
+    name: outside
+    value: inside
+  severity:
+    - from: 20
+      to: 50
+      color: green
+    - from: 10
+      to: 19
+      color: yellow
+    - from: 0
+      to: 9
+      color: red
+  # state_display: |
+  #   [[[
+  #     let time = parseInt(entity.state);
+  #     if (isNaN(time) || time === 0) return "Not Running";
+  #     return time + " min";
+  #   ]]]
+  # visibility: |
+  #   [[[
+  #     let time = parseInt(entity.state);
+  #     return !isNaN(time) && time > 0;  // Hide when machine is off
+  #   ]]]
 
-- type: vertical-stack
-  cards:
-    - type: entities
-      title: "Dryer Monitor"
-      entities:
-        - entity: sensor.dryer_power_plug_current
-          name: "Current Usage"
-        - entity: sensor.dryer_power_plug_power
-          name: "Power Consumption"
-        - entity: sensor.dryer_power_plug_summation_delivered
-          name: "Total Energy Used"
-        - entity: sensor.dryer_power_plug_voltage
-          name: "Voltage"
-      card_mod: *card_style # Apply the same width rules
+- type: entities
+  entities:
+    - entity: sensor.washing_machine_power_plug_current
+      name: "Current Usage"
+    - entity: sensor.washing_machine_power_plug_power
+      name: "Power Consumption"
+    - entity: sensor.washing_machine_power_plug_summation_delivered
+      name: "Total Energy Used"
+    - entity: sensor.washing_machine_power_plug_voltage
+      name: "Voltage"
+    - entity: sensor.washing_machine_estimated_remaining
+      name: "Time Left (Est.)" # New: Estimated cycle time remaining
+  card_mod: &card_style
+    style: |
+      ha-card {
+        width: auto;  /* Allows cards to resize dynamically */
+        max-width: 100%;  /* Ensures it doesn't grow too large */
+        padding: 16px;
+        border: 1px solid var(--primary-color);
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: var(--card-background-color);
+      }
 
-    - type: history-graph
-      title: "Dryer Power History"
-      entities:
-        - entity: sensor.dryer_power_plug_power
-          name: "Power Consumption"
-        - entity: sensor.dryer_power_plug_current
-          name: "Current Usage"
-        - entity: sensor.dryer_power_plug_voltage
-          name: "Voltage"
-      hours_to_show: 6
-      refresh_interval: 30
+- type: history-graph
+  title: "Laundry Power History"
+  entities:
+    - entity: sensor.washing_machine_power_plug_power
+      name: "Power Consumption"
+    - entity: sensor.washing_machine_power_plug_current
+      name: "Current Usage"
+    - entity: sensor.washing_machine_power_plug_voltage
+      name: "Voltage"
+  hours_to_show: 6
+  refresh_interval: 30
+
+- type: statistics-graph
+  title: "Laundry Energy Usage (Last 24h)"
+  entities:
+    - entity: sensor.washing_machine_power_plug_power
+      name: "Power Consumption"
+  days_to_show: 1
+  stat_types: mean
+  chart_type: line
+
+- type: heading
+  heading_style: title
+  heading: "Drier Monitor"
+  badges:
+    - entity: input_boolean.dryer_on
+      name: "Dryer"
+      icon: mdi:tumble-dryer
+      show_state: true
+      state_content:
+        - state
+        - last_changed
+
+- type: custom:bar-card
+  entity: sensor.dryer_estimated_remaining
+  title: "Dryer Time Remaining"
+  min: 0
+  max: 60 # Adjust for your dryer's cycle time
+  icon: mdi:tumble-dryer
+  positions:
+    icon: outside
+    name: outside
+    value: inside
+  severity:
+    - from: 30
+      to: 60
+      color: green
+    - from: 10
+      to: 29
+      color: yellow
+    - from: 0
+      to: 9
+      color: red
+  # state_display: |
+  #   [[[
+  #     let time = parseInt(entity.state);
+  #     if (isNaN(time) || time === 0 min) return "Not Running";
+  #     return time + " min";
+  #   ]]]
+  # visibility: |
+  #   [[[
+  #     let time = parseInt(entity.state);
+  #     return !isNaN(time) && time > 0;  // Hide when machine is off
+  #   ]]]
+
+- type: entities
+  entities:
+    - entity: sensor.dryer_power_plug_current
+      name: "Current Usage"
+    - entity: sensor.dryer_power_plug_power
+      name: "Power Consumption"
+    - entity: sensor.dryer_power_plug_summation_delivered
+      name: "Total Energy Used"
+    - entity: sensor.dryer_power_plug_voltage
+      name: "Voltage"
+    - entity: sensor.dryer_estimated_remaining
+      name: "Time Left (Est.)"
+  card_mod: *card_style # Apply the same width rules
+
+- type: history-graph
+  title: "Dryer Power History"
+  entities:
+    - entity: sensor.dryer_power_plug_power
+      name: "Power Consumption"
+    - entity: sensor.dryer_power_plug_current
+      name: "Current Usage"
+    - entity: sensor.dryer_power_plug_voltage
+      name: "Voltage"
+  hours_to_show: 6
+  refresh_interval: 30
+
+- type: statistics-graph
+  title: "Dryer Energy Usage (Last 24h)"
+  entities:
+    - entity: sensor.dryer_power_plug_power
+      name: "Power Consumption"
+  days_to_show: 1
+  stat_types: mean
+  chart_type: line
