@@ -8,7 +8,6 @@
       show_icon: true
       show_state: true
       state_content:
-        - temperature
         - humidity
         - wind_speed
       icon: mdi:weather-partly-cloudy

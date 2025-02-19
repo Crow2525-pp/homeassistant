@@ -1,0 +1,90 @@
+# Washer Column
+- type: heading
+  heading_style: title
+  heading: "Laundry Monitor"
+  badges:
+    - type: entity
+      entity: input_boolean.washing_machine_on
+      name: "Washer"
+      icon: mdi:washing-machine
+      show_state: true
+      state_content:
+      color: state # Dynamic color based on ON/OFF
+      tap_action:
+        action: more-info # Opens more info for the washer
+
+    - type: entity
+      entity: sensor.washing_machine_estimated_remaining
+      name: "Time Remaining"
+      icon: mdi:clock-outline
+      show_state: true
+      color: "#42A5F5" # Soft Blue
+      tap_action:
+        action: more-info
+
+    - type: entity
+      entity: sensor.washing_machine_power_plug_power
+      name: "Power Usage"
+      icon: mdi:flash
+      show_state: true
+      color: "#FBC02D" # Yellow for Power
+      tap_action:
+        action: more-info
+
+- type: conditional
+  conditions:
+    - entity: sensor.washing_machine_estimated_remaining
+      state_not: "0"
+  card:
+    type: custom:bar-card
+    entity: sensor.washing_machine_estimated_remaining
+    title: "Washer Time Remaining"
+    min: 0
+    max: 50
+    icon: mdi:washing-machine
+    positions:
+      icon: outside
+      name: outside
+      value: inside
+    background_style: "linear-gradient(90deg, rgba(66,165,245,1) 0%, rgba(30,136,229,1) 100%)"
+    state_display: |
+      [[[
+        let time = parseFloat(entity.state);
+        if (isNaN(time) || time <= 0) return "Not Running";
+        return time + " min";
+      ]]]
+
+- type: entities
+  title: "Washer Stats"
+  entities:
+    - entity: sensor.washing_machine_power_plug_current
+      name: "Current Usage"
+    - entity: sensor.washing_machine_power_plug_power
+      name: "Power Consumption"
+    - entity: sensor.washing_machine_power_plug_summation_delivered
+      name: "Total Energy Used"
+    - entity: sensor.washing_machine_power_plug_voltage
+      name: "Voltage"
+    - entity: sensor.washing_machine_estimated_remaining
+      name: "Time Left (Est.)"
+
+- type: history-graph
+  title: "Washer Power History"
+  entities:
+    - entity: sensor.washing_machine_power_plug_power
+      name: "Power Consumption"
+    - entity: sensor.washing_machine_power_plug_current
+      name: "Current Usage"
+    - entity: sensor.washing_machine_power_plug_voltage
+      name: "Voltage"
+  hours_to_show: 6
+  refresh_interval: 30
+
+- type: statistics-graph
+  title: "Laundry Energy Usage (Last 24h)"
+  entities:
+    - entity: sensor.washing_machine_power_plug_power
+      name: "Power Consumption"
+  days_to_show: 1
+  stat_types: mean
+  chart_type: line

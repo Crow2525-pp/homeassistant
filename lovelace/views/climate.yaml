@@ -1,21 +1,60 @@
-# /lovelace/views/main.yaml
 title: Climate Dashboard
 path: climate
 icon: mdi:thermostat
-badges:
-  - entity: input_boolean.washing_machine_on
-    name: "Washer"
-    icon: mdi:washing-machine
-    show_state: true
-    state_content:
-      - last_changed
 
-  - entity: input_boolean.dryer_on
-    name: "Dryer"
-    icon: mdi:tumble-dryer
+badges:
+  - type: entity
+    show_name: true
     show_state: true
+    show_icon: true
+    entity: person.phil_patterson
+    visibility:
+      - condition: user
+        users:
+          - 9698c3b9047a439cadc6b24f0455adf8
+          - e104d00f0f6d4b459273ce6c45cf232f
+    color: indigo
+    tap_action:
+      action: more-info
+    show_entity_picture: true
+    state_content:
+      - state
+    name: Phil
+  - type: entity
+    show_name: true
+    show_state: true
+    show_icon: true
+    entity: person.stephanie_patterson
+    tap_action:
+      action: more-info
+    show_entity_picture: true
+    visibility:
+      - condition: user
+        users:
+          - 307832576127404887f4525f27f45536
+          - e104d00f0f6d4b459273ce6c45cf232f
+    state_content:
+      - state
+    name: Steph
+  - type: entity
+    show_name: true
+    show_state: true
+    show_icon: true
+    entity: person.wendy
     state_content:
       - last_changed
+    color: indigo
+    tap_action:
+      action: more-info
+    name: Wendy Home
+    show_entity_picture: true
+  - type: entity
+    show_name: true
+    show_state: true
+    show_icon: true
+    entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
+    name: Solar Yield
+    color: ""
 
 type: sections
 sections:

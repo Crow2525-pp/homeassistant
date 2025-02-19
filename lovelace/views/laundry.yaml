@@ -1,4 +1,3 @@
-# /lovelace/views/main.yaml
 title: Laundry
 path: laundry
 icon: mdi:washing-machine
@@ -20,7 +19,13 @@ badges:
 type: sections
 sections:
   - type: grid
-    cards: !include ../cards/laundry.yaml
+    cards: !include ../cards/laundry/washer.yaml
+
+  - type: grid
+    cards: !include ../cards/laundry/dryer.yaml
+
+  - type: grid
+    cards: !include ../cards/laundry/misc.yaml
 
   # !include_dir_merge_list ../cards/
   # cards: !include ../cards/alerts.yaml
