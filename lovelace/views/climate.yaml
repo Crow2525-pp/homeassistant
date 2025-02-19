@@ -1,6 +1,22 @@
+# /lovelace/views/main.yaml
 title: Climate Dashboard
 path: climate
 icon: mdi:thermostat
+badges:
+  - entity: input_boolean.washing_machine_on
+    name: "Washer"
+    icon: mdi:washing-machine
+    show_state: true
+    state_content:
+      - last_changed
+
+  - entity: input_boolean.dryer_on
+    name: "Dryer"
+    icon: mdi:tumble-dryer
+    show_state: true
+    state_content:
+      - last_changed
+
 type: sections
 sections:
   - type: grid

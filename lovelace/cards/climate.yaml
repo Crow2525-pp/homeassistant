@@ -1,3 +1,9 @@
+- type: custom:better-thermostat-ui-card
+  name: Masterbed
+  entity: climate.masterbed_versatile_thermostat
+  disable_overpowering: false
+  eco_temperature: 22
+
 - type: tile
   entity: climate.living_room_versatile_thermastat
   name: Living Room
