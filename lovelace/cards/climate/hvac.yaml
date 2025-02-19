@@ -1,6 +1,7 @@
 # Climate Control
 - type: heading
   heading_style: title
+  icon: mdi:home-thermometer
   heading: "Climate Control"
 
 # Home Occupancy Status

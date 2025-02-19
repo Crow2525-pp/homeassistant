@@ -1,0 +1,132 @@
+- type: heading
+  heading: "Temperature"
+  icon: mdi:thermometer
+  heading_style: title
+
+- type: glance
+  show_state: true
+  entities:
+    # Living Room
+    - entity: sensor.livingroom_irblaster_temperature
+      name: Living
+      tap_action:
+        action: more-info
+      card_mod:
+        style: |
+          :host {
+            --paper-item-icon-color:
+              {% if states('sensor.livingroom_irblaster_temperature') | float < 18 %}
+                #64B5F6
+              {% elif states('sensor.livingroom_irblaster_temperature') | float > 24 %}
+                #FF8A65
+              {% else %}
+                #81C784
+              {% endif %};
+          }
+
+    # Henry's Room
+    - entity: sensor.study_esp32_ottosroom_temperature
+      name: Henry
+      tap_action:
+        action: more-info
+      card_mod:
+        style: |
+          :host {
+            --paper-item-icon-color:
+              {% if states('sensor.study_esp32_ottosroom_temperature') | float < 18 %}
+                #64B5F6
+              {% elif states('sensor.study_esp32_ottosroom_temperature') | float > 24 %}
+                #FF8A65
+              {% else %}
+                #81C784
+              {% endif %};
+          }
+
+    # Otto's Room
+    - entity: sensor.ble_temperature_masterbed_temp_humidity_sensor
+      name: Otto
+      tap_action:
+        action: more-info
+      card_mod:
+        style: |
+          :host {
+            --paper-item-icon-color:
+              {% if states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float < 18 %}
+                #64B5F6
+              {% elif states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float > 24 %}
+                #FF8A65
+              {% else %}
+                #81C784
+              {% endif %};
+          }
+
+    # Master Bedroom
+    - entity: sensor.study_esp32_henrysroom_temperature
+      name: Master
+      tap_action:
+        action: more-info
+      card_mod:
+        style: |
+          :host {
+            --paper-item-icon-color:
+              {% if states('sensor.study_esp32_henrysroom_temperature') | float < 18 %}
+                #64B5F6
+              {% elif states('sensor.study_esp32_henrysroom_temperature') | float > 24 %}
+                #FF8A65
+              {% else %}
+                #81C784
+              {% endif %};
+          }
+
+    # Essendon Airport
+    - entity: sensor.essendon_airport_temp
+      name: Essendon
+      tap_action:
+        action: more-info
+      card_mod:
+        style: |
+          :host {
+            --paper-item-icon-color:
+              {% if states('sensor.essendon_airport_temp') | float < 18 %}
+                #64B5F6
+              {% elif states('sensor.essendon_airport_temp') | float > 24 %}
+                #FF8A65
+              {% else %}
+                #81C784
+              {% endif %};
+          }
+
+- type: heading
+  heading: "Temperature Trends"
+  icon: mdi:thermometer
+  heading_style: subtitle
+
+- type: history-graph
+  entities:
+    - entity: sensor.ble_temperature_masterbed_temp_humidity_sensor
+      name: Master Bedroom
+    - entity: sensor.study_esp32_ottosroom_temperature
+      name: Otto's Room
+    - entity: sensor.study_esp32_henrysroom_temperature
+      name: Henry's Room
+    - entity: sensor.livingroom_irblaster_temperature
+      name: Living Room
+  hours_to_show: 24
+  show_names: true
+
+- type: heading
+  heading: "Weather"
+  icon: mdi:weather-cloudy
+  heading_style: title
+  badges:
+    - type: entity
+      entity: weather.braybrook
+      show_icon: true
+      show_state: true
+      state_content:
+        - humidity
+        - wind_speed
+      icon: mdi:weather-partly-cloudy
+- type: weather-forecast
+  entity: weather.braybrook
+  forecast_type: daily
