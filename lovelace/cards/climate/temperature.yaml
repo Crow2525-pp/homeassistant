@@ -104,29 +104,12 @@
 - type: history-graph
   entities:
     - entity: sensor.ble_temperature_masterbed_temp_humidity_sensor
-      name: Master Bedroom
+      name: Master
     - entity: sensor.study_esp32_ottosroom_temperature
-      name: Otto's Room
+      name: Otto
     - entity: sensor.study_esp32_henrysroom_temperature
-      name: Henry's Room
+      name: Henry
     - entity: sensor.livingroom_irblaster_temperature
-      name: Living Room
+      name: Living
   hours_to_show: 24
   show_names: true
-
-- type: heading
-  heading: "Weather"
-  icon: mdi:weather-cloudy
-  heading_style: title
-  badges:
-    - type: entity
-      entity: weather.braybrook
-      show_icon: true
-      show_state: true
-      state_content:
-        - humidity
-        - wind_speed
-      icon: mdi:weather-partly-cloudy
-- type: weather-forecast
-  entity: weather.braybrook
-  forecast_type: daily

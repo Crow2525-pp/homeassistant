@@ -61,7 +61,7 @@
 
     # Master Bedroom
     - entity: sensor.humiditysensor_humidity
-      name: Masterbed
+      name: Master
       tap_action:
         action: more-info
       card_mod:
@@ -107,7 +107,7 @@
   entities:
     # Living Room
     - entity: sensor.livingroom_irblaster_humidity
-      name: Living Room IR Blaster
+      name: Living
     # - entity: sensor.ble_humidity_kitchen_temp_humidity_sensor
     #   name: BLE Humidity Kitchen
     # - entity: sensor.ble_humidity_front_door
@@ -117,7 +117,7 @@
     # - entity: sensor.henrys_room_ir_blaster_humidity
     #   name: Henry's Room IR Blaster
     - entity: sensor.study_esp32_henrysroom_humidity
-      name: Study ESP32 Henry's Room
+      name: Henry
     # - entity: sensor.ble_humidity_a4c138a817fd
     #   name: Henry's Room
     # - entity: sensor.henrys_room_temp_humidity_sensor_humidity
@@ -125,7 +125,7 @@
 
     # Otto's Room
     - entity: sensor.study_esp32_ottosroom_humidity
-      name: Study ESP32 Otto's Room
+      name: Otto
     # - entity: sensor.ottos_room_temp_humidity_sensor_humidity
     #   name: Otto's Room Temp Humidity
 
@@ -133,7 +133,7 @@
     # - entity: sensor.hub_2_0be5_humidity
     #   name: Masterbed Sidebed Hub
     - entity: sensor.humiditysensor_humidity
-      name: Masterbed Matter Humidity Sensor
+      name: Masterbed
 
     # Other Sensors
     # - entity: sensor.essendon_airport_humidity

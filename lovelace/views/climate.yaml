@@ -1,6 +1,6 @@
 title: Climate Dashboard
 path: climate
-icon: mdi:thermostat
+icon: mdi:hvac
 
 badges:
   - type: entity
@@ -57,6 +57,7 @@ badges:
     color: ""
 
 type: sections
+max_columns: 3
 sections:
   - type: grid
     cards: !include ../cards/climate/hvac.yaml
@@ -66,3 +67,6 @@ sections:
 
   - type: grid
     cards: !include ../cards/climate/humidity.yaml
+
+  - type: grid
+    cards: !include ../cards/climate/forecast.yaml
