@@ -13,13 +13,13 @@
     - name: "Washing Machine Estimated Remaining"
       unique_id: washing_machine_estimated_remaining
       state: >
-        {% set cycle_time = 50 %}
+        {% set cycle_time = 55 %}
         {% if is_state('input_boolean.washing_machine_on', 'on') and states.input_boolean.washing_machine_on.last_changed %}
           {% set last_changed = as_timestamp(states.input_boolean.washing_machine_on.last_changed) %}
           {% if last_changed is not none %}
             {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
             {% set remaining = cycle_time - elapsed %}
-            {{ [remaining | round(0), 0] | max }}  # Ensures 0 min is the lowest value
+            {{ [remaining | round(0), 0] | max }} 
           {% else %}
             0
           {% endif %}

@@ -1453,6 +1453,6 @@ views:
     visible:
       - user: e104d00f0f6d4b459273ce6c45cf232f
       - user: 307832576127404887f4525f27f45536
-  - !include lovelace/views/main.yaml
-  # - !include lovelace/views/climate.yaml
+  - !include lovelace/views/laundry.yaml
+  - !include lovelace/views/climate.yaml
   # - !include lovelace/views/media.yaml

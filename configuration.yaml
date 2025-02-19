@@ -22,6 +22,8 @@ lovelace:
       type: module
     - url: /hacsfiles/bar-card/bar-card.js
       type: module
+    - url: /hacsfiles/better-thermostat-ui-card/better-thermostat-ui-card.js
+      type: module
 
 logger:
   default: info
