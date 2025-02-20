@@ -17,6 +17,7 @@ badges:
       - last_changed
 
 type: sections
+max_columns: 2
 sections:
   - type: grid
     cards: !include ../cards/laundry/washer.yaml

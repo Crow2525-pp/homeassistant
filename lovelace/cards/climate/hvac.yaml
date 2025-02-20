@@ -15,6 +15,7 @@
       icon: mdi:account-group
       show_state: true
       state_content:
+        - state
         - last_changed
       color: >
         {% if states('zone.home') | int == 0 %} red {% else %} blue {% endif %}
@@ -28,7 +29,7 @@
     - type: vertical-stack
       cards:
         - type: tile
-          entity: climate.living_room_versatile_thermastat
+          entity: climate.masterbed_versatile_thermostat
           name: Master Bedroom
           features:
             - type: climate-hvac-modes
@@ -46,8 +47,7 @@
               state_content:
                 - state
                 - last_changed
-              color: >
-                {% if is_state('binary_sensor.master_bedroom_door_sensor_opening', 'on') %} orange {% else %} blue {% endif %}
+              color: state
               tap_action:
                 action: more-info
     # Otto's Room
@@ -72,8 +72,7 @@
               state_content:
                 - state
                 - last_changed
-              color: >
-                {% if is_state('binary_sensor.otto_room_door_sensor_opening', 'on') %} orange {% else %} blue {% endif %}
+              color: state
               tap_action:
                 action: more-info
 - type: grid
@@ -101,8 +100,7 @@
               state_content:
                 - state
                 - last_changed
-              color: >
-                {% if is_state('binary_sensor.henry_door_sensor_magnet_opening', 'on') %} orange {% else %} blue {% endif %}
+              color: state
               tap_action:
                 action: more-info
     # Living Room
@@ -126,8 +124,7 @@
               state_content:
                 - state
                 - last_changed
-              color: >
-                {% if is_state('binary_sensor.living_room_door_sensor_opening', 'on') %} orange {% else %} blue {% endif %}
+              color: state
               tap_action:
                 action: more-info
         - type: heading
@@ -141,7 +138,6 @@
               state_content:
                 - state
                 - last_changed
-              color: >
-                {% if is_state('binary_sensor.interior_garage_door_sensor_magnet_opening', 'on') %} orange {% else %} blue {% endif %}
+              color: state
               tap_action:
                 action: more-info

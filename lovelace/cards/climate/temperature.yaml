@@ -25,8 +25,26 @@
           }
 
     # Henry's Room
-    - entity: sensor.study_esp32_ottosroom_temperature
+    - entity: sensor.study_esp32_henrysroom_temperature
       name: Henry
+      tap_action:
+        action: more-info
+      card_mod:
+        style: |
+          :host {
+            --paper-item-icon-color:
+              {% if states('sensor.study_esp32_henrysroom_temperature') | float < 18 %}
+                #64B5F6
+              {% elif states('sensor.study_esp32_henrysroom_temperature') | float > 24 %}
+                #FF8A65
+              {% else %}
+                #81C784
+              {% endif %};
+          }
+
+    # Otto's Room
+    - entity: sensor.study_esp32_ottosroom_temperature
+      name: Otto
       tap_action:
         action: more-info
       card_mod:
@@ -42,9 +60,9 @@
               {% endif %};
           }
 
-    # Otto's Room
+    # Master Bedroom
     - entity: sensor.ble_temperature_masterbed_temp_humidity_sensor
-      name: Otto
+      name: Master
       tap_action:
         action: more-info
       card_mod:
@@ -54,24 +72,6 @@
               {% if states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float < 18 %}
                 #64B5F6
               {% elif states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float > 24 %}
-                #FF8A65
-              {% else %}
-                #81C784
-              {% endif %};
-          }
-
-    # Master Bedroom
-    - entity: sensor.study_esp32_henrysroom_temperature
-      name: Master
-      tap_action:
-        action: more-info
-      card_mod:
-        style: |
-          :host {
-            --paper-item-icon-color:
-              {% if states('sensor.study_esp32_henrysroom_temperature') | float < 18 %}
-                #64B5F6
-              {% elif states('sensor.study_esp32_henrysroom_temperature') | float > 24 %}
                 #FF8A65
               {% else %}
                 #81C784

@@ -1455,3 +1455,4 @@ views:
   # - !include lovelace/views/media.yaml
   - !include lovelace/views/climate.yaml
   - !include lovelace/views/laundry.yaml
+  - !include lovelace/views/alarm.yaml

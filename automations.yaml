@@ -2913,13 +2913,14 @@
   use_blueprint:
     path: Blackshome/appliance-notifications.yaml
     input:
-      power_sensor: sensor.washing_machine_power_plug_power
-      running_dead_zone: 4
+      running_dead_zone: 1
       start_notify_device:
       - c054264b79e6739a057236f3a3c512b4
+      - 58e2eb1fec0eb5ec9ce450433d074fcf
       include_end_notify: enable_end_notify_options
       end_notify_device:
       - 58e2eb1fec0eb5ec9ce450433d074fcf
+      - c054264b79e6739a057236f3a3c512b4
       end_reminder_notification: disable_reminder_notification
       include_power_tracking: enable_power_tracking
       include_duration_tracking: enable_duration_tracking
@@ -2951,11 +2952,11 @@
         data: {}
         target:
           entity_id: input_boolean.washing_machine_on
-      start_appliance_power: 2
+      start_appliance_power: 17
       include_start_notify: enable_start_notify_options
-      end_appliance_power: 6
-      end_time_delay: 2
-      start_time_delay: 0
+      end_appliance_power: 4
+      end_time_delay: 1
+      start_time_delay: 1
       end_repeat_count: 1
       start_message: YES! Another load of washing is ON :)
       start_power_consumption: input_number.washing_power_tracker_kwh
@@ -3152,6 +3153,7 @@
       power_sensor: sensor.dryer_power_plug_power
       start_notify_device:
       - c054264b79e6739a057236f3a3c512b4
+      - 58e2eb1fec0eb5ec9ce450433d074fcf
       include_start_notify: enable_start_notify_options
       start_notify_data:
       - channel
@@ -3179,6 +3181,11 @@
           cache: true
           media_player_entity_id: media_player.kitchen
           message: Dryer is done
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.dryer_on
       end_appliance_power: 6
       start_custom_actions:
       - action: input_boolean.turn_on
@@ -3186,18 +3193,15 @@
         data: {}
         target:
           entity_id: input_boolean.dryer_on
-      watchdog_custom_actions:
-      - action: input_boolean.turn_off
-        metadata: {}
-        data: {}
-        target:
-          entity_id: input_boolean.dryer_on
+      watchdog_custom_actions: []
       end_time_delay: 1.5
       start_title: Dryer
       end_message_title: Dryer
       start_appliance_power: 5
       start_power_consumption: input_number.start_dryer_power_tracker
       end_power_consumption: input_number.end_dryer_power_tracker_kwh
+      start_notify_interruption_level: passive
+      end_reminder_notification_max_count: 1
 - id: '1738224719290'
   alias: Reading light switch
   description: Turns on or off the reading light

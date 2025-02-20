@@ -1,0 +1,10 @@
+# Alarm Control
+title: Security Control Center
+path: alarm
+icon: mdi:shield-home
+
+type: sections
+max_columns: 2
+sections:
+  - type: grid
+    cards: !include ../cards/alarm/alarmo.yaml

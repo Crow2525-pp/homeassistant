@@ -1,0 +1,142 @@
+# --- 🎥 CAMERA GRID ---
+- type: heading
+  heading_style: title
+  heading: Live Security Feeds
+  icon: mdi:cctv
+- type: grid
+  square: false
+  columns: 2
+  cards:
+    - type: picture-entity
+      entity: camera.bi_driveway
+      name: Driveway
+      camera_view: live
+      fit_mode: fill
+    - type: picture-entity
+      entity: camera.bi_front_door_camera
+      name: Front Door
+      camera_view: live
+      fit_mode: fill
+
+# --- 🔔 ALARM CONTROL PANEL ---
+- type: heading
+  heading_style: title
+  heading: Security System
+  icon: mdi:security
+
+- type: alarm-panel
+  entity: alarm_control_panel.alarmo
+  name: Security System
+  states:
+    - arm_away
+    - arm_night
+    - disarm
+
+# --- 🚪 DOORS & WINDOWS ---
+- type: heading
+  heading_style: title
+  heading: Entry Points - Doors & Windows
+  icon: mdi:door
+- type: heading
+  heading_style: subtitle
+  badges:
+    - type: entity
+      entity: sensor.total_security_entities
+      name: "Total Security Entities"
+      show_state: true
+      state_content:
+        - name
+        - state
+    - type: entity
+      entity: sensor.offline_security_entities
+      name: Offline Security Entities
+      show_state: true
+      state_content:
+        - name
+        - state
+
+- type: custom:auto-entities
+  card:
+    type: entities
+  filter:
+    include:
+      - domain: binary_sensor and
+      - label: Doors
+        options:
+          secondary_info: last-changed
+  sort:
+    method: room
+
+# --- 👁️ MOTION & PRESENCE ---
+- type: entities
+  title: Motion Sensors & Occupancy
+  icon: mdi:motion-sensor
+  entities:
+    - entity: binary_sensor.front_door_cam_motion_2
+      name: Front Door Camera Motion
+    - entity: binary_sensor.motion_sensor_motion
+      name: Front Hallway Motion
+    - entity: binary_sensor.motion_sensor_occupancy
+      name: General Occupancy
+
+# --- 🌊 WATER & FIRE SENSORS ---
+- type: entities
+  title: Water & Fire Detection
+  icon: mdi:water-alert
+  entities:
+    - entity: binary_sensor.front_door_water_sensor_moisture
+      name: Front Door Moisture
+    - entity: binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture
+      name: Laundry Sensor
+    - entity: binary_sensor.smoke_alarm_smoke
+      name: Smoke Alarm
+
+# --- ⚠️ WARNINGS & ENVIRONMENT ---
+- type: entities
+  title: Warnings & Environmental Alerts
+  icon: mdi:alert-decagram
+  entities:
+    - entity: sensor.braybrook_warnings
+      name: Weather Warnings
+
+# --- 🚗 DEVICE & VEHICLE STATUS ---
+- type: entities
+  title: Device & Car Integration
+  icon: mdi:cellphone
+  entities:
+    - entity: binary_sensor.samsung_galaxy_s22_ultra_android_auto
+      name: Galaxy S22 Ultra - Android Auto
+    - entity: binary_sensor.samsung_galaxy_s22_ultra_is_charging
+      name: Galaxy S22 Ultra - Charging
+
+# --- 👥 PRESENCE TRACKING ---
+- type: entities
+  title: Presence Tracking
+  icon: mdi:account-group
+  entities:
+    - entity: person.phil_patterson
+      name: Phil Patterson
+    - entity: person.stephanie_patterson
+      name: Stephanie Patterson
+    - entity: person.wendy
+      name: Wendy
+
+# --- 📊 HISTORY GRAPH ---
+- type: history-graph
+  title: Activity Log - Last 18 Hours
+  hours_to_show: 18
+  refresh_interval: 30
+  entities:
+    - entity: person.phil_patterson
+    - entity: person.stephanie_patterson
+    - entity: input_select.occupancy
+    - entity: alarm_control_panel.alarmo
+    - entity: zone.home
+    - entity: binary_sensor.front_door_cam_motion_2
+
+# -- SETTINGS ---
+- type: entities
+  title: Settings
+  entities:
+    - entity: input_select.occupancy
+      name: Home Occupancy Status

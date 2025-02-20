@@ -1,0 +1,7 @@
+badges:
+  - type: entity
+    entity: alarm_control_panel.alarmo
+    show_state: true
+    colour: state
+    state_content:
+      - state
