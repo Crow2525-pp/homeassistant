@@ -1593,66 +1593,6 @@
           sequence: []
   mode: parallel
   max_exceeded: silent
-- id: '1705646906838'
-  alias: Dishwasher done
-  description: Power change less than 50w resultingnin sending notification to s23
-    phil and iphone steph
-  triggers:
-  - type: power
-    device_id: 6061744ba3656ae82e93e33c02f2d070
-    entity_id: 616d141a6ad937b14ac1f65b5fe12c62
-    domain: sensor
-    below: 20
-    for:
-      hours: 0
-      minutes: 20
-      seconds: 0
-    id: Dishwasher Off
-    trigger: device
-  - type: power
-    device_id: 6061744ba3656ae82e93e33c02f2d070
-    entity_id: 616d141a6ad937b14ac1f65b5fe12c62
-    domain: sensor
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-    id: Dishwasher On
-    above: 20
-    trigger: device
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - Dishwasher On
-      sequence:
-      - action: input_boolean.turn_on
-        metadata: {}
-        data: {}
-        target:
-          entity_id: input_boolean.dishwasher_on
-    - conditions:
-      - condition: trigger
-        id:
-        - Dishwasher Off
-      - condition: state
-        entity_id: input_boolean.dishwasher_on
-        state: 'on'
-      sequence:
-      - action: input_boolean.turn_off
-        target:
-          entity_id:
-          - input_boolean.dishwasher_on
-        data: {}
-      - data:
-          message: Dishwasher is done
-        action: notify.mobile_app_slvdh
-      - data:
-          message: Dishwasher is done
-        action: notify.mobile_app_samsung_galaxy_s22_ultra
-  mode: single
 - id: '1706063916168'
   alias: Water detected
   description: ''
@@ -2913,7 +2853,7 @@
   use_blueprint:
     path: Blackshome/appliance-notifications.yaml
     input:
-      running_dead_zone: 1
+      running_dead_zone: 2
       start_notify_device:
       - c054264b79e6739a057236f3a3c512b4
       - 58e2eb1fec0eb5ec9ce450433d074fcf
@@ -2952,9 +2892,9 @@
         data: {}
         target:
           entity_id: input_boolean.washing_machine_on
-      start_appliance_power: 17
+      start_appliance_power: 10
       include_start_notify: enable_start_notify_options
-      end_appliance_power: 4
+      end_appliance_power: 10
       end_time_delay: 1
       start_time_delay: 1
       end_repeat_count: 1
@@ -3169,7 +3109,7 @@
       end_message: Dryer is finished!
       start_message: YES! Another dryer load is ON :)
       include_power_tracking: enable_power_tracking
-      power_consumption_sensor: sensor.dryer_power_plug_power
+      power_consumption_sensor: sensor.dryer_power_plug_summation_delivered
       include_duration_tracking: enable_duration_tracking
       include_custom_actions:
       - enable_end_custom_actions
@@ -3186,7 +3126,7 @@
         data: {}
         target:
           entity_id: input_boolean.dryer_on
-      end_appliance_power: 6
+      end_appliance_power: 400
       start_custom_actions:
       - action: input_boolean.turn_on
         metadata: {}
@@ -3197,11 +3137,12 @@
       end_time_delay: 1.5
       start_title: Dryer
       end_message_title: Dryer
-      start_appliance_power: 5
+      start_appliance_power: 10
       start_power_consumption: input_number.start_dryer_power_tracker
       end_power_consumption: input_number.end_dryer_power_tracker_kwh
       start_notify_interruption_level: passive
       end_reminder_notification_max_count: 1
+      start_time_delay: 0.5
 - id: '1738224719290'
   alias: Reading light switch
   description: Turns on or off the reading light
@@ -3397,3 +3338,46 @@
     target:
       device_id: ac27c1acd87d567603e54ed90f046a50
   mode: single
+- id: '1740132306652'
+  alias: Dishwasher Appliance Notification
+  description: Based on power consumption alerts the household to the dishwasher being
+    run
+  use_blueprint:
+    path: Blackshome/appliance-notifications.yaml
+    input:
+      end_power_consumption: input_number.dishwasher_power_tracker_end
+      power_sensor: sensor.dishwasher_power_sensor_mss310_energy_kwh_main_channel
+      start_appliance_power: 40
+      include_start_notify: enable_start_notify_options
+      start_notify_device:
+      - 58e2eb1fec0eb5ec9ce450433d074fcf
+      - c054264b79e6739a057236f3a3c512b4
+      start_title: Dishwasher
+      start_message: YES! The dishwasher is on
+      start_notify_interruption_level: passive
+      start_notify_data: []
+      include_end_notify: enable_end_notify_options
+      end_notify_device:
+      - 58e2eb1fec0eb5ec9ce450433d074fcf
+      - c054264b79e6739a057236f3a3c512b4
+      end_message_title: Dishwasher
+      end_message: Yippee the dishwasher machine is finished!
+      include_power_tracking: enable_power_tracking
+      power_consumption_sensor: sensor.dishwasher_power_sensor_mss310_power_w_main_channel
+      start_power_consumption: input_number.dishwasher_power_tracker_start
+      include_duration_tracking: enable_duration_tracking
+      include_custom_actions:
+      - enable_start_custom_actions
+      - enable_end_custom_actions
+      start_custom_actions:
+      - action: input_boolean.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.dishwasher_on
+      end_custom_actions:
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.dishwasher_on
