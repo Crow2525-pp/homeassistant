@@ -111,5 +111,7 @@
       name: Henry
     - entity: sensor.livingroom_irblaster_temperature
       name: Living
+    - entity: sensor.essendon_airport_temp
+      name: Essendon
   hours_to_show: 24
   show_names: true

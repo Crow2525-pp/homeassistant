@@ -113,6 +113,8 @@
       name: Henry
     - entity: sensor.livingroom_irblaster_humidity
       name: Living
+    - entity: sensor.essendon_airport_humidity
+      name: Essendon
 
       # Living Room
       # - entity: sensor.ble_humidity_kitchen_temp_humidity_sensor
