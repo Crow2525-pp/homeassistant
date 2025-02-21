@@ -1,0 +1,41 @@
+# --- 🎥 CAMERA GRID ---
+- type: heading
+  heading_style: title
+  heading: Live Security Feeds
+  icon: mdi:cctv
+
+- type: grid
+  square: false
+  columns: 2
+  cards:
+    - type: picture-entity
+      entity: camera.bi_driveway
+      name: Driveway
+      camera_view: live
+      fit_mode: fill
+    - type: picture-entity
+      entity: camera.bi_front_door_camera
+      name: Front Door
+      camera_view: live
+      fit_mode: fill
+
+# --- 👁️ MOTION & PRESENCE ---
+- type: heading
+  heading_style: title
+  heading: Motion Sensors
+  icon: mdi:motion-sensor
+
+- type: custom:auto-entities
+  card:
+    type: entities
+  filter:
+    include:
+      - domain: binary_sensor and
+      - label: Motion*
+        options:
+          secondary_info: last-changed
+  sort:
+    method: room
+
+- type: entity
+  entity: sensor.motion_sensor_illuminance

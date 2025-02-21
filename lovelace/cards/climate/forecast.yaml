@@ -14,3 +14,11 @@
 - type: weather-forecast
   entity: weather.braybrook
   forecast_type: daily
+
+# --- ⚠️ WARNINGS & ENVIRONMENT ---
+- type: entities
+  title: Warnings & Environmental Alerts
+  icon: mdi:alert-decagram
+  entities:
+    - entity: sensor.braybrook_warnings
+      name: Weather Warnings
