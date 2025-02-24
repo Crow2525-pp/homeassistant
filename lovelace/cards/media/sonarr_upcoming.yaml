@@ -1,0 +1,34 @@
+# - type: custom:config-template-card
+#   variables:
+#     rows: >-
+#       {% set ns = namespace(rows=[]) %}
+#       {% for key, value in states.sensor.sonarr_upcoming.attributes.items() %}
+#         {% if key not in ['friendly_name', 'unit_of_measurement'] %}
+#           {% set ns.rows = ns.rows + [{
+#             "type": "custom:template-entity-row",
+#             "entity": "sensor.sonarr_upcoming",
+#             "name": key,
+#             "state": value
+#           }] %}
+#         {% endif %}
+#       {% endfor %}
+#       {{ ns.rows | tojson }}
+#   card:
+#     type: entities
+#     title: Upcoming Shows
+#     # Use triple-bracket JS template to parse rows (a JSON string) back into an array
+#     entities: >-
+#       [[[
+#         return JSON.parse(variables.rows);
+#       ]]]
+
+
+- type: custom:template-entity-row
+  entity: sensor.sonarr_upcoming
+  name: Upcoming Shows
+  state: >
+    {% for key, value in states.sensor.sonarr_upcoming.attributes.items() %}
+      {% if key not in ['friendly_name', 'unit_of_measurement'] %}
+        {{ key }}: {{ value }}{% if not loop.last %}, {% endif %}
+      {% endif %}
+    {% endfor %}

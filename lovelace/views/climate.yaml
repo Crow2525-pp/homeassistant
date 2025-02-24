@@ -55,6 +55,12 @@ badges:
     entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
     name: Solar Yield
     color: ""
+  - type: entity
+    show_name: true
+    show_state: true
+    show_icon: true
+    entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
+    name: Curr. Energy Use
 
 type: sections
 max_columns: 3
@@ -70,3 +76,6 @@ sections:
 
   - type: grid
     cards: !include ../cards/climate/forecast.yaml
+
+  - type: grid
+    cards: !include ../cards/climate/warnings.yaml

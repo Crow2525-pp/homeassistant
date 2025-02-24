@@ -1,3 +1,7 @@
+resources:
+  - url: www/custom-lovelace/upcoming-media-card-0.6.2/upcoming-media-card.js?v=0.6.2
+    type: js
+
 title: Home Dashboard
 views:
   - title: .
@@ -1283,7 +1287,7 @@ views:
     visible:
       - user: e104d00f0f6d4b459273ce6c45cf232f
   - title: Media
-    path: media
+    path: media2
     icon: mdi:music
     theme: waves
     cards:
@@ -1456,3 +1460,6 @@ views:
   - !include lovelace/views/climate.yaml
   - !include lovelace/views/laundry.yaml
   - !include lovelace/views/alarm.yaml
+  - !include lovelace/views/maintenance.yaml
+  - !include lovelace/views/network.yaml
+  - !include lovelace/views/media.yaml

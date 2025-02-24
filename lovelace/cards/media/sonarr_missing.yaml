@@ -1,0 +1,36 @@
+- type: markdown
+  title: Missing Sonarr Episodes
+  content: >
+    {% set show_attrs = state_attr('sensor.sonarr_shows') %}
+    {% if show_attrs %}
+    **Shows with Missing Episodes:**  
+    {% set missing = [] %}
+    {% for key, value in show_attrs|dictsort %}
+      {% if key not in ['friendly_name','unit_of_measurement'] %}
+        {# key example: "South Park: 0/0 Episodes" #}
+        {% set parts = key.split(':') %}
+        {% if parts|length == 2 %}
+          {% set show_name = parts[0]|trim %}
+          {# ep_info => "0/0 Episodes" => remove 'Episodes' and split by '/' #}
+          {% set ep_info = parts[1]|replace('Episodes','')|trim %}
+          {% set ep_split = ep_info.split('/') %}
+          {% if ep_split|length == 2 %}
+            {% set have = ep_split[0]|int %}
+            {% set total = ep_split[1]|int %}
+            {% if have < total %}
+              {% set missing = missing + [show_name ~ ': Missing ' ~ (total - have) ~ ' episodes'] %}
+            {% endif %}
+          {% endif %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% if missing|length > 0 %}
+    {% for item in missing %}
+    - {{ item }}
+    {% endfor %}
+    {% else %}
+    All shows are up to date!
+    {% endif %}
+    {% else %}
+    *No data found in sensor.sonarr_shows.*
+    {% endif %}

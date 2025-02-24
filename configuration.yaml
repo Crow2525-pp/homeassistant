@@ -26,6 +26,10 @@ lovelace:
       type: module
     - url: /hacsfiles/lovelace-auto-entities/auto-entities.js
       type: module
+    - url: /hacsfiles/lovelace-template-entity-row/template-entity-row.js
+      type: module          
+    - url: /hacsfiles/config-template-card/config-template-card.js
+      type: module
 
 logger:
   default: info
@@ -38,6 +42,7 @@ frontend:
   javascript_version: latest
   extra_module_url:
     - /local/card-mod.js
+
 http:
   use_x_forwarded_for: true
   trusted_proxies:

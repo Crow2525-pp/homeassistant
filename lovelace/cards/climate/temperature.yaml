@@ -113,5 +113,6 @@
       name: Living
     - entity: sensor.essendon_airport_temp
       name: Essendon
+    - entity: sensor.thermal_comfort_kitchen_heat_index
   hours_to_show: 24
   show_names: true

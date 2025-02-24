@@ -1,0 +1,138 @@
+- type: entities
+  title: 🌐 Network Health
+  entities:
+    - entity: sensor.homenetwork
+      name: Home Network Status
+    - entity: binary_sensor.wan_down_alert_active
+      name: Internet Connection
+      icon: mdi:wan
+      state_color: true
+    - entity: binary_sensor.network_device_down_alert_active
+      name: Network Device Alert
+      icon: mdi:access-point-network
+      state_color: true
+    - entity: sensor.usg_3p_cpu_utilization
+      name: Router CPU Usage
+      icon: mdi:chip
+    - entity: sensor.usg_3p_memory_utilization
+      name: Router Memory Usage
+      icon: mdi:memory
+    - entity: sensor.usg_3p_state
+      name: Router Status
+      icon: mdi:router
+    - entity: sensor.usw_16_poe_cpu_utilization
+      name: Switch CPU Usage
+      icon: mdi:chip
+    - entity: sensor.usw_16_poe_memory_utilization
+      name: Switch Memory Usage
+      icon: mdi:memory
+    - entity: sensor.usw_16_poe_state
+      name: Switch Status
+      icon: mdi:ethernet
+
+- type: entities
+  title: 🖥️ Server & VM Monitoring
+  entities:
+    - entity: sensor.node_pve_cpu_used
+      name: Proxmox CPU Usage
+    - entity: sensor.node_pve_memory_used_percentage
+      name: Proxmox Memory Usage
+    - entity: sensor.qemu_media_server_101_cpu_used
+      name: Media Server CPU
+    - entity: sensor.qemu_media_server_101_disk_used_percentage
+      name: Media Server Disk Usage
+
+- type: gauge
+  entity: sensor.node_pve_cpu_used
+  name: Proxmox CPU Usage
+  min: 0
+  max: 100
+  severity:
+    green: 0
+    yellow: 50
+    red: 80
+
+- type: gauge
+  entity: sensor.node_pve_memory_used_percentage
+  name: Proxmox Memory Usage
+  min: 0
+  max: 100
+  severity:
+    green: 0
+    yellow: 60
+    red: 90
+
+- type: history-graph
+  title: 📊 Network Traffic (12h)
+  hours_to_show: 12
+  refresh_interval: 60
+  entities:
+    - entity: sensor.server_rx
+      name: RX (Received)
+    - entity: sensor.server_tx
+      name: TX (Transmitted)
+    - entity: sensor.docker_rx
+    - entity: sensor.docker_tx
+
+- type: statistics-graph
+  title: 🐳 Portainer - Container Resource Usage
+  entities:
+    - entity: sensor.portainer_local_plex
+      name: Plex CPU
+    - entity: sensor.portainer_local_sonarr
+      name: Sonarr CPU
+    - entity: sensor.portainer_local_radarr
+      name: Radarr CPU
+    - entity: sensor.portainer_local_nginxproxymanager
+      name: NGINX Proxy Manager CPU
+  stat_types:
+    - mean
+    - max
+  days_to_show: 1
+  chart_type: line
+
+- type: custom:auto-entities
+  card:
+    type: entities
+    title: 🐳 Portainer Containers
+  filter:
+    include:
+      - entity_id: sensor.portainer_local_*
+    exclude:
+      - state: "off"
+      - state: "unavailable"
+      - hidden_by: "user"
+  sort:
+    method: name
+
+- type: glance
+  title: 🟢 Container Health Check
+  entities:
+    - entity: sensor.portainer_local_plex
+      name: Plex
+    - entity: sensor.portainer_local_radarr
+      name: Radarr
+    - entity: sensor.portainer_local_sonarr
+      name: Sonarr
+    - entity: sensor.portainer_local_nginxproxymanager
+      name: NGINX Proxy
+
+- type: history-graph
+  title: "Speed Test Trends"
+  hours_to_show: 12
+  entities:
+    - entity: sensor.speedtest_ping
+      name: Ping
+    - entity: sensor.speedtest_download
+      name: Download
+    - entity: sensor.speedtest_upload
+      name: Upload
+
+- type: logbook
+  title: 🔔 Recent System Events
+  entities:
+    - sensor.node_pve_cpu_used
+    - sensor.portainer_local_plex
+    - sensor.portainer_local_sonarr
+    - sensor.portainer_local_radarr
+  hours_to_show: 24

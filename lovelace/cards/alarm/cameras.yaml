@@ -9,12 +9,7 @@
   columns: 2
   cards:
     - type: picture-entity
-      entity: camera.bi_driveway
-      name: Driveway
-      camera_view: live
-      fit_mode: fill
-    - type: picture-entity
-      entity: camera.bi_front_door_camera
+      entity: camera.security_cameras_front_door_camera
       name: Front Door
       camera_view: live
       fit_mode: fill

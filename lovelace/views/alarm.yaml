@@ -5,21 +5,7 @@ icon: mdi:shield-home
 
 type: sections
 max_columns: 3
-badges:
-  - type: entity
-    entity: sensor.total_security_entities
-    name: "Total Security Entities"
-    show_state: true
-    state_content:
-      - name
-      - state
-  - type: entity
-    entity: sensor.offline_security_entities
-    name: Offline Security Entities
-    show_state: true
-    state_content:
-      - name
-      - state
+
 sections:
   - type: grid
     cards: !include ../cards/alarm/cameras.yaml

@@ -16,6 +16,13 @@ badges:
     state_content:
       - last_changed
 
+  - entity: input_boolean.dishwasher_on
+    name: "Dishwasher"
+    icon: mdi:dishwasher
+    show_state: true
+    state_content:
+      - last_changed
+
 type: sections
 max_columns: 2
 sections:
@@ -24,6 +31,9 @@ sections:
 
   - type: grid
     cards: !include ../cards/laundry/dryer.yaml
+
+  - type: grid
+    cards: !include ../cards/laundry/dishwasher.yaml
 
   - type: grid
     cards: !include ../cards/laundry/misc.yaml

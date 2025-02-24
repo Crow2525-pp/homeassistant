@@ -1,0 +1,11 @@
+title: Network & Device Monitoring
+path: network
+icon: mdi:network
+type: sections
+max_columns: 2
+sections:
+  - type: grid
+    cards: !include ../cards/network/network_services.yaml
+
+  - type: grid
+    cards: !include ../cards/network/network_status.yaml

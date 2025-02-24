@@ -297,17 +297,6 @@
     device_id: c054264b79e6739a057236f3a3c512b4
     entity_id: 39a721a1e67ec5758cce90959b3d8a25
     domain: binary_sensor
-  - condition: not
-    conditions:
-    - condition: or
-      conditions:
-      - condition: state
-        entity_id: input_select.automation_killswitch
-        state: Exit/Entry Automations Off
-      - condition: state
-        entity_id: input_select.automation_killswitch
-        state: All Automations Off
-    alias: Ensure Killswitch Not Activated
   actions:
   - device_id: 7edad8ef01a718694f8a423cbfdca0c0
     domain: cover
@@ -1152,18 +1141,7 @@
       minutes: 20
       seconds: 0
     trigger: state
-  conditions:
-  - condition: not
-    conditions:
-    - condition: or
-      conditions:
-      - condition: state
-        entity_id: input_select.automation_killswitch
-        state: Exit/Entry Automations Off
-      - condition: state
-        entity_id: input_select.automation_killswitch
-        state: All Automations Off
-    alias: Ensure Killswitch Not Activated
+  conditions: []
   actions:
   - data:
       hvac_mode: 'off'
@@ -2651,27 +2629,6 @@
         target:
           entity_id: climate.henry_s_room_versatile_thermostat
   mode: single
-- id: '1724224516271'
-  alias: Cover Control Automation (CCA)
-  description: Balcony Roller Blinds cover automation - tests
-  use_blueprint:
-    path: hvorragend/cover_control_automation.yaml
-    input:
-      blind: cover.roller_blinds_chan1
-      auto_options:
-      - auto_up_enabled
-      - auto_down_enabled
-      - auto_brightness_enabled
-      - auto_sun_enabled
-      - auto_lockout_protection_enabled
-      cover_status_options: cover_helper_enabled
-      ignore_after_manual_config:
-      - ignore_closing_after_manual
-      contact_sensor_lockout: binary_sensor.balcony_door_sensor_magnet_opening_2
-      cover_status_helper: input_text.cover_status_helper
-      time_up_early: 07:00:00
-      time_up_early_non_workday: 08:00:00
-      time_up_late_non_workday: 09:00:00
 - id: '1724225427107'
   alias: Masters are Sleeping
   description: Adjusts the boolean to true if both devices are sleeping, otherwise
@@ -2870,7 +2827,7 @@
       end_notify_data:
       - channel
       end_notify_channel: Laundry
-      power_consumption_sensor: sensor.washing_machine_power_plug_power
+      power_consumption_sensor: sensor.washing_machine_power_plug_summation_delivered
       include_custom_actions:
       - enable_end_custom_actions
       - enable_start_custom_actions
@@ -2887,6 +2844,7 @@
           cache: true
           media_player_entity_id: media_player.kitchen
           message: Washing machine is done
+        enabled: false
       - action: input_boolean.turn_off
         metadata: {}
         data: {}
@@ -2901,6 +2859,13 @@
       start_message: YES! Another load of washing is ON :)
       start_power_consumption: input_number.washing_power_tracker_kwh
       end_power_consumption: input_number.washing_power_tracker_end_kwh
+      start_notify_interruption_level: passive
+      end_notify_interruption_level: passive
+      global_conditions:
+      - condition: state
+        entity_id: input_boolean.master_automation_killswitch
+        state: 'off'
+      power_sensor: sensor.washing_machine_power_plug_power
 - id: '1732614031949'
   alias: Sprinkler On at sunrise if superhot
   description: Superhot is >25 degrees
@@ -3115,18 +3080,18 @@
       - enable_end_custom_actions
       - enable_start_custom_actions
       end_custom_actions:
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.dryer_on
       - action: tts.speak
         metadata: {}
         data:
           cache: true
           media_player_entity_id: media_player.kitchen
           message: Dryer is done
-      - action: input_boolean.turn_off
-        metadata: {}
-        data: {}
-        target:
-          entity_id: input_boolean.dryer_on
-      end_appliance_power: 400
+      end_appliance_power: 23
       start_custom_actions:
       - action: input_boolean.turn_on
         metadata: {}
@@ -3143,6 +3108,19 @@
       start_notify_interruption_level: passive
       end_reminder_notification_max_count: 1
       start_time_delay: 0.5
+      include_watchdog: enable_watchdog
+      watchdog_timeframe:
+        hours: 5
+        minutes: 0
+        seconds: 0
+      watchdog_message: Uh-oh! Time to check the dry
+      watchdog_notify_data:
+      - channel
+      watchdog_notify_channel: Washing
+      global_conditions:
+      - condition: state
+        entity_id: input_boolean.master_automation_killswitch
+        state: 'off'
 - id: '1738224719290'
   alias: Reading light switch
   description: Turns on or off the reading light
@@ -3347,7 +3325,7 @@
     input:
       end_power_consumption: input_number.dishwasher_power_tracker_end
       power_sensor: sensor.dishwasher_power_sensor_mss310_energy_kwh_main_channel
-      start_appliance_power: 40
+      start_appliance_power: 12
       include_start_notify: enable_start_notify_options
       start_notify_device:
       - 58e2eb1fec0eb5ec9ce450433d074fcf
@@ -3381,3 +3359,51 @@
         data: {}
         target:
           entity_id: input_boolean.dishwasher_on
+      global_conditions:
+      - condition: state
+        entity_id: input_boolean.master_automation_killswitch
+        state: 'off'
+      end_appliance_power: 12
+      include_watchdog: disable_watchdog
+- id: '1740211475857'
+  alias: Otto awake
+  description: Otto or Henry have gotten out of their beds
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.otto_room_door_sensor_opening
+    to: 'on'
+    from: 'off'
+  conditions:
+  - condition: time
+    after: '19:00:00'
+    before: '22:30:00'
+  - condition: state
+    entity_id: input_boolean.otto_automation_killswitch
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.master_automation_killswitch
+    state: 'off'
+  actions:
+  - action: light.toggle
+    metadata: {}
+    data: {}
+    target:
+      area_id:
+      - master_bedroom
+      - living_room
+      - front_entrance
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 0
+      milliseconds: 700
+  - action: light.toggle
+    metadata: {}
+    data: {}
+    target:
+      area_id:
+      - master_bedroom
+      - living_room
+      - front_entrance
+  mode: single

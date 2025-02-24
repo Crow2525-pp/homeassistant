@@ -2,7 +2,18 @@ title: Media Dashboard
 path: media
 icon: mdi:music
 type: sections
+max_columns: 2
 sections:
-  - !include ../sections/media_control.yaml
-  - !include ../sections/media_quick_actions.yaml
-  - !include ../sections/media_recent_played.yaml
+  - type: grid
+    cards: !include ../cards/media/sonarr_upcoming.yaml
+  - type: grid
+    # cards: !include ../cards/media/sonarr_missing.yaml
+  - type: grid
+    cards: !include ../cards/media/sonarr_queue.yaml
+  - type: grid
+    # cards: !include ../cards/media/sonarr_all_shows.yaml
+
+  - type: grid
+    cards: !include ../cards/media/media_control.yaml
+  # - !include ../cards/media//media_quick_actions.yaml
+  # - !include ../cards/media//media_recent_played.yaml

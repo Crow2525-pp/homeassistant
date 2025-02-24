@@ -9,12 +9,12 @@
 - type: custom:auto-entities
   card:
     type: entities
+    state_color: true
   filter:
     include:
       - domain: binary_sensor and
       - label: Doors
         options:
-          color: state
           secondary_info: last-changed
   sort:
     method: room
@@ -27,15 +27,14 @@
 - type: custom:auto-entities
   card:
     type: entities
+    state_color: true
   filter:
     include:
-      - label: Water*
+      - label: "Water*"
         options:
-          color: state
           secondary_info: last-changed
       - label: Fire
         options:
-          color: state
           secondary_info: last-changed
   sort:
     method: room

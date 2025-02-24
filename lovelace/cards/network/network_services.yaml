@@ -1,0 +1,72 @@
+- type: entities
+  title: 🔗 Network Services
+  entities:
+    - type: weblink
+      name: SABnzbd
+      url: http://192.168.1.103:8082/sabnzbd/
+    - type: weblink
+      name: Radarr
+      url: http://192.168.1.103:7878/
+    - type: weblink
+      name: Sonarr
+      url: http://192.168.1.103:8989/
+    - type: weblink
+      name: Plex
+      url: http://192.168.1.103:32400/web/index.html#!/
+    - type: weblink
+      name: Portainer
+      url: https://192.168.1.103:9443/#!/2/docker/containers
+    - type: weblink
+      name: Readarr
+      url: http://192.168.1.103:8788/
+    - type: weblink
+      name: qBitTorrent
+      url: http://192.168.1.103:8070/
+    - type: weblink
+      name: Calibre Web
+      url: http://192.168.1.103:8083/
+    - type: weblink
+      name: Blue Iris Security Cams
+      url: http://192.168.1.101:81
+    - type: weblink
+      name: Calibre WebUi
+      url: http://admin:timisanidiot@192.168.1.103:8061/
+    - type: weblink
+      name: Calibre
+      url: http://192.168.1.103:8060/
+    - type: weblink
+      name: Prowlarr
+      url: http://192.168.1.103:9696/
+    - type: weblink
+      name: NextCloud
+      url: https://192.168.1.103:441
+    - type: weblink
+      name: Proxmox
+      url: https://192.168.1.100:8006/
+    - type: weblink
+      name: PhotoPrism
+      url: https://192.168.1.103:2342
+    - type: weblink
+      name: Unifi Gateway
+      url: https://192.168.1.1
+    - type: weblink
+      name: Mobility Print
+      url: http://192.168.1.101:9163/
+    - type: weblink
+      name: SyncThing
+      url: http://192.168.1.103:8384/
+    - type: weblink
+      name: Nginx
+      url: http://192.168.1.103:84/login
+    - type: weblink
+      name: Bazar
+      url: http://192.168.1.103:6767
+    - type: weblink
+      name: Reader Audiobooks
+      url: http://192.168.1.103:8789/
+    - type: weblink
+      name: Dagster Webserver
+      url: http://192.168.1.103:3000/
+    - type: weblink
+      name: Lidar
+      url: http://192.168.1.103:8686/
