@@ -9,6 +9,16 @@
     - name: WAN Down Alert Active
       state: "{{ (is_state('group.wan_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.wan_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.wan_down_notify', 'on') }}"
 
+- binary_sensor:
+  ## Internet Connection Status based on TX and RX
+  - name: Internet Connection
+    state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float > 0) or (states('sensor.ucg_ultra_port_5_rx') | float > 0)) }}"
+
+  ## WAN Down Alert Active with 250-second delay
+  - name: WAN Down Alert Active
+    state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float == 0) and (states('sensor.ucg_ultra_port_5_rx') | float == 0) and ((as_timestamp(now()) - as_timestamp(states.sensor.ucg_ultra_port_5_tx.last_changed)) | int(0) > 250)) }}"
+
+
 - sensor:
     - name: "Washing Machine Estimated Remaining"
       unique_id: washing_machine_estimated_remaining

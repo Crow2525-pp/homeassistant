@@ -4,10 +4,3 @@
   state_topic: "espresense/devices/known:6afe09508f42"
   timeout: 10
   away_timeout: 120 # number of seconds after which the enitity will get status not_ho
-# - platform: sonarr_upcoming_media
-#   api_key: 193eebea1c39429494293b63ac6af2e1
-#   host: http://192.168.1.103
-#   port: 8989
-#   days: 14
-#   ssl: false
-#   max: 10

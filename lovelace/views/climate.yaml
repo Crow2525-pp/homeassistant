@@ -1,7 +1,7 @@
 title: Climate Dashboard
 path: climate
 icon: mdi:hvac
-
+theme: "minimalist-desktop"
 badges:
   - type: entity
     show_name: true
