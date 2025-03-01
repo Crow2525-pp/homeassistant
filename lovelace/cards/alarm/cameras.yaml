@@ -9,10 +9,12 @@
   columns: 2
   cards:
     - type: picture-entity
-      entity: camera.security_cameras_front_door_camera
+      entity: camera.bi_front_door_camera
       name: Front Door
       camera_view: live
       fit_mode: fill
+
+
 
 # --- 👁️ MOTION & PRESENCE ---
 - type: heading
@@ -34,3 +36,6 @@
 
 - type: entity
   entity: sensor.motion_sensor_illuminance
+
+- type: entity
+  entity: binary_sensor.security_cameras_front_door_camera_motion

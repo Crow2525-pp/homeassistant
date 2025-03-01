@@ -25,6 +25,7 @@
   entities:
     - entity: person.phil_patterson
     - entity: person.stephanie_patterson
+    - entity: person.wendy
     - entity: input_select.occupancy
     - entity: alarm_control_panel.alarmo
     - entity: zone.home
