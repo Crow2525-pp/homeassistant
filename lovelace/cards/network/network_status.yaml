@@ -51,6 +51,8 @@
       name: Switch Memory Usage
       icon: mdi:memory
 
+#TODO: Add WIFI Access Points Monitoring
+
 # 📊 WAN Latency (Mini Graph)
 - type: custom:mini-graph-card
   title: 📊 WAN Latency
