@@ -14,9 +14,10 @@ sections:
     cards: !include ../cards/alarm/doors_and_water.yaml
 
   - type: grid
-    square: false
     cards: !include ../cards/alarm/presence.yaml
 
   - type: grid
-    square: false
     cards: !include ../cards/alarm/alarmo.yaml
+  
+  - type: grid
+    cards: !include ../cards/alarm/motion.yaml

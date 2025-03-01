@@ -19,6 +19,11 @@
     state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float == 0) and (states('sensor.ucg_ultra_port_5_rx') | float == 0) and ((as_timestamp(now()) - as_timestamp(states.sensor.ucg_ultra_port_5_tx.last_changed)) | int(0) > 250)) }}"
 
 
+- binary_sensor:
+    - name: "Holiday Season"
+      unique_id: holiday_season
+      state: "{{ now().month == 11 or now().month == 12 }}"
+
 - sensor:
     - name: "Washing Machine Estimated Remaining"
       unique_id: washing_machine_estimated_remaining
@@ -61,3 +66,14 @@
         friendly_name: "Dryer Estimated Remaining"
         unit_of_measurement: "min"
       icon: mdi:timer
+
+- trigger:
+    - trigger: time_pattern
+      hours: /1
+  action:
+    - action: weather.get_forecasts
+      data:
+        type: hourly
+      target:
+        entity_id: weather.home
+      response_variable: hourly

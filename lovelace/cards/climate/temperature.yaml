@@ -116,3 +116,14 @@
     - entity: sensor.thermal_comfort_kitchen_heat_index
   hours_to_show: 24
   show_names: true
+
+- type: entity
+  entity: sensor.essendon_airport_max_temp
+- type: entity
+  entity: sensor.essendon_airport_min_temp
+- type: entity
+  entity: sensor.essendon_airport_rain_since_9am
+- type: entity
+  entity: sensor.essendon_airport_wind_speed_kilometre
+
+

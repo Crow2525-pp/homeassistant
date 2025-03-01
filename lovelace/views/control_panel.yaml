@@ -7,4 +7,10 @@ sections:
   - type: grid
     cards: !include ../cards/alerts.yaml
   - type: grid
-    cards: !include ../cards/lights/lights.yaml
+    cards: !include ../cards/switches/lights.yaml
+  - type: grid
+    cards: !include ../cards/switches/sprinkler.yaml
+  - type: grid
+    cards: !include ../cards/fans.yaml
+  - type: grid
+    cards: !include ../cards/switches/powerpoints.yaml

@@ -7,3 +7,5 @@ max_columns: 2
 sections:
   - type: grid
     cards: !include ../cards/maintenance/maintenance.yaml
+  - type: grid
+    cards: !include ../cards/stats/domain_history.yaml
