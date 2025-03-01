@@ -143,10 +143,22 @@
     device_id: a4c9fa6c4205ff2778142853b379e0c5
     entity_id: remote.sony_kd_55x8500c
     domain: remote
-  - data: {}
-    target:
-      entity_id: climate.living_room_ac
-    action: climate.turn_off
+  - delay:
+      hours: 0
+      minutes: 2
+      seconds: 0
+      milliseconds: 0
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: climate.living_room_versatile_thermastat
+        attribute: is_on
+        state: 'true'
+      sequence:
+      - data: {}
+        target:
+          entity_id: climate.living_room_ac
+        action: climate.turn_off
   - data:
       option: Sleeping
     target:
@@ -226,16 +238,21 @@
 - id: '1647521016663'
   alias: Camera test door
   description: ''
-  trigger:
+  triggers:
   - type: motion
-    platform: device
     device_id: 92ce4d5d5c029a9e37a00e2bf4573f3c
     entity_id: binary_sensor.bi_door_camera_motion
     domain: binary_sensor
-  condition: []
-  action:
-  - service: media_player.play_media
-    target:
+    trigger: device
+  conditions:
+  - condition: state
+    entity_id: input_boolean.people_home
+    state: 'on'
+  - condition: state
+    entity_id: schedule.awake_hours
+    state: 'on'
+  actions:
+  - target:
       entity_id: media_player.kitchen
     data:
       media_content_id: media-source://camera/camera.bi_door_camera
@@ -249,6 +266,7 @@
       - {}
       - media_content_type: app
         media_content_id: media-source://camera
+    action: media_player.play_media
   mode: single
 - id: '1648979867608'
   alias: Send a camera snapshot when motion is detected - phil
@@ -951,44 +969,38 @@
   mode: single
 - id: '1685791154995'
   alias: People Home
-  description: Changes input boolean of same name depending on occupancy toggle change
-  trigger:
-  - platform: state
-    entity_id:
-    - input_select.occupancy
-  condition: []
-  action:
-  - if:
-    - condition: or
-      conditions:
+  description: Toggles input_boolean.people_home based on home occupancy
+  triggers:
+  - entity_id: input_select.occupancy
+    trigger: state
+  actions:
+  - choose:
+    - conditions:
       - condition: state
-        entity_id: input_select.occupancy
-        state: Home
-      - condition: state
-        entity_id: input_select.occupancy
-        state: Sleeping
-    then:
-    - service: input_boolean.turn_on
-      data: {}
-      target:
+        entity_id: zone.home
+        state: not_home
+      sequence:
+      - target:
+          entity_id: input_boolean.people_home
+        action: input_boolean.turn_off
+        data: {}
+    default:
+    - target:
         entity_id: input_boolean.people_home
-    else:
-    - service: input_boolean.turn_off
+      action: input_boolean.turn_on
       data: {}
-      target:
-        entity_id: input_boolean.people_home
   mode: single
 - id: '1685791243798'
-  alias: Send a notification with camera snapshot when motion is detected with blocking
-    state and URL (or lovelace view) on click, critical or not, collapse or not.
+  alias: Send Front Door Notification to Phil
   description: Camera detection
   use_blueprint:
     path: Stan-Gobien/CriticalCollapseOptionNotHomeMotionCameraSnapshotWithClickAction.yaml
     input:
-      motion_sensor: binary_sensor.front_door_cam_motion_2
+      motion_sensor: binary_sensor.bi_front_door_camera_motion
       camera: camera.bi_front_door_camera
       notify_device: c054264b79e6739a057236f3a3c512b4
       blocker_entity: input_boolean.people_home
+      is_critical: false
 - id: '1690150562163'
   alias: Tag Masterbed desk left cnr is scanned
   description: ''
@@ -2539,8 +2551,8 @@
     path: Blackshome/appliance-notifications.yaml
     input:
       end_power_consumption: input_number.dishwasher_power_tracker_end
-      power_sensor: sensor.dishwasher_power_sensor_mss310_energy_kwh_main_channel
-      start_appliance_power: 12
+      power_sensor: sensor.dishwasher_power_sensor_mss310_power_w_main_channel
+      start_appliance_power: 0.012
       include_start_notify: enable_start_notify_options
       start_notify_device:
       - 58e2eb1fec0eb5ec9ce450433d074fcf
@@ -2556,7 +2568,7 @@
       end_message_title: Dishwasher
       end_message: Yippee the dishwasher machine is finished!
       include_power_tracking: enable_power_tracking
-      power_consumption_sensor: sensor.dishwasher_power_sensor_mss310_power_w_main_channel
+      power_consumption_sensor: sensor.dishwasher_power_sensor_mss310_energy_kwh_main_channel
       start_power_consumption: input_number.dishwasher_power_tracker_start
       include_duration_tracking: enable_duration_tracking
       include_custom_actions:
@@ -2578,7 +2590,7 @@
       - condition: state
         entity_id: input_boolean.master_automation_killswitch
         state: 'off'
-      end_appliance_power: 12
+      end_appliance_power: 0.012
       include_watchdog: disable_watchdog
 - id: '1740211475857'
   alias: Otto awake
@@ -2622,3 +2634,14 @@
       - living_room
       - front_entrance
   mode: single
+- id: '1740797986690'
+  alias: Send Front Door Notification to Steph
+  description: Camera detection
+  use_blueprint:
+    path: Stan-Gobien/CriticalCollapseOptionNotHomeMotionCameraSnapshotWithClickAction.yaml
+    input:
+      motion_sensor: binary_sensor.bi_front_door_camera_motion
+      camera: camera.bi_front_door_camera
+      notify_device: 58e2eb1fec0eb5ec9ce450433d074fcf
+      blocker_entity: input_boolean.people_home
+      is_critical: false
