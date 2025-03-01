@@ -30,3 +30,4 @@
     - entity: alarm_control_panel.alarmo
     - entity: zone.home
     - entity: binary_sensor.front_door_cam_motion_2
+    - entity: binary_sensor.bi_front_door_camera_motion

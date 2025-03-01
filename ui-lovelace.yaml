@@ -1463,3 +1463,4 @@ views:
   - !include lovelace/views/maintenance.yaml
   - !include lovelace/views/network.yaml
   - !include lovelace/views/media.yaml
+  - !include lovelace/views/control_panel.yaml

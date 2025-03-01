@@ -43,10 +43,16 @@
   name: Office LED Strip
   icon: mdi:led-outline
 
-- type: tile
-  entity: light.xmas_lights_plug_socket_1
-  name: Christmas Lights
-  icon: mdi:string-lights
+- type: conditional
+  conditions:
+    - condition: template
+      value_template: "{{ now().month in [11, 12] }}"
+  card:
+    type: tile
+    entity: light.xmas_lights_plug_socket_1
+    name: Christmas Lights
+    icon: mdi:string-lights
+
 
 - type: history-graph
   title: "Lights Usage History"

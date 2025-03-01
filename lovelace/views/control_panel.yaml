@@ -1,0 +1,10 @@
+title: Control Panel
+path: control
+icon: mdi:view-dashboard
+type: sections
+max_columns: 1
+sections:
+  - type: grid
+    cards: !include ../cards/alerts.yaml
+  - type: grid
+    cards: !include ../cards/lights/lights.yaml

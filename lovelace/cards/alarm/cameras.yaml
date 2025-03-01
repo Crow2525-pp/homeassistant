@@ -39,3 +39,5 @@
 
 - type: entity
   entity: binary_sensor.security_cameras_front_door_camera_motion
+- type: entity
+  entity: binary_sensor.bi_front_door_camera_motion
