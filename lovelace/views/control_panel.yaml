@@ -2,15 +2,23 @@ title: Control Panel
 path: control
 icon: mdi:view-dashboard
 type: sections
+badges: !include ../badges/standard.yaml
+
 max_columns: 1
 sections:
   - type: grid
     cards: !include ../cards/alerts.yaml
   - type: grid
+    cards: !include ../cards/climate/hvac.yaml
+  - type: grid
     cards: !include ../cards/switches/lights.yaml
+  - type: grid
+    cards: !include ../cards/fans.yaml
+  - type: grid
+    cards: !include ../cards/switches/covers.yaml
   - type: grid
     cards: !include ../cards/switches/sprinkler.yaml
   - type: grid
-    cards: !include ../cards/fans.yaml
+    cards: !include ../cards/alarm/alarmo.yaml
   - type: grid
     cards: !include ../cards/switches/powerpoints.yaml

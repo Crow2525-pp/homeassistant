@@ -3,64 +3,7 @@ path: network
 icon: mdi:network
 type: sections
 max_columns: 2
-badges:
-  - type: entity
-    entity: sensor.homenetwork
-    name: Homenetwork Connections
-    icon: mdi:lan
-    show_name: true
-    show_state: true
-    state_content:
-      - state
-      - last_changed
-    color: >
-      {% if states('sensor.homenetwork') | int == 0 %} red {% else %} green {% endif %}
-    tap_action:
-      action: more-info
-
-  - type: entity
-    entity: sensor.homenetworkiot
-    name: Homenetwork IOT Connections
-    icon: mdi:lan-connect
-    show_name: true
-    show_state: true
-    state_content:
-      - state
-      - last_changed
-    color: >
-      {% if states('sensor.homenetworkiot') | int == 0 %} red {% else %} green {% endif %}
-    tap_action:
-      action: more-info
-
-  - type: entity
-    entity: binary_sensor.internet_connection
-    name: Internet Connection
-    icon: mdi:wan
-    show_name: true
-    show_state: true
-    state_content:
-      - state
-      - last_changed
-    color: >
-      {% if is_state('binary_sensor.internet_connection', 'on') %} green {% else %} red {% endif %}
-    tap_action:
-      action: more-info
-
-  - type: entity
-    entity: binary_sensor.network_device_down_alert_active
-    name: Network Device Alert
-    icon: mdi:access-point-network
-    show_state: true
-    show_name: true
-    state_content:
-      - state
-      - last_changed
-    color: >
-      {% if is_state('binary_sensor.network_device_down_alert_active', 'on') %} red {% else %} green {% endif %}
-    tap_action:
-      action: more-info
-
-
+badges: !include ../badges/network.yaml
 sections:
   - type: grid
     cards: !include ../cards/network/network_services.yaml

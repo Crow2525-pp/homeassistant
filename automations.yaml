@@ -2140,7 +2140,7 @@
   use_blueprint:
     path: Blackshome/appliance-notifications.yaml
     input:
-      running_dead_zone: 2
+      running_dead_zone: 0
       start_notify_device:
       - c054264b79e6739a057236f3a3c512b4
       - 58e2eb1fec0eb5ec9ce450433d074fcf
@@ -2592,6 +2592,7 @@
         state: 'off'
       end_appliance_power: 0.012
       include_watchdog: disable_watchdog
+      running_dead_zone: 0
 - id: '1740211475857'
   alias: Otto awake
   description: Otto or Henry have gotten out of their beds
@@ -2623,8 +2624,8 @@
   - delay:
       hours: 0
       minutes: 0
-      seconds: 0
-      milliseconds: 700
+      seconds: 1
+      milliseconds: 0
   - action: light.toggle
     metadata: {}
     data: {}
@@ -2633,6 +2634,22 @@
       - master_bedroom
       - living_room
       - front_entrance
+  - action: input_boolean.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.ottos_door_open
+  - wait_for_trigger:
+    - trigger: state
+      entity_id:
+      - binary_sensor.otto_room_door_sensor_opening
+      to: 'off'
+    continue_on_timeout: true
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.ottos_door_open
   mode: single
 - id: '1740797986690'
   alias: Send Front Door Notification to Steph

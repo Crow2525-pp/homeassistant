@@ -1,0 +1,20 @@
+- entity: input_boolean.washing_machine_on
+  name: "Washer"
+  icon: mdi:washing-machine
+  show_state: true
+  state_content:
+    - last_changed
+
+- entity: input_boolean.dryer_on
+  name: "Dryer"
+  icon: mdi:tumble-dryer
+  show_state: true
+  state_content:
+    - last_changed
+
+- entity: input_boolean.dishwasher_on
+  name: "Dishwasher"
+  icon: mdi:dishwasher
+  show_state: true
+  state_content:
+    - last_changed

@@ -20,13 +20,14 @@
           secondary_info: last-changed
     exclude:
       - domain: automation
+      - entity: light.xmas_lights_plug_socket_1
   sort:
     method: room
 
 - type: conditional
   conditions:
     - entity: binary_sensor.holiday_season
-      state: "off"
+      state: "on"
   card:
     type: tile
     entity: light.xmas_lights_plug_socket_1

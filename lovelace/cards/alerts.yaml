@@ -79,6 +79,44 @@
           font-weight: bold; /* Bold state text for emphasis */
           margin-top: 8px; /* Margin for spacing */
         }
+        
+- type: conditional
+  conditions:
+    - condition: state
+      entity: input_boolean.ottos_door_open
+      state: "on"
+  card:
+    type: button
+    entity: input_boolean.ottos_door_open
+    name: "Otto's Door"
+    show_name: true
+    show_icon: true
+    show_state: true
+    tap_action:
+      action: toggle
+    theme: waves
+    icon_height: "60px"
+    card_mod:
+      style: |
+        ha-card {
+          background-color: #d35400;
+          color: white !important;
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          padding: 16px;
+
+          /* Force icon color variables to white */
+          --mdc-icon-color: white !important;
+          --paper-item-icon-color: white !important;
+        }
+        ha-icon {
+          color: white !important; /* Direct override for the icon */
+        }
+        .state {
+          font-weight: bold;
+          margin-top: 8px;
+          color: white !important;
+        }
 
 - type: alarm-panel
   entity: alarm_control_panel.alarmo
@@ -161,3 +199,5 @@
         ha-card {
           background-color: #cc6601;
         }
+
+

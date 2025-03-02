@@ -117,13 +117,15 @@
   hours_to_show: 24
   show_names: true
 
-- type: entity
-  entity: sensor.essendon_airport_max_temp
-- type: entity
-  entity: sensor.essendon_airport_min_temp
-- type: entity
-  entity: sensor.essendon_airport_rain_since_9am
-- type: entity
-  entity: sensor.essendon_airport_wind_speed_kilometre
+- type: glance
+  entities:
+    - entity: sensor.essendon_airport_max_temp
+      name: Max
+    - entity: sensor.essendon_airport_min_temp
+      name: Min
+    - entity: sensor.essendon_airport_rain_since_9am
+      name: Rain
+    - entity: sensor.essendon_airport_wind_speed_kilometre
+      name: Wind
 
 

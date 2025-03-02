@@ -15,7 +15,7 @@
 # -- ⚙️ SETTINGS ---
 - type: heading
   heading_style: title
-  heading: Settings
+  heading: Occupancy Override
   icon: mdi:cog
 
 - type: entities
