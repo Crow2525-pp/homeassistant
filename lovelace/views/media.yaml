@@ -21,3 +21,6 @@ sections:
 
   - type: grid
     cards: !include ../cards/media/sonarr_queue.yaml
+
+# TODO: fix sonarr missing shows and all shows.
+# TODO: add plex recently added movies and tv shows

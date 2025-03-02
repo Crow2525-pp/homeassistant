@@ -50,6 +50,7 @@
   entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
   name: Solar Yield
   color: ""
+
 - type: entity
   show_name: true
   show_state: true
@@ -89,3 +90,40 @@
     - condition: state
       entity_id: input_boolean.dishwasher_on
       state: 'on'
+
+- type: entity
+  entity: binary_sensor.internet_connection
+  name: Internet Connection
+  icon: mdi:wan
+  show_name: true
+  show_state: true
+  state_content:
+    - state
+    - last_changed
+  color: >
+    {% if is_state('binary_sensor.internet_connection', 'on') %} green {% else %} red {% endif %}
+  tap_action:
+    action: more-info
+  visibility:
+    - condition: state
+      entity_id: binary_sensor.internet_connection
+      state: 'on'
+
+
+- type: entity
+  entity: binary_sensor.network_device_down_alert_active
+  name: Network Device Alert
+  icon: mdi:access-point-network
+  show_state: true
+  show_name: true
+  visibility:
+    - condition: state
+      entity_id: binary_sensor.network_device_down_alert_active
+      state: 'on'
+  state_content:
+    - state
+    - last_changed
+  color: >
+    {% if is_state('binary_sensor.network_device_down_alert_active', 'on') %} red {% else %} green {% endif %}
+  tap_action:
+    action: more-info
