@@ -1,0 +1,16 @@
+- type: custom:auto-entities
+  card:
+    type: grid
+    square: false
+    columns: 2
+    state_color: true
+  card_param: cards
+  filter:
+    include:
+      - domain: switch and
+      - label: Switch
+        options:
+          type: tile
+          secondary_info: last-changed
+  sort:
+    method: room

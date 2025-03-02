@@ -1,0 +1,14 @@
+
+- type: custom:auto-entities
+  card:
+    type: entities
+    title: 🐳 Portainer Containers
+  filter:
+    include:
+      - entity_id: sensor.portainer_local_*
+    exclude:
+      - state: "off"
+      - state: "unavailable"
+      - hidden_by: "user"
+  sort:
+    method: name

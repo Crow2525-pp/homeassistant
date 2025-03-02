@@ -1,0 +1,33 @@
+# --- 👥 PRESENCE TRACKING ---
+- type: heading
+  heading: Presence Tracking
+  heading_style: title
+  icon: mdi:account-group
+
+- type: entities
+  entities:
+    - entity: person.phil_patterson
+      name: Phil Patterson
+    - entity: person.stephanie_patterson
+      name: Stephanie Patterson
+    - entity: person.wendy
+      name: Wendy
+
+# --- 📊 HISTORY GRAPH ---
+- type: heading
+  heading: Activity Log - Last 18 Hours
+  heading_style: title
+  icon: mdi:chart-line
+
+- type: history-graph
+  hours_to_show: 18
+  refresh_interval: 30
+  entities:
+    - entity: person.phil_patterson
+    - entity: person.stephanie_patterson
+    - entity: person.wendy
+    - entity: input_select.occupancy
+    - entity: alarm_control_panel.alarmo
+    - entity: zone.home
+    - entity: binary_sensor.front_door_cam_motion_2
+    - entity: binary_sensor.bi_front_door_camera_motion

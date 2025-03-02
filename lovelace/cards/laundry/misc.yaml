@@ -1,0 +1,43 @@
+# Power Plug Controls
+- type: heading
+  heading_style: title
+  heading: "Power Plug Controls"
+
+- type: grid
+  columns: 2
+  square: false
+  cards:
+    - type: tile
+      entity: switch.washing_machine_power_plug_switch
+      name: "Washer Plug"
+      icon: mdi:power-plug
+      color: "#4CAF50"
+      tap_action:
+        action: toggle
+
+    - type: tile
+      entity: switch.dryer_power_plug_switch
+      name: "Dryer Plug"
+      icon: mdi:power-plug
+      color: "#4CAF50"
+      tap_action:
+        action: toggle
+
+# Appliance Notification Automations (Toggle On/Off)
+- type: heading
+  heading_style: title
+  heading: "Appliance Notifications"
+
+- type: entities
+  entities:
+    - entity: automation.dryer_appliance_notifications_actions
+      name: "Dryer Notifications"
+      icon: mdi:bell
+      tap_action:
+        action: more-info
+
+    - entity: automation.appliance_notifications_actions
+      name: "Washer Notifications"
+      icon: mdi:bell
+      tap_action:
+        action: more-info

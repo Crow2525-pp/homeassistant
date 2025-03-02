@@ -1,0 +1,55 @@
+- type: custom:auto-entities
+  card:
+    type: history-graph
+  filter:
+    include:
+      - domain: light and
+      - label: lights
+        options:
+          secondary_info: last-changed
+          hours_to_show: 24
+          show_names: true
+    exclude:
+      - domain: automation
+  sort:
+    method: room
+
+- type: custom:auto-entities
+  card:
+    type: history-graph
+  filter:
+    include:
+      - domain: switch and
+      - label: switch
+        options:
+          secondary_info: last-changed
+          hours_to_show: 24
+          show_names: true
+    exclude:
+      - domain: automation
+  sort:
+    method: room
+
+- type: custom:auto-entities
+  card:
+    type: history-graph
+  filter:
+    include:
+      - domain: binary_sensor and
+      - label: Doors
+        options:
+          secondary_info: last-changed
+  sort:
+    method: room
+
+- type: history-graph
+  hours_to_show: 18
+  entities:
+    - entity: person.phil_patterson
+    - entity: person.stephanie_patterson
+    - entity: person.wendy
+    - entity: input_select.occupancy
+    - entity: alarm_control_panel.alarmo
+    - entity: zone.home
+    - entity: binary_sensor.front_door_cam_motion_2
+    - entity: binary_sensor.bi_front_door_camera_motion

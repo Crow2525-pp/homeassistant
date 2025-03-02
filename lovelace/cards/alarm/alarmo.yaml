@@ -1,0 +1,24 @@
+# --- 🔔 ALARM CONTROL PANEL ---
+- type: heading
+  heading_style: title
+  heading: Security System
+  icon: mdi:security
+
+- type: alarm-panel
+  entity: alarm_control_panel.alarmo
+  name: Security System
+  states:
+    - arm_away
+    - arm_night
+    - disarm
+
+# -- ⚙️ SETTINGS ---
+- type: heading
+  heading_style: title
+  heading: Occupancy Override
+  icon: mdi:cog
+
+- type: entities
+  entities:
+    - entity: input_select.occupancy
+      name: Home Occupancy Status

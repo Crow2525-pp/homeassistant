@@ -1,0 +1,203 @@
+- type: conditional
+  conditions:
+    - entity: input_boolean.washing_machine_on
+      state: "on"
+  card:
+    type: button
+    entity: input_boolean.washing_machine_on
+    name: Laundry On
+    show_name: true
+    show_icon: true
+    show_state: false
+    theme: waves
+    icon_height: 60px
+    tap_action:
+      action: none
+    card_mod:
+      style: |
+        ha-card {
+          padding: 16px;
+          border: 1px solid var(--primary-color);
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          background-color: var(--card-background-color);
+        }
+- type: conditional
+  conditions:
+    - entity: input_boolean.dryer_on
+      state: "on"
+  card:
+    type: button
+    entity: input_boolean.dryer_on
+    name: Dryer On
+    show_name: true
+    show_icon: true
+    show_state: false
+    theme: waves
+    icon_height: 60px
+    tap_action:
+      action: none
+    card_mod:
+      style: |
+        ha-card {
+          padding: 16px;
+          border: 1px solid var(--primary-color);
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          background-color: var(--card-background-color);
+        }
+
+- type: conditional
+  conditions:
+    - condition: state
+      entity: cover.garage_door_msg100_main_channel
+      state: "open"
+  card:
+    type: button
+    entity: cover.garage_door_msg100_main_channel
+    name: "Garage"
+    show_name: true
+    show_icon: true
+    show_state: true
+    tap_action:
+      action: toggle
+    theme: waves
+    icon_height: "60px"
+    card_mod:
+      style: |
+        ha-card {
+          background-color: #44739d; /* Dark blue background */
+          color: white; /* White text color for better contrast */
+          border-radius: 12px; /* Rounded corners */
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
+          padding: 16px; /* Add padding for better spacing */
+        }
+        ha-icon {
+          color: white; /* White icon color for better visibility */
+        }
+        .state {
+          font-weight: bold; /* Bold state text for emphasis */
+          margin-top: 8px; /* Margin for spacing */
+        }
+        
+- type: conditional
+  conditions:
+    - condition: state
+      entity: input_boolean.ottos_door_open
+      state: "on"
+  card:
+    type: button
+    entity: input_boolean.ottos_door_open
+    name: "Otto's Door"
+    show_name: true
+    show_icon: true
+    show_state: true
+    tap_action:
+      action: toggle
+    theme: waves
+    icon_height: "60px"
+    card_mod:
+      style: |
+        ha-card {
+          background-color: #d35400;
+          color: white !important;
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          padding: 16px;
+
+          /* Force icon color variables to white */
+          --mdc-icon-color: white !important;
+          --paper-item-icon-color: white !important;
+        }
+        ha-icon {
+          color: white !important; /* Direct override for the icon */
+        }
+        .state {
+          font-weight: bold;
+          margin-top: 8px;
+          color: white !important;
+        }
+
+- type: alarm-panel
+  entity: alarm_control_panel.alarmo
+  name: "Alarm Active!"
+  theme: waves
+  visibility:
+    - condition: state
+      entity: alarm_control_panel.alarmo
+      state: "triggered"
+  card_mod:
+    style: |
+      ha-card {
+        background-color: #b33a3a; /* Darker red background */
+        color: white; /* Use white text for better contrast */
+        padding: 16px; /* Add padding inside the card */
+        border-radius: 10px; /* Round the corners of the card */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow for a 3D effect */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      ha-card h1 {
+        color: white; /* Ensure header text is also white */
+      }
+      .disarm {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 2px solid white;
+        border-radius: 5px;
+        padding: 10px 20px;
+        text-align: center;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+      .disarm:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+- type: conditional
+  conditions:
+    - condition: state
+      entity: alert.network_device_down_warn_alert_active
+      state: "on"
+  card:
+    type: entities
+    title: "Network Issues"
+    entities:
+      - entity: binary_sensor.wan_down_alert_active
+        icon: mdi:wan
+        secondary_info: last-changed
+      - entity: binary_sensor.network_device_down_alert_active
+        icon: mdi:access-point-network
+        secondary_info: last-changed
+    state_color: false
+    card_mod:
+      style: |
+        ha-card {
+          background-color: #cc6601;
+        }
+
+- type: conditional
+  conditions:
+    - condition: state
+      entity: alert.wan_down_warn_alert_active
+      state: "on"
+  card:
+    type: entities
+    title: "Network Issues"
+    entities:
+      - entity: binary_sensor.wan_down_alert_active
+        icon: mdi:wan
+        secondary_info: last-changed
+      - entity: binary_sensor.network_device_down_alert_active
+        icon: mdi:access-point-network
+        secondary_info: last-changed
+    state_color: false
+    card_mod:
+      style: |
+        ha-card {
+          background-color: #cc6601;
+        }
+
+

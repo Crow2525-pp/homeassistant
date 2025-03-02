@@ -1,0 +1,74 @@
+- type: grid
+  columns: 2
+  square: false
+  cards:
+    - type: heading
+      heading: "Solar Power Overview"
+      heading_style: title
+      icon: mdi:solar-power-variant
+
+    - type: entity
+      entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
+      name: Solar Power Output
+      icon: mdi:flash
+
+    - type: entity
+      entity: sensor.gosungrow_getpslist_devices_1205796_today_energy
+      name: Today’s Energy
+      icon: mdi:calendar-today
+
+    - type: entity
+      entity: sensor.gosungrow_virtual_1205796_7_1_1_p8063
+      name: Battery Charge Level
+      icon: mdi:battery-charging
+
+    - type: entity
+      entity: sensor.gosungrow_virtual_1205796_7_1_1_p8062
+      name: Grid Power Usage
+      icon: mdi:transmission-tower
+
+    - type: entity
+      entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
+      name: Current Energy Consumption
+      icon: mdi:power
+
+- type: grid
+  columns: 1
+  square: false
+  cards:
+    - type: heading
+      heading: "Solar Energy Trends"
+      heading_style: subtitle
+      icon: mdi:chart-line
+
+    - type: sensor
+      entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
+      graph: line
+      detail: 2
+      hours_to_show: 24
+      name: Solar Yield
+
+    - type: sensor
+      entity: sensor.gosungrow_getpslist_devices_1205796_today_energy
+      graph: line
+      detail: 2
+      hours_to_show: 24
+      name: Daily Energy Production
+
+    - type: sensor
+      entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
+      graph: line
+      detail: 2
+      hours_to_show: 24
+      name: Household Energy Usage
+
+- type: history-graph
+  title: "Solar Energy Data History"
+  entities:
+    - entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
+      name: Solar Yield
+    - entity: sensor.gosungrow_virtual_1205796_7_1_1_p8063
+      name: Battery Charge
+    - entity: sensor.gosungrow_virtual_1205796_7_1_1_p8062
+      name: Grid Usage
+  hours_to_show: 24

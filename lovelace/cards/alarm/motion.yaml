@@ -1,0 +1,12 @@
+- type: custom:auto-entities
+  card:
+    type: history-graph
+  filter:
+    include:
+      - entity_id: "binary_sensor.*motion*"
+        options:
+          secondary_info: last-changed
+    exclude:
+      - entity_id: "*battery*"
+  sort:
+    method: room

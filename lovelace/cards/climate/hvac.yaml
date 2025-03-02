@@ -1,0 +1,143 @@
+# Climate Control
+- type: heading
+  heading_style: title
+  icon: mdi:home-thermometer
+  heading: "Climate Control"
+
+# Home Occupancy Status
+- type: heading
+  heading_style: subtitle
+  heading: "Home Occupancy"
+  badges:
+    - type: entity
+      entity: zone.home
+      name: "People at Home"
+      icon: mdi:account-group
+      show_state: true
+      state_content:
+        - state
+        - last_changed
+      color: >
+        {% if states('zone.home') | int == 0 %} red {% else %} blue {% endif %}
+      tap_action:
+        action: more-info
+
+- type: grid
+  columns: 2
+  cards:
+    # Master Bedroom
+    - type: vertical-stack
+      cards:
+        - type: tile
+          entity: climate.masterbed_versatile_thermostat
+          name: Master Bedroom
+          features:
+            - type: climate-hvac-modes
+            - type: climate-preset-modes
+              style: dropdown
+            - type: target-temperature
+        - type: heading
+          heading_style: subtitle
+          badges:
+            - type: entity
+              entity: binary_sensor.master_bedroom_door_sensor_opening
+              show_state: true
+
+              name: "Master Bedroom Door"
+              state_content:
+                - state
+                - last_changed
+              color: state
+              tap_action:
+                action: more-info
+    # Otto's Room
+    - type: vertical-stack
+      cards:
+        - type: tile
+          entity: climate.otto_s_room
+          name: Otto’s Room
+          features:
+            - type: climate-hvac-modes
+            - type: climate-preset-modes
+              style: dropdown
+            - type: target-temperature
+        - type: heading
+          heading_style: subtitle
+          badges:
+            - type: entity
+              entity: binary_sensor.otto_room_door_sensor_opening
+
+              name: "Otto's Room Door"
+              show_state: true
+              state_content:
+                - state
+                - last_changed
+              color: state
+              tap_action:
+                action: more-info
+- type: grid
+  columns: 2
+  cards:
+    # Henry's Room
+    - type: vertical-stack
+      cards:
+        - type: tile
+          entity: climate.henry_s_room_versatile_thermostat
+          name: Henry’s Room
+          features:
+            - type: climate-hvac-modes
+            - type: climate-preset-modes
+              style: dropdown
+            - type: target-temperature
+        - type: heading
+          heading_style: subtitle
+
+          badges:
+            - type: entity
+              entity: binary_sensor.henry_door_sensor_magnet_opening
+              name: "Henry's Room Door"
+              show_state: true
+              state_content:
+                - state
+                - last_changed
+              color: state
+              tap_action:
+                action: more-info
+    # Living Room
+    - type: vertical-stack
+      cards:
+        - type: tile
+          entity: climate.living_room_versatile_thermastat
+          name: Living Room
+          features:
+            - type: climate-hvac-modes
+            - type: climate-preset-modes
+              style: dropdown
+            - type: target-temperature
+        - type: heading
+          heading_style: subtitle
+          badges:
+            - type: entity
+              entity: binary_sensor.living_room_door_sensor_opening
+              name: "Living Room Door"
+              show_state: true
+              state_content:
+                - state
+                - last_changed
+              color: state
+              tap_action:
+                action: more-info
+        - type: heading
+          heading_style: subtitle
+
+          badges:
+            - type: entity
+              entity: binary_sensor.interior_garage_door_sensor_magnet_opening
+              name: "Interior Garage Door"
+              show_state: true
+              state_content:
+                - state
+                - last_changed
+              color: state
+              tap_action:
+                action: more-info

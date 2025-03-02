@@ -1,0 +1,91 @@
+# Dryer Column
+- type: heading
+  heading_style: title
+  heading: "Drier Monitor"
+  badges:
+    - type: entity
+      entity: input_boolean.dryer_on
+      name: "Dryer"
+      icon: mdi:tumble-dryer
+      show_state: true
+      color: state
+      tap_action:
+        action: more-info
+
+    - type: entity
+      entity: sensor.dryer_estimated_remaining
+      name: "Time Remaining"
+      icon: mdi:clock-outline
+      show_state: true
+      color: "#42A5F5"
+      tap_action:
+        action: more-info
+
+    - type: entity
+      entity: sensor.dryer_power_plug_power
+      name: "Power Usage"
+      icon: mdi:flash
+      show_state: true
+      color: "#FBC02D"
+      tap_action:
+        action: more-info
+
+- type: conditional
+  conditions:
+    - entity: sensor.dryer_estimated_remaining
+      state_not: "0"
+  card:
+    type: custom:bar-card
+    entity: sensor.dryer_estimated_remaining
+    title: "Dryer Time Remaining"
+    min: 0
+    max: 120
+    icon: mdi:tumble-dryer
+    positions:
+      icon: outside
+      name: outside
+      value: inside
+    background_style: "linear-gradient(90deg, rgba(255,183,77,1) 0%, rgba(245,124,0,1) 100%)"
+    state_display: |
+      [[[ 
+        let time = parseFloat(entity.state);
+        if (isNaN(time) || time <= 0) return "Not Running";
+        return time + " min";
+      ]]]
+
+- type: entities
+  title: "Dryer Stats"
+  entities:
+    - entity: sensor.dryer_power_plug_current
+      name: "Current Usage"
+    - entity: sensor.dryer_power_plug_power
+      name: "Power Consumption"
+    - entity: sensor.dryer_power_plug_summation_delivered
+      name: "Total Energy Used"
+    - entity: sensor.dryer_power_plug_voltage
+      name: "Voltage"
+    - entity: sensor.dryer_estimated_remaining
+      name: "Time Left (Est.)"
+
+- type: history-graph
+  title: "Dryer Power History"
+  entities:
+    - entity: sensor.dryer_power_plug_power
+      name: "Power Consumption"
+    - entity: sensor.dryer_power_plug_current
+      name: "Current Usage"
+    - entity: sensor.dryer_power_plug_voltage
+      name: "Voltage"
+  hours_to_show: 6
+  refresh_interval: 30
+
+- type: statistics-graph
+  title: "Dryer Energy Usage (Last 24h)"
+  entities:
+    - entity: sensor.dryer_power_plug_power
+      name: "Power Consumption"
+  days_to_show: 1
+  stat_types: mean
+  chart_type: line
+
+#TODO: Fix Drier is done Automation

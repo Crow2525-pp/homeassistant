@@ -1,0 +1,16 @@
+- type: markdown
+  title: All Sonarr Shows
+  content: >
+    {% set attrs = state_attr('sensor.sonarr_shows','friendly_name') %}
+    {% set show_attrs = state_attr('sensor.sonarr_shows') %}
+    {% if show_attrs %}
+    **List of Sonarr Shows:**  
+    {% for key, value in show_attrs|dictsort %}
+      {# Skip non-show attributes #}
+      {% if key not in ['friendly_name','unit_of_measurement'] %}
+      - {{ key }}
+      {% endif %}
+    {% endfor %}
+    {% else %}
+    *No data found in sensor.sonarr_shows.*
+    {% endif %}

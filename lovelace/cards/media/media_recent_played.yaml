@@ -1,0 +1,10 @@
+- type: history-graph
+  title: "Recent Media Activity"
+  entities:
+    - entity: media_player.google_tv_2
+    - entity: media_player.kitchen
+      name: Google Home
+    - entity: media_player.spotify_philip_patterson
+      name: Spotify
+
+  hours_to_show: 12

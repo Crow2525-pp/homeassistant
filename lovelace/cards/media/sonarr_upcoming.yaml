@@ -1,0 +1,26 @@
+# - type: custom:config-template-card
+#   entities:
+#     - sensor.sonarr_upcoming
+#   variables:
+#     shows: >-
+      
+#   card:
+#     type: markdown
+#     title: 📺 Upcoming TV Shows
+#     content: |
+#       {% set ns = namespace(output="") %}
+#         {% for key, value in states.sensor.sonarr_upcoming.attributes.items() %}
+#           {% if key not in ['friendly_name', 'unit_of_measurement'] %}
+#             {% set ns.output = ns.output + "- **" + key + "** — " + value + "\n" %}
+#           {% endif %}
+#         {% endfor %}
+#       {{ ns.output }}
+
+- type: custom:upcoming-media-card
+  entity: sensor.sonnar_upcoming_media_sonarr_upcoming_media
+  title: Upcoming TV
+  image_style: poster
+  date: true
+  clock: 24
+  max: 5
+  hide_flagged: false

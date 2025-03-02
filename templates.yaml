@@ -1,0 +1,79 @@
+- binary_sensor:
+    - name: Garage Door Alert Active
+      state: "{{ is_state('cover.smart_garage_door_garage', 'open')}}"
+
+- binary_sensor:
+    ## Down alerts have 250 second delay built in before activating
+    - name: Network Device Down Alert Active
+      state: "{{ (is_state('group.network_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.network_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.network_device_down_notify', 'on') }}"
+    - name: WAN Down Alert Active
+      state: "{{ (is_state('group.wan_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.wan_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.wan_down_notify', 'on') }}"
+
+- binary_sensor:
+  ## Internet Connection Status based on TX and RX
+  - name: Internet Connection
+    state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float > 0) or (states('sensor.ucg_ultra_port_5_rx') | float > 0)) }}"
+
+  ## WAN Down Alert Active with 250-second delay
+  - name: WAN Down Alert Active
+    state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float == 0) and (states('sensor.ucg_ultra_port_5_rx') | float == 0) and ((as_timestamp(now()) - as_timestamp(states.sensor.ucg_ultra_port_5_tx.last_changed)) | int(0) > 250)) }}"
+
+
+- binary_sensor:
+    - name: "Holiday Season"
+      unique_id: holiday_season
+      state: "{{ now().month == 11 or now().month == 12 }}"
+
+- sensor:
+    - name: "Washing Machine Estimated Remaining"
+      unique_id: washing_machine_estimated_remaining
+      state: >
+        {% set cycle_time = 55 %}
+        {% if is_state('input_boolean.washing_machine_on', 'on') and states.input_boolean.washing_machine_on.last_changed %}
+          {% set last_changed = as_timestamp(states.input_boolean.washing_machine_on.last_changed) %}
+          {% if last_changed is not none %}
+            {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
+            {% set remaining = cycle_time - elapsed %}
+            {{ [remaining | round(0), 0] | max }} 
+          {% else %}
+            0
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+      attributes:
+        friendly_name: "Washing Machine Estimated Remaining"
+        unit_of_measurement: "min"
+      icon: mdi:timer
+
+    - name: "Dryer Estimated Remaining"
+      unique_id: dryer_estimated_remaining
+      state: >
+        {% set cycle_time = 120 %}
+        {% if is_state('input_boolean.dryer_on', 'on') and states.input_boolean.dryer_on.last_changed %}
+          {% set last_changed = as_timestamp(states.input_boolean.dryer_on.last_changed) %}
+          {% if last_changed is not none %}
+            {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
+            {% set remaining = cycle_time - elapsed %}
+            {{ [remaining | round(0), 0] | max }}
+          {% else %}
+            0
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+      attributes:
+        friendly_name: "Dryer Estimated Remaining"
+        unit_of_measurement: "min"
+      icon: mdi:timer
+
+- trigger:
+    - trigger: time_pattern
+      hours: /1
+  action:
+    - action: weather.get_forecasts
+      data:
+        type: hourly
+      target:
+        entity_id: weather.home
+      response_variable: hourly

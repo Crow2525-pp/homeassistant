@@ -13,9 +13,14 @@
 !scripts.yaml
 !mysensors.yaml
 !notifications.yaml
+!templates.yaml
+!media_player.yaml
+
 
 # Dashboard
-.storage/lovelace
+!.storage/lovelace
+!ui-lovelace.yaml
+!lovelace/**
 
 # Smart IR
 !custom_components/smartir/custom_codes/**

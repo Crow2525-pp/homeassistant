@@ -1,0 +1,21 @@
+title: Climate Dashboard
+path: climate
+icon: mdi:hvac
+badges: !include ../badges/standard.yaml
+type: sections
+max_columns: 3
+sections:
+  - type: grid
+    cards: !include ../cards/climate/hvac.yaml
+
+  - type: grid
+    cards: !include ../cards/climate/temperature.yaml
+
+  - type: grid
+    cards: !include ../cards/climate/humidity.yaml
+
+  - type: grid
+    cards: !include ../cards/climate/forecast.yaml
+
+  - type: grid
+    cards: !include ../cards/climate/warnings.yaml

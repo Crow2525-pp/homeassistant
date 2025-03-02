@@ -13,18 +13,56 @@ scene: !include scenes.yaml
 climate: !include climate.yaml
 fan: !include fan.yaml
 media_player: !include media_player.yaml
+template: !include templates.yaml
+
+lovelace:
+  mode: yaml
+  resources:
+    - url: /hacsfiles/lovelace-card-mod/card-mod.js
+      type: module
+    - url: /hacsfiles/bar-card/bar-card.js
+      type: module
+    - url: /hacsfiles/better-thermostat-ui-card/better-thermostat-ui-card.js
+      type: module
+    - url: /hacsfiles/lovelace-auto-entities/auto-entities.js
+      type: module
+    - url: /hacsfiles/lovelace-template-entity-row/template-entity-row.js
+      type: module          
+    - url: /hacsfiles/config-template-card/config-template-card.js
+      type: module
+    - url: /hacsfiles/upcoming-media-card/upcoming-media-card.js
+      type: module
+    - url: /hacsfiles/button-card/button-card.js
+      type: module
+    - url: /hacsfiles/mini-graph-card/mini-graph-card-bundle.js
+      type: module
+    - url: /hacsfiles/mini-media-player/mini-media-player-bundle.js
+      type: module
+    - url: /hacsfiles/my-cards/my-cards.js
+      type: module
+    - url: /hacsfiles/light-entity-card/dist/light-entity-card.js
+      type: module
+    - url: /hacsfiles/simple-weather-card/simple-weather-card-bundle.js
+      type: module
+    - url: /hacsfiles/weather-radar-card/weather-radar-card.js
+      type: module
+    - url: /hacsfiles/lovelace-state-switch/state-switch.js
+      type: module
+
 
 logger:
-  default: info
+  default: warning
   logs:
     custom_components.smartir.climate: debug
     custom_components.smartir.fan: debug
+    custom_components.versatile_thermostat: debug
 
 frontend:
   themes: !include_dir_merge_named themes
   javascript_version: latest
   extra_module_url:
     - /local/card-mod.js
+
 http:
   use_x_forwarded_for: true
   trusted_proxies:
@@ -100,18 +138,6 @@ input_boolean:
 
     icon: mdi:alert
 
-template:
-  - binary_sensor:
-      - name: Garage Door Alert Active
-        state: "{{ is_state('cover.smart_garage_door_garage', 'open')}}"
-
-  - binary_sensor:
-      ## Down alerts have 250 second delay built in before activating
-      - name: Network Device Down Alert Active
-        state: "{{ (is_state('group.network_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.network_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.network_device_down_notify', 'on') }}"
-      - name: WAN Down Alert Active
-        state: "{{ (is_state('group.wan_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.wan_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.wan_down_notify', 'on') }}"
-
 alert:
   garage_door_info_alert_active:
     name: Garage Door Alert Active
@@ -160,11 +186,10 @@ alert:
       - 60
     can_acknowledge: true
     skip_first: false
-    title: "7580 Warning - WAN Down"
+    title: "⚠️ WAN Down"
     message: >
-      WAN down for {{ relative_time(states.binary_sensor.wan_down_alert_active.last_changed) }} \  
-      Alerts on: {{ expand('group.wan_devices') | selectattr('state', 'eq', 'off') | map(attribute='attributes.friendly_name') | list | join(', ') }} \ 
-      Triggered: {{ as_timestamp(states.binary_sensor.wan_down_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}
-    done_message: "WAN Down Alert RESOLVED at {{ as_timestamp(states.binary_sensor.wan_down_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}"
+      WAN has been down for {{ relative_time(states.binary_sensor.wan_down_alert_active.last_changed) }}.
+      Please check your WAN connection.
+    done_message: "✅ WAN Down Alert RESOLVED at {{ as_timestamp(states.binary_sensor.wan_down_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}"
     notifiers:
       - STD_Warning

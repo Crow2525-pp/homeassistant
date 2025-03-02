@@ -1,0 +1,21 @@
+title: Laundry
+path: laundry
+icon: mdi:washing-machine
+badges: !include ../badges/laundry.yaml
+
+
+type: sections
+max_columns: 2
+sections:
+  - type: grid
+    cards: !include ../cards/laundry/washer.yaml
+
+  - type: grid
+    cards: !include ../cards/laundry/dryer.yaml
+
+  - type: grid
+    cards: !include ../cards/laundry/dishwasher.yaml
+
+  - type: grid
+    cards: !include ../cards/laundry/misc.yaml
+

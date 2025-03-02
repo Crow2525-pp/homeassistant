@@ -1,0 +1,9 @@
+- type: markdown
+  title: Sonarr Queue
+  content: >
+    {% set queue_count = states('sensor.sonarr_queue') | int %}
+    {% if queue_count > 0 %}
+    **Episodes in Queue:** {{ queue_count }}
+    {% else %}
+    *No episodes in queue.*
+    {% endif %}

@@ -1,0 +1,41 @@
+# --- 🚪 DOORS & WINDOWS ---
+- type: heading
+  heading_style: title
+  heading: Entry Points - Doors & Windows
+  icon: mdi:door
+- type: heading
+  heading_style: subtitle
+
+- type: custom:auto-entities
+  card:
+    type: entities
+    state_color: true
+  filter:
+    include:
+      - domain: binary_sensor and
+      - label: Doors
+        options:
+          secondary_info: last-changed
+  sort:
+    method: room
+
+    # --- 🌊 WATER & FIRE SENSORS ---
+- type: heading
+  heading_style: title
+  heading: Water & Fire Detection
+  icon: mdi:water-alert
+- type: custom:auto-entities
+  card:
+    type: entities
+    state_color: true
+  filter:
+    include:
+      - label: "Water*"
+        options:
+          secondary_info: last-changed
+      - label: Fire
+        options:
+          secondary_info: last-changed
+  sort:
+    method: room
+
