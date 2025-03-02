@@ -20,5 +20,4 @@ sections:
     cards: !include ../cards/media/media_control.yaml
 
   - type: grid
-    square: false
     cards: !include ../cards/media/sonarr_queue.yaml

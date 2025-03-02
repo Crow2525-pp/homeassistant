@@ -19,9 +19,3 @@ sections:
   - type: grid
     cards: !include ../cards/laundry/misc.yaml
 
-  # !include_dir_merge_list ../cards/
-  # cards: !include ../cards/alerts.yaml
-  # - !include ../cards/network.yaml
-  # - !include ../cards/cameras.yaml
-  # - !include ../cards/solar.yaml
-  # - !include ../cards/lights.yaml
