@@ -3,11 +3,6 @@ title: Security Control Center
 path: alarm
 icon: mdi:shield-home
 badges: !include ../badges/standard.yaml
-# type: sections
-# max_columns: 3
-
-# sections:
-#   - type: grid
 cards: 
   - !include ../cards/alarm/cameras.yaml
   - !include ../cards/alarm/doors_and_water.yaml

@@ -2,10 +2,6 @@ title: Climate Dashboard
 path: climate
 icon: mdi:hvac
 badges: !include ../badges/standard.yaml
-# type: sections
-# max_columns: 3
-# sections:
-#   - type: grid
 cards: 
   - !include ../cards/climate/hvac.yaml
   - !include ../cards/climate/temperature.yaml

@@ -1,11 +1,6 @@
 title: Maintenance
 path: maintenance
 icon: mdi:wrench
-
-# type: sections
-# max_columns: 2
-# sections:
-#   - type: grid
 cards: 
   - !include ../cards/maintenance/maintenance.yaml
   - !include ../cards/stats/domain_history.yaml

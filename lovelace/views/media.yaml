@@ -1,10 +1,6 @@
 title: Media Dashboard
 path: media
 icon: mdi:music
-# type: sections
-# max_columns: 4
-# sections:
-#   - type: grid
 cards: 
   - !include ../cards/media/media_recent_played.yaml
   - !include ../cards/media/sonarr_upcoming.yaml
