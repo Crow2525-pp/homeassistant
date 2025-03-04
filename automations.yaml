@@ -328,22 +328,22 @@
 - id: '1649148675412'
   alias: Lights on am
   description: ''
-  trigger:
+  triggers:
   - type: value
-    platform: device
     device_id: c054264b79e6739a057236f3a3c512b4
     entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
     domain: sensor
     below: 80
+    trigger: device
   - type: value
-    platform: device
     device_id: 58e2eb1fec0eb5ec9ce450433d074fcf
     entity_id: sensor.slvdh_floors_descended
     domain: sensor
     above: 1
-  - platform: time
-    at: 05:00:00
-  condition:
+    trigger: device
+  - at: 05:00:00
+    trigger: time
+  conditions:
   - condition: sun
     before: sunrise
   - condition: or
@@ -358,14 +358,15 @@
       entity_id: input_select.occupancy
       state: Guest
     alias: Someone Home
-  action:
-  - service: light.turn_on
-    metadata: {}
+  actions:
+  - metadata: {}
     data: {}
     target:
-      area_id:
-      - kitchen
-      - living_room
+      device_id:
+      - 232fc839ce53ebd06b58a471c2412ad2
+      - fee3e1405cfa62d116d3f31ec12a9618
+      - cb1af1280403c9c6679a6535afb27939
+    action: light.turn_on
   mode: single
 - id: '1655607456252'
   alias: Dim the lights at 8pm
@@ -2318,7 +2319,7 @@
           cache: true
           media_player_entity_id: media_player.kitchen
           message: Dryer is done
-      end_appliance_power: 23
+      end_appliance_power: 300
       start_custom_actions:
       - action: input_boolean.turn_on
         metadata: {}
@@ -2348,6 +2349,7 @@
       - condition: state
         entity_id: input_boolean.master_automation_killswitch
         state: 'off'
+      running_dead_zone: 1
 - id: '1738224719290'
   alias: Reading light switch
   description: Turns on or off the reading light
@@ -2552,7 +2554,7 @@
     input:
       end_power_consumption: input_number.dishwasher_power_tracker_end
       power_sensor: sensor.dishwasher_power_sensor_mss310_power_w_main_channel
-      start_appliance_power: 0.012
+      start_appliance_power: 15
       include_start_notify: enable_start_notify_options
       start_notify_device:
       - 58e2eb1fec0eb5ec9ce450433d074fcf
@@ -2590,9 +2592,9 @@
       - condition: state
         entity_id: input_boolean.master_automation_killswitch
         state: 'off'
-      end_appliance_power: 0.012
+      end_appliance_power: 6
       include_watchdog: disable_watchdog
-      running_dead_zone: 0
+      running_dead_zone: 2
 - id: '1740211475857'
   alias: Otto awake
   description: Otto or Henry have gotten out of their beds
@@ -2613,6 +2615,12 @@
     entity_id: input_boolean.master_automation_killswitch
     state: 'off'
   actions:
+  - action: tts.cloud_say
+    metadata: {}
+    data:
+      cache: false
+      entity_id: media_player.kitchen
+      message: Otto's doors open
   - action: light.toggle
     metadata: {}
     data: {}
@@ -2639,6 +2647,11 @@
     data: {}
     target:
       entity_id: input_boolean.ottos_door_open
+  - delay:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
   - wait_for_trigger:
     - trigger: state
       entity_id:

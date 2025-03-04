@@ -1,4 +1,6 @@
 # Climate Control
+type: vertical-stack
+cards:
 - type: heading
   heading_style: title
   icon: mdi:home-thermometer

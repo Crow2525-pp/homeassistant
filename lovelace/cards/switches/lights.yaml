@@ -1,4 +1,5 @@
-
+type: vertical-stack
+cards:
 - type: heading
   heading: "Lights Control"
   heading_style: title

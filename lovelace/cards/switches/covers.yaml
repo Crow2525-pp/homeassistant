@@ -1,3 +1,5 @@
+type: vertical-stack
+cards:
 - features:
     - type: cover-open-close
   type: tile

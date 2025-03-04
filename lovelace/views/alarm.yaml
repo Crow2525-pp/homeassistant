@@ -8,16 +8,9 @@ max_columns: 3
 
 sections:
   - type: grid
-    cards: !include ../cards/alarm/cameras.yaml
-
-  - type: grid
-    cards: !include ../cards/alarm/doors_and_water.yaml
-
-  - type: grid
-    cards: !include ../cards/alarm/presence.yaml
-
-  - type: grid
-    cards: !include ../cards/alarm/alarmo.yaml
-  
-  - type: grid
-    cards: !include ../cards/alarm/motion.yaml
+    cards: 
+      - !include ../cards/alarm/cameras.yaml
+      - !include ../cards/alarm/doors_and_water.yaml
+      - !include ../cards/alarm/presence.yaml
+      - !include ../cards/alarm/alarmo.yaml
+      - !include ../cards/alarm/motion.yaml

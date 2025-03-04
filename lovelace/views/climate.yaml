@@ -6,16 +6,9 @@ type: sections
 max_columns: 3
 sections:
   - type: grid
-    cards: !include ../cards/climate/hvac.yaml
-
-  - type: grid
-    cards: !include ../cards/climate/temperature.yaml
-
-  - type: grid
-    cards: !include ../cards/climate/humidity.yaml
-
-  - type: grid
-    cards: !include ../cards/climate/forecast.yaml
-
-  - type: grid
-    cards: !include ../cards/climate/warnings.yaml
+    cards: 
+      - !include ../cards/climate/hvac.yaml
+      - !include ../cards/climate/temperature.yaml
+      - !include ../cards/climate/humidity.yaml
+      - !include ../cards/climate/forecast.yaml
+      - !include ../cards/climate/warnings.yaml

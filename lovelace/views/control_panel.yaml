@@ -4,21 +4,16 @@ icon: mdi:view-dashboard
 type: sections
 badges: !include ../badges/standard.yaml
 
-max_columns: 1
+max_columns: 2
 sections:
+  # - !include ../cards/alerts.yaml
   - type: grid
-    cards: !include ../cards/alerts.yaml
-  - type: grid
-    cards: !include ../cards/climate/hvac.yaml
-  - type: grid
-    cards: !include ../cards/switches/lights.yaml
-  - type: grid
-    cards: !include ../cards/fans.yaml
-  - type: grid
-    cards: !include ../cards/switches/covers.yaml
-  - type: grid
-    cards: !include ../cards/switches/sprinkler.yaml
-  - type: grid
-    cards: !include ../cards/alarm/alarmo.yaml
-  - type: grid
-    cards: !include ../cards/switches/powerpoints.yaml
+    columns: 2
+    cards: 
+      - !include ../cards/climate/hvac.yaml
+      - !include ../cards/switches/lights.yaml
+      - !include ../cards/fans.yaml
+      - !include ../cards/switches/covers.yaml
+      - !include ../cards/switches/sprinkler.yaml
+      - !include ../cards/alarm/alarmo.yaml
+      - !include ../cards/switches/powerpoints.yaml

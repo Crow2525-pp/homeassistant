@@ -1,3 +1,5 @@
+type: vertical-stack
+cards:
   - type: grid
     columns: 2
     square: false
