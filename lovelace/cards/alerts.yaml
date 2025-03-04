@@ -1,4 +1,4 @@
-type: grid
+type: vertical-stack
 cards:
   - type: conditional
     conditions:

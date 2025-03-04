@@ -4,12 +4,12 @@ icon: mdi:washing-machine
 badges: !include ../badges/laundry.yaml
 
 
-type: sections
-max_columns: 2
-sections:
-  - type: grid
-    cards: 
-      - !include ../cards/laundry/washer.yaml
-      - !include ../cards/laundry/dryer.yaml
-      - !include ../cards/laundry/dishwasher.yaml
-      - !include ../cards/laundry/misc.yaml
+# type: sections
+# max_columns: 2
+# sections:
+#   - type: grid
+cards: 
+  - !include ../cards/laundry/washer.yaml
+  - !include ../cards/laundry/dryer.yaml
+  - !include ../cards/laundry/dishwasher.yaml
+  - !include ../cards/laundry/misc.yaml
