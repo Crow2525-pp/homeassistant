@@ -1100,6 +1100,11 @@
         target:
           entity_id: input_boolean.super_hot_today
         action: input_boolean.turn_on
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.hot_today_flag
     - conditions:
       - condition: numeric_state
         entity_id: sensor.braybrook_temp_max_0
@@ -1109,6 +1114,11 @@
         target:
           entity_id: input_boolean.hot_today_flag
         action: input_boolean.turn_on
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.super_hot_today
     - conditions:
       - condition: numeric_state
         entity_id: sensor.braybrook_temp_max_0
@@ -1866,11 +1876,11 @@
 - id: '1723799786022'
   alias: Close Master Blinds and Curtains If Hot
   description: Tries to keep masterbed cool on hot days
-  trigger:
-  - platform: time
-    at: input_datetime.wakeup_time_phil_steph
-  condition: []
-  action:
+  triggers:
+  - at: input_datetime.wakeup_time_phil_steph
+    trigger: time
+  conditions: []
+  actions:
   - alias: Blinds closed if hot
     choose:
     - conditions:
@@ -1901,7 +1911,7 @@
           entity_id:
           - cover.windowcovering_cover
         data:
-          position: 50
+          position: 60
       alias: Hot
     - conditions:
       - condition: and
