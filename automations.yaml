@@ -192,14 +192,19 @@
 - id: '1644437526740'
   alias: open blinds in the morning
   description: ''
-  trigger:
-  - platform: time
-    at: input_datetime.wakeup_time_phil_steph
-  condition:
-  - condition: state
-    entity_id: input_boolean.hot_today_flag
-    state: 'off'
-  action:
+  triggers:
+  - at: input_datetime.wakeup_time_phil_steph
+    trigger: time
+  conditions:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_boolean.hot_today_flag
+      state: 'off'
+    - condition: state
+      entity_id: input_boolean.super_hot_today
+      state: 'off'
+  actions:
   - action: cover.open_cover
     metadata: {}
     data: {}
@@ -1621,20 +1626,20 @@
 - id: '1713092115962'
   alias: Nightly Garage Door Check
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - cover.garage_door_msg100_main_channel
+  triggers:
+  - entity_id:
+    - cover.smart_garage_door_garage
     to: open
-  - platform: state
-    entity_id:
-    - cover.garage_door_msg100_main_channel
+    trigger: state
+  - entity_id:
+    - cover.smart_garage_door_garage
     to: opening
-  condition:
+    trigger: state
+  conditions:
   - condition: state
     entity_id: input_boolean.garage_door_notify
     state: 'on'
-  action:
+  actions:
   - data:
       message: 'Garage Door open for {{ relative_time(states.binary_sensor.garage_door_alert_active.last_changed)
         }} \   Alerts on: Alerts on: {{ states.cover | selectattr(''entity_id'', ''eq'',
@@ -2329,7 +2334,7 @@
           cache: true
           media_player_entity_id: media_player.kitchen
           message: Dryer is done
-      end_appliance_power: 300
+      end_appliance_power: 12
       start_custom_actions:
       - action: input_boolean.turn_on
         metadata: {}
@@ -2563,7 +2568,6 @@
     path: Blackshome/appliance-notifications.yaml
     input:
       end_power_consumption: input_number.dishwasher_power_tracker_end
-      power_sensor: sensor.dishwasher_power_sensor_mss310_power_w_main_channel
       start_appliance_power: 15
       include_start_notify: enable_start_notify_options
       start_notify_device:
@@ -2578,9 +2582,9 @@
       - 58e2eb1fec0eb5ec9ce450433d074fcf
       - c054264b79e6739a057236f3a3c512b4
       end_message_title: Dishwasher
-      end_message: Yippee the dishwasher machine is finished!
+      end_message: Unpack the dishwasher - it's done!
       include_power_tracking: enable_power_tracking
-      power_consumption_sensor: sensor.dishwasher_power_sensor_mss310_energy_kwh_main_channel
+      power_consumption_sensor: sensor.dishwasher_smart_plug_consumption
       start_power_consumption: input_number.dishwasher_power_tracker_start
       include_duration_tracking: enable_duration_tracking
       include_custom_actions:
@@ -2602,9 +2606,15 @@
       - condition: state
         entity_id: input_boolean.master_automation_killswitch
         state: 'off'
-      end_appliance_power: 6
+      end_appliance_power: 13
       include_watchdog: disable_watchdog
       running_dead_zone: 2
+      power_sensor: sensor.smart_plug_power
+      end_notify_data:
+      - channel
+      end_notify_channel: Dishwasher
+      end_reminder_notification_message: Hey! Your dishes are ready, don't leave it
+        to get mouldy!
 - id: '1740211475857'
   alias: Otto awake
   description: Otto or Henry have gotten out of their beds

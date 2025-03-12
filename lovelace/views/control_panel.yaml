@@ -28,6 +28,9 @@ cards:
           - condition: state
             entity: alert.wan_down_warn_alert_active
             state: "on"
+          - condition: numeric_state
+            entity: sensor.braybrook_warnings
+            above: 0
     card: !include ../cards/alerts.yaml
   - !include ../cards/climate/hvac.yaml
   - !include ../cards/switches/lights.yaml

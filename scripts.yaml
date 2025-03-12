@@ -92,43 +92,11 @@ tvbrightup:
 garage_door_toggle:
   alias: Garage door toggle
   sequence:
-  - choose:
-    - conditions:
-      - condition: state
-        state: open
-        entity_id: cover.garage_door_msg100_main_channel
-      sequence:
-      - device_id: 406074b25db99bde730f3605a2795a3e
-        domain: cover
-        entity_id: f88c2e0d87d9b41771b966865b362a50
-        type: close
-    - conditions:
-      - condition: state
-        state: closed
-        entity_id: cover.garage_door_msg100_main_channel
-      sequence:
-      - device_id: 406074b25db99bde730f3605a2795a3e
-        domain: cover
-        entity_id: f88c2e0d87d9b41771b966865b362a50
-        type: open
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: cover.garage_door_msg100_main_channel
-          state: closing
-        - condition: state
-          state: opening
-          entity_id: cover.garage_door_msg100_main_channel
-        - condition: state
-          state: unavailable
-          entity_id: cover.garage_door_msg100_main_channel
-        - condition: state
-          state: unknown
-          entity_id: cover.garage_door_msg100_main_channel
-      sequence:
-      - stop: Error
-        error: true
+  - action: cover.toggle
+    metadata: {}
+    data: {}
+    target:
+      device_id: 7edad8ef01a718694f8a423cbfdca0c0
   mode: single
   icon: mdi:garage
 fan_speed_3:
