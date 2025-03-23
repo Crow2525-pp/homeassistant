@@ -58,11 +58,11 @@ cards:
   - type: conditional
     conditions:
       - condition: state
-        entity: cover.garage_door_msg100_main_channel
+        entity: cover.smart_garage_door_garage
         state: "open"
     card:
       type: button
-      entity: cover.garage_door_msg100_main_channel
+      entity: cover.smart_garage_door_garage
       name: "Garage"
       show_name: true
       show_icon: true

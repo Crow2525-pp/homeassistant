@@ -893,8 +893,6 @@
   - event: sunrise
     offset: 00:15:00
     trigger: sun
-  - trigger: time
-    at: 05:30:00
   conditions: []
   actions:
   - data: {}
@@ -1535,7 +1533,7 @@
         id: tag_scan
       sequence:
       - alias: Update date tracker to next due date
-        entity_id: input_datetime.clean_toielts
+        entity_id: input_datetime.masterbed_toilet_last_cleaned
         data:
           datetime: "{% if rolling_completion %}\n  {% set last_date = states(date_tracker)
             | as_datetime %}\n  {{ last_date.date() + timedelta(days=task_interval)
@@ -2334,7 +2332,7 @@
           cache: true
           media_player_entity_id: media_player.kitchen
           message: Dryer is done
-      end_appliance_power: 12
+      end_appliance_power: 14
       start_custom_actions:
       - action: input_boolean.turn_on
         metadata: {}
@@ -2342,7 +2340,7 @@
         target:
           entity_id: input_boolean.dryer_on
       watchdog_custom_actions: []
-      end_time_delay: 1.5
+      end_time_delay: 0.5
       start_title: Dryer
       end_message_title: Dryer
       start_appliance_power: 10
@@ -2608,13 +2606,15 @@
         state: 'off'
       end_appliance_power: 13
       include_watchdog: disable_watchdog
-      running_dead_zone: 2
+      running_dead_zone: 3
       power_sensor: sensor.smart_plug_power
       end_notify_data:
       - channel
       end_notify_channel: Dishwasher
       end_reminder_notification_message: Hey! Your dishes are ready, don't leave it
         to get mouldy!
+      end_time_delay: 5
+      start_time_delay: 0.5
 - id: '1740211475857'
   alias: Otto awake
   description: Otto or Henry have gotten out of their beds
@@ -2695,3 +2695,97 @@
       notify_device: 58e2eb1fec0eb5ec9ce450433d074fcf
       blocker_entity: input_boolean.people_home
       is_critical: false
+- id: '1742615433146'
+  alias: Set datetime on RFID scan
+  description: When maintenance items are scanned then update the datetime of these
+  triggers:
+  - tag_id: 859e3818-e623-47aa-9062-d89afd44489b
+    id: main_toilet
+    trigger: tag
+  - tag_id: 14544260-abc9-4e84-be5b-20b3df57978d
+    id: masterbed_toilet
+    trigger: tag
+  - tag_id: 0dba78a1-9dd0-439b-9d5b-386fa0f5df85
+    id: omas_toilet
+    trigger: tag
+  - tag_id: 69410df3-68be-4aec-9721-f933de3c73de
+    id: kids_toilet
+    trigger: tag
+  actions:
+  - data:
+      name: RFID Debug
+      message: 'Trigger ID: {{ trigger.id }}'
+    action: logbook.log
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''main_toilet'' }}'
+      sequence:
+      - target:
+          entity_id: input_datetime.main_toilet_last_cleaned
+        data:
+          timestamp: '{{ now().timestamp() }}'
+        action: input_datetime.set_datetime
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''masterbed_toilet'' }}'
+      sequence:
+      - target:
+          entity_id: input_datetime.masterbed_toilet_last_cleaned
+        data:
+          timestamp: '{{ now().timestamp() }}'
+        action: input_datetime.set_datetime
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''omas_toilet'' }}'
+      sequence:
+      - target:
+          entity_id: input_datetime.omas_toilet_last_cleaned
+        data:
+          timestamp: '{{ now().timestamp() }}'
+        action: input_datetime.set_datetime
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''kids_toilet'' }}'
+      sequence:
+      - target:
+          entity_id: input_datetime.kids_toilet_last_cleaned
+        data:
+          timestamp: '{{ now().timestamp() }}'
+        action: input_datetime.set_datetime
+  mode: single
+- id: '1742667190756'
+  alias: Dryer v2
+  description: ''
+  use_blueprint:
+    path: Blackshome/appliance-notifications.yaml
+    input:
+      power_sensor: sensor.dryer_power_plug_power
+      include_start_notify: enable_start_notify_options
+      start_message: YES! Another dryer load is ON :)
+      include_end_notify: enable_end_notify_options
+      end_notify_device:
+      - c054264b79e6739a057236f3a3c512b4
+      end_message: Yippee the dryer machine is finished!
+      include_power_tracking: enable_power_tracking
+      power_consumption_sensor: sensor.dryer_power_plug_summation_delivered
+      start_power_consumption: input_number.start_dryer_power_tracker
+      end_power_consumption: input_number.end_dryer_power_tracker_kwh
+      include_duration_tracking: enable_duration_tracking
+      include_cycle_counter: disable_cycle_counter
+      include_service_reminder: disable_service_reminder
+      include_custom_actions:
+      - enable_start_custom_actions
+      - enable_end_custom_actions
+      start_custom_actions:
+      - action: input_boolean.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.dryer_on
+      end_custom_actions:
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.dryer_on

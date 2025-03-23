@@ -14,7 +14,7 @@ cards:
             entity: input_boolean.dryer_on
             state: "on"
           - condition: state
-            entity: cover.garage_door_msg100_main_channel
+            entity: cover.smart_garage_door_garage
             state: "open"
           - condition: state
             entity: input_boolean.ottos_door_open
