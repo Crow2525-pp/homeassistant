@@ -39,3 +39,4 @@ cards:
   - !include ../cards/switches/covers.yaml
   - !include ../cards/alarm/alarmo.yaml
   - !include ../cards/switches/powerpoints.yaml
+  - !include ../cards/automations/automations.yaml

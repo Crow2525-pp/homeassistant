@@ -1,0 +1,9 @@
+binary_sensor:
+  - name: "Blue Iris Cam Front Door"
+    unique_id: bi_cam_front_door
+    state_topic: "BlueIris/FrontDoor/Status"
+    payload_on: "ON"
+    payload_off: "OFF"
+    device_class: "motion"
+    value_template: "{{ value_json.trigger }}"
+    qos: 1

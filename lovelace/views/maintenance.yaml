@@ -1,6 +1,8 @@
 title: Maintenance
 path: maintenance
 icon: mdi:wrench
-cards: 
+cards:
+  - !include ../cards/automations/killswitches.yaml
+  - !include ../cards/maintenance/last_times.yaml
   - !include ../cards/maintenance/maintenance.yaml
   - !include ../cards/stats/domain_history.yaml

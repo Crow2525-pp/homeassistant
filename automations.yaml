@@ -2625,15 +2625,20 @@
     to: 'on'
     from: 'off'
   conditions:
-  - condition: time
-    after: '19:00:00'
-    before: '22:30:00'
   - condition: state
     entity_id: input_boolean.otto_automation_killswitch
     state: 'off'
   - condition: state
     entity_id: input_boolean.master_automation_killswitch
     state: 'off'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_boolean.otto_door_alarm_active
+      state: 'on'
+    - condition: time
+      after: '19:00:00'
+      before: '22:30:00'
   actions:
   - action: tts.cloud_say
     metadata: {}
