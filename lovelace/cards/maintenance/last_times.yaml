@@ -1,28 +1,22 @@
 type: vertical-stack
 cards:
-  - type: custom:auto-entities
-    card:
-      type: entities
-      title: Maintenance Dates
-    filter:
-      include:
-        - domain: input_datetime
-          attributes:
-            label: Maintenance
-    card_param: entities
-    sort:
-      method: name
-    card_mod:
-      style: |
-        hui-entities-card {
-          --paper-input-container-shared-input-style_-_cursor: default;
-        }
-    map:
-      template-entity-row: >
-        {{ {
-          'entity': entity.entity_id,
-          'type': 'custom:template-entity-row',
-          'name': entity.attributes.friendly_name or entity.entity_id,
-          'state': as_timestamp(entity.state) | timestamp_custom('%Y-%m-%d %H:%M'),
-          'icon': entity.attributes.icon
-        } }}
+  # - type: custom:auto-entities
+  #   card:
+  #     type: markdown
+  #     title: Maintenance Dates
+  #   filter:
+  #     include:
+  #       - domain: input_datetime
+  #         label: Maintenance
+  #   sort:
+  #     method: name
+  #   card_param: content
+  #   template: true
+  #   content: >
+  #     {% for entity in entities %}
+  #     - **{{ state_attr(entity, 'friendly_name') or entity }}:** {{ states(entity) }}
+  #     {% endfor %}
+  - type: markdown
+    title: Maintenance Dates
+    content: >
+      {{ states('sensor.maintenance_dates_summary') }}

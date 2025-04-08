@@ -1000,10 +1000,9 @@
   use_blueprint:
     path: Stan-Gobien/CriticalCollapseOptionNotHomeMotionCameraSnapshotWithClickAction.yaml
     input:
-      motion_sensor: binary_sensor.bi_front_door_camera_motion
-      camera: camera.bi_front_door_camera
+      motion_sensor: binary_sensor.bi_driveway_motion
+      camera: camera.driveway_cam_fluent
       notify_device: c054264b79e6739a057236f3a3c512b4
-      blocker_entity: input_boolean.people_home
       is_critical: false
 - id: '1690150562163'
   alias: Tag Masterbed desk left cnr is scanned
@@ -2613,7 +2612,7 @@
       end_notify_channel: Dishwasher
       end_reminder_notification_message: Hey! Your dishes are ready, don't leave it
         to get mouldy!
-      end_time_delay: 5
+      end_time_delay: 15
       start_time_delay: 0.5
 - id: '1740211475857'
   alias: Otto awake
