@@ -1628,14 +1628,16 @@
     - cover.smart_garage_door_garage
     to: open
     trigger: state
-  - entity_id:
-    - cover.smart_garage_door_garage
-    to: opening
-    trigger: state
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
+  - trigger: time
+    at: '21:00:00'
   conditions:
   - condition: state
-    entity_id: input_boolean.garage_door_notify
-    state: 'on'
+    entity_id: cover.smart_garage_door_garage
+    state: open
   actions:
   - data:
       message: 'Garage Door open for {{ relative_time(states.binary_sensor.garage_door_alert_active.last_changed)
@@ -1648,6 +1650,14 @@
         '
       title: 7580 Info - Garage Door Open
     action: notify.STD_Information
+  - action: notify.mobile_app_samsung_galaxy_s22_ultra
+    metadata: {}
+    data:
+      message: Garage door left open
+  - action: notify.mobile_app_slvdh
+    metadata: {}
+    data:
+      message: Garage door left open
   mode: single
 - id: '1714337117111'
   alias: Master AC off when wake up
@@ -2793,3 +2803,82 @@
         data: {}
         target:
           entity_id: input_boolean.dryer_on
+- id: '1744157304881'
+  alias: test
+  description: ''
+  triggers: []
+  conditions: []
+  actions:
+  - action: media_player.play_media
+    data:
+      media_content_id: media-source://media_source/local/Memes/image1.jpg
+      media_content_type: image
+    target:
+      entity_id: media_player.kitchen
+  mode: single
+- id: '1744580704061'
+  alias: Tag Fishy is scanned
+  description: Records the time fish were fed
+  triggers:
+  - tag_id: 8bc95efa-4e0c-410c-93a1-dea4085761ee
+    trigger: tag
+  actions:
+  - target:
+      entity_id: input_datetime.fish_last_fed
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+    action: input_datetime.set_datetime
+  mode: single
+- id: '1744580705665'
+  alias: Fishy are fed
+  description: ''
+  triggers:
+  - trigger: tag
+    tag_id: 0e988472-9902-4140-a053-0beeb7f9eeb2
+  conditions: []
+  actions: []
+  mode: single
+- id: '1744580844831'
+  alias: Fish not fed reminder - Morning
+  description: Sends a reminder if fish haven't been fed by 8am
+  triggers:
+  - at: 08:00:00
+    trigger: time
+  conditions:
+  - condition: or
+    conditions:
+    - condition: template
+      value_template: '{% set fed = states(''input_datetime.fish_last_fed'') %} {%
+        set now_date = now().date() %} {% set fed_time = as_datetime(fed) %} {{ fed_time.date()
+        != now_date or fed_time.hour < 6 or fed_time.hour >= 8 }}
+
+        '
+  actions:
+  - action: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      message: Fish aren't fed - morning
+  - action: notify.mobile_app_slvdh
+    data:
+      message: Fish aren't fed
+  mode: single
+- id: '1744580871551'
+  alias: Fish not fed reminder - Dinner
+  description: Sends a reminder if fish haven't been fed by 9pm
+  triggers:
+  - at: '21:00:00'
+    trigger: time
+  conditions:
+  - condition: template
+    value_template: '{% set fed = states(''input_datetime.fish_last_fed'') %} {% set
+      now_date = now().date() %} {% set fed_time = as_datetime(fed) %} {{ fed_time.date()
+      != now_date or fed_time.hour < 16 or fed_time.hour >= 21 }}
+
+      '
+  actions:
+  - action: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      message: Fish aren't fed - morning
+  - action: notify.mobile_app_slvdh
+    data:
+      message: Fish aren't fed
+  mode: single
