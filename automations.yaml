@@ -2103,17 +2103,31 @@
   triggers:
   - trigger: time_pattern
     minutes: '15'
-  conditions:
-  - condition: device
-    type: is_off
-    device_id: 232fc839ce53ebd06b58a471c2412ad2
-    entity_id: 5988af91837e47236db524998627e65e
-    domain: switch
+  conditions: []
   actions:
-  - type: turn_on
-    device_id: 232fc839ce53ebd06b58a471c2412ad2
-    entity_id: 5988af91837e47236db524998627e65e
-    domain: switch
+  - choose:
+    - conditions:
+      - condition: device
+        type: is_off
+        device_id: 232fc839ce53ebd06b58a471c2412ad2
+        entity_id: 5988af91837e47236db524998627e65e
+        domain: switch
+      sequence:
+      - type: turn_on
+        device_id: 232fc839ce53ebd06b58a471c2412ad2
+        entity_id: 5988af91837e47236db524998627e65e
+        domain: switch
+    - conditions:
+      - condition: device
+        type: is_off
+        device_id: 399b754fdf1cb07ed6c2bfcf22f86dce
+        entity_id: 4e12ee54d94d1ad1c2db1176f6da428d
+        domain: switch
+      sequence:
+      - type: turn_on
+        device_id: 232fc839ce53ebd06b58a471c2412ad2
+        entity_id: 5988af91837e47236db524998627e65e
+        domain: switch
   mode: single
 - id: '1732241510110'
   alias: Adjust Floorlamp Based on Solar Production
@@ -2454,6 +2468,13 @@
     subtype: button_1
     trigger: device
     id: Double
+  - device_id: 8c730c300afc8f900acf8e9782eb6d62
+    domain: zha
+    type: remote_button_short_press
+    subtype: button
+    trigger: device
+    id: Once
+    enabled: false
   conditions: []
   actions:
   - choose:
@@ -2881,4 +2902,39 @@
   - action: notify.mobile_app_slvdh
     data:
       message: Fish aren't fed
+  mode: single
+- id: '1746997822978'
+  alias: Turn off living rm heater if hot enough
+  description: ''
+  triggers:
+  - trigger: time
+    at: 06:30:00
+  - trigger: time
+    at: 07:00:00
+  - trigger: time
+    at: 07:30:00
+  - trigger: time
+    at: 06:00:00
+  conditions:
+  - condition: state
+    entity_id: climate.living_room_ac
+    state: heat
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
+  - condition: or
+    conditions:
+    - condition: numeric_state
+      entity_id: sensor.livingroom_irblaster_temperature
+      above: 20
+    - condition: numeric_state
+      entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+      above: 20
+  actions:
+  - device_id: b084d1fcd04470308deb597901c61d5c
+    domain: climate
+    entity_id: 919759f355a72fa8f73dfe61b55457b2
+    type: set_hvac_mode
+    hvac_mode: 'off'
   mode: single

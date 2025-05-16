@@ -30,14 +30,25 @@ cards:
   card:
     type: entities
     state_color: true
+    title: Water & Fire Sensors
   filter:
     include:
       - label: "Water*"
-        options:
-          secondary_info: last-changed
       - label: Fire
-        options:
-          secondary_info: last-changed
   sort:
-    method: room
+    method: name
+  show_empty: false
+  card_param: entities
+  template: |
+    {% for entity in entities %}
+      {% set area = area_name(entity.entity_id) %}
+      {
+        "type": "custom:template-entity-row",
+        "entity": "{{ entity.entity_id }}",
+        "name": "{{ entity.name or entity.entity_id }}",
+        "secondary": "Room: {{ area if area else 'Unknown' }} | Last changed: {{ entity.last_changed }}"
+      }
+      {% if not loop.last %},{% endif %}
+    {% endfor %}
+
 
