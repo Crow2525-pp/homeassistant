@@ -1,42 +1,39 @@
 type: vertical-stack
 cards:
-- type: heading
-  heading: "Lights Control"
-  heading_style: title
-  icon: mdi:lightbulb
+  - type: heading
+    heading: "Lights Control"
+    heading_style: title
+    icon: mdi:lightbulb
 
-- type: custom:auto-entities
-  card:
-    type: grid
-    square: false
-    columns: 2
-    state_color: true
-  card_param: cards
-  filter:
-    include:
-      - domain: light and
-      - label: lights
-        options:
-          type: tile
-          secondary_info: last-changed
-    exclude:
-      - domain: automation
-      - entity: light.xmas_lights_plug_socket_1
-  sort:
-    method: room
+  - type: custom:auto-entities
+    card:
+      type: grid
+      square: false
+      columns: 2
+      state_color: true
+    card_param: cards
+    filter:
+      include:
+        - domain: light and
+        - label: lights
+          options:
+            type: tile
+            secondary_info: last-changed
+      exclude:
+        - domain: automation
+        # - entity: light.xmas_lights_plug_socket_1
+    sort:
+      method: room
 
-- type: conditional
-  conditions:
-    - entity: binary_sensor.holiday_season
-      state: "on"
-  card:
-    type: tile
-    entity: light.xmas_lights_plug_socket_1
-    name: Christmas Lights
-    icon: mdi:string-lights
-
-
-
+  - type: conditional
+    conditions:
+      - entity: binary_sensor.holiday_season
+        state: "on"
+    card:
+      type: tile
+      entity: light.xmas_lights_plug_socket_1
+      name: Christmas Lights
+      icon: mdi:string-lights
 # - type: history-graph
 #   title: "Lights Usage History"
 #   entities:

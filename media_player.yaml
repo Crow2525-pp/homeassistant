@@ -49,3 +49,6 @@
     is_volume_muted: media_player.sony_kd_55x8500c|is_volume_muted
     volume_level: media_player.sony_kd_55x8500c|volume_level
     source_list: media_player.sony_kd_55x8500c|source_list
+# - platform: wiim_custom
+#   host: 192.168.1.170
+#   name: Living Room Wiimamp

@@ -1777,26 +1777,26 @@
     TV backlights if it is after sundown.
 
     '
-  trigger:
-  - platform: state
-    entity_id: remote.sony_kd_55x8500c
+  triggers:
+  - entity_id: remote.sony_kd_55x8500c
     from: 'off'
     to: 'on'
     id: tv_on
-  - platform: state
-    entity_id: remote.sony_kd_55x8500c
+    trigger: state
+  - entity_id: remote.sony_kd_55x8500c
     from: 'on'
     to: 'off'
     id: tv_off
-  - platform: sun
-    event: sunset
+    trigger: state
+  - event: sunset
     offset: 0
-  - platform: state
-    entity_id: remote.sony_kd_55x8500c
+    trigger: sun
+  - entity_id: remote.sony_kd_55x8500c
     to: unavailable
     id: tv_unavailable
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - alias: Amp and backlight on/off
     choose:
     - conditions:
@@ -1808,6 +1808,7 @@
           entity_id:
           - switch.amplifier_socket_1
         data: {}
+        enabled: false
       - condition: sun
         after: sunset
         before: sunrise
@@ -1824,6 +1825,7 @@
           entity_id:
           - switch.amplifier_socket_1
         data: {}
+        enabled: false
       - action: light.turn_off
         target:
           entity_id: light.tv_backlight
@@ -1837,6 +1839,7 @@
           entity_id:
           - switch.amplifier_socket_1
         data: {}
+        enabled: false
       - action: light.turn_off
         target:
           entity_id: light.tv_backlight
@@ -1945,29 +1948,29 @@
       alias: Not Hot
   mode: single
 - id: '1724061115527'
-  alias: Study Heater on at night
+  alias: Henry Heater on at night
   description: If it's too hot or cold at night make sure the heater is on or off.
     Winter automation.
-  trigger:
-  - platform: numeric_state
-    entity_id:
+  triggers:
+  - entity_id:
     - sensor.study_esp32_henrysroom_temperature
     for:
       hours: 0
-      minutes: 10
+      minutes: 0
       seconds: 0
-    above: 19.7
+    above: 20.1
     id: Hot
-  - platform: numeric_state
-    entity_id:
+    trigger: numeric_state
+  - entity_id:
     - sensor.study_esp32_henrysroom_temperature
     for:
       hours: 0
-      minutes: 10
+      minutes: 0
       seconds: 0
-    below: 19.2
+    below: 19.7
     id: Cold
-  condition:
+    trigger: numeric_state
+  conditions:
   - condition: time
     after: '18:00:00'
     before: 06:00:00
@@ -1995,7 +1998,7 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Holiday
-  action:
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -2645,6 +2648,10 @@
         to get mouldy!
       end_time_delay: 15
       start_time_delay: 0.5
+      include_cycle_counter: enable_cycle_counter_and_notify
+      cycle_counter_helper: counter.dishwasher_counter
+      include_service_reminder: enable_service_reminder
+      service_reminder_counter_helper: counter.dishwasher_counter
 - id: '1740211475857'
   alias: Otto awake
   description: Otto or Henry have gotten out of their beds
@@ -2937,4 +2944,287 @@
     entity_id: 919759f355a72fa8f73dfe61b55457b2
     type: set_hvac_mode
     hvac_mode: 'off'
+  mode: single
+- id: '1747602506171'
+  alias: Otto's Room Heater on at night
+  description: If it's too hot or cold at night make sure the heater is on or off.
+    Winter automation.
+  triggers:
+  - entity_id:
+    - sensor.ottos_room_temp_humidity_sensor_temperature
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    above: 19.5
+    id: Hot
+    trigger: numeric_state
+  - entity_id:
+    - sensor.ottos_room_temp_humidity_sensor_temperature
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    below: 18.5
+    id: Cold
+    trigger: numeric_state
+  conditions:
+  - condition: time
+    after: '18:00:00'
+    before: 06:00:00
+    weekday:
+    - sun
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Sleeping
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Guest
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Hot
+      sequence:
+      - metadata: {}
+        data:
+          preset_mode: 'Off'
+        target:
+          entity_id: climate.otto_s_room
+        enabled: false
+        action: climate.set_preset_mode
+      - metadata: {}
+        data:
+          hvac_mode: 'off'
+        action: climate.set_hvac_mode
+        target:
+          entity_id: climate.otto_s_room
+    - conditions:
+      - condition: trigger
+        id:
+        - Cold
+      sequence:
+      - metadata: {}
+        data:
+          preset_mode: eco
+        action: climate.set_preset_mode
+        target:
+          entity_id: climate.otto_s_room
+      - metadata: {}
+        data:
+          hvac_mode: heat
+        action: climate.set_hvac_mode
+        target:
+          entity_id: climate.otto_s_room
+  mode: single
+- id: '1747602740394'
+  alias: Masterbed Heater On at night if cold
+  description: If it's too hot or cold at night make sure the heater is on or off.
+    Winter automation.
+  triggers:
+  - entity_id:
+    - sensor.temperaturesensor_temperature
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    above: 17.2
+    id: Hot
+    trigger: numeric_state
+  - entity_id:
+    - sensor.temperaturesensor_temperature
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    below: 16
+    id: Cold
+    trigger: numeric_state
+  conditions:
+  - condition: time
+    after: '18:00:00'
+    before: 06:00:00
+    weekday:
+    - sun
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Sleeping
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Guest
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Hot
+      sequence:
+      - metadata: {}
+        data:
+          preset_mode: 'Off'
+        target:
+          entity_id: climate.otto_s_room
+        enabled: true
+        action: climate.set_preset_mode
+      - metadata: {}
+        data:
+          hvac_mode: 'off'
+        action: climate.set_hvac_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+    - conditions:
+      - condition: trigger
+        id:
+        - Cold
+      sequence:
+      - metadata: {}
+        data:
+          preset_mode: eco
+        action: climate.set_preset_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+      - metadata: {}
+        data:
+          hvac_mode: heat
+        action: climate.set_hvac_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+  mode: single
+- id: '1747862856741'
+  alias: Night setback for living room
+  description: If it's too hot or cold at night make sure the heater is on or off.
+    Winter automation.
+  triggers:
+  - entity_id:
+    - sensor.livingroom_irblaster_temperature
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    above: 16
+    id: Hot
+    trigger: numeric_state
+  - entity_id:
+    - sensor.livingroom_irblaster_temperature
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    below: 14.5
+    id: Cold
+    trigger: numeric_state
+  conditions:
+  - condition: time
+    after: '22:00:00'
+    before: 05:00:00
+    weekday:
+    - sun
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Sleeping
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Guest
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Hot
+      sequence:
+      - metadata: {}
+        data:
+          preset_mode: 'Off'
+        target:
+          entity_id: climate.otto_s_room
+        enabled: false
+        action: climate.set_preset_mode
+      - metadata: {}
+        data:
+          hvac_mode: 'off'
+        action: climate.set_hvac_mode
+        target:
+          entity_id: climate.living_room_ac
+    - conditions:
+      - condition: trigger
+        id:
+        - Cold
+      sequence:
+      - metadata: {}
+        data:
+          preset_mode: eco
+        action: climate.set_preset_mode
+        target:
+          entity_id: climate.living_room_versatile_thermastat
+      - metadata: {}
+        data:
+          hvac_mode: heat
+        action: climate.set_hvac_mode
+        target:
+          entity_id:
+          - climate.living_room_versatile_thermastat
+  mode: single
+- id: '1749730336110'
+  alias: Volume control wiimamp
+  description: ''
+  triggers:
+  - trigger: time
+    at: 06:30:00
+  conditions: []
+  actions:
+  - action: media_player.volume_set
+    metadata: {}
+    data:
+      volume_level: 0.17
+    target:
+      device_id: 460e7ce205c826c208cee3efb7193105
   mode: single
