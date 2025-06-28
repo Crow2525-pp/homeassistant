@@ -2208,18 +2208,49 @@
         target:
           entity_id: input_boolean.washing_machine_on
       end_custom_actions:
-      - action: tts.speak
-        metadata: {}
-        data:
-          cache: true
-          media_player_entity_id: media_player.kitchen
-          message: Washing machine is done
-        enabled: false
       - action: input_boolean.turn_off
         metadata: {}
         data: {}
         target:
           entity_id: input_boolean.washing_machine_on
+      - action: tts.google_translate_say
+        metadata: {}
+        data:
+          cache: false
+          entity_id: media_player.kitchen
+          message: Washing is done! Henry, time to put the washing in the dryer!
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 10
+          milliseconds: 0
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.kitchen
+        data:
+          media_content_id: media-source://media_source/local/Memes/image1.jpg
+          media_content_type: image/jpeg
+        metadata:
+          title: image1.jpg
+          thumbnail:
+          media_class: image
+          children_media_class:
+          navigateIds:
+          - {}
+          - media_content_type: app
+            media_content_id: media-source://media_source
+          - media_content_type: ''
+            media_content_id: media-source://media_source/local/Memes
+      - delay:
+          hours: 0
+          minutes: 15
+          seconds: 0
+          milliseconds: 0
+      - action: media_player.turn_off
+        metadata: {}
+        data: {}
+        target:
+          device_id: 38066f3083671e091a033c27c46cc53c
       start_appliance_power: 10
       include_start_notify: enable_start_notify_options
       end_appliance_power: 10
@@ -2352,12 +2383,44 @@
         data: {}
         target:
           entity_id: input_boolean.dryer_on
-      - action: tts.speak
+      - action: tts.google_translate_say
         metadata: {}
         data:
-          cache: true
-          media_player_entity_id: media_player.kitchen
-          message: Dryer is done
+          cache: false
+          entity_id: media_player.kitchen
+          message: Dryer is done, put it in the laundry and leave it there for ages!
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 10
+          milliseconds: 0
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.kitchen
+        data:
+          media_content_id: media-source://media_source/local/Memes/images.jpg
+          media_content_type: image/jpeg
+        metadata:
+          title: images.jpg
+          thumbnail:
+          media_class: image
+          children_media_class:
+          navigateIds:
+          - {}
+          - media_content_type: app
+            media_content_id: media-source://media_source
+          - media_content_type: ''
+            media_content_id: media-source://media_source/local/Memes
+      - delay:
+          hours: 0
+          minutes: 15
+          seconds: 0
+          milliseconds: 0
+      - action: media_player.turn_off
+        metadata: {}
+        data: {}
+        target:
+          device_id: 38066f3083671e091a033c27c46cc53c
       end_appliance_power: 14
       start_custom_actions:
       - action: input_boolean.turn_on
@@ -3112,7 +3175,7 @@
       sequence:
       - metadata: {}
         data:
-          preset_mode: eco
+          preset_mode: frost
         action: climate.set_preset_mode
         target:
           entity_id: climate.masterbed_versatile_thermostat
@@ -3224,7 +3287,57 @@
   - action: media_player.volume_set
     metadata: {}
     data:
-      volume_level: 0.17
+      volume_level: 0.08
     target:
       device_id: 460e7ce205c826c208cee3efb7193105
   mode: single
+- id: '1749858009259'
+  alias: Cover Control Automation (CCA) - Outdoor Blinds
+  description: ''
+  use_blueprint:
+    path: hvorragend/cover_control_automation.yaml
+    input:
+      auto_options:
+      - auto_up_enabled
+      - auto_down_enabled
+      - auto_brightness_enabled
+      - auto_sun_enabled
+      - auto_ventilate_enabled
+      cover_status_options: cover_helper_enabled
+      cover_status_helper: input_text.cover_status_helper
+      workday_sensor: binary_sensor.workday_sensor
+      default_brightness_sensor: sensor.hub_2_0be5_light_level
+      brightness_up: 4673
+      contact_window_opened: binary_sensor.balcony_door_sensor_magnet_opening_2
+      resident_sensor: input_boolean.home_presence
+      check_config: true
+      blind: cover.roller_blinds_chan1
+      shading_brightness_sensor: sensor.hub_2_0be5_illuminance
+      shading_temperatur_sensor1: sensor.ble_temperature_masterbed_temp_humidity_sensor
+      shading_temperatur_sensor2: sensor.essendon_airport_temp
+      shading_forecast_sensor: sensor.essendon_airport_max_temp
+- id: '1749869631608'
+  alias: Cover Control Automations - Curtains
+  description: ''
+  use_blueprint:
+    path: hvorragend/cover_control_automation.yaml
+    input:
+      auto_options:
+      - auto_up_enabled
+      - auto_down_enabled
+      - auto_brightness_enabled
+      - auto_sun_enabled
+      - auto_ventilate_enabled
+      cover_status_options: cover_helper_disabled
+      cover_status_helper: input_text.cover_status_helper_curtains
+      workday_sensor: binary_sensor.workday_sensor
+      default_brightness_sensor: sensor.hub_2_0be5_light_level
+      brightness_up: 4673
+      contact_window_opened: binary_sensor.balcony_door_sensor_magnet_opening_2
+      resident_sensor: input_boolean.home_presence
+      check_config: true
+      blind: cover.curtain_3_b3bb
+      shading_brightness_sensor: sensor.hub_2_0be5_illuminance
+      shading_temperatur_sensor1: sensor.ble_temperature_masterbed_temp_humidity_sensor
+      shading_temperatur_sensor2: sensor.essendon_airport_temp
+      shading_forecast_sensor: sensor.essendon_airport_max_temp
