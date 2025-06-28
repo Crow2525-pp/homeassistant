@@ -1,0 +1,20 @@
+type: vertical-stack
+cards:
+  - type: heading
+    heading: "Manual Automations"
+    heading_style: title
+    icon: mdi-human-greeting-variant
+
+  - type: custom:auto-entities
+    card:
+      type: grid
+      square: false
+      columns: 2
+      state_color: true
+    card_param: cards
+    filter:
+      include:
+        - integration: input_boolean and
+        - label: "Manual Automations"
+          options:
+            type: tile

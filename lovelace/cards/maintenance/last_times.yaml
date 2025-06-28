@@ -1,0 +1,16 @@
+type: vertical-stack
+cards:
+  - type: custom:auto-entities
+    card:
+      type: markdown
+      content: >
+        {% for dt in states.input_datetime %}
+        - **{{ dt.attributes.friendly_name }}**: {{ dt.state }}
+        {% endfor %}
+    card_param: content
+    filter:
+      include:
+        - domain: input_datetime
+        - label: and Maintenance
+    sort:
+      method: room

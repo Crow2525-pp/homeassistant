@@ -1,3 +1,5 @@
+type: vertical-stack
+cards:
 - type: tile
   entity: switch.water_switch_switch
   name: Sprinkler

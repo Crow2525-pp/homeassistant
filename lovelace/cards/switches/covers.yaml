@@ -1,18 +1,27 @@
-- features:
-    - type: cover-open-close
-  type: tile
-  entity: cover.roller_blinds_chan1
-  hide_state: true
-  name: Roller Blinds
-  color: primary
-  layout_options:
-    grid_columns: full
-- features:
-    - type: cover-open-close
-    - type: cover-position
-  type: tile
-  entity: cover.windowcovering_cover
-  name: Curtains
-  layout_options:
-    grid_columns: full
-    grid_rows: 3
+type: vertical-stack
+cards:
+  - features:
+      - type: cover-open-close
+    type: tile
+    entity: cover.roller_blinds_chan1
+    hide_state: true
+    name: Roller Blinds
+    color: primary
+    layout_options:
+      grid_columns: full
+  - features:
+      - type: cover-open-close
+      - type: cover-position
+    type: tile
+    entity: cover.windowcovering_cover
+    name: Curtains
+    layout_options:
+      grid_columns: full
+  - features:
+      - type: cover-open-close
+      - type: cover-position
+    type: tile
+    entity: cover.smart_garage_door_garage
+    name: Garage
+    layout_options:
+      grid_columns: full

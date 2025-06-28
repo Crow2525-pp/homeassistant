@@ -1,55 +1,57 @@
-# Dishwasher Column
-- type: heading
-  heading_style: title
-  heading: "Dishwasher Monitor"
-  badges:
-    - type: entity
-      entity: input_boolean.dishwasher_on
-      name: "Dishwasher"
-      icon: mdi:dishwasher
-      show_state: true
-      color: state
-      tap_action:
-        action: more-info
+type: vertical-stack
+cards:
+  # Dishwasher Column
+  - type: heading
+    heading_style: title
+    heading: "Dishwasher Monitor"
+    badges:
+      - type: entity
+        entity: input_boolean.dishwasher_on
+        name: "Dishwasher"
+        icon: mdi:dishwasher
+        show_state: true
+        color: state
+        tap_action:
+          action: more-info
 
-    - type: entity
-      entity: sensor.dishwasher_power_sensor_mss310_energy_kwh_main_channel
-      name: "Power Usage"
-      icon: mdi:flash
-      show_state: true
-      color: "#FBC02D"
-      tap_action:
-        action: more-info
+      - type: entity
+        entity: sensor.dishwasher_smart_plug_consumption
+        name: "Power Usage"
+        icon: mdi:flash
+        show_state: true
+        color: "#FBC02D"
+        tap_action:
+          action: more-info
 
-- type: entities
-  title: "Dishwasher Stats"
-  entities:
-    - entity: sensor.dishwasher_power_sensor_mss310_current_a_main_channel
-      name: "Current (A)"
-    - entity: sensor.dishwasher_power_sensor_mss310_energy_kwh_main_channel
-      name: "Energy (kWh)"
-    - entity: sensor.dishwasher_power_sensor_mss310_voltage_v_main_channel
-      name: "Voltage (V)"
-    - entity: sensor.dishwasher_power_sensor_mss310_power_w_main_channel
-      name: "Power (W)"
+  - type: entities
+    title: "Dishwasher Stats"
+    entities:
+      - entity: sensor.smart_plug_current
+        name: "Current (A)"
+      - entity: sensor.dishwasher_smart_plug_consumption
+        name: "Energy (kWh)"
+      - entity: sensor.smart_plug_voltage
+        name: "Voltage (V)"
+      - entity: sensor.smart_plug_power
+        name: "Power (W)"
 
-- type: history-graph
-  title: "Dishwasher Power History"
-  entities:
-    - entity: sensor.dishwasher_power_sensor_mss310_power_w_main_channel
-      name: "Power (W)"
-    - entity: sensor.dishwasher_power_sensor_mss310_current_a_main_channel
-      name: "Current (A)"
-    - entity: sensor.dishwasher_power_sensor_mss310_voltage_v_main_channel
-      name: "Voltage (V)"
-  hours_to_show: 6
-  refresh_interval: 30
+  - type: history-graph
+    title: "Dishwasher Power History"
+    entities:
+      - entity: sensor.smart_plug_power
+        name: "Power (W)"
+      - entity: sensor.smart_plug_current
+        name: "Current (A)"
+      - entity: sensor.smart_plug_voltage
+        name: "Voltage (V)"
+    hours_to_show: 6
+    refresh_interval: 30
 
-- type: statistics-graph
-  title: "Dishwasher Energy Usage (Last 24h)"
-  entities:
-    - entity: sensor.dishwasher_power_sensor_mss310_energy_kwh_main_channel
-      name: "Energy (kWh)"
-  days_to_show: 1
-  stat_types: mean
-  chart_type: line
+  - type: statistics-graph
+    title: "Dishwasher Energy Usage (Last 24h)"
+    entities:
+      - entity: sensor.dishwasher_smart_plug_consumption
+        name: "Energy (kWh)"
+    days_to_show: 1
+    stat_types: mean
+    chart_type: line

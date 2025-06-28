@@ -1,0 +1,7 @@
+# Calendar Family Planning
+title: Calendar Family Planning
+path: calendar-family-planning
+icon: mdi:calendar-month
+badges: !include ../badges/standard.yaml
+cards:
+  - !include ../cards/calendar.yaml

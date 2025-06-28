@@ -1,143 +1,145 @@
-- type: heading
-  heading: "Humdity"
-  icon: mdi:water-percent
+type: vertical-stack
+cards:
+  - type: heading
+    heading: "Humdity"
+    icon: mdi:water-percent
 
-- type: glance
-  show_state: true
-  entities:
-    # Living Room
-    - entity: sensor.livingroom_irblaster_humidity
-      name: Living
-      tap_action:
-        action: more-info
-      card_mod:
-        style: |
-          :host {
-            --paper-item-icon-color:
-              {% if states('sensor.livingroom_irblaster_humidity') | float < 40 %}
-                #64B5F6
-              {% elif states('sensor.livingroom_irblaster_humidity') | float > 60 %}
-                #FF8A65
-              {% else %}
-                #81C784
-              {% endif %};
-          }
-
-    # Henry's Room
-    - entity: sensor.study_esp32_henrysroom_humidity
-      name: Henry
-      tap_action:
-        action: more-info
-      card_mod:
-        style: |
-          :host {
-            --paper-item-icon-color:
-              {% if states('sensor.study_esp32_henrysroom_humidity') | float < 40 %}
-                #64B5F6
-              {% elif states('sensor.study_esp32_henrysroom_humidity') | float > 60 %}
-                #FF8A65
-              {% else %}
-                #81C784
-              {% endif %};
-          }
-
-    # Otto's Room
-    - entity: sensor.study_esp32_ottosroom_humidity
-      name: Otto
-      tap_action:
-        action: more-info
-      card_mod:
-        style: |
-          :host {
-            --paper-item-icon-color:
-              {% if states('sensor.study_esp32_ottosroom_humidity') | float < 40 %}
-                #64B5F6
-              {% elif states('sensor.study_esp32_ottosroom_humidity') | float > 60 %}
-                #FF8A65
-              {% else %}
-                #81C784
-              {% endif %};
-          }
-
-    # Master Bedroom
-    - entity: sensor.humiditysensor_humidity
-      name: Master
-      tap_action:
-        action: more-info
-      card_mod:
-        style: |
-          :host {
-            --paper-item-icon-color:
-              {% if states('sensor.humiditysensor_humidity') | float < 40 %}
-                #64B5F6
-              {% elif states('sensor.humiditysensor_humidity') | float > 60 %}
-                #FF8A65
-              {% else %}
-                #81C784
-              {% endif %};
-          }
-
-    # Essendon
-    - entity: sensor.essendon_airport_humidity
-      name: Essendon
-      tap_action:
-        action: more-info
-      card_mod:
-        style: |
-          :host {
-            --paper-item-icon-color:
-              {% if states('sensor.essendon_airport_humidity') | float < 40 %}
-                #64B5F6
-              {% elif states('sensor.essendon_airport_humidity') | float > 60 %}
-                #FF8A65
-              {% else %}
-                #81C784
-              {% endif %};
-          }
-
-- type: heading
-  heading: "Humdity Trends"
-  icon: mdi:water-percent
-  heading_style: subtitle
-
-- type: history-graph
-  title: Humidity Trends
-  hours_to_show: 24
-  refresh_interval: 60
-  entities:
-    - entity: sensor.humiditysensor_humidity
-      name: Master
-    - entity: sensor.study_esp32_ottosroom_humidity
-      name: Otto
-    - entity: sensor.study_esp32_henrysroom_humidity
-      name: Henry
-    - entity: sensor.livingroom_irblaster_humidity
-      name: Living
-    - entity: sensor.essendon_airport_humidity
-      name: Essendon
-
+  - type: glance
+    show_state: true
+    entities:
       # Living Room
-      # - entity: sensor.ble_humidity_kitchen_temp_humidity_sensor
-      #   name: BLE Humidity Kitchen
-      # - entity: sensor.ble_humidity_front_door
-      #   name: BLE Humidity Front Door
+      - entity: sensor.livingroom_irblaster_humidity
+        name: Living
+        tap_action:
+          action: more-info
+        card_mod:
+          style: |
+            :host {
+              --paper-item-icon-color:
+                {% if states('sensor.livingroom_irblaster_humidity') | float < 40 %}
+                  #64B5F6
+                {% elif states('sensor.livingroom_irblaster_humidity') | float > 60 %}
+                  #FF8A65
+                {% else %}
+                  #81C784
+                {% endif %};
+            }
 
       # Henry's Room
-      # - entity: sensor.henrys_room_ir_blaster_humidity
-      #   name: Henry's Room IR Blaster
-      # - entity: sensor.ble_humidity_a4c138a817fd
-      #   name: Henry's Room
-      # - entity: sensor.henrys_room_temp_humidity_sensor_humidity
-      #   name: Henry's Room Temp Humidity
+      - entity: sensor.study_esp32_henrysroom_humidity
+        name: Lucas
+        tap_action:
+          action: more-info
+        card_mod:
+          style: |
+            :host {
+              --paper-item-icon-color:
+                {% if states('sensor.study_esp32_henrysroom_humidity') | float < 40 %}
+                  #64B5F6
+                {% elif states('sensor.study_esp32_henrysroom_humidity') | float > 60 %}
+                  #FF8A65
+                {% else %}
+                  #81C784
+                {% endif %};
+            }
 
       # Otto's Room
-      # - entity: sensor.ottos_room_temp_humidity_sensor_humidity
-      #   name: Otto's Room Temp Humidity
+      - entity: sensor.study_esp32_ottosroom_humidity
+        name: Otto
+        tap_action:
+          action: more-info
+        card_mod:
+          style: |
+            :host {
+              --paper-item-icon-color:
+                {% if states('sensor.study_esp32_ottosroom_humidity') | float < 40 %}
+                  #64B5F6
+                {% elif states('sensor.study_esp32_ottosroom_humidity') | float > 60 %}
+                  #FF8A65
+                {% else %}
+                  #81C784
+                {% endif %};
+            }
 
       # Master Bedroom
-      # - entity: sensor.hub_2_0be5_humidity
-      #   name: Masterbed Sidebed Hub
+      - entity: sensor.humiditysensor_humidity
+        name: Master
+        tap_action:
+          action: more-info
+        card_mod:
+          style: |
+            :host {
+              --paper-item-icon-color:
+                {% if states('sensor.humiditysensor_humidity') | float < 40 %}
+                  #64B5F6
+                {% elif states('sensor.humiditysensor_humidity') | float > 60 %}
+                  #FF8A65
+                {% else %}
+                  #81C784
+                {% endif %};
+            }
 
-      # Other Sensors
-      # - entity: sensor.essendon_airport_humidity
-      #   name: Essendon Airport
+      # Essendon
+      - entity: sensor.essendon_airport_humidity
+        name: Essendon
+        tap_action:
+          action: more-info
+        card_mod:
+          style: |
+            :host {
+              --paper-item-icon-color:
+                {% if states('sensor.essendon_airport_humidity') | float < 40 %}
+                  #64B5F6
+                {% elif states('sensor.essendon_airport_humidity') | float > 60 %}
+                  #FF8A65
+                {% else %}
+                  #81C784
+                {% endif %};
+            }
+
+  - type: heading
+    heading: "Humdity Trends"
+    icon: mdi:water-percent
+    heading_style: subtitle
+
+  - type: history-graph
+    title: Humidity Trends
+    hours_to_show: 24
+    refresh_interval: 60
+    entities:
+      - entity: sensor.humiditysensor_humidity
+        name: Master
+      - entity: sensor.study_esp32_ottosroom_humidity
+        name: Otto
+      - entity: sensor.study_esp32_henrysroom_humidity
+        name: Lucas
+      - entity: sensor.livingroom_irblaster_humidity
+        name: Living
+      - entity: sensor.essendon_airport_humidity
+        name: Essendon
+
+        # Living Room
+        # - entity: sensor.ble_humidity_kitchen_temp_humidity_sensor
+        #   name: BLE Humidity Kitchen
+        # - entity: sensor.ble_humidity_front_door
+        #   name: BLE Humidity Front Door
+
+        # Henry's Room
+        # - entity: sensor.henrys_room_ir_blaster_humidity
+        #   name: Henry's Room IR Blaster
+        # - entity: sensor.ble_humidity_a4c138a817fd
+        #   name: Henry's Room
+        # - entity: sensor.henrys_room_temp_humidity_sensor_humidity
+        #   name: Henry's Room Temp Humidity
+
+        # Otto's Room
+        # - entity: sensor.ottos_room_temp_humidity_sensor_humidity
+        #   name: Otto's Room Temp Humidity
+
+        # Master Bedroom
+        # - entity: sensor.hub_2_0be5_humidity
+        #   name: Masterbed Sidebed Hub
+
+        # Other Sensors
+        # - entity: sensor.essendon_airport_humidity
+        #   name: Essendon Airport

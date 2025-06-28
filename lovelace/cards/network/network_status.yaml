@@ -1,3 +1,5 @@
+type: vertical-stack
+cards:
 # 🌐 Network Health
 - type: entities
   title: 🌐 Network Health

@@ -6,6 +6,7 @@ title: Home Dashboard
 views:
   - !include lovelace/views/control_panel.yaml
   - !include lovelace/views/climate.yaml
+  - !include lovelace/views/calendar.yaml
   - !include lovelace/views/alarm.yaml
   - !include lovelace/views/network.yaml
   - !include lovelace/views/laundry.yaml
@@ -880,7 +881,7 @@ views:
   #           card_mod:
   #             style: |
   #               ha-card {
-  #                 background-color: {% if states('binary_sensor.master_bedroom_door_sensor_opening') == 'on' %} #fff9c4 {% else %}  {% endif %}; 
+  #                 background-color: {% if states('binary_sensor.master_bedroom_door_sensor_opening') == 'on' %} #fff9c4 {% else %}  {% endif %};
   #                 border-radius: 12px;
   #                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   #               }
@@ -951,7 +952,7 @@ views:
   #           card_mod:
   #             style: |
   #               ha-card {
-  #                 background-color: {% if states('binary_sensor.henry_door_sensor_magnet_opening') == 'on' %} #fff9c4 {% else %}  {% endif %}; 
+  #                 background-color: {% if states('binary_sensor.henry_door_sensor_magnet_opening') == 'on' %} #fff9c4 {% else %}  {% endif %};
   #                 border-radius: 12px;
   #                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   #               }
@@ -1463,4 +1464,3 @@ views:
   #   visible:
   #     - user: e104d00f0f6d4b459273ce6c45cf232f
   #     - user: 307832576127404887f4525f27f45536
-

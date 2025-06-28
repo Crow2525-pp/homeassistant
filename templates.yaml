@@ -10,19 +10,30 @@
       state: "{{ (is_state('group.wan_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.wan_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.wan_down_notify', 'on') }}"
 
 - binary_sensor:
-  ## Internet Connection Status based on TX and RX
-  - name: Internet Connection
-    state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float > 0) or (states('sensor.ucg_ultra_port_5_rx') | float > 0)) }}"
+    ## Internet Connection Status based on TX and RX
+    - name: Internet Connection
+      state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float > 0) or (states('sensor.ucg_ultra_port_5_rx') | float > 0)) }}"
 
-  ## WAN Down Alert Active with 250-second delay
-  - name: WAN Down Alert Active
-    state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float == 0) and (states('sensor.ucg_ultra_port_5_rx') | float == 0) and ((as_timestamp(now()) - as_timestamp(states.sensor.ucg_ultra_port_5_tx.last_changed)) | int(0) > 250)) }}"
-
+    ## WAN Down Alert Active with 250-second delay
+    - name: WAN Down Alert Active
+      state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float == 0) and (states('sensor.ucg_ultra_port_5_rx') | float == 0) and ((as_timestamp(now()) - as_timestamp(states.sensor.ucg_ultra_port_5_tx.last_changed)) | int(0) > 250)) }}"
 
 - binary_sensor:
     - name: "Holiday Season"
       unique_id: holiday_season
       state: "{{ now().month == 11 or now().month == 12 }}"
+
+- sensor:
+    - name: "Maintenance Dates Summary"
+      state: >
+        {% set items = states.input_datetime
+          | selectattr('attributes.label', 'defined')
+          | selectattr('attributes.label', 'equalto', 'Maintenance')
+          | map(attribute='entity_id')
+          | list %}
+        {% for e in items %}
+        - {{ state_attr(e, 'friendly_name') }}: {{ states(e) }}
+        {% endfor %}
 
 - sensor:
     - name: "Washing Machine Estimated Remaining"
@@ -77,3 +88,24 @@
       target:
         entity_id: weather.home
       response_variable: hourly
+
+- trigger:
+    - platform: state
+      entity_id:
+        - sensor.ble_temperature_masterbed_temp_humidity_sensor
+        - sensor.ble_humidity_masterbed_temp_humidity_sensor
+        - sensor.ble_battery_masterbed_temp_humidity_sensor
+  sensor:
+    - name: "Masterbed Temp/Humidity Sensor Last Seen"
+      state: "{{ now().isoformat() }}"
+
+- trigger:
+    - platform: state
+      entity_id:
+        - sensor.ble_temperature_kitchen_temp_humidity_sensor
+        - sensor.ble_humidity_kitchen_temp_humidity_sensor
+        - sensor.ble_voltage_kitchen_temp_humidity_sensor
+        - sensor.ble_rssi_kitchen_temp_humidity_sensor
+  sensor:
+    - name: "Kitchen Temp/Humidity Sensor Last Seen"
+      state: "{{ now().isoformat() }}"

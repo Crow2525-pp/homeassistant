@@ -1,26 +1,14 @@
 title: Media Dashboard
 path: media
 icon: mdi:music
-type: sections
-max_columns: 4
-sections:
-  - type: grid
-    cards: !include ../cards/media/media_recent_played.yaml
-  - type: grid
-    square: false
-    cards: !include ../cards/media/sonarr_upcoming.yaml
-  # - type: grid
-  #   cards: !include ../cards/media/sonarr_missing.yaml
-  # - type: grid
-  # cards: !include ../cards/media/sonarr_all_shows.yaml
-
-  - type: grid    
-    cards: !include ../cards/media/media_quick_actions.yaml
-  - type: grid
-    cards: !include ../cards/media/media_control.yaml
-
-  - type: grid
-    cards: !include ../cards/media/sonarr_queue.yaml
+cards: 
+  - !include ../cards/media/media_recent_played.yaml
+  - !include ../cards/media/sonarr_upcoming.yaml
+# - !include ../cards/media/sonarr_missing.yaml
+# - !include ../cards/media/sonarr_all_shows.yaml
+  - !include ../cards/media/media_quick_actions.yaml
+  - !include ../cards/media/media_control.yaml
+  - !include ../cards/media/sonarr_queue.yaml
 
 # TODO: fix sonarr missing shows and all shows.
 # TODO: add plex recently added movies and tv shows

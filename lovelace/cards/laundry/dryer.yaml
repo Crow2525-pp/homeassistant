@@ -1,3 +1,6 @@
+type: vertical-stack
+cards:
+
 # Dryer Column
 - type: heading
   heading_style: title

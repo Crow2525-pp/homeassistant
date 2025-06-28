@@ -1,9 +1,9 @@
+type: vertical-stack
+cards:
 - features:
     - type: fan-speed
   type: tile
   entity: fan.masterbedroom_fan
-  show_entity_picture: false
-  hide_state: true
   vertical: false
   layout_options:
     grid_columns: full

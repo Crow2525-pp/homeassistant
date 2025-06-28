@@ -1,15 +1,8 @@
 title: Network & Device Monitoring
 path: network
 icon: mdi:network
-type: sections
-max_columns: 2
 badges: !include ../badges/network.yaml
-sections:
-  - type: grid
-    cards: !include ../cards/network/network_services.yaml
-
-  - type: grid
-    cards: !include ../cards/network/network_status.yaml
-
-  - type: grid
-    cards: !include ../cards/network/network_portainer.yaml
+cards: 
+  - !include ../cards/network/network_services.yaml
+  - !include ../cards/network/network_status.yaml
+  - !include ../cards/network/network_portainer.yaml

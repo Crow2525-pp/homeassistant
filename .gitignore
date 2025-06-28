@@ -15,7 +15,7 @@
 !notifications.yaml
 !templates.yaml
 !media_player.yaml
-
+!mqtt.yaml
 
 # Dashboard
 !.storage/lovelace

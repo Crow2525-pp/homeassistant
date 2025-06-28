@@ -1,0 +1,20 @@
+type: vertical-stack
+cards:
+  - type: heading
+    heading: "Kill Switches"
+    heading_style: title
+    icon: mdi-death-star-variant
+
+  - type: custom:auto-entities
+    card:
+      type: grid
+      square: false
+      columns: 1
+      state_color: true
+    card_param: cards
+    filter:
+      include:
+        - integration: input_boolean and
+        - label: Killswitch
+          options:
+            type: tile

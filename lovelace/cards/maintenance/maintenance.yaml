@@ -1,11 +1,11 @@
-- type: custom:auto-entities
-  card:
-    type: entities
-  filter:
-    include:
-      - domain: Sensor and
-      - label: Maintenance
-  sort:
-    method: room
-
-# TODO: Add last cleaned/serviced dates to utilities
+type: vertical-stack
+cards:
+  - type: custom:auto-entities
+    card:
+      type: entities
+    filter:
+      include:
+        - domain: Sensor and
+        - label: Maintenance
+    sort:
+      method: room

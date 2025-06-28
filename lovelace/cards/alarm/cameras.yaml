@@ -1,17 +1,27 @@
-# --- 🎥 CAMERA GRID ---
-- type: heading
-  heading_style: title
-  heading: Live Security Feeds
-  icon: mdi:cctv
+type: vertical-stack
+cards:
+  # --- 🎥 CAMERA GRID ---
+  - type: heading
+    heading_style: title
+    heading: Live Security Feeds
+    icon: mdi:cctv
 
-- type: picture-entity
-  entity: camera.bi_front_door_camera
-  name: Front Door
-  camera_view: live
-  fit_mode: fill
-  tap_action:
-    action: url
-    url_path: http://192.168.1.101:81
+  - type: picture-entity
+    entity: camera.front_door_cam_sub
+    name: Front Door
+    camera_view: live
+    fit_mode: fill
+    tap_action:
+      action: url
+      url_path: http://192.168.1.101:81
+  - type: picture-entity
+    entity: camera.driveway_cam_fluent
+    name: Driveway
+    camera_view: live
+    fit_mode: fill
+    tap_action:
+      action: url
+      url_path: http://192.168.1.101:81
 #TODO: get BI alerts working
 #TODO: fix drive-way camera
 

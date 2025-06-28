@@ -1,24 +1,42 @@
 title: Control Panel
 path: control
 icon: mdi:view-dashboard
-type: sections
 badges: !include ../badges/standard.yaml
-
-max_columns: 1
-sections:
-  - type: grid
-    cards: !include ../cards/alerts.yaml
-  - type: grid
-    cards: !include ../cards/climate/hvac.yaml
-  - type: grid
-    cards: !include ../cards/switches/lights.yaml
-  - type: grid
-    cards: !include ../cards/fans.yaml
-  - type: grid
-    cards: !include ../cards/switches/covers.yaml
-  - type: grid
-    cards: !include ../cards/switches/sprinkler.yaml
-  - type: grid
-    cards: !include ../cards/alarm/alarmo.yaml
-  - type: grid
-    cards: !include ../cards/switches/powerpoints.yaml
+cards:
+  - type: conditional
+    conditions:
+      - condition: or
+        conditions:
+          - condition: state
+            entity: input_boolean.washing_machine_on
+            state: "on"
+          - condition: state
+            entity: input_boolean.dryer_on
+            state: "on"
+          - condition: state
+            entity: cover.smart_garage_door_garage
+            state: "open"
+          - condition: state
+            entity: input_boolean.ottos_door_open
+            state: "on"
+          - condition: state
+            entity: alarm_control_panel.alarmo
+            state: "triggered"
+          - condition: state
+            entity: alert.network_device_down_warn_alert_active
+            state: "on"
+          - condition: state
+            entity: alert.wan_down_warn_alert_active
+            state: "on"
+          - condition: numeric_state
+            entity: sensor.braybrook_warnings
+            above: 0
+    card: !include ../cards/alerts.yaml
+  - !include ../cards/climate/hvac.yaml
+  - !include ../cards/switches/lights.yaml
+  - !include ../cards/fans.yaml
+  - !include ../cards/switches/sprinkler.yaml
+  - !include ../cards/switches/covers.yaml
+  - !include ../cards/alarm/alarmo.yaml
+  - !include ../cards/switches/powerpoints.yaml
+  - !include ../cards/automations/automations.yaml
