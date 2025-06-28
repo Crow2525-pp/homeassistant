@@ -88,3 +88,24 @@
       target:
         entity_id: weather.home
       response_variable: hourly
+
+- trigger:
+    - platform: state
+      entity_id:
+        - sensor.ble_temperature_masterbed_temp_humidity_sensor
+        - sensor.ble_humidity_masterbed_temp_humidity_sensor
+        - sensor.ble_battery_masterbed_temp_humidity_sensor
+  sensor:
+    - name: "Masterbed Temp/Humidity Sensor Last Seen"
+      state: "{{ now().isoformat() }}"
+
+- trigger:
+    - platform: state
+      entity_id:
+        - sensor.ble_temperature_kitchen_temp_humidity_sensor
+        - sensor.ble_humidity_kitchen_temp_humidity_sensor
+        - sensor.ble_voltage_kitchen_temp_humidity_sensor
+        - sensor.ble_rssi_kitchen_temp_humidity_sensor
+  sensor:
+    - name: "Kitchen Temp/Humidity Sensor Last Seen"
+      state: "{{ now().isoformat() }}"
