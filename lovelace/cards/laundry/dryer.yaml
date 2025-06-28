@@ -4,7 +4,7 @@ cards:
 # Dryer Column
 - type: heading
   heading_style: title
-  heading: "Drier Monitor"
+  heading: "Dryer Monitor"
   badges:
     - type: entity
       entity: input_boolean.dryer_on
