@@ -78,6 +78,11 @@
         unit_of_measurement: "min"
       icon: mdi:timer
 
+    - name: "Living Room Temperature (Offset)"
+      unique_id: livingroom_irblaster_temperature_offset
+      unit_of_measurement: "°C"
+      state: "{{ (states('sensor.livingroom_irblaster_temperature') | float + 1.7) | round(1) }}"
+
 - trigger:
     - trigger: time_pattern
       hours: /1

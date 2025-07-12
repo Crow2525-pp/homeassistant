@@ -9,7 +9,7 @@ cards:
     show_state: true
     entities:
       # Living Room
-      - entity: sensor.livingroom_irblaster_temperature
+      - entity: sensor.living_room_temperature_offset
         name: Living
         tap_action:
           action: more-info
@@ -17,9 +17,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.livingroom_irblaster_temperature') | float < 18 %}
+                {% if states('sensor.living_room_temperature_offset') | float < 18 %}
                   #64B5F6
-                {% elif states('sensor.livingroom_irblaster_temperature') | float > 24 %}
+                {% elif states('sensor.living_room_temperature_offset') | float > 24 %}
                   #FF8A65
                 {% else %}
                   #81C784
@@ -111,7 +111,7 @@ cards:
         name: Otto
       - entity: sensor.study_esp32_henrysroom_temperature
         name: Lucas
-      - entity: sensor.livingroom_irblaster_temperature
+      - entity: sensor.living_room_temperature_offset
         name: Living
       - entity: sensor.essendon_airport_temp
         name: Essendon

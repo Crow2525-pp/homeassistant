@@ -31,5 +31,5 @@
   device_code: 1002
   delay: 0.5
   controller_data: remote.livingroom_irblaster_remote
-  temperature_sensor: sensor.livingroom_irblaster_temperature #sensor.ble_temperature_kitchen_temp_humidity_sensor
+  temperature_sensor: sensor.living_room_temperature_offset #sensor.ble_temperature_kitchen_temp_humidity_sensor
   humidity_sensor: sensor.ble_humidity_kitchen_temp_humidity_sensor

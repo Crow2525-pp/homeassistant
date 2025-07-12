@@ -211,15 +211,11 @@ curtains_half_way:
 spotify_tv:
   alias: Spotify Tv On
   sequence:
-  - type: turn_on
-    device_id: 8533a36763883cb9bde6099bbac23f51
-    entity_id: da9cf3f4657b2c2a6fe37f4c23350031
-    domain: remote
   - action: remote.turn_on
-    target:
-      entity_id: remote.google_tv
     data:
       activity: spotify://
+    target:
+      device_id: 1dd250129defd8ff84726a6e7d45aee6
   - delay:
       hours: 0
       minutes: 0
@@ -230,12 +226,12 @@ spotify_tv:
     data: {}
     action: media_player.media_play
     target:
-      entity_id: media_player.google_tv_2
+      device_id: 1dd250129defd8ff84726a6e7d45aee6
   - metadata: {}
     data: {}
     action: media_player.media_play
     target:
-      entity_id: media_player.google_tv_2
+      device_id: 1dd250129defd8ff84726a6e7d45aee6
   mode: single
   icon: mdi:spotify
 volume_talking:
@@ -274,24 +270,22 @@ volume_high:
 spotify_off:
   alias: Spotify Tv Off
   sequence:
-  - type: turn_off
-    device_id: 8533a36763883cb9bde6099bbac23f51
-    entity_id: da9cf3f4657b2c2a6fe37f4c23350031
-    domain: remote
+  - action: media_player.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: media_player.tv_2
+      device_id: 1dd250129defd8ff84726a6e7d45aee6
   mode: single
   icon: mdi:spotify
 new_script:
   alias: YouTube
   sequence:
-  - type: turn_on
-    device_id: 8533a36763883cb9bde6099bbac23f51
-    entity_id: da9cf3f4657b2c2a6fe37f4c23350031
-    domain: remote
   - action: remote.turn_on
-    target:
-      entity_id: remote.google_tv
     data:
       activity: com.google.android.youtube.tv
+    target:
+      entity_id: remote.tv
   icon: mdi:youtube
   mode: single
 spotify:
@@ -302,7 +296,7 @@ spotify:
     data:
       activity: spotify://
     target:
-      entity_id: remote.google_tv
+      entity_id: remote.tv
   icon: mdi:spotify
   mode: single
 volume_quiet:
