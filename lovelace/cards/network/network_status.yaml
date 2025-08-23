@@ -1,125 +1,125 @@
 type: vertical-stack
 cards:
-# 🌐 Network Health
-- type: entities
-  title: 🌐 Network Health
-  show_header_toggle: false
-  entities:
-    - entity: sensor.homenetwork
-      name: Homenetwork Connections
-    - entity: sensor.homenetworkiot
-      name: Homenetwork IOT Connections
-    - entity: binary_sensor.internet_connection
-      name: Internet Connection
-      icon: mdi:wan
-      state_color: true
-    - entity: binary_sensor.network_device_down_alert_active
-      name: Network Device Alert
-      icon: mdi:access-point-network
-      state_color: true
+  # 🌐 Network Health
+  - type: entities
+    title: 🌐 Network Health
+    show_header_toggle: false
+    entities:
+      - entity: sensor.homenetwork
+        name: Homenetwork Connections
+      - entity: sensor.homenetworkiot
+        name: Homenetwork IOT Connections
+      - entity: binary_sensor.internet_connection
+        name: Internet Connection
+        icon: mdi:wan
+        state_color: true
+      - entity: binary_sensor.network_device_down_alert_active
+        name: Network Device Alert
+        icon: mdi:access-point-network
+        state_color: true
 
-# 📡 Router Monitoring
-- type: entities
-  title: 📡 Router Monitoring
-  entities:
-    - entity: sensor.ucg_ultra_state
-      name: Router Status
-      icon: mdi:router
-    - entity: sensor.ucg_ultra_cpu_utilization
-      name: Router CPU Usage
-      icon: mdi:chip
-    - entity: sensor.ucg_ultra_ucg_ultra_cpu_temperature
-      name: Router CPU Temperature
-      icon: mdi:thermometer
-    - entity: sensor.ucg_ultra_memory_utilization
-      name: Router Memory Usage
-      icon: mdi:memory
-    - entity: sensor.ucg_ultra_uptime
-      name: Router Uptime
-    - entity: sensor.ucg_ultra_clients
-      name: Router Connected Clients
+  # 📡 Router Monitoring
+  - type: entities
+    title: 📡 Router Monitoring
+    entities:
+      - entity: sensor.ucg_ultra_state
+        name: Router Status
+        icon: mdi:router
+      - entity: sensor.ucg_ultra_cpu_utilization
+        name: Router CPU Usage
+        icon: mdi:chip
+      - entity: sensor.ucg_ultra_ucg_ultra_cpu_temperature
+        name: Router CPU Temperature
+        icon: mdi:thermometer
+      - entity: sensor.ucg_ultra_memory_utilization
+        name: Router Memory Usage
+        icon: mdi:memory
+      - entity: sensor.ucg_ultra_uptime
+        name: Router Uptime
+      - entity: sensor.ucg_ultra_clients
+        name: Router Connected Clients
 
-# 🔌 Switch Monitoring
-- type: entities
-  title: 🔌 Switch Monitoring
-  entities:
-    - entity: sensor.usw_16_poe_state
-      name: Switch Status
-      icon: mdi:ethernet
-    - entity: sensor.usw_16_poe_cpu_utilization
-      name: Switch CPU Usage
-      icon: mdi:chip
-    - entity: sensor.usw_16_poe_memory_utilization
-      name: Switch Memory Usage
-      icon: mdi:memory
+  # 🔌 Switch Monitoring
+  - type: entities
+    title: 🔌 Switch Monitoring
+    entities:
+      - entity: sensor.usw_16_poe_state
+        name: Switch Status
+        icon: mdi:ethernet
+      # - entity: sensor.usw_16_poe_cpu_utilization
+      #   name: Switch CPU Usage
+      #   icon: mdi:chip
+      # - entity: sensor.usw_16_poe_memory_utilization
+      #   name: Switch Memory Usage
+      #   icon: mdi:memory
 
-#TODO: Add WIFI Access Points Monitoring
+  #TODO: Add WIFI Access Points Monitoring
 
-# 📊 WAN Latency (Mini Graph)
-- type: custom:mini-graph-card
-  title: 📊 WAN Latency
-  hours_to_show: 24
-  points_per_hour: 60
-  show:
-    fill: true
-    legend: true
-    points: false
-    labels: true
-  entities:
-    - entity: sensor.ucg_ultra_microsoft_wan_latency
-      name: Microsoft Latency
-      color: '#4285F4'
-    - entity: sensor.ucg_ultra_google_wan_latency
-      name: Google Latency
-      color: '#FBBC05'
-    - entity: sensor.ucg_ultra_cloudflare_wan_latency
-      name: Cloudflare Latency
-      color: '#EA4335'
+  # 📊 WAN Latency (Mini Graph)
+  - type: custom:mini-graph-card
+    title: 📊 WAN Latency
+    hours_to_show: 24
+    points_per_hour: 60
+    show:
+      fill: true
+      legend: true
+      points: false
+      labels: true
+    entities:
+      - entity: sensor.ucg_ultra_microsoft_wan_latency
+        name: Microsoft Latency
+        color: "#4285F4"
+      - entity: sensor.ucg_ultra_google_wan_latency
+        name: Google Latency
+        color: "#FBBC05"
+      - entity: sensor.ucg_ultra_cloudflare_wan_latency
+        name: Cloudflare Latency
+        color: "#EA4335"
 
-# 📊 WAN Up/Down Status
-- type: custom:mini-graph-card
-  title: 📊 WAN Up/Down Status
-  hours_to_show: 24
-  points_per_hour: 60
-  show:
-    fill: true
-    legend: true
-    points: false
-    labels: true
-  entities:
-    - entity: sensor.ucg_ultra_port_5_tx
-      name: WAN TX
-      color: '#4285F4'
-    - entity: sensor.ucg_ultra_port_5_rx
-      name: WAN RX
-      color: '#FBBC05'
+  # 📊 WAN Up/Down Status
+  - type: custom:mini-graph-card
+    title: 📊 WAN Up/Down Status
+    hours_to_show: 24
+    points_per_hour: 60
+    show:
+      fill: true
+      legend: true
+      points: false
+      labels: true
+    entities:
+      - entity: sensor.ucg_ultra_port_5_tx
+        name: WAN TX
+        color: "#4285F4"
+      - entity: sensor.ucg_ultra_port_5_rx
+        name: WAN RX
+        color: "#FBBC05"
 
-# 💻 Server & VM Monitoring
-- type: entities
-  title: 💻 Server & VM Monitoring
-  entities:
-    - entity: sensor.node_pve_cpu_used
-      name: Proxmox CPU Usage
-      icon: mdi:chip
-    - entity: sensor.node_pve_memory_used_percentage
-      name: Proxmox Memory Usage
-      icon: mdi:memory
-    - entity: sensor.qemu_media_server_101_cpu_used
-      name: Media Server CPU
-      icon: mdi:server
-    - entity: sensor.qemu_media_server_101_disk_used_percentage
-      name: Media Server Disk Usage
-      icon: mdi:harddisk
-
-# 📈 Speed Test Trends
-- type: history-graph
-  title: 📈 Speed Test Trends
-  hours_to_show: 12
-  entities:
-    - entity: sensor.speedtest_ping
-      name: Ping
-    - entity: sensor.speedtest_download
-      name: Download
-    - entity: sensor.speedtest_upload
-      name: Upload
+  # 💻 Server & VM Monitoring
+  - type: entities
+    title: 💻 Server & VM Monitoring
+    entities:
+      - entity: sensor.node_pve_cpu_used
+        name: Proxmox CPU Usage
+        icon: mdi:chip
+      - entity: sensor.node_pve_memory_used_percentage
+        name: Proxmox Memory Usage
+        icon: mdi:memory
+      - entity: sensor.qemu_media_server_101_cpu_used
+        name: Media Server CPU
+        icon: mdi:server
+      - entity: sensor.qemu_media_server_101_disk_used_percentage
+        name: Media Server Disk Usage
+        icon: mdi:harddisk
+        
+  # 📈 Speed Test Trends
+  - type: history-graph
+    title: 📈 Speed Test Trends
+    hours_to_show: 12
+    entities:
+      - entity: sensor.speedtest_ping
+        name: Ping
+      - entity: sensor.speedtest_download
+        name: Download
+      - entity: sensor.speedtest_upload
+        name: Upload
 
