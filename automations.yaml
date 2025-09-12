@@ -3456,7 +3456,6 @@
         target:
           area_id:
           - back_garden
-          - living_room
           entity_id: light.lounge
     - conditions:
       - condition: trigger
@@ -3464,16 +3463,18 @@
         - motion clear
       - condition: or
         conditions:
-        - condition: state
-          entity_id: media_player.living_room_wiimamp
-          state: playing
-        - condition: numeric_state
-          entity_id: sun.sun
-          attribute: elevation
-          above: 0
-        - condition: state
-          entity_id: media_player.tv_2
-          state: playing
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: media_player.living_room_wiimamp
+            state: playing
+          - condition: state
+            entity_id: media_player.tv_2
+            state: playing
+          - condition: numeric_state
+            entity_id: sun.sun
+            attribute: elevation
+            above: 0
       sequence:
       - action: light.turn_off
         metadata: {}
@@ -3524,4 +3525,61 @@
     data: {}
     target:
       entity_id: media_player.wiim_amp_pro_ebe4
+  mode: single
+- id: '1756063707572'
+  alias: Lights off if watching tv
+  description: Tv is playing or paused causes lights to be turned on/off
+  triggers:
+  - trigger: state
+    entity_id:
+    - media_player.tv
+    to: playing
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    id: Playing
+  - trigger: state
+    entity_id:
+    - media_player.tv
+    to: paused
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    id: Paused
+  conditions:
+  - condition: sun
+    after: sunset
+    before: sunrise
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Playing
+      - condition: time
+        after: '20:30:00'
+        before: 00:00:00
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.lounge
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: time
+          after: 00:00:00
+          before: '20:30:00'
+        - condition: trigger
+          id:
+          - Paused
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.lounge
   mode: single
