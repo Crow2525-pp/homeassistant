@@ -1660,10 +1660,18 @@
     metadata: {}
     data:
       message: Garage door left open
+      data:
+        actions:
+        - action: CLOSE_GARAGE
+          title: Close Garage Door
   - action: notify.mobile_app_slvdh
     metadata: {}
     data:
       message: Garage door left open
+      data:
+        actions:
+        - action: CLOSE_GARAGE
+          title: Close Garage Door
   mode: single
 - id: '1714337117111'
   alias: Master AC off when wake up
@@ -3643,4 +3651,17 @@
         data: {}
         target:
           entity_id: light.lounge
+  mode: single
+- id: '1727826000000'
+  alias: Handle Close Garage Action
+  description: Handles the action button from garage door notification
+  triggers:
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: CLOSE_GARAGE
+  actions:
+  - action: cover.close_cover
+    target:
+      entity_id: cover.smart_garage_door_garage
   mode: single
