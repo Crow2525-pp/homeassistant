@@ -1,0 +1,223 @@
+type: conditional
+conditions:
+  - condition: or
+    conditions:
+      - condition: state
+        entity: binary_sensor.solar_excess_available
+        state: 'on'
+      - condition: state
+        entity: sensor.living_room_climate_suggestion
+        state: 'heat_now'
+      - condition: state
+        entity: sensor.living_room_climate_suggestion
+        state: 'cool_now'
+      - condition: state
+        entity: sensor.master_bedroom_climate_suggestion
+        state: 'heat_now'
+      - condition: state
+        entity: sensor.master_bedroom_climate_suggestion
+        state: 'cool_now'
+      - condition: state
+        entity: sensor.henrys_room_climate_suggestion
+        state: 'heat_now'
+      - condition: state
+        entity: sensor.henrys_room_climate_suggestion
+        state: 'cool_now'
+      - condition: state
+        entity: sensor.ottos_room_climate_suggestion
+        state: 'heat_now'
+      - condition: state
+        entity: sensor.ottos_room_climate_suggestion
+        state: 'cool_now'
+      - condition: state
+        entity: binary_sensor.dishwasher_suggestion
+        state: 'on'
+      - condition: state
+        entity: binary_sensor.dryer_suggestion
+        state: 'on'
+card:
+  type: vertical-stack
+  cards:
+    - type: markdown
+      content: |
+        ## Smart Suggestions
+      card_mod:
+        style: |
+          ha-card {
+            background: transparent;
+            box-shadow: none;
+            padding: 8px 16px 0px 16px;
+          }
+          ha-markdown h2 {
+            font-size: 1.2em;
+            margin: 0;
+            font-weight: 500;
+          }
+
+    # Solar excess indicator
+    - type: conditional
+      conditions:
+        - condition: state
+          entity: binary_sensor.solar_excess_available
+          state: 'on'
+      card:
+        type: markdown
+        content: |
+          **☀️ Excess Solar Power Available!**
+          {{ state_attr('binary_sensor.solar_excess_available', 'excess_power') }}W surplus
+
+          *Good time to run appliances*
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(135deg, rgba(251, 192, 45, 0.2) 0%, rgba(253, 203, 110, 0.1) 100%);
+              border-left: 4px solid #FBC02D;
+              padding: 12px 16px;
+              border-radius: 8px;
+            }
+
+    # Living Room suggestion
+    - type: conditional
+      conditions:
+        - condition: or
+          conditions:
+            - condition: state
+              entity: sensor.living_room_climate_suggestion
+              state: 'heat_now'
+            - condition: state
+              entity: sensor.living_room_climate_suggestion
+              state: 'cool_now'
+      card:
+        type: markdown
+        content: |
+          **Living Room**
+          {{ state_attr('sensor.living_room_climate_suggestion', 'message') }}
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(135deg, rgba(66, 133, 244, 0.1) 0%, rgba(66, 133, 244, 0.05) 100%);
+              border-left: 4px solid #4285F4;
+              padding: 12px 16px;
+              border-radius: 8px;
+              margin-top: 8px;
+            }
+
+    # Master Bedroom suggestion
+    - type: conditional
+      conditions:
+        - condition: or
+          conditions:
+            - condition: state
+              entity: sensor.master_bedroom_climate_suggestion
+              state: 'heat_now'
+            - condition: state
+              entity: sensor.master_bedroom_climate_suggestion
+              state: 'cool_now'
+      card:
+        type: markdown
+        content: |
+          **Master Bedroom**
+          {{ state_attr('sensor.master_bedroom_climate_suggestion', 'message') }}
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(135deg, rgba(219, 68, 55, 0.1) 0%, rgba(219, 68, 55, 0.05) 100%);
+              border-left: 4px solid #DB4437;
+              padding: 12px 16px;
+              border-radius: 8px;
+              margin-top: 8px;
+            }
+
+    # Henry's Room suggestion
+    - type: conditional
+      conditions:
+        - condition: or
+          conditions:
+            - condition: state
+              entity: sensor.henrys_room_climate_suggestion
+              state: 'heat_now'
+            - condition: state
+              entity: sensor.henrys_room_climate_suggestion
+              state: 'cool_now'
+      card:
+        type: markdown
+        content: |
+          **Henry's Room**
+          {{ state_attr('sensor.henrys_room_climate_suggestion', 'message') }}
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(135deg, rgba(15, 157, 88, 0.1) 0%, rgba(15, 157, 88, 0.05) 100%);
+              border-left: 4px solid #0F9D58;
+              padding: 12px 16px;
+              border-radius: 8px;
+              margin-top: 8px;
+            }
+
+    # Otto's Room suggestion
+    - type: conditional
+      conditions:
+        - condition: or
+          conditions:
+            - condition: state
+              entity: sensor.ottos_room_climate_suggestion
+              state: 'heat_now'
+            - condition: state
+              entity: sensor.ottos_room_climate_suggestion
+              state: 'cool_now'
+      card:
+        type: markdown
+        content: |
+          **Otto's Room**
+          {{ state_attr('sensor.ottos_room_climate_suggestion', 'message') }}
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(135deg, rgba(244, 180, 0, 0.1) 0%, rgba(244, 180, 0, 0.05) 100%);
+              border-left: 4px solid #F4B400;
+              padding: 12px 16px;
+              border-radius: 8px;
+              margin-top: 8px;
+            }
+
+    # Dishwasher suggestion
+    - type: conditional
+      conditions:
+        - condition: state
+          entity: binary_sensor.dishwasher_suggestion
+          state: 'on'
+      card:
+        type: markdown
+        content: |
+          **🍽️ Dishwasher**
+          {{ state_attr('binary_sensor.dishwasher_suggestion', 'message') }}
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%);
+              border-left: 4px solid #9C27B0;
+              padding: 12px 16px;
+              border-radius: 8px;
+              margin-top: 8px;
+            }
+
+    # Dryer suggestion
+    - type: conditional
+      conditions:
+        - condition: state
+          entity: binary_sensor.dryer_suggestion
+          state: 'on'
+      card:
+        type: markdown
+        content: |
+          **👔 Dryer**
+          {{ state_attr('binary_sensor.dryer_suggestion', 'message') }}
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(135deg, rgba(0, 150, 136, 0.1) 0%, rgba(0, 150, 136, 0.05) 100%);
+              border-left: 4px solid #009688;
+              padding: 12px 16px;
+              border-radius: 8px;
+              margin-top: 8px;
+            }

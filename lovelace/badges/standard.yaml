@@ -50,6 +50,10 @@
   entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
   name: Solar Yield
   color: ""
+  visibility:
+    - condition: numeric_state
+      entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
+      above: 0
 
 - type: entity
   show_name: true

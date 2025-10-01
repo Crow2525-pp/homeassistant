@@ -1,0 +1,19 @@
+type: vertical-stack
+cards:
+  - type: tile
+    entity: sensor.gosungrow_virtual_1205796_7_1_1_p8062
+    name: Grid Import
+    icon: mdi:transmission-tower-export
+    color: blue
+    vertical: true
+  - type: tile
+    entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
+    name: Home Consumption
+    icon: mdi:home-lightning-bolt
+    color: orange
+    vertical: true
+card_mod:
+  style: |
+    ha-card {
+      border-radius: 12px;
+    }

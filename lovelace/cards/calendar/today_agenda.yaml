@@ -1,0 +1,148 @@
+type: vertical-stack
+cards:
+  - type: markdown
+    content: |
+      ## 📅 Today's Events
+      {{ now().strftime('%A, %B %d, %Y') }}
+    card_mod:
+      style: |
+        ha-card {
+          background: transparent;
+          box-shadow: none;
+          padding: 8px 16px 0px 16px;
+        }
+        ha-markdown h2 {
+          font-size: 1.3em;
+          margin: 0;
+          font-weight: 500;
+        }
+
+  # Phil's Today
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: calendar.philip_james_patterson_gmail_com
+        state: "on"
+    card:
+      type: markdown
+      content: |
+        **{{ state_attr('calendar.philip_james_patterson_gmail_com', 'friendly_name') }}**
+
+        📍 {{ state_attr('calendar.philip_james_patterson_gmail_com', 'message') }}
+        ⏰ {{ state_attr('calendar.philip_james_patterson_gmail_com', 'start_time') | as_timestamp | timestamp_custom('%I:%M %p', true) if state_attr('calendar.philip_james_patterson_gmail_com', 'all_day') == false else 'All Day' }}
+        {% if state_attr('calendar.philip_james_patterson_gmail_com', 'location') %}
+        📌 {{ state_attr('calendar.philip_james_patterson_gmail_com', 'location') }}
+        {% endif %}
+      card_mod:
+        style: |
+          ha-card {
+            border-left: 4px solid #4A90E2;
+            background-color: rgba(74, 144, 226, 0.05);
+            padding: 12px 16px;
+            border-radius: 8px;
+          }
+
+  # Steph's Today
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: calendar.stephanie_louise_patterson_gmail_com
+        state: "on"
+    card:
+      type: markdown
+      content: |
+        **{{ state_attr('calendar.stephanie_louise_patterson_gmail_com', 'friendly_name') }}**
+
+        📍 {{ state_attr('calendar.stephanie_louise_patterson_gmail_com', 'message') }}
+        ⏰ {{ state_attr('calendar.stephanie_louise_patterson_gmail_com', 'start_time') | as_timestamp | timestamp_custom('%I:%M %p', true) if state_attr('calendar.stephanie_louise_patterson_gmail_com', 'all_day') == false else 'All Day' }}
+        {% if state_attr('calendar.stephanie_louise_patterson_gmail_com', 'location') %}
+        📌 {{ state_attr('calendar.stephanie_louise_patterson_gmail_com', 'location') }}
+        {% endif %}
+      card_mod:
+        style: |
+          ha-card {
+            border-left: 4px solid #D94F70;
+            background-color: rgba(217, 79, 112, 0.05);
+            padding: 12px 16px;
+            border-radius: 8px;
+          }
+
+  # Family Today
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: calendar.family_2
+        state: "on"
+    card:
+      type: markdown
+      content: |
+        **{{ state_attr('calendar.family_2', 'friendly_name') }}**
+
+        📍 {{ state_attr('calendar.family_2', 'message') }}
+        ⏰ {{ state_attr('calendar.family_2', 'start_time') | as_timestamp | timestamp_custom('%I:%M %p', true) if state_attr('calendar.family_2', 'all_day') == false else 'All Day' }}
+        {% if state_attr('calendar.family_2', 'location') %}
+        📌 {{ state_attr('calendar.family_2', 'location') }}
+        {% endif %}
+      card_mod:
+        style: |
+          ha-card {
+            border-left: 4px solid #F5A623;
+            background-color: rgba(245, 166, 35, 0.05);
+            padding: 12px 16px;
+            border-radius: 8px;
+          }
+
+  # Steph Work Today
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: calendar.slvandenhoff_gmail_com
+        state: "on"
+    card:
+      type: markdown
+      content: |
+        **Steph Work Calendar**
+
+        📍 {{ state_attr('calendar.slvandenhoff_gmail_com', 'message') }}
+        ⏰ {{ state_attr('calendar.slvandenhoff_gmail_com', 'start_time') | as_timestamp | timestamp_custom('%I:%M %p', true) if state_attr('calendar.slvandenhoff_gmail_com', 'all_day') == false else 'All Day' }}
+        {% if state_attr('calendar.slvandenhoff_gmail_com', 'location') %}
+        📌 {{ state_attr('calendar.slvandenhoff_gmail_com', 'location') }}
+        {% endif %}
+      card_mod:
+        style: |
+          ha-card {
+            border-left: 4px solid #9B59B6;
+            background-color: rgba(155, 89, 182, 0.05);
+            padding: 12px 16px;
+            border-radius: 8px;
+          }
+
+  # No events message
+  - type: conditional
+    conditions:
+      - condition: and
+        conditions:
+          - condition: state
+            entity: calendar.philip_james_patterson_gmail_com
+            state: "off"
+          - condition: state
+            entity: calendar.stephanie_louise_patterson_gmail_com
+            state: "off"
+          - condition: state
+            entity: calendar.family_2
+            state: "off"
+          - condition: state
+            entity: calendar.slvandenhoff_gmail_com
+            state: "off"
+    card:
+      type: markdown
+      content: |
+        *No events scheduled for today* 🎉
+      card_mod:
+        style: |
+          ha-card {
+            text-align: center;
+            padding: 24px;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+          }

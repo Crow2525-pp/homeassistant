@@ -1,7 +1,7 @@
-# Alarm Control
-title: Security Control Center
+# Security
+title: Security
 path: alarm
-icon: mdi:shield-home
+icon: mdi:security
 badges: !include ../badges/standard.yaml
 cards: 
   - !include ../cards/alarm/cameras.yaml

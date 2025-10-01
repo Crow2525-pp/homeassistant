@@ -1,6 +1,6 @@
-title: Media Dashboard
+title: Media
 path: media
-icon: mdi:music
+icon: mdi:play-circle
 cards: 
   - !include ../cards/media/media_recent_played.yaml
   - !include ../cards/media/sonarr_upcoming.yaml

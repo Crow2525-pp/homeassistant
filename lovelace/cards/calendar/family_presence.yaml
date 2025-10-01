@@ -1,0 +1,45 @@
+type: vertical-stack
+cards:
+  - type: markdown
+    content: |
+      ## 🏠 Family Status
+    card_mod:
+      style: |
+        ha-card {
+          background: transparent;
+          box-shadow: none;
+          padding: 8px 16px 0px 16px;
+        }
+        ha-markdown h2 {
+          font-size: 1.2em;
+          margin: 0;
+          font-weight: 500;
+        }
+
+  - type: glance
+    entities:
+      - entity: person.phil_patterson
+        show_name: true
+      - entity: person.stephanie_patterson
+        show_name: true
+      - entity: person.wendy
+        show_name: true
+    columns: 3
+    state_color: true
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+        }
+
+  - type: entities
+    entities:
+      - entity: input_select.occupancy
+        name: House Status
+        icon: mdi:home-account
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          margin-top: 8px;
+        }

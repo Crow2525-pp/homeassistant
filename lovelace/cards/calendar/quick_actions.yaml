@@ -1,0 +1,19 @@
+type: button
+name: "Open Google Calendar"
+icon: mdi:calendar-multiple
+show_name: true
+show_icon: true
+tap_action:
+  action: url
+  url_path: "https://calendar.google.com"
+card_mod:
+  style: |
+    ha-card {
+      background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+      color: white;
+      border-radius: 12px;
+      height: 48px;
+    }
+    ha-card:active {
+      transform: scale(0.98);
+    }

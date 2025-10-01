@@ -1,0 +1,77 @@
+type: vertical-stack
+cards:
+  - type: heading
+    heading: "Appliances"
+    heading_style: title
+    icon: mdi:washing-machine
+    badges:
+      - type: entity
+        entity: sensor.washing_machine_power_plug_power
+        name: "Washer"
+        show_state: true
+        color: state
+      - type: entity
+        entity: sensor.washing_machine_estimated_remaining
+        name: "Time Left"
+        show_state: true
+
+  - type: glance
+    show_state: true
+    columns: 3
+    entities:
+      # Washing Machine
+      - entity: sensor.washing_machine_power_plug_power
+        name: Washer
+        icon: mdi:washing-machine
+        tap_action:
+          action: more-info
+
+      # Dryer
+      - entity: input_boolean.dryer_on
+        name: Dryer
+        icon: mdi:tumble-dryer
+        tap_action:
+          action: more-info
+
+      # Dishwasher
+      - entity: sensor.dishwasher_smart_plug_consumption
+        name: Dishwasher
+        icon: mdi:dishwasher
+        tap_action:
+          action: more-info
+
+  # Running appliances indicator
+  - type: conditional
+    conditions:
+      - condition: or
+        conditions:
+          - condition: state
+            entity: input_boolean.washing_machine_on
+            state: 'on'
+          - condition: state
+            entity: input_boolean.dryer_on
+            state: 'on'
+          - condition: state
+            entity: input_boolean.dishwasher_on
+            state: 'on'
+    card:
+      type: markdown
+      content: |
+        **Currently Running:**
+        {% if is_state('input_boolean.washing_machine_on', 'on') %}
+        • Washer ({{ states('sensor.washing_machine_estimated_remaining') }} min remaining)
+        {% endif %}
+        {% if is_state('input_boolean.dryer_on', 'on') %}
+        • Dryer ({{ states('sensor.dryer_estimated_remaining') }} min remaining)
+        {% endif %}
+        {% if is_state('input_boolean.dishwasher_on', 'on') %}
+        • Dishwasher
+        {% endif %}
+      card_mod:
+        style: |
+          ha-card {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+            border-left: 4px solid #4CAF50;
+            padding: 12px 16px;
+            border-radius: 8px;
+          }

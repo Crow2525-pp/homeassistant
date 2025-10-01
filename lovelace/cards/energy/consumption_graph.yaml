@@ -1,0 +1,28 @@
+type: custom:mini-graph-card
+name: Home Consumption
+icon: mdi:home-lightning-bolt
+hours_to_show: 24
+points_per_hour: 4
+line_width: 3
+font_size: 75
+animate: true
+show:
+  name: true
+  icon: true
+  state: true
+  legend: false
+  fill: true
+  points: false
+  labels: true
+entities:
+  - entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
+    name: Home Usage
+    color: "#FB8072"
+    show_state: true
+    show_indicator: true
+card_mod:
+  style: |
+    ha-card {
+      border-radius: 12px;
+      background: linear-gradient(to bottom, rgba(251, 128, 114, 0.1) 0%, rgba(251, 128, 114, 0.02) 100%);
+    }

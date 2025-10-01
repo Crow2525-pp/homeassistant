@@ -6,6 +6,7 @@ title: Home Dashboard
 views:
   - !include lovelace/views/control_panel.yaml
   - !include lovelace/views/climate.yaml
+  - !include lovelace/views/energy.yaml
   - !include lovelace/views/calendar.yaml
   - !include lovelace/views/alarm.yaml
   - !include lovelace/views/network.yaml

@@ -1,0 +1,23 @@
+type: gauge
+entity: sensor.gosungrow_virtual_1205796_7_1_1_p8063
+name: Battery Level
+min: 0
+max: 100
+needle: true
+unit: "%"
+severity:
+  green: 50
+  yellow: 25
+  red: 10
+segments:
+  - from: 0
+    color: "#db4437"
+  - from: 25
+    color: "#f4b400"
+  - from: 50
+    color: "#0f9d58"
+card_mod:
+  style: |
+    ha-card {
+      border-radius: 12px;
+    }

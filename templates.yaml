@@ -119,3 +119,255 @@
   sensor:
     - name: "Kitchen Temp/Humidity Sensor Last Seen"
       state: "{{ now().isoformat() }}"
+
+- binary_sensor:
+    # Solar excess - when production exceeds consumption by 1000W+
+    - name: "Solar Excess Available"
+      unique_id: solar_excess_available
+      state: >
+        {% set production = states('sensor.gosungrow_virtual_1205796_1_1_1_p24') | float(0) %}
+        {% set consumption = states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) %}
+        {{ (production - consumption) > 1000 }}
+      icon: "mdi:solar-power-variant"
+      attributes:
+        excess_power: >
+          {% set production = states('sensor.gosungrow_virtual_1205796_1_1_1_p24') | float(0) %}
+          {% set consumption = states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) %}
+          {{ (production - consumption) | round(0) }}
+
+- sensor:
+    # Smart appliance recommendation based on solar, season, and conditions
+    - name: "Appliance Recommendation"
+      unique_id: appliance_recommendation
+      state: >
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+        {% set month = now().month %}
+        {% set is_winter = month in [5, 6, 7, 8, 9] %}
+        {% set is_summer = month in [11, 12, 1, 2, 3] %}
+
+        {% if solar_excess %}
+          {% if is_winter %}
+            heating
+          {% elif is_summer %}
+            cooling
+          {% else %}
+            laundry
+          {% endif %}
+        {% else %}
+          none
+        {% endif %}
+      icon: >
+        {% if is_state('sensor.appliance_recommendation', 'heating') %}
+          mdi:fire
+        {% elif is_state('sensor.appliance_recommendation', 'cooling') %}
+          mdi:snowflake
+        {% elif is_state('sensor.appliance_recommendation', 'laundry') %}
+          mdi:washing-machine
+        {% else %}
+          mdi:lightbulb-off
+        {% endif %}
+      attributes:
+        reason: >
+          {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+          {% set excess = state_attr('binary_sensor.solar_excess_available', 'excess_power') | float(0) %}
+          {% if solar_excess %}
+            Excess solar: {{ excess }}W available
+          {% else %}
+            No excess solar power
+          {% endif %}
+
+- sensor:
+    # Room climate recommendations
+    - name: "Living Room Climate Suggestion"
+      unique_id: living_room_climate_suggestion
+      state: >
+        {% set temp = states('sensor.living_room_temperature_offset') | float(0) %}
+        {% set outside_temp = state_attr('weather.braybrook', 'temperature') | float(20) %}
+        {% set month = now().month %}
+        {% set is_winter = month in [5, 6, 7, 8, 9] %}
+        {% set is_summer = month in [11, 12, 1, 2, 3] %}
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+
+        {% if is_winter and temp < 18 and solar_excess %}
+          heat_now
+        {% elif is_summer and temp > 26 and solar_excess %}
+          cool_now
+        {% elif is_winter and temp < 16 %}
+          heat_needed
+        {% elif is_summer and temp > 28 %}
+          cool_needed
+        {% else %}
+          comfortable
+        {% endif %}
+      icon: "mdi:home-thermometer"
+      attributes:
+        current_temp: "{{ states('sensor.living_room_temperature_offset') }}"
+        outside_temp: "{{ state_attr('weather.braybrook', 'temperature') }}"
+        message: >
+          {% set temp = states('sensor.living_room_temperature_offset') | float(0) %}
+          {% set state = states('sensor.living_room_climate_suggestion') %}
+          {% if state == 'heat_now' %}
+            🔥 Good time to heat! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'cool_now' %}
+            ❄️ Good time to cool! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'heat_needed' %}
+            Room is cold ({{ temp }}°C) but no excess solar
+          {% elif state == 'cool_needed' %}
+            Room is warm ({{ temp }}°C) but no excess solar
+          {% else %}
+            Room temperature is comfortable ({{ temp }}°C)
+          {% endif %}
+
+    - name: "Master Bedroom Climate Suggestion"
+      unique_id: master_bedroom_climate_suggestion
+      state: >
+        {% set temp = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+        {% set month = now().month %}
+        {% set is_winter = month in [5, 6, 7, 8, 9] %}
+        {% set is_summer = month in [11, 12, 1, 2, 3] %}
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+
+        {% if is_winter and temp < 18 and solar_excess %}
+          heat_now
+        {% elif is_summer and temp > 26 and solar_excess %}
+          cool_now
+        {% elif is_winter and temp < 16 %}
+          heat_needed
+        {% elif is_summer and temp > 28 %}
+          cool_needed
+        {% else %}
+          comfortable
+        {% endif %}
+      icon: "mdi:bed-thermometer"
+      attributes:
+        current_temp: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        message: >
+          {% set temp = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+          {% set state = states('sensor.master_bedroom_climate_suggestion') %}
+          {% if state == 'heat_now' %}
+            🔥 Good time to heat! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'cool_now' %}
+            ❄️ Good time to cool! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'heat_needed' %}
+            Room is cold ({{ temp }}°C) but no excess solar
+          {% elif state == 'cool_needed' %}
+            Room is warm ({{ temp }}°C) but no excess solar
+          {% else %}
+            Room temperature is comfortable ({{ temp }}°C)
+          {% endif %}
+
+    - name: "Henry's Room Climate Suggestion"
+      unique_id: henrys_room_climate_suggestion
+      state: >
+        {% set temp = states('sensor.study_esp32_henrysroom_temperature') | float(0) %}
+        {% set month = now().month %}
+        {% set is_winter = month in [5, 6, 7, 8, 9] %}
+        {% set is_summer = month in [11, 12, 1, 2, 3] %}
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+
+        {% if is_winter and temp < 18 and solar_excess %}
+          heat_now
+        {% elif is_summer and temp > 26 and solar_excess %}
+          cool_now
+        {% elif is_winter and temp < 16 %}
+          heat_needed
+        {% elif is_summer and temp > 28 %}
+          cool_needed
+        {% else %}
+          comfortable
+        {% endif %}
+      icon: "mdi:thermometer"
+      attributes:
+        current_temp: "{{ states('sensor.study_esp32_henrysroom_temperature') }}"
+        message: >
+          {% set temp = states('sensor.study_esp32_henrysroom_temperature') | float(0) %}
+          {% set state = states('sensor.henrys_room_climate_suggestion') %}
+          {% if state == 'heat_now' %}
+            🔥 Good time to heat! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'cool_now' %}
+            ❄️ Good time to cool! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'heat_needed' %}
+            Room is cold ({{ temp }}°C) but no excess solar
+          {% elif state == 'cool_needed' %}
+            Room is warm ({{ temp }}°C) but no excess solar
+          {% else %}
+            Room temperature is comfortable ({{ temp }}°C)
+          {% endif %}
+
+    - name: "Otto's Room Climate Suggestion"
+      unique_id: ottos_room_climate_suggestion
+      state: >
+        {% set temp = states('sensor.study_esp32_ottosroom_temperature') | float(0) %}
+        {% set month = now().month %}
+        {% set is_winter = month in [5, 6, 7, 8, 9] %}
+        {% set is_summer = month in [11, 12, 1, 2, 3] %}
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+
+        {% if is_winter and temp < 18 and solar_excess %}
+          heat_now
+        {% elif is_summer and temp > 26 and solar_excess %}
+          cool_now
+        {% elif is_winter and temp < 16 %}
+          heat_needed
+        {% elif is_summer and temp > 28 %}
+          cool_needed
+        {% else %}
+          comfortable
+        {% endif %}
+      icon: "mdi:thermometer"
+      attributes:
+        current_temp: "{{ states('sensor.study_esp32_ottosroom_temperature') }}"
+        message: >
+          {% set temp = states('sensor.study_esp32_ottosroom_temperature') | float(0) %}
+          {% set state = states('sensor.ottos_room_climate_suggestion') %}
+          {% if state == 'heat_now' %}
+            🔥 Good time to heat! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'cool_now' %}
+            ❄️ Good time to cool! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'heat_needed' %}
+            Room is cold ({{ temp }}°C) but no excess solar
+          {% elif state == 'cool_needed' %}
+            Room is warm ({{ temp }}°C) but no excess solar
+          {% else %}
+            Room temperature is comfortable ({{ temp }}°C)
+          {% endif %}
+
+- binary_sensor:
+    # Appliance suggestions based on solar excess
+    - name: "Dishwasher Suggestion"
+      unique_id: dishwasher_suggestion
+      state: >
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+        {% set dishwasher_on = is_state('input_boolean.dishwasher_on', 'on') %}
+        {{ solar_excess and not dishwasher_on }}
+      icon: "mdi:dishwasher"
+      attributes:
+        message: >
+          {% if is_state('binary_sensor.dishwasher_suggestion', 'on') %}
+            Good time to run dishwasher with excess solar power!
+          {% else %}
+            {% if is_state('input_boolean.dishwasher_on', 'on') %}
+              Dishwasher already running
+            {% else %}
+              Waiting for excess solar power
+            {% endif %}
+          {% endif %}
+
+    - name: "Dryer Suggestion"
+      unique_id: dryer_suggestion
+      state: >
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+        {% set dryer_on = is_state('input_boolean.dryer_on', 'on') %}
+        {{ solar_excess and not dryer_on }}
+      icon: "mdi:tumble-dryer"
+      attributes:
+        message: >
+          {% if is_state('binary_sensor.dryer_suggestion', 'on') %}
+            Good time to run dryer with excess solar power!
+          {% else %}
+            {% if is_state('input_boolean.dryer_on', 'on') %}
+              Dryer already running
+            {% else %}
+              Waiting for excess solar power
+            {% endif %}
+          {% endif %}

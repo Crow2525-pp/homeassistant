@@ -1,19 +1,134 @@
 type: vertical-stack
 cards:
   - type: heading
-    heading: "Kill Switches"
+    heading: "Automation Controls"
     heading_style: title
-    icon: mdi-death-star-variant
+    icon: mdi:tune
+
+  - type: markdown
+    content: |
+      *Pause or toggle automations*
+    card_mod:
+      style: |
+        ha-card {
+          background: transparent;
+          box-shadow: none;
+          padding: 0px 16px 8px;
+          margin-top: -8px;
+        }
+        ha-markdown p {
+          font-size: 0.9em;
+          color: var(--secondary-text-color);
+          margin: 0;
+          font-style: italic;
+        }
+
+  # Climate overrides
+  - type: markdown
+    content: |
+      **Climate Overrides**
+    card_mod:
+      style: |
+        ha-card {
+          background: transparent;
+          box-shadow: none;
+          padding: 8px 16px 4px;
+        }
+        ha-markdown p {
+          font-size: 0.95em;
+          font-weight: 500;
+          margin: 0;
+        }
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: input_boolean.climate_manual_control_master
+        name: Master Bedroom
+        icon: mdi:bed
+        vertical: false
+
+      - type: tile
+        entity: input_boolean.climate_manual_control_otto
+        name: Otto's Room
+        icon: mdi:account
+        vertical: false
+
+      - type: tile
+        entity: input_boolean.climate_manual_control_living
+        name: Living Room
+        icon: mdi:sofa
+        vertical: false
+
+      - type: tile
+        entity: input_boolean.climate_manual_control_study
+        name: Study (Henry)
+        icon: mdi:desk
+        vertical: false
+
+  # Device overrides
+  - type: markdown
+    content: |
+      **Device Overrides**
+    card_mod:
+      style: |
+        ha-card {
+          background: transparent;
+          box-shadow: none;
+          padding: 16px 16px 4px;
+          margin-top: 8px;
+        }
+        ha-markdown p {
+          font-size: 0.95em;
+          font-weight: 500;
+          margin: 0;
+        }
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: input_boolean.blind_manual_control
+        name: Blinds
+        icon: mdi:blinds
+        vertical: false
+
+  # Automation toggles
+  - type: markdown
+    content: |
+      **Automation Toggles**
+    card_mod:
+      style: |
+        ha-card {
+          background: transparent;
+          box-shadow: none;
+          padding: 16px 16px 4px;
+          margin-top: 8px;
+        }
+        ha-markdown p {
+          font-size: 0.95em;
+          font-weight: 500;
+          margin: 0;
+        }
 
   - type: custom:auto-entities
     card:
       type: grid
       square: false
-      columns: 1
+      columns: 2
       state_color: true
     card_param: cards
     filter:
       include:
+        # Manual Automations
+        - integration: input_boolean and
+        - label: "Manual Automations"
+          options:
+            type: tile
+        # Killswitches
         - integration: input_boolean and
         - label: Killswitch
           options:

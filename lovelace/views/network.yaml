@@ -1,6 +1,6 @@
-title: Network & Device Monitoring
+title: Network
 path: network
-icon: mdi:network
+icon: mdi:server-network
 badges: !include ../badges/network.yaml
 cards: 
   - !include ../cards/network/network_services.yaml

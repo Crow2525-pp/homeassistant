@@ -1,6 +1,6 @@
-title: Climate Dashboard
+title: Climate
 path: climate
-icon: mdi:hvac
+icon: mdi:thermostat-box
 badges: !include ../badges/standard.yaml
 cards: 
   - !include ../cards/climate/hvac.yaml

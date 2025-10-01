@@ -1,0 +1,66 @@
+type: vertical-stack
+cards:
+  - type: heading
+    heading: "Quick Actions"
+    heading_style: title
+    icon: mdi:lightning-bolt
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      # Good Night scene
+      - type: button
+        name: Good Night
+        icon: mdi:weather-night
+        tap_action:
+          action: call-service
+          service: script.good_night
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(135deg, rgba(63, 81, 181, 0.2) 0%, rgba(63, 81, 181, 0.1) 100%);
+            }
+
+      # Good Morning scene
+      - type: button
+        name: Good Morning
+        icon: mdi:weather-sunny
+        tap_action:
+          action: call-service
+          service: script.good_morning
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(135deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 193, 7, 0.1) 100%);
+            }
+
+      # Leaving Home
+      - type: button
+        name: Leaving Home
+        icon: mdi:home-export-outline
+        tap_action:
+          action: call-service
+          service: script.leaving_home
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(135deg, rgba(244, 67, 54, 0.2) 0%, rgba(244, 67, 54, 0.1) 100%);
+            }
+
+      # Close Garage (quick action)
+      - type: button
+        name: Close Garage
+        icon: mdi:garage
+        tap_action:
+          action: call-service
+          service: cover.close_cover
+          target:
+            entity_id: cover.smart_garage_door_garage
+        hold_action:
+          action: more-info
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.1) 100%);
+            }

@@ -354,3 +354,77 @@ new_roller_blind_up:
       - cover.roller_blinds_chan1
   alias: New Roller Blind Up
   description: ''
+
+# Quick action scripts
+good_night:
+  alias: Good Night
+  sequence:
+    # Close all blinds
+    - service: script.roller_blinds_down
+      data: {}
+    - service: cover.close_cover
+      target:
+        entity_id: cover.windowcovering_cover
+    # Turn off lights
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.lounge
+          - light.tv_backlight
+    # Close garage if open
+    - service: cover.close_cover
+      target:
+        entity_id: cover.smart_garage_door_garage
+    # Set occupancy to sleeping
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.occupancy
+      data:
+        option: Sleeping
+  mode: single
+  icon: mdi:weather-night
+
+good_morning:
+  alias: Good Morning
+  sequence:
+    # Open blinds
+    - service: script.roller_blinds_up
+      data: {}
+    - service: cover.open_cover
+      target:
+        entity_id: cover.windowcovering_cover
+    # Set occupancy to home
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.occupancy
+      data:
+        option: Home
+  mode: single
+  icon: mdi:weather-sunny
+
+leaving_home:
+  alias: Leaving Home
+  sequence:
+    # Close garage
+    - service: cover.close_cover
+      target:
+        entity_id: cover.smart_garage_door_garage
+    # Turn off all climate
+    - service: climate.turn_off
+      target:
+        entity_id:
+          - climate.living_room_ac
+          - climate.master_bedroom_ac
+          - climate.ottos_room_ac
+    # Turn off lights
+    - service: light.turn_off
+      target:
+        area_id: all
+    # Set occupancy to away
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.occupancy
+      data:
+        option: Away
+  mode: single
+  icon: mdi:home-export-outline

@@ -1,6 +1,6 @@
-title: Control Panel
+title: Home
 path: control
-icon: mdi:view-dashboard
+icon: mdi:home
 badges: !include ../badges/standard.yaml
 cards:
   - type: conditional
@@ -32,6 +32,10 @@ cards:
             entity: sensor.braybrook_warnings
             above: 0
     card: !include ../cards/alerts.yaml
+  - !include ../cards/quick_actions.yaml
+  - !include ../cards/smart_suggestions.yaml
+  - !include ../cards/security_status.yaml
+  - !include ../cards/appliance_power.yaml
   - !include ../cards/climate/hvac.yaml
   - !include ../cards/switches/lights.yaml
   - !include ../cards/fans.yaml
@@ -39,4 +43,4 @@ cards:
   - !include ../cards/switches/covers.yaml
   - !include ../cards/alarm/alarmo.yaml
   - !include ../cards/switches/powerpoints.yaml
-  - !include ../cards/automations/automations.yaml
+  - !include ../cards/automations/killswitches.yaml

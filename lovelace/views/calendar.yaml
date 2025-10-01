@@ -1,7 +1,18 @@
-# Calendar Family Planning
-title: Calendar Family Planning
-path: calendar-family-planning
-icon: mdi:calendar-month
+# Calendar
+title: Calendar
+path: calendar
+icon: mdi:calendar
 badges: !include ../badges/standard.yaml
 cards:
-  - !include ../cards/calendar.yaml
+  # Top row - Today's info in a grid
+  - type: grid
+    columns: 2
+    cards:
+      - !include ../cards/calendar/today_agenda.yaml
+      - type: vertical-stack
+        cards:
+          - !include ../cards/calendar/quick_actions.yaml
+          - !include ../cards/calendar/family_presence.yaml
+
+  # Full width week planner
+  - !include ../cards/calendar/week_planner.yaml

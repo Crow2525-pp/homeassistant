@@ -1,0 +1,23 @@
+# Energy & Solar
+title: Energy & Solar
+path: energy
+icon: mdi:solar-power
+badges: !include ../badges/standard.yaml
+cards:
+  # Top row - Current status
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - !include ../cards/energy/solar_current.yaml
+      - !include ../cards/energy/grid_status.yaml
+
+  # Solar production graph
+  - !include ../cards/energy/solar_production_graph.yaml
+
+  # Grid and consumption graphs
+  - type: grid
+    columns: 2
+    cards:
+      - !include ../cards/energy/grid_graph.yaml
+      - !include ../cards/energy/consumption_graph.yaml

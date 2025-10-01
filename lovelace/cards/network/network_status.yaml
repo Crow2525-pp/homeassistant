@@ -1,8 +1,9 @@
 type: vertical-stack
 cards:
-  # 🌐 Network Health
+  # Network Health
   - type: entities
-    title: 🌐 Network Health
+    title: Network Health
+    icon: mdi:network
     show_header_toggle: false
     entities:
       - entity: sensor.homenetwork
@@ -18,9 +19,10 @@ cards:
         icon: mdi:access-point-network
         state_color: true
 
-  # 📡 Router Monitoring
+  # Router Monitoring
   - type: entities
-    title: 📡 Router Monitoring
+    title: Router Monitoring
+    icon: mdi:router-wireless
     entities:
       - entity: sensor.ucg_ultra_state
         name: Router Status
@@ -39,9 +41,10 @@ cards:
       - entity: sensor.ucg_ultra_clients
         name: Router Connected Clients
 
-  # 🔌 Switch Monitoring
+  # Switch Monitoring
   - type: entities
-    title: 🔌 Switch Monitoring
+    title: Switch Monitoring
+    icon: mdi:ethernet-cable
     entities:
       - entity: sensor.usw_16_poe_state
         name: Switch Status
@@ -55,9 +58,10 @@ cards:
 
   #TODO: Add WIFI Access Points Monitoring
 
-  # 📊 WAN Latency (Mini Graph)
+  # WAN Latency
   - type: custom:mini-graph-card
-    title: 📊 WAN Latency
+    title: WAN Latency
+    icon: mdi:chart-line
     hours_to_show: 24
     points_per_hour: 60
     show:
@@ -76,9 +80,10 @@ cards:
         name: Cloudflare Latency
         color: "#EA4335"
 
-  # 📊 WAN Up/Down Status
+  # WAN Up/Down Status
   - type: custom:mini-graph-card
-    title: 📊 WAN Up/Down Status
+    title: WAN Traffic
+    icon: mdi:swap-vertical
     hours_to_show: 24
     points_per_hour: 60
     show:
@@ -94,9 +99,10 @@ cards:
         name: WAN RX
         color: "#FBBC05"
 
-  # 💻 Server & VM Monitoring
+  # Server & VM Monitoring
   - type: entities
-    title: 💻 Server & VM Monitoring
+    title: Server & VM Monitoring
+    icon: mdi:server
     entities:
       - entity: sensor.node_pve_cpu_used
         name: Proxmox CPU Usage
@@ -111,9 +117,9 @@ cards:
         name: Media Server Disk Usage
         icon: mdi:harddisk
         
-  # 📈 Speed Test Trends
+  # Speed Test Trends
   - type: history-graph
-    title: 📈 Speed Test Trends
+    title: Speed Test Trends
     hours_to_show: 12
     entities:
       - entity: sensor.speedtest_ping

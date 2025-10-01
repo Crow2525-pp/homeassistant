@@ -1,0 +1,48 @@
+type: custom:week-planner-card
+showLegend: true
+legendToggle: true
+compact: false
+noCardBackground: false
+hideDaysWithoutEvents: false
+showLocation: true
+showDescription: true  # Changed from false - show event descriptions
+calendars:
+  - entity: calendar.philip_james_patterson_gmail_com
+    name: Phil
+    colour: "#4A90E2" # Calming blue
+  - entity: calendar.stephanie_louise_patterson_gmail_com
+    name: Steph
+    colour: "#D94F70" # Warm rose pink
+  - entity: calendar.family_2
+    name: Family
+    colour: "#F5A623" # Vibrant golden orange
+  - entity: calendar.slvandenhoff_gmail_com
+    name: Steph Work
+    colour: "#9B59B6" # Purple
+days: 7
+weather:
+  entity: weather.braybrook
+  showCondition: true
+  showTemperature: true
+  showLowTemperature: true  # Changed to show low temps
+  useTwiceDaily: false
+grid_options:
+  columns: full
+card_mod:
+  style: |
+    .container .day .events .event[data-entity="calendar.philip_james_patterson_gmail_com"] .inner {
+      background-color: #4A90E2;
+    }
+    .container .day .events .event[data-entity="calendar.stephanie_louise_patterson_gmail_com"] .inner {
+      background-color: #D94F70;
+    }
+    .container .day .events .event[data-entity="calendar.family_2"] .inner {
+      background-color: #F5A623;
+    }
+    .container .day .events .event[data-entity="calendar.slvandenhoff_gmail_com"] .inner {
+      background-color: #9B59B6;
+    }
+    ha-card {
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
