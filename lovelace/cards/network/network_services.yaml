@@ -32,7 +32,7 @@ cards:
       url: http://192.168.1.101:81
     - type: weblink
       name: Calibre WebUi
-      url: http://admin:timisanidiot@192.168.1.103:8061/
+      url: http://192.168.1.103:8061/
     - type: weblink
       name: Calibre
       url: http://192.168.1.103:8060/

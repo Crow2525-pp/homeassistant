@@ -9,6 +9,9 @@
   - minutes: '45'
     trigger: time_pattern
   conditions:
+  - condition: state
+    entity_id: input_boolean.blind_manual_control
+    state: 'off'
   - type: is_not_open
     condition: device
     device_id: 73d77b02a3b8c93387e8cd225b08eb91
@@ -181,7 +184,18 @@
   trigger:
   - platform: time
     at: '21:30:00'
-  condition: []
+  condition:
+  - condition: state
+    entity_id: input_boolean.blind_manual_control
+    state: 'off'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: cover.roller_blinds_chan1
+      state: 'open'
+    - condition: state
+      entity_id: cover.windowcovering_cover
+      state: 'open'
   action:
   - action: cover.close_cover
     metadata: {}
@@ -198,6 +212,9 @@
   - at: input_datetime.wakeup_time_phil_steph
     trigger: time
   conditions:
+  - condition: state
+    entity_id: input_boolean.blind_manual_control
+    state: 'off'
   - condition: or
     conditions:
     - condition: state
@@ -353,17 +370,9 @@
   conditions:
   - condition: sun
     before: sunrise
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Guest
+  - condition: state
+    entity_id: binary_sensor.someone_home
+    state: 'on'
     alias: Someone Home
   actions:
   - metadata: {}
@@ -471,10 +480,12 @@
   alias: Occupancy State from Sleep to Home
   description: At sunrise
   trigger:
+  # Disabled: Using manual wakeup time instead of sunrise
   - platform: sun
     event: sunrise
     offset: 0
     enabled: false
+  # Disabled: Sleep confidence sensor not reliable enough
   - type: value
     platform: device
     device_id: c054264b79e6739a057236f3a3c512b4
@@ -522,18 +533,13 @@
   - condition: state
     entity_id: input_boolean.super_hot_today
     state: 'off'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Guest
+  - condition: state
+    entity_id: binary_sensor.someone_home
+    state: 'on'
     alias: Someone Home
+  - condition: state
+    entity_id: input_boolean.climate_manual_control_living
+    state: 'off'
   actions:
   - data:
       preset_mode: comfort
@@ -801,7 +807,10 @@
       hours: 0
       minutes: 2
       seconds: 0
-  condition: []
+  condition:
+  - condition: state
+    entity_id: input_boolean.blind_manual_control
+    state: 'off'
   action:
   - variables:
       original_position: '{{ states(''cover.roller_blinds_chan1'') }}'
@@ -821,9 +830,14 @@
     data:
       title: Wind speed reduced
       message: Blinds can go back down
-  - service_template: "{% if original_state == 'closed' %}\n  cover.close_cover\n{%
-      elif original_state == 'open' %}\n  cover.open_cover\n{% else %}\n  cover.stop_cover\n{%
-      endif %} \n"
+  - action: >
+      {% if original_position == 'closed' %}
+        cover.close_cover
+      {% elif original_position == 'open' %}
+        cover.open_cover
+      {% else %}
+        cover.stop_cover
+      {% endif %}
     target:
       entity_id: cover.roller_blinds_chan1
     alias: Return blinds to prev state
@@ -1037,7 +1051,7 @@
     data: {}
   mode: single
 - id: '1693433717718'
-  alias: Tag Masterbed desk left cnr is scanned
+  alias: Tag Masterbed - Close Blinds Halfway
   description: ''
   trigger:
   - platform: tag
@@ -1690,21 +1704,16 @@
     above: 1
     trigger: device
   conditions:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Guest
+  - condition: state
+    entity_id: binary_sensor.someone_home
+    state: 'on'
     alias: Someone Home
   - condition: time
     after: 06:00:00
     before: 09:00:00
+  - condition: state
+    entity_id: input_boolean.climate_manual_control_master
+    state: 'off'
   actions:
   - metadata: {}
     data:
@@ -1764,17 +1773,9 @@
   - platform: time
     at: 07:00:00
   condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Guest
+  - condition: state
+    entity_id: binary_sensor.someone_home
+    state: 'on'
     alias: Someone Home
   - condition: state
     entity_id: alarm_control_panel.alarmo
@@ -1861,10 +1862,10 @@
   mode: single
 - id: '1721641437270'
   alias: Periodic Roller Blind Position Update
-  description: ''
+  description: 'Updates blind position tracking - reduced frequency from 4s to 30s'
   trigger:
   - platform: time_pattern
-    seconds: /4
+    seconds: /30
   condition:
   - condition: state
     entity_id: timer.roller_blind_timer
@@ -1880,7 +1881,7 @@
         data_template:
           entity_id: input_number.roller_blind_position
           value: '{{ [states(''input_number.roller_blind_position'')|int + (100 /
-            4), 100] | min }}
+            30), 100] | min }}
 
             '
     - conditions:
@@ -1892,23 +1893,19 @@
         data_template:
           entity_id: input_number.roller_blind_position
           value: '{{ [states(''input_number.roller_blind_position'')|int - (100 /
-            4), 0] | max }}
+            30), 0] | max }}
 
             '
-- id: '1721641629896'
-  alias: Correct Roller Blind State On Reset
-  description: ''
-  trigger: []
-  condition: []
-  action: []
-  mode: single
 - id: '1723799786022'
   alias: Close Master Blinds and Curtains If Hot
   description: Tries to keep masterbed cool on hot days
   triggers:
   - at: input_datetime.wakeup_time_phil_steph
     trigger: time
-  conditions: []
+  conditions:
+  - condition: state
+    entity_id: input_boolean.blind_manual_control
+    state: 'off'
   actions:
   - alias: Blinds closed if hot
     choose:
@@ -1996,22 +1993,17 @@
     - thu
     - fri
     - sat
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Guest
+  - condition: state
+    entity_id: binary_sensor.someone_home
+    state: 'on'
   - condition: not
     conditions:
     - condition: state
       entity_id: input_select.occupancy
       state: Holiday
+  - condition: state
+    entity_id: input_boolean.climate_manual_control_study
+    state: 'off'
   actions:
   - choose:
     - conditions:
@@ -2115,11 +2107,16 @@
   mode: single
 - id: '1730921531314'
   alias: Keep on
-  description: Ensure that usb controller in living room for it blaster is always
-    on
+  description: Ensure that usb controller in living room for ir blaster is always
+    on - converted to state trigger from polling
   triggers:
-  - trigger: time_pattern
-    minutes: '15'
+  - trigger: state
+    entity_id:
+      - 5988af91837e47236db524998627e65e
+      - 4e12ee54d94d1ad1c2db1176f6da428d
+    to: 'off'
+    for:
+      seconds: 30
   conditions: []
   actions:
   - choose:
@@ -2799,6 +2796,8 @@
     - binary_sensor.otto_room_door_sensor_opening
     to: 'on'
     from: 'off'
+    for:
+      seconds: 2
   conditions:
   - condition: state
     entity_id: input_boolean.otto_automation_killswitch
@@ -2969,19 +2968,6 @@
         data: {}
         target:
           entity_id: input_boolean.dryer_on
-- id: '1744157304881'
-  alias: test
-  description: ''
-  triggers: []
-  conditions: []
-  actions:
-  - action: media_player.play_media
-    data:
-      media_content_id: media-source://media_source/local/Memes/image1.jpg
-      media_content_type: image
-    target:
-      entity_id: media_player.kitchen
-  mode: single
 - id: '1744580704061'
   alias: Tag Fishy is scanned
   description: Records the time fish were fed
@@ -2994,15 +2980,6 @@
     data:
       datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
     action: input_datetime.set_datetime
-  mode: single
-- id: '1744580705665'
-  alias: Fishy are fed
-  description: ''
-  triggers:
-  - trigger: tag
-    tag_id: 0e988472-9902-4140-a053-0beeb7f9eeb2
-  conditions: []
-  actions: []
   mode: single
 - id: '1744580844831'
   alias: Fish not fed reminder - Morning
@@ -3076,6 +3053,9 @@
     - condition: numeric_state
       entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
       above: 20
+  - condition: state
+    entity_id: input_boolean.climate_manual_control_living
+    state: 'off'
   actions:
   - device_id: b084d1fcd04470308deb597901c61d5c
     domain: climate
@@ -3118,22 +3098,17 @@
     - thu
     - fri
     - sat
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Guest
+  - condition: state
+    entity_id: binary_sensor.someone_home
+    state: 'on'
   - condition: not
     conditions:
     - condition: state
       entity_id: input_select.occupancy
       state: Holiday
+  - condition: state
+    entity_id: input_boolean.climate_manual_control_otto
+    state: 'off'
   actions:
   - choose:
     - conditions:
@@ -3207,22 +3182,17 @@
     - thu
     - fri
     - sat
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Guest
+  - condition: state
+    entity_id: binary_sensor.someone_home
+    state: 'on'
   - condition: not
     conditions:
     - condition: state
       entity_id: input_select.occupancy
       state: Holiday
+  - condition: state
+    entity_id: input_boolean.climate_manual_control_master
+    state: 'off'
   actions:
   - choose:
     - conditions:
@@ -3234,7 +3204,7 @@
         data:
           preset_mode: 'Off'
         target:
-          entity_id: climate.otto_s_room
+          entity_id: climate.masterbed_versatile_thermostat
         enabled: true
         action: climate.set_preset_mode
       - metadata: {}
@@ -3296,22 +3266,17 @@
     - thu
     - fri
     - sat
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Guest
+  - condition: state
+    entity_id: binary_sensor.someone_home
+    state: 'on'
   - condition: not
     conditions:
     - condition: state
       entity_id: input_select.occupancy
       state: Holiday
+  - condition: state
+    entity_id: input_boolean.climate_manual_control_living
+    state: 'off'
   actions:
   - choose:
     - conditions:
@@ -3407,6 +3372,10 @@
       - resident_closing_enabled
       - resident_allow_opening
       drive_delay_fix: 16
+  conditions:
+  - condition: state
+    entity_id: input_boolean.blind_manual_control
+    state: 'off'
 - id: '1749869631608'
   alias: Cover Control Automations - Curtains
   description: ''
@@ -3458,21 +3427,16 @@
     above: 1
     trigger: device
   conditions:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Guest
+  - condition: state
+    entity_id: binary_sensor.someone_home
+    state: 'on'
     alias: Someone Home
   - condition: time
     after: '20:30:00'
     before: 01:00:00
+  - condition: state
+    entity_id: input_boolean.climate_manual_control_living
+    state: 'off'
   actions:
   - metadata: {}
     data:
@@ -3665,3 +3629,106 @@
     target:
       entity_id: cover.smart_garage_door_garage
   mode: single
+- id: '1727826000001'
+  alias: Track Manual Blind Control
+  description: Sets manual override flag when blinds operated manually, clears after 2 hours
+  triggers:
+  - trigger: state
+    entity_id:
+      - cover.roller_blinds_chan1
+      - cover.windowcovering_cover
+    attribute: current_position
+  conditions:
+  - condition: template
+    value_template: "{{ trigger.to_state.context.user_id is not none or trigger.to_state.context.parent_id is none }}"
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.blind_manual_control
+  - delay:
+      hours: 2
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.blind_manual_control
+  mode: restart
+- id: '1727826000002'
+  alias: Track Manual Climate Control - Living Room
+  description: Sets manual override flag when living room climate operated manually, clears after 4 hours
+  triggers:
+  - trigger: state
+    entity_id:
+      - climate.living_room_ac
+      - climate.living_room_versatile_thermastat
+  conditions:
+  - condition: template
+    value_template: "{{ trigger.to_state.context.user_id is not none or trigger.to_state.context.parent_id is none }}"
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.climate_manual_control_living
+  - delay:
+      hours: 4
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.climate_manual_control_living
+  mode: restart
+- id: '1727826000003'
+  alias: Track Manual Climate Control - Master Bedroom
+  description: Sets manual override flag when master bedroom climate operated manually, clears after 4 hours
+  triggers:
+  - trigger: state
+    entity_id:
+      - climate.masterbed_versatile_thermostat
+  conditions:
+  - condition: template
+    value_template: "{{ trigger.to_state.context.user_id is not none or trigger.to_state.context.parent_id is none }}"
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.climate_manual_control_master
+  - delay:
+      hours: 4
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.climate_manual_control_master
+  mode: restart
+- id: '1727826000004'
+  alias: Track Manual Climate Control - Otto's Room
+  description: Sets manual override flag when Otto's room climate operated manually, clears after 4 hours
+  triggers:
+  - trigger: state
+    entity_id:
+      - climate.otto_s_room
+  conditions:
+  - condition: template
+    value_template: "{{ trigger.to_state.context.user_id is not none or trigger.to_state.context.parent_id is none }}"
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.climate_manual_control_otto
+  - delay:
+      hours: 4
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.climate_manual_control_otto
+  mode: restart
+- id: '1727826000005'
+  alias: Track Manual Climate Control - Study/Henry's Room
+  description: Sets manual override flag when study/Henry's room climate operated manually, clears after 4 hours
+  triggers:
+  - trigger: state
+    entity_id:
+      - climate.henry_s_room_versatile_thermostat
+  conditions:
+  - condition: template
+    value_template: "{{ trigger.to_state.context.user_id is not none or trigger.to_state.context.parent_id is none }}"
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.climate_manual_control_study
+  - delay:
+      hours: 4
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.climate_manual_control_study
+  mode: restart

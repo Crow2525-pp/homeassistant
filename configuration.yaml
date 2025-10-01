@@ -139,8 +139,27 @@ input_boolean:
     icon: mdi:alert
   wan_down_notify:
     name: WAN Down Notify
-
     icon: mdi:alert
+  blind_manual_control:
+    name: Blinds Manual Control Override
+    icon: mdi:blinds
+    initial: false
+  climate_manual_control_living:
+    name: Living Room Climate Manual Override
+    icon: mdi:thermostat
+    initial: false
+  climate_manual_control_master:
+    name: Master Bedroom Climate Manual Override
+    icon: mdi:thermostat
+    initial: false
+  climate_manual_control_otto:
+    name: Otto's Room Climate Manual Override
+    icon: mdi:thermostat
+    initial: false
+  climate_manual_control_study:
+    name: Study Climate Manual Override
+    icon: mdi:thermostat
+    initial: false
 
 alert:
   garage_door_info_alert_active:

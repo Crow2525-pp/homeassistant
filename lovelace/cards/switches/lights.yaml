@@ -23,7 +23,7 @@ cards:
         - domain: automation
         # - entity: light.xmas_lights_plug_socket_1
     sort:
-      method: room
+      method: friendly_name
 
   - type: conditional
     conditions:

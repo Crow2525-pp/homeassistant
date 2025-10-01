@@ -1845,7 +1845,7 @@
                   "entity": "t",
                   "name": "Calibre WebUi",
                   "type": "weblink",
-                  "url": "http://admin:timisanidiot@192.168.1.103:8061/"
+                  "url": "http://192.168.1.103:8061/"
                 },
                 {
                   "entity": "t",

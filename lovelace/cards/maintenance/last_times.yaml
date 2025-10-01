@@ -13,4 +13,4 @@ cards:
         - domain: input_datetime
         - label: and Maintenance
     sort:
-      method: room
+      method: friendly_name

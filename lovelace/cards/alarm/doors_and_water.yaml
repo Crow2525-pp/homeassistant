@@ -19,7 +19,7 @@ cards:
         options:
           secondary_info: last-changed
   sort:
-    method: room
+    method: friendly_name
 
     # --- 🌊 WATER & FIRE SENSORS ---
 - type: heading

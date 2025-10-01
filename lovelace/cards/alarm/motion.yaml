@@ -11,4 +11,4 @@ cards:
     exclude:
       - entity_id: "*battery*"
   sort:
-    method: room
+    method: friendly_name

@@ -8,4 +8,4 @@ cards:
         - domain: Sensor and
         - label: Maintenance
     sort:
-      method: room
+      method: friendly_name

@@ -23,6 +23,11 @@
       unique_id: holiday_season
       state: "{{ now().month == 11 or now().month == 12 }}"
 
+    - name: "Someone Home"
+      unique_id: someone_home
+      state: "{{ states('input_select.occupancy') in ['Home', 'Sleeping', 'Guest'] }}"
+      icon: "mdi:home-account"
+
 - sensor:
     - name: "Maintenance Dates Summary"
       state: >
