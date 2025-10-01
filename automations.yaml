@@ -2213,6 +2213,25 @@
         data: {}
         target:
           entity_id: input_boolean.washing_machine_on
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.kitchen
+        data:
+          media:
+            media_content_id: media-source://media_source/local/audioclips/makemyclothesniceandclean.aac
+            media_content_type: audio/x-aac
+            metadata:
+              title: makemyclothesniceandclean.aac
+              thumbnail:
+              media_class: music
+              children_media_class:
+              navigateIds:
+              - {}
+              - media_content_type: app
+                media_content_id: media-source://media_source
+              - media_content_type: ''
+                media_content_id: media-source://media_source/local/audioclips
+              browse_entity_id: media_player.kitchen
       end_custom_actions:
       - action: input_boolean.turn_off
         metadata: {}
@@ -2234,19 +2253,20 @@
         target:
           entity_id: media_player.kitchen
         data:
-          media_content_id: media-source://media_source/local/Memes/image1.jpg
-          media_content_type: image/jpeg
-        metadata:
-          title: image1.jpg
-          thumbnail:
-          media_class: image
-          children_media_class:
-          navigateIds:
-          - {}
-          - media_content_type: app
-            media_content_id: media-source://media_source
-          - media_content_type: ''
-            media_content_id: media-source://media_source/local/Memes
+          media:
+            media_content_id: media-source://media_source/local/Memes/image1.jpg
+            media_content_type: image/jpeg
+            metadata:
+              title: image1.jpg
+              thumbnail:
+              media_class: image
+              children_media_class:
+              navigateIds:
+              - {}
+              - media_content_type: app
+                media_content_id: media-source://media_source
+              - media_content_type: ''
+                media_content_id: media-source://media_source/local/Memes
       - delay:
           hours: 0
           minutes: 15
@@ -2404,19 +2424,40 @@
         target:
           entity_id: media_player.kitchen
         data:
-          media_content_id: media-source://media_source/local/Memes/images.jpg
-          media_content_type: image/jpeg
-        metadata:
-          title: images.jpg
-          thumbnail:
-          media_class: image
-          children_media_class:
-          navigateIds:
-          - {}
-          - media_content_type: app
-            media_content_id: media-source://media_source
-          - media_content_type: ''
-            media_content_id: media-source://media_source/local/Memes
+          media:
+            media_content_id: media-source://media_source/local/Memes/images.jpg
+            media_content_type: image/jpeg
+            metadata:
+              title: images.jpg
+              thumbnail:
+              media_class: image
+              children_media_class:
+              navigateIds:
+              - {}
+              - media_content_type: app
+                media_content_id: media-source://media_source
+              - media_content_type: ''
+                media_content_id: media-source://media_source/local/Memes
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.kitchen
+        data:
+          media:
+            media_content_id: media-source://media_source/local/audioclips/the washing
+              is done.aac
+            media_content_type: audio/x-aac
+            metadata:
+              title: the washing is done.aac
+              thumbnail:
+              media_class: music
+              children_media_class:
+              navigateIds:
+              - {}
+              - media_content_type: app
+                media_content_id: media-source://media_source
+              - media_content_type: ''
+                media_content_id: media-source://media_source/local/audioclips
+              browse_entity_id: media_player.kitchen
       - delay:
           hours: 0
           minutes: 15
@@ -2702,6 +2743,26 @@
         data: {}
         target:
           entity_id: input_boolean.dishwasher_on
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.kitchen
+        data:
+          media:
+            media_content_id: media-source://media_source/local/audioclips/clean the
+              dishes ya filthy animal.aac
+            media_content_type: audio/x-aac
+            metadata:
+              title: clean the dishes ya filthy animal.aac
+              thumbnail:
+              media_class: music
+              children_media_class:
+              navigateIds:
+              - {}
+              - media_content_type: app
+                media_content_id: media-source://media_source
+              - media_content_type: ''
+                media_content_id: media-source://media_source/local/audioclips
+              browse_entity_id: media_player.kitchen
       global_conditions:
       - condition: state
         entity_id: input_boolean.master_automation_killswitch
