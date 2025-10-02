@@ -172,3 +172,12 @@
   metadata:
     climate.otto_s_ac:
       entity_only: true
+- id: '1736526000006'
+  name: Living Room Evening
+  entities:
+    light.lounge:
+      state: 'on'
+      brightness: 255
+      color_mode: brightness
+  metadata: {}
+
