@@ -10,23 +10,75 @@ cards:
     - type: media-control
       entity: media_player.sony_bravia
       name: Sony Bravia TV
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+          }
 
     - type: media-control
       entity: media_player.spotify_philip_patterson
       name: Spotify - Philip
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+          }
 
     - type: media-control
       entity: media_player.master_bedroom_speaker
       name: Master Bedroom Speaker
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+          }
 
     - type: media-control
       entity: media_player.kitchen
       name: Kitchen Speaker
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+          }
 
     - type: media-control
       entity: media_player.study_speaker
       name: Study Speaker
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+          }
 
-    - type: media-control
-      entity: media_player.google_tv_2
-      name: Google TV

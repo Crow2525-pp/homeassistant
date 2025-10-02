@@ -7,3 +7,20 @@ cards:
   vertical: false
   layout_options:
     grid_columns: full
+  card_mod:
+    style: |
+      ha-card {
+        background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(51, 65, 85, 0.4);
+        border: none;
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(51, 65, 85, 0.5);
+      }
+      ha-tile-icon {
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+      }

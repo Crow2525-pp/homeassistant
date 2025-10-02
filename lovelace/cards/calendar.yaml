@@ -12,13 +12,13 @@ cards:
     calendars:
       - entity: calendar.philip_james_patterson_gmail_com
         name: Phil
-        colour: "#4A90E2" # Calming blue
+        colour: "#4285F4" # Blue - Google Material Design
       - entity: calendar.stephanie_louise_patterson_gmail_com
         name: Steph
-        colour: "#D94F70" # Warm rose pink
+        colour: "#DB4437" # Red - Google Material Design
       - entity: calendar.family_2
         name: Family
-        colour: "#F5A623" # Vibrant golden orange
+        colour: "#F4B400" # Yellow - Google Material Design
       - entity: calendar.slvandenhoff_gmail_com
         name: Steph
     days: 7
@@ -33,11 +33,11 @@ cards:
     card_mod:
       style: >
         .container .day .events .event[data-entity="calendar.philip_james_patterson_gmail_com"] .inner {
-          background-color: #4A90E2;
+          background-color: #4285F4; /* Blue - Google Material Design */
         }
         .container .day .events .event[data-entity="calendar.stephanie_louise_patterson_gmail_com"] .inner {
-          background-color: #D94F70;
+          background-color: #DB4437; /* Red - Google Material Design */
         }
         .container .day .events .event[data-entity="calendar.family_2"] .inner {
-          background-color: #F5A623;
+          background-color: #F4B400; /* Yellow - Google Material Design */
         }

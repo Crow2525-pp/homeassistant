@@ -45,6 +45,17 @@ cards:
         name: Driveway
         tap_action:
           action: more-info
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
 
   # Quick action button for garage if open
   - type: conditional
@@ -53,17 +64,63 @@ cards:
         entity: cover.smart_garage_door_garage
         state: 'open'
     card:
-      type: button
-      name: Close Garage Door
-      icon: mdi:garage-alert
-      tap_action:
-        action: call-service
-        service: cover.close_cover
-        target:
-          entity_id: cover.smart_garage_door_garage
-      card_mod:
-        style: |
-          ha-card {
-            background: linear-gradient(135deg, rgba(244, 67, 54, 0.2) 0%, rgba(244, 67, 54, 0.1) 100%);
-            border-left: 4px solid #F44336;
-          }
+      type: vertical-stack
+      cards:
+        - type: button
+          name: Close Garage Door
+          icon: mdi:garage-alert
+          show_name: true
+          show_icon: true
+          icon_height: 48px
+          tap_action:
+            action: call-service
+            service: cover.close_cover
+            target:
+              entity_id: cover.smart_garage_door_garage
+          card_mod:
+            style: |
+              ha-card {
+                background: linear-gradient(145deg, #E11D48 0%, #BE123C 100%);
+                color: white;
+                border-radius: 16px 16px 0 0;
+                box-shadow: 0 8px 16px rgba(225, 29, 72, 0.4);
+                padding: 20px;
+                min-height: 110px;
+                border: none;
+                transition: all 0.3s ease;
+              }
+              ha-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 12px 24px rgba(225, 29, 72, 0.5);
+              }
+              ha-icon {
+                color: white;
+                --mdc-icon-size: 52px;
+                filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              }
+              .name {
+                font-weight: 600;
+                font-size: 19px;
+                margin-top: 10px;
+                letter-spacing: 0.3px;
+              }
+        - type: markdown
+          content: "Garage door is currently **OPEN**  \nTap to close immediately"
+          card_mod:
+            style: |
+              ha-card {
+                background: linear-gradient(145deg, rgba(66, 66, 66, 0.95), rgba(33, 33, 33, 0.95));
+                backdrop-filter: blur(10px);
+                border-radius: 0 0 16px 16px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                padding: 14px;
+                font-size: 13px;
+                line-height: 1.6;
+                margin-top: -6px;
+                border-top: 2px solid rgba(225, 29, 72, 0.3);
+                color: white;
+              }
+              ha-card p {
+                margin: 4px 0;
+                color: white;
+              }

@@ -17,7 +17,7 @@ show:
 entities:
   - entity: sensor.gosungrow_virtual_1205796_7_1_1_p8062
     name: Grid Import
-    color: "#80B1D3"
+    color: "#4285F4" # Blue - Google Material Design
     show_state: true
     show_indicator: true
 card_mod:
@@ -25,4 +25,10 @@ card_mod:
     ha-card {
       border-radius: 12px;
       background: linear-gradient(to bottom, rgba(128, 177, 211, 0.1) 0%, rgba(128, 177, 211, 0.02) 100%);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    ha-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }

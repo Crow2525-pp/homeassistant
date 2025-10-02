@@ -1,0 +1,161 @@
+# Shared Card Styling System & Color Palette
+# Use YAML anchors to eliminate repetition across dashboards
+# Reference with <<: *anchor_name or *color_name
+
+# ==========================================
+# MODERN BLUE-BASED COLOR PALETTE
+# ==========================================
+# Designed to work cohesively against blue backgrounds
+# All colors provide excellent contrast with white text
+
+colors:
+  # Core Gradients - Modern blue-grey tones with subtle color accents
+  gradient_navy: &gradient_navy "linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%)"
+  gradient_slate: &gradient_slate "linear-gradient(145deg, #334155 0%, #1E293B 100%)"
+  gradient_teal: &gradient_teal "linear-gradient(145deg, #0F766E 0%, #115E59 100%)"
+  gradient_indigo: &gradient_indigo "linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)"
+  gradient_amber: &gradient_amber "linear-gradient(145deg, #D97706 0%, #B45309 100%)"
+  gradient_rose: &gradient_rose "linear-gradient(145deg, #E11D48 0%, #BE123C 100%)"
+
+  # Shadow Colors (rgba format for shadows)
+  shadow_navy: &shadow_navy "30, 58, 95"
+  shadow_slate: &shadow_slate "51, 65, 85"
+  shadow_teal: &shadow_teal "15, 118, 110"
+  shadow_indigo: &shadow_indigo "79, 70, 229"
+  shadow_amber: &shadow_amber "217, 119, 6"
+  shadow_rose: &shadow_rose "225, 29, 72"
+
+  # Temperature/State colors (for glance cards, badges, etc.)
+  temp_cold: &temp_cold "#60A5FA"
+  temp_hot: &temp_hot "#FB923C"
+  temp_comfortable: &temp_comfortable "#34D399"
+
+# ==========================================
+# CARD STYLE TEMPLATES
+# ==========================================
+
+# Navy Gradient Card (Default - Most Cards)
+# Deep blue-grey that complements blue backgrounds
+card_navy: &card_navy
+  card_mod:
+    style: |
+      ha-card {
+        background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(30, 58, 95, 0.4);
+        border: none;
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(30, 58, 95, 0.5);
+      }
+      ha-tile-icon {
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      }
+
+# Slate Gradient Card (Neutral Alternative)
+# Cool grey that works well with blue
+card_slate: &card_slate
+  card_mod:
+    style: |
+      ha-card {
+        background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(51, 65, 85, 0.4);
+        border: none;
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(51, 65, 85, 0.5);
+      }
+      ha-tile-icon {
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      }
+
+# Teal Gradient Card (Energy/Solar/Eco)
+# Blue-green that harmonizes with blue backgrounds
+card_teal: &card_teal
+  card_mod:
+    style: |
+      ha-card {
+        background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+        border: none;
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
+      }
+      ha-tile-icon {
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      }
+
+# Indigo Gradient Card (Special Actions/Features)
+# Vibrant indigo for standout elements
+card_indigo: &card_indigo
+  card_mod:
+    style: |
+      ha-card {
+        background: linear-gradient(145deg, #4F46E5 0%, #3730A3 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(79, 70, 229, 0.4);
+        border: none;
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(79, 70, 229, 0.5);
+      }
+      ha-tile-icon {
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      }
+
+# Amber Gradient Card (Morning/Warnings)
+# Warm accent that contrasts nicely with blue
+card_amber: &card_amber
+  card_mod:
+    style: |
+      ha-card {
+        background: linear-gradient(145deg, #D97706 0%, #B45309 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(217, 119, 6, 0.4);
+        border: none;
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(217, 119, 6, 0.5);
+      }
+      ha-tile-icon {
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      }
+
+# Rose Gradient Card (Alerts/Critical)
+# Modern rose-red for alerts without being harsh
+card_rose: &card_rose
+  card_mod:
+    style: |
+      ha-card {
+        background: linear-gradient(145deg, #E11D48 0%, #BE123C 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(225, 29, 72, 0.4);
+        border: none;
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(225, 29, 72, 0.5);
+      }
+      ha-tile-icon {
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      }

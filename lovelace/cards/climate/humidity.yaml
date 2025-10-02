@@ -1,11 +1,22 @@
 type: vertical-stack
 cards:
   - type: heading
-    heading: "Humdity"
+    heading: "Humidity"
     icon: mdi:water-percent
 
   - type: glance
     show_state: true
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
     entities:
       # Living Room
       - entity: sensor.livingroom_irblaster_humidity
@@ -98,7 +109,7 @@ cards:
             }
 
   - type: heading
-    heading: "Humdity Trends"
+    heading: "Humidity Trends"
     icon: mdi:water-percent
     heading_style: subtitle
 
@@ -117,6 +128,17 @@ cards:
         name: Living
       - entity: sensor.essendon_airport_humidity
         name: Essendon
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
 
         # Living Room
         # - entity: sensor.ble_humidity_kitchen_temp_humidity_sensor

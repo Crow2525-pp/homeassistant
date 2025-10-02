@@ -18,7 +18,7 @@ show:
 entities:
   - entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
     name: Solar Power
-    color: "#FDB462"
+    color: "#F4B400" # Yellow - Google Material Design
     show_state: true
     show_indicator: true
 card_mod:
@@ -26,4 +26,10 @@ card_mod:
     ha-card {
       border-radius: 12px;
       background: linear-gradient(to bottom, rgba(253, 180, 98, 0.1) 0%, rgba(253, 180, 98, 0.02) 100%);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    ha-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }

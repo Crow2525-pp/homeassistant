@@ -14,6 +14,17 @@ cards:
     tap_action:
       action: url
       url_path: http://192.168.1.101:81
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
   - type: picture-entity
     entity: camera.driveway_cam_fluent
     name: Driveway
@@ -22,6 +33,17 @@ cards:
     tap_action:
       action: url
       url_path: http://192.168.1.101:81
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
 #TODO: get BI alerts working
 #TODO: fix drive-way camera
 

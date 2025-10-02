@@ -20,7 +20,7 @@ cards:
       name: "Time Remaining"
       icon: mdi:clock-outline
       show_state: true
-      color: "#42A5F5" # Soft Blue
+      color: "#4285F4" # Blue - Google Material Design
       tap_action:
         action: more-info
 
@@ -29,7 +29,7 @@ cards:
       name: "Power Usage"
       icon: mdi:flash
       show_state: true
-      color: "#FBC02D" # Yellow for Power
+      color: "#F4B400" # Yellow - Google Material Design
       tap_action:
         action: more-info
 
@@ -56,19 +56,114 @@ cards:
         return time + " min";
       ]]]
 
-- type: entities
-  title: "Washer Stats"
-  entities:
-    - entity: sensor.washing_machine_power_plug_current
+- type: heading
+  heading: "Washer Stats"
+  heading_style: subtitle
+
+- type: grid
+  columns: 2
+  square: false
+  cards:
+    - type: tile
+      entity: sensor.washing_machine_power_plug_current
       name: "Current Usage"
-    - entity: sensor.washing_machine_power_plug_power
+      card_mod:
+        style: |
+          ha-card {
+            background: linear-gradient(145deg, #4285F4 0%, #357ABD 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+            border: none;
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(66, 133, 244, 0.4);
+          }
+          ha-tile-icon {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+          }
+    - type: tile
+      entity: sensor.washing_machine_power_plug_power
       name: "Power Consumption"
-    - entity: sensor.washing_machine_power_plug_summation_delivered
+      card_mod:
+        style: |
+          ha-card {
+            background: linear-gradient(145deg, #4285F4 0%, #357ABD 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+            border: none;
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(66, 133, 244, 0.4);
+          }
+          ha-tile-icon {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+          }
+    - type: tile
+      entity: sensor.washing_machine_power_plug_summation_delivered
       name: "Total Energy Used"
-    - entity: sensor.washing_machine_power_plug_voltage
+      card_mod:
+        style: |
+          ha-card {
+            background: linear-gradient(145deg, #4285F4 0%, #357ABD 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+            border: none;
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(66, 133, 244, 0.4);
+          }
+          ha-tile-icon {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+          }
+    - type: tile
+      entity: sensor.washing_machine_power_plug_voltage
       name: "Voltage"
-    - entity: sensor.washing_machine_estimated_remaining
+      card_mod:
+        style: |
+          ha-card {
+            background: linear-gradient(145deg, #4285F4 0%, #357ABD 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+            border: none;
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(66, 133, 244, 0.4);
+          }
+          ha-tile-icon {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+          }
+    - type: tile
+      entity: sensor.washing_machine_estimated_remaining
       name: "Time Left (Est.)"
+      card_mod:
+        style: |
+          ha-card {
+            background: linear-gradient(145deg, #4285F4 0%, #357ABD 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+            border: none;
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(66, 133, 244, 0.4);
+          }
+          ha-tile-icon {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+          }
 
 - type: history-graph
   title: "Washer Power History"
@@ -81,6 +176,17 @@ cards:
       name: "Voltage"
   hours_to_show: 6
   refresh_interval: 30
+  card_mod:
+    style: |
+      ha-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
 
 - type: statistics-graph
   title: "Laundry Energy Usage (Last 24h)"
@@ -90,6 +196,17 @@ cards:
   days_to_show: 1
   stat_types: mean
   chart_type: line
+  card_mod:
+    style: |
+      ha-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
 
 
 #TODO: Fix Washer is done Automation

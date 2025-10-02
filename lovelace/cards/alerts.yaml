@@ -74,7 +74,7 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background-color: #44739d; /* Dark blue background */
+            background-color: #4285F4; /* Blue - Google Material Design */
             color: white; /* White text color for better contrast */
             border-radius: 12px; /* Rounded corners */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
@@ -107,7 +107,7 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background-color: #d35400;
+            background-color: #F4B400; /* Yellow - Google Material Design */
             color: white !important;
             border-radius: 12px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -137,7 +137,7 @@ cards:
     card_mod:
       style: |
         ha-card {
-          background-color: #b33a3a; /* Darker red background */
+          background-color: #DB4437; /* Red - Google Material Design */
           color: white; /* Use white text for better contrast */
           padding: 16px; /* Add padding inside the card */
           border-radius: 10px; /* Round the corners of the card */
@@ -183,7 +183,7 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background-color: #cc6601;
+            background-color: #F4B400; /* Yellow - Google Material Design */
           }
 
   - type: conditional
@@ -205,5 +205,5 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background-color: #cc6601;
+            background-color: #F4B400; /* Yellow - Google Material Design */
           }

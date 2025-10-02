@@ -7,15 +7,20 @@ cards:
       state_color: false
     filter:
       include:
-        - domain: input_datetime
+        - domain: input_datetime and
+        - label: Maintenance
           options:
             type: custom:template-entity-row
             secondary: |
               {{ as_timestamp(config.entity) | timestamp_custom('%d %b %Y at %I:%M %p', true) }} ({{ relative_time(config.entity) }})
     sort:
-      method: friendly_name
+      method: domain
     card_mod:
       style: |
         ha-card {
           border-radius: 12px;
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
         }

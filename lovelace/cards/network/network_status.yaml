@@ -1,54 +1,262 @@
 type: vertical-stack
 cards:
   # Network Health
-  - type: entities
-    title: Network Health
+  - type: heading
+    heading: Network Health
+    heading_style: title
     icon: mdi:network
-    show_header_toggle: false
-    entities:
-      - entity: sensor.homenetwork
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.homenetwork
         name: Homenetwork Connections
-      - entity: sensor.homenetworkiot
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: sensor.homenetworkiot
         name: Homenetwork IOT Connections
-      - entity: binary_sensor.internet_connection
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: binary_sensor.internet_connection
         name: Internet Connection
         icon: mdi:wan
-        state_color: true
-      - entity: binary_sensor.network_device_down_alert_active
+        state_content: state
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: binary_sensor.network_device_down_alert_active
         name: Network Device Alert
         icon: mdi:access-point-network
-        state_color: true
+        state_content: state
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
 
   # Router Monitoring
-  - type: entities
-    title: Router Monitoring
+  - type: heading
+    heading: Router Monitoring
+    heading_style: title
     icon: mdi:router-wireless
-    entities:
-      - entity: sensor.ucg_ultra_state
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.ucg_ultra_state
         name: Router Status
         icon: mdi:router
-      - entity: sensor.ucg_ultra_cpu_utilization
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: sensor.ucg_ultra_cpu_utilization
         name: Router CPU Usage
         icon: mdi:chip
-      - entity: sensor.ucg_ultra_ucg_ultra_cpu_temperature
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: sensor.ucg_ultra_ucg_ultra_cpu_temperature
         name: Router CPU Temperature
         icon: mdi:thermometer
-      - entity: sensor.ucg_ultra_memory_utilization
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: sensor.ucg_ultra_memory_utilization
         name: Router Memory Usage
         icon: mdi:memory
-      - entity: sensor.ucg_ultra_uptime
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: sensor.ucg_ultra_uptime
         name: Router Uptime
-      - entity: sensor.ucg_ultra_clients
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: sensor.ucg_ultra_clients
         name: Router Connected Clients
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
 
   # Switch Monitoring
-  - type: entities
-    title: Switch Monitoring
+  - type: heading
+    heading: Switch Monitoring
+    heading_style: title
     icon: mdi:ethernet-cable
-    entities:
-      - entity: sensor.usw_16_poe_state
-        name: Switch Status
-        icon: mdi:ethernet
+
+  - type: tile
+    entity: sensor.usw_16_poe_state
+    name: Switch Status
+    icon: mdi:ethernet
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #4285F4 0%, #357ABD 100%);
+          color: white;
+          border-radius: 12px;
+          box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+          border: none;
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 24px rgba(66, 133, 244, 0.4);
+        }
+        ha-tile-icon {
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
       # - entity: sensor.usw_16_poe_cpu_utilization
       #   name: Switch CPU Usage
       #   icon: mdi:chip
@@ -72,13 +280,24 @@ cards:
     entities:
       - entity: sensor.ucg_ultra_microsoft_wan_latency
         name: Microsoft Latency
-        color: "#4285F4"
+        color: "#4285F4" # Blue - Google Material Design
       - entity: sensor.ucg_ultra_google_wan_latency
         name: Google Latency
-        color: "#FBBC05"
+        color: "#F4B400" # Yellow - Google Material Design
       - entity: sensor.ucg_ultra_cloudflare_wan_latency
         name: Cloudflare Latency
-        color: "#EA4335"
+        color: "#DB4437" # Red - Google Material Design
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
 
   # WAN Up/Down Status
   - type: custom:mini-graph-card
@@ -94,28 +313,116 @@ cards:
     entities:
       - entity: sensor.ucg_ultra_port_5_tx
         name: WAN TX
-        color: "#4285F4"
+        color: "#4285F4" # Blue - Google Material Design
       - entity: sensor.ucg_ultra_port_5_rx
         name: WAN RX
-        color: "#FBBC05"
+        color: "#F4B400" # Yellow - Google Material Design
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
 
   # Server & VM Monitoring
-  - type: entities
-    title: Server & VM Monitoring
+  - type: heading
+    heading: Server & VM Monitoring
+    heading_style: title
     icon: mdi:server
-    entities:
-      - entity: sensor.node_pve_cpu_used
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.node_pve_cpu_used
         name: Proxmox CPU Usage
         icon: mdi:chip
-      - entity: sensor.node_pve_memory_used_percentage
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: sensor.node_pve_memory_used_percentage
         name: Proxmox Memory Usage
         icon: mdi:memory
-      - entity: sensor.qemu_media_server_101_cpu_used
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: sensor.qemu_media_server_101_cpu_used
         name: Media Server CPU
         icon: mdi:server
-      - entity: sensor.qemu_media_server_101_disk_used_percentage
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: sensor.qemu_media_server_101_disk_used_percentage
         name: Media Server Disk Usage
         icon: mdi:harddisk
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
         
   # Speed Test Trends
   - type: history-graph
@@ -128,4 +435,15 @@ cards:
         name: Download
       - entity: sensor.speedtest_upload
         name: Upload
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
 

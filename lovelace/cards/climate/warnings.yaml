@@ -13,7 +13,7 @@ filter:
           "entity": "sensor.braybrook_warnings",
           "type": "custom:template-entity-row",
           "icon": "mdi:alert",
-          "name": "{{ w.title }}", #{{ w.short_title }} - 
+          "name": "{{ w.title }}", #{{ w.short_title }} -
           "class": "{{ 'major' if w.warning_group_type == 'major' else 'minor' }}",
           "state": "{{ w.phase | capitalize }}",
           "secondary": "Iss: {{ w.issue_time }} | Exp: {{ w.expiry_time }}"
@@ -31,3 +31,14 @@ filter:
         }
       ]
     {% endif %}
+card_mod:
+  style: |
+    ha-card {
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    ha-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }

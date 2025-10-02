@@ -7,6 +7,17 @@ cards:
 
   - type: glance
     show_state: true
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
     entities:
       # Living Room
       - entity: sensor.living_room_temperature_offset
@@ -118,6 +129,17 @@ cards:
       - entity: sensor.thermal_comfort_kitchen_heat_index
     hours_to_show: 24
     show_names: true
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
 
   - type: glance
     entities:
@@ -129,3 +151,14 @@ cards:
         name: Rain
       - entity: sensor.essendon_airport_wind_speed_kilometre
         name: Wind
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }

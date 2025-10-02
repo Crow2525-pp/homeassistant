@@ -71,7 +71,7 @@ card:
           style: |
             ha-card {
               background: linear-gradient(135deg, rgba(251, 192, 45, 0.2) 0%, rgba(253, 203, 110, 0.1) 100%);
-              border-left: 4px solid #FBC02D;
+              border-left: 4px solid #F4B400; /* Yellow - Google Material Design */
               padding: 12px 16px;
               border-radius: 8px;
             }

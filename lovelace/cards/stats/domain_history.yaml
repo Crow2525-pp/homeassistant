@@ -15,6 +15,17 @@ cards:
       - domain: automation
   sort:
     method: friendly_name
+  card_mod:
+    style: |
+      ha-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
 
 - type: custom:auto-entities
   card:
@@ -31,6 +42,17 @@ cards:
       - domain: automation
   sort:
     method: friendly_name
+  card_mod:
+    style: |
+      ha-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
 
 - type: custom:auto-entities
   card:
@@ -43,6 +65,17 @@ cards:
           secondary_info: last-changed
   sort:
     method: friendly_name
+  card_mod:
+    style: |
+      ha-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
 
 - type: history-graph
   hours_to_show: 18
@@ -55,3 +88,14 @@ cards:
     - entity: zone.home
     - entity: binary_sensor.front_door_cam_motion_2
     - entity: binary_sensor.bi_front_door_camera_motion
+  card_mod:
+    style: |
+      ha-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }

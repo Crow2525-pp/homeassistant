@@ -6,14 +6,43 @@ cards:
     icon: mdi:transmission-tower-export
     color: blue
     vertical: true
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
+          color: white;
+          border-radius: 12px;
+          box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+          border: none;
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
+        }
+        ha-tile-icon {
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
   - type: tile
     entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
     name: Home Consumption
     icon: mdi:home-lightning-bolt
     color: orange
     vertical: true
-card_mod:
-  style: |
-    ha-card {
-      border-radius: 12px;
-    }
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
+          color: white;
+          border-radius: 12px;
+          box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+          border: none;
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
+        }
+        ha-tile-icon {
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }

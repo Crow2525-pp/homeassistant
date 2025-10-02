@@ -19,21 +19,98 @@ cards:
         name: "Power Usage"
         icon: mdi:flash
         show_state: true
-        color: "#FBC02D"
+        color: "#F4B400" # Yellow - Google Material Design
         tap_action:
           action: more-info
 
-  - type: entities
-    title: "Dishwasher Stats"
-    entities:
-      - entity: sensor.smart_plug_current
+  - type: heading
+    heading: "Dishwasher Stats"
+    heading_style: subtitle
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.smart_plug_current
         name: "Current (A)"
-      - entity: sensor.dishwasher_smart_plug_consumption
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #0F9D58 0%, #0A7E3E 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 157, 88, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(15, 157, 88, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: sensor.dishwasher_smart_plug_consumption
         name: "Energy (kWh)"
-      - entity: sensor.smart_plug_voltage
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #0F9D58 0%, #0A7E3E 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 157, 88, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(15, 157, 88, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: sensor.smart_plug_voltage
         name: "Voltage (V)"
-      - entity: sensor.smart_plug_power
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #0F9D58 0%, #0A7E3E 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 157, 88, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(15, 157, 88, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+      - type: tile
+        entity: sensor.smart_plug_power
         name: "Power (W)"
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #0F9D58 0%, #0A7E3E 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 157, 88, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(15, 157, 88, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
 
   - type: history-graph
     title: "Dishwasher Power History"
@@ -46,6 +123,17 @@ cards:
         name: "Voltage (V)"
     hours_to_show: 6
     refresh_interval: 30
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
 
   - type: statistics-graph
     title: "Dishwasher Energy Usage (Last 24h)"
@@ -55,3 +143,14 @@ cards:
     days_to_show: 1
     stat_types: mean
     chart_type: line
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }

@@ -1,68 +1,209 @@
 type: vertical-stack
 cards:
+  - type: heading
+    heading: "Media Quick Actions"
+    heading_style: subtitle
+    icon: mdi:play-circle-outline
+
+  # Featured Spotify Action
+  - type: vertical-stack
+    cards:
+      - type: button
+        show_name: true
+        show_icon: true
+        entity: script.spotify_tv
+        icon_height: 48px
+        tap_action:
+          action: call-service
+          service: script.spotify_tv
+        hold_action:
+          action: call-service
+          service: script.spotify_off
+        name: Spotify TV
+        icon: mdi:spotify
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1DB954 0%, #1AA34A 100%);
+              color: white;
+              border-radius: 16px 16px 0 0;
+              box-shadow: 0 8px 16px rgba(29, 185, 84, 0.3);
+              padding: 20px;
+              min-height: 110px;
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(29, 185, 84, 0.4);
+            }
+            ha-icon {
+              color: white;
+              --mdc-icon-size: 52px;
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+            .name {
+              font-weight: 600;
+              font-size: 19px;
+              margin-top: 10px;
+              letter-spacing: 0.3px;
+            }
+      - type: markdown
+        content: "Tap: Start Spotify on TV  \nHold: Turn off Spotify"
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, rgba(227, 247, 236, 0.95), rgba(209, 242, 224, 0.95));
+              backdrop-filter: blur(10px);
+              border-radius: 0 0 16px 16px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+              padding: 14px;
+              font-size: 13px;
+              line-height: 1.6;
+              margin-top: -6px;
+              border-top: 2px solid rgba(29, 185, 84, 0.3);
+            }
+            ha-card p {
+              margin: 4px 0;
+            }
+
+  # Volume Controls Grid
   - type: grid
     columns: 2
     square: false
     cards:
-    - type: heading
-      heading: "Media Quick Actions"
-      heading_style: subtitle
-      icon: mdi:play-circle-outline
+      - type: button
+        show_name: true
+        show_icon: true
+        entity: script.volume_quiet
+        tap_action:
+          action: call-service
+          service: script.volume_quiet
+        name: Volume Quiet
+        icon: mdi:volume-low
+        icon_height: 30px
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #64B5F6 0%, #42A5F5 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 12px rgba(66, 165, 245, 0.25);
+              padding: 16px;
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 16px rgba(66, 165, 245, 0.35);
+            }
+            ha-icon {
+              color: white;
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+            .name {
+              font-weight: 500;
+              margin-top: 8px;
+            }
 
-    - type: button
-      show_name: true
-      show_icon: true
-      entity: script.spotify_tv
-      tap_action:
-        action: call-service
-        service: script.spotify_tv
-      hold_action:
-        action: call-service
-        service: script.spotify_off
-      name: Spotify TV
-      icon: mdi:spotify
-      icon_height: 30px
+      - type: button
+        show_name: true
+        show_icon: true
+        entity: script.volume_talking
+        tap_action:
+          action: call-service
+          service: script.volume_talking
+        name: Volume Low
+        icon: mdi:volume-medium
+        icon_height: 30px
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #81C784 0%, #66BB6A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 12px rgba(102, 187, 106, 0.25);
+              padding: 16px;
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 16px rgba(102, 187, 106, 0.35);
+            }
+            ha-icon {
+              color: white;
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+            .name {
+              font-weight: 500;
+              margin-top: 8px;
+            }
 
-    - type: button
-      show_name: true
-      show_icon: true
-      entity: script.volume_quiet
-      tap_action:
-        action: call-service
-        service: script.volume_quiet
-      name: TV Volume Quiet
-      icon: mdi:volume-low
-      icon_height: 30px
+      - type: button
+        show_name: true
+        show_icon: true
+        entity: script.volume_medium
+        tap_action:
+          action: call-service
+          service: script.volume_medium
+        name: Volume Med
+        icon: mdi:volume-high
+        icon_height: 30px
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #FFB74D 0%, #FFA726 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 12px rgba(255, 167, 38, 0.25);
+              padding: 16px;
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 16px rgba(255, 167, 38, 0.35);
+            }
+            ha-icon {
+              color: white;
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+            .name {
+              font-weight: 500;
+              margin-top: 8px;
+            }
 
-    - type: button
-      show_name: true
-      show_icon: true
-      entity: script.volume_talking
-      tap_action:
-        action: call-service
-        service: script.volume_talking
-      name: TV Volume Low
-      icon: mdi:volume-medium
-      icon_height: 30px
-
-    - type: button
-      show_name: true
-      show_icon: true
-      entity: script.volume_medium
-      tap_action:
-        action: call-service
-        service: script.volume_medium
-      name: TV Volume Med
-      icon: mdi:volume-high
-      icon_height: 30px
-
-    - type: button
-      show_name: true
-      show_icon: true
-      entity: script.volume_high
-      tap_action:
-        action: call-service
-        service: script.volume_high
-      name: TV Volume High
-      icon: mdi:volume-source
-      icon_height: 30px
+      - type: button
+        show_name: true
+        show_icon: true
+        entity: script.volume_high
+        tap_action:
+          action: call-service
+          service: script.volume_high
+        name: Volume High
+        icon: mdi:volume-source
+        icon_height: 30px
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #EF5350 0%, #E53935 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 12px rgba(229, 57, 53, 0.25);
+              padding: 16px;
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 16px rgba(229, 57, 53, 0.35);
+            }
+            ha-icon {
+              color: white;
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            }
+            .name {
+              font-weight: 500;
+              margin-top: 8px;
+            }

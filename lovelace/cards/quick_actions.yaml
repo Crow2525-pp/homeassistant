@@ -9,58 +9,246 @@ cards:
     columns: 2
     square: false
     cards:
-      # Good Night scene
-      - type: button
-        name: Good Night
-        icon: mdi:weather-night
-        tap_action:
-          action: call-service
-          service: script.good_night
-        card_mod:
-          style: |
-            ha-card {
-              background: linear-gradient(135deg, rgba(63, 81, 181, 0.2) 0%, rgba(63, 81, 181, 0.1) 100%);
-            }
+      # Good Morning
+      - type: vertical-stack
+        cards:
+          - type: button
+            name: Good Morning
+            icon: mdi:weather-sunny
+            tap_action:
+              action: call-service
+              service: script.good_morning
+            show_name: true
+            show_icon: true
+            icon_height: 48px
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, #D97706 0%, #B45309 100%);
+                  color: white;
+                  border-radius: 16px 16px 0 0;
+                  box-shadow: 0 8px 16px rgba(217, 119, 6, 0.4);
+                  padding: 20px;
+                  min-height: 110px;
+                  border: none;
+                  transition: all 0.3s ease;
+                }
+                ha-card:hover {
+                  transform: translateY(-2px);
+                  box-shadow: 0 12px 24px rgba(217, 119, 6, 0.5);
+                }
+                ha-icon {
+                  color: white;
+                  --mdc-icon-size: 52px;
+                  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+                }
+                .name {
+                  font-weight: 600;
+                  font-size: 19px;
+                  margin-top: 10px;
+                  letter-spacing: 0.3px;
+                }
+          - type: markdown
+            content: "☀️ Opens blinds & curtains  \n🏠 Sets occupancy to **Home**"
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, rgba(66, 66, 66, 0.95), rgba(33, 33, 33, 0.95));
+                  backdrop-filter: blur(10px);
+                  border-radius: 0 0 16px 16px;
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                  padding: 14px;
+                  font-size: 13px;
+                  line-height: 1.6;
+                  margin-top: -6px;
+                  border-top: 2px solid rgba(217, 119, 6, 0.3);
+                  color: white;
+                }
+                ha-card p {
+                  margin: 4px 0;
+                  color: white;
+                }
 
-      # Good Morning scene
-      - type: button
-        name: Good Morning
-        icon: mdi:weather-sunny
-        tap_action:
-          action: call-service
-          service: script.good_morning
-        card_mod:
-          style: |
-            ha-card {
-              background: linear-gradient(135deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 193, 7, 0.1) 100%);
-            }
+      # Good Night
+      - type: vertical-stack
+        cards:
+          - type: button
+            name: Good Night
+            icon: mdi:weather-night
+            tap_action:
+              action: call-service
+              service: script.good_night
+            show_name: true
+            show_icon: true
+            icon_height: 48px
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, #4F46E5 0%, #3730A3 100%);
+                  color: white;
+                  border-radius: 16px 16px 0 0;
+                  box-shadow: 0 8px 16px rgba(79, 70, 229, 0.4);
+                  padding: 20px;
+                  min-height: 110px;
+                  border: none;
+                  transition: all 0.3s ease;
+                }
+                ha-card:hover {
+                  transform: translateY(-2px);
+                  box-shadow: 0 12px 24px rgba(79, 70, 229, 0.5);
+                }
+                ha-icon {
+                  color: white;
+                  --mdc-icon-size: 52px;
+                  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+                }
+                .name {
+                  font-weight: 600;
+                  font-size: 19px;
+                  margin-top: 10px;
+                  letter-spacing: 0.3px;
+                }
+          - type: markdown
+            content: "🌙 Closes blinds, curtains & garage  \n💡 Turns off lights  \n😴 Sets occupancy to **Sleeping**"
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, rgba(66, 66, 66, 0.95), rgba(33, 33, 33, 0.95));
+                  backdrop-filter: blur(10px);
+                  border-radius: 0 0 16px 16px;
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                  padding: 14px;
+                  font-size: 13px;
+                  line-height: 1.6;
+                  margin-top: -6px;
+                  border-top: 2px solid rgba(79, 70, 229, 0.3);
+                  color: white;
+                }
+                ha-card p {
+                  margin: 4px 0;
+                  color: white;
+                }
+
+      # Close Garage
+      - type: vertical-stack
+        cards:
+          - type: button
+            name: Close Garage
+            icon: mdi:garage
+            tap_action:
+              action: call-service
+              service: cover.close_cover
+              target:
+                entity_id: cover.smart_garage_door_garage
+            hold_action:
+              action: more-info
+            show_name: true
+            show_icon: true
+            icon_height: 48px
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
+                  color: white;
+                  border-radius: 16px 16px 0 0;
+                  box-shadow: 0 8px 16px rgba(51, 65, 85, 0.4);
+                  padding: 20px;
+                  min-height: 110px;
+                  border: none;
+                  transition: all 0.3s ease;
+                }
+                ha-card:hover {
+                  transform: translateY(-2px);
+                  box-shadow: 0 12px 24px rgba(51, 65, 85, 0.5);
+                }
+                ha-icon {
+                  color: white;
+                  --mdc-icon-size: 52px;
+                  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+                }
+                .name {
+                  font-weight: 600;
+                  font-size: 19px;
+                  margin-top: 10px;
+                  letter-spacing: 0.3px;
+                }
+          - type: markdown
+            content: "🚗 Toggle garage door  \n↕️ (Open ↔ Close)"
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, rgba(66, 66, 66, 0.95), rgba(33, 33, 33, 0.95));
+                  backdrop-filter: blur(10px);
+                  border-radius: 0 0 16px 16px;
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                  padding: 14px;
+                  font-size: 13px;
+                  line-height: 1.6;
+                  margin-top: -6px;
+                  border-top: 2px solid rgba(51, 65, 85, 0.3);
+                  color: white;
+                }
+                ha-card p {
+                  margin: 4px 0;
+                  color: white;
+                }
 
       # Leaving Home
-      - type: button
-        name: Leaving Home
-        icon: mdi:home-export-outline
-        tap_action:
-          action: call-service
-          service: script.leaving_home
-        card_mod:
-          style: |
-            ha-card {
-              background: linear-gradient(135deg, rgba(244, 67, 54, 0.2) 0%, rgba(244, 67, 54, 0.1) 100%);
-            }
-
-      # Close Garage (quick action)
-      - type: button
-        name: Close Garage
-        icon: mdi:garage
-        tap_action:
-          action: call-service
-          service: cover.close_cover
-          target:
-            entity_id: cover.smart_garage_door_garage
-        hold_action:
-          action: more-info
-        card_mod:
-          style: |
-            ha-card {
-              background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.1) 100%);
-            }
+      - type: vertical-stack
+        cards:
+          - type: button
+            name: Leaving Home
+            icon: mdi:home-export-outline
+            tap_action:
+              action: call-service
+              service: script.leaving_home
+            show_name: true
+            show_icon: true
+            icon_height: 48px
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, #E11D48 0%, #BE123C 100%);
+                  color: white;
+                  border-radius: 16px 16px 0 0;
+                  box-shadow: 0 8px 16px rgba(225, 29, 72, 0.4);
+                  padding: 20px;
+                  min-height: 110px;
+                  border: none;
+                  transition: all 0.3s ease;
+                }
+                ha-card:hover {
+                  transform: translateY(-2px);
+                  box-shadow: 0 12px 24px rgba(225, 29, 72, 0.5);
+                }
+                ha-icon {
+                  color: white;
+                  --mdc-icon-size: 52px;
+                  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+                }
+                .name {
+                  font-weight: 600;
+                  font-size: 19px;
+                  margin-top: 10px;
+                  letter-spacing: 0.3px;
+                }
+          - type: markdown
+            content: "🚪 Closes garage door  \n❄️ Turns off all climate & lights  \n🏃 Sets occupancy to **Away**"
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, rgba(66, 66, 66, 0.95), rgba(33, 33, 33, 0.95));
+                  backdrop-filter: blur(10px);
+                  border-radius: 0 0 16px 16px;
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                  padding: 14px;
+                  font-size: 13px;
+                  line-height: 1.6;
+                  margin-top: -6px;
+                  border-top: 2px solid rgba(225, 29, 72, 0.3);
+                  color: white;
+                }
+                ha-card p {
+                  margin: 4px 0;
+                  color: white;
+                }

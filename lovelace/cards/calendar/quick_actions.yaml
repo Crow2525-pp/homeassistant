@@ -1,19 +1,58 @@
-type: button
-name: "Open Google Calendar"
-icon: mdi:calendar-multiple
-show_name: true
-show_icon: true
-tap_action:
-  action: url
-  url_path: "https://calendar.google.com"
-card_mod:
-  style: |
-    ha-card {
-      background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
-      color: white;
-      border-radius: 12px;
-      height: 48px;
-    }
-    ha-card:active {
-      transform: scale(0.98);
-    }
+type: vertical-stack
+cards:
+  - type: button
+    name: "Open Google Calendar"
+    icon: mdi:calendar-multiple
+    show_name: true
+    show_icon: true
+    icon_height: 48px
+    tap_action:
+      action: url
+      url_path: "https://calendar.google.com"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+          color: white;
+          border-radius: 16px 16px 0 0;
+          box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+          padding: 20px;
+          min-height: 110px;
+          border: none;
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+        }
+        ha-icon {
+          color: white;
+          --mdc-icon-size: 52px;
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        .name {
+          font-weight: 600;
+          font-size: 19px;
+          margin-top: 10px;
+          letter-spacing: 0.3px;
+        }
+  - type: markdown
+    content: "View and manage your schedule  \nOpens in new tab"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, rgba(30, 58, 95, 0.95), rgba(13, 27, 42, 0.95));
+          backdrop-filter: blur(10px);
+          border-radius: 0 0 16px 16px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          padding: 14px;
+          font-size: 13px;
+          line-height: 1.6;
+          margin-top: -6px;
+          border-top: 2px solid rgba(30, 58, 95, 0.3);
+          color: white;
+        }
+        ha-card p {
+          margin: 4px 0;
+          color: white;
+        }
