@@ -1,0 +1,6 @@
+- platform: group
+  name: family_mobile
+  services:
+    - service: mobile_app_samsung_galaxy_s22_ultra
+    - service: mobile_app_slvdh
+
