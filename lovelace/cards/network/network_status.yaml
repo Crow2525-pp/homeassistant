@@ -28,7 +28,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
       - type: tile
         entity: sensor.homenetworkiot
@@ -48,7 +48,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
       - type: tile
         entity: binary_sensor.internet_connection
@@ -70,7 +70,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
       - type: tile
         entity: binary_sensor.network_device_down_alert_active
@@ -92,7 +92,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
 
   # Router Monitoring
@@ -124,7 +124,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
       - type: tile
         entity: sensor.ucg_ultra_cpu_utilization
@@ -145,7 +145,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
       - type: tile
         entity: sensor.ucg_ultra_ucg_ultra_cpu_temperature
@@ -166,7 +166,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
       - type: tile
         entity: sensor.ucg_ultra_memory_utilization
@@ -187,7 +187,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
       - type: tile
         entity: sensor.ucg_ultra_uptime
@@ -207,7 +207,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
       - type: tile
         entity: sensor.ucg_ultra_clients
@@ -227,7 +227,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
 
   # Switch Monitoring
@@ -243,19 +243,19 @@ cards:
     card_mod:
       style: |
         ha-card {
-          background: linear-gradient(145deg, #4285F4 0%, #357ABD 100%);
+          background: linear-gradient(145deg, #4F46E5 0%, #3730A3 100%);
           color: white;
           border-radius: 12px;
-          box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+          box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
           border: none;
           transition: all 0.3s ease;
         }
         ha-card:hover {
           transform: translateY(-2px);
-          box-shadow: 0 12px 24px rgba(66, 133, 244, 0.4);
+          box-shadow: 0 12px 24px rgba(79, 70, 229, 0.4);
         }
         ha-tile-icon {
-          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
         }
       # - entity: sensor.usw_16_poe_cpu_utilization
       #   name: Switch CPU Usage
@@ -358,7 +358,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
       - type: tile
         entity: sensor.node_pve_memory_used_percentage
@@ -379,7 +379,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
       - type: tile
         entity: sensor.qemu_media_server_101_cpu_used
@@ -400,7 +400,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
       - type: tile
         entity: sensor.qemu_media_server_101_disk_used_percentage
@@ -421,7 +421,7 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
         
   # Speed Test Trends

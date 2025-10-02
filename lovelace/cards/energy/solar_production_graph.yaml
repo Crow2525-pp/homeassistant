@@ -25,7 +25,7 @@ card_mod:
   style: |
     ha-card {
       border-radius: 12px;
-      background: linear-gradient(to bottom, var(--solar-gradient-start) 0%, var(--solar-gradient-end) 100%);
+      background: linear-gradient(to bottom, linear-gradient(145deg, #D97706 0%, #B45309 100%) 0%, var(--solar-gradient-end) 100%);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
     }

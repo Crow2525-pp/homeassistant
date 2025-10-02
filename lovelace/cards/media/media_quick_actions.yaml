@@ -24,10 +24,10 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, #1DB954 0%, #1AA34A 100%);
+              background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
               color: white;
               border-radius: 16px 16px 0 0;
-              box-shadow: 0 8px 16px rgba(29, 185, 84, 0.3);
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.3);
               padding: 20px;
               min-height: 110px;
               border: none;
@@ -35,12 +35,12 @@ cards:
             }
             ha-card:hover {
               transform: translateY(-2px);
-              box-shadow: 0 12px 24px rgba(29, 185, 84, 0.4);
+              box-shadow: 0 12px 24px rgba(15, 118, 110, 0.4);
             }
             ha-icon {
               color: white;
               --mdc-icon-size: 52px;
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
             .name {
               font-weight: 600;
@@ -53,7 +53,7 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, rgba(227, 247, 236, 0.95), rgba(209, 242, 224, 0.95));
+              background: linear-gradient(145deg, rgba(15, 118, 110, 0.95), rgba(15, 118, 110, 0.95));
               backdrop-filter: blur(10px);
               border-radius: 0 0 16px 16px;
               box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -61,7 +61,7 @@ cards:
               font-size: 13px;
               line-height: 1.6;
               margin-top: -6px;
-              border-top: 2px solid rgba(29, 185, 84, 0.3);
+              border-top: 2px solid rgba(15, 118, 110, 0.3);
             }
             ha-card p {
               margin: 4px 0;
@@ -85,21 +85,21 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, #64B5F6 0%, #42A5F5 100%);
+              background: linear-gradient(145deg, #4F46E5 0%, #3730A3 100%);
               color: white;
               border-radius: 12px;
-              box-shadow: 0 4px 12px rgba(66, 165, 245, 0.25);
+              box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
               padding: 16px;
               border: none;
               transition: all 0.3s ease;
             }
             ha-card:hover {
               transform: translateY(-2px);
-              box-shadow: 0 6px 16px rgba(66, 165, 245, 0.35);
+              box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
             }
             ha-icon {
               color: white;
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
             .name {
               font-weight: 500;
@@ -119,21 +119,21 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, #81C784 0%, #66BB6A 100%);
+              background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
               color: white;
               border-radius: 12px;
-              box-shadow: 0 4px 12px rgba(102, 187, 106, 0.25);
+              box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
               padding: 16px;
               border: none;
               transition: all 0.3s ease;
             }
             ha-card:hover {
               transform: translateY(-2px);
-              box-shadow: 0 6px 16px rgba(102, 187, 106, 0.35);
+              box-shadow: 0 6px 16px rgba(15, 118, 110, 0.35);
             }
             ha-icon {
               color: white;
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
             .name {
               font-weight: 500;
@@ -153,21 +153,21 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, #FFB74D 0%, #FFA726 100%);
+              background: linear-gradient(145deg, #D97706 0%, #B45309 100%);
               color: white;
               border-radius: 12px;
-              box-shadow: 0 4px 12px rgba(255, 167, 38, 0.25);
+              box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
               padding: 16px;
               border: none;
               transition: all 0.3s ease;
             }
             ha-card:hover {
               transform: translateY(-2px);
-              box-shadow: 0 6px 16px rgba(255, 167, 38, 0.35);
+              box-shadow: 0 6px 16px rgba(217, 119, 6, 0.35);
             }
             ha-icon {
               color: white;
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
             .name {
               font-weight: 500;
@@ -187,21 +187,21 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, #EF5350 0%, #E53935 100%);
+              background: linear-gradient(145deg, #E11D48 0%, #BE123C 100%);
               color: white;
               border-radius: 12px;
-              box-shadow: 0 4px 12px rgba(229, 57, 53, 0.25);
+              box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
               padding: 16px;
               border: none;
               transition: all 0.3s ease;
             }
             ha-card:hover {
               transform: translateY(-2px);
-              box-shadow: 0 6px 16px rgba(229, 57, 53, 0.35);
+              box-shadow: 0 6px 16px rgba(225, 29, 72, 0.35);
             }
             ha-icon {
               color: white;
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
             }
             .name {
               font-weight: 500;

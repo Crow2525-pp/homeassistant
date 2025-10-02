@@ -27,6 +27,9 @@ cards:
   - type: markdown
     content: |
       **Climate Overrides**
+
+      💡 **OFF** = Automations control climate (normal mode)
+      🔒 **ON** = You control climate manually (automations disabled)
     card_mod:
       style: |
         ha-card {
@@ -35,9 +38,12 @@ cards:
           padding: 8px 16px 4px;
         }
         ha-markdown p {
+          font-size: 0.9em;
+          margin: 0;
+        }
+        ha-markdown p:first-child {
           font-size: 0.95em;
           font-weight: 500;
-          margin: 0;
         }
 
   - type: grid
@@ -52,19 +58,25 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, var(--google-blue) 0%, var(--google-blue-dark) 100%);
+              background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
               color: white;
               border-radius: 12px;
-              box-shadow: 0 8px 16px var(--google-blue-alpha-30);
+              box-shadow: 0 8px 16px rgba(51, 65, 85, 0.3);
               border: none;
               transition: all 0.3s ease;
+              --primary-text-color: white !important;
+              --secondary-text-color: rgba(255, 255, 255, 0.7) !important;
             }
             ha-card:hover {
               transform: translateY(-2px);
-              box-shadow: 0 12px 24px var(--google-blue-alpha-40);
+              box-shadow: 0 12px 24px rgba(51, 65, 85, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+              color: white !important;
+            }
+            * {
+              color: white !important;
             }
 
       - type: tile
@@ -75,19 +87,25 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, var(--google-green) 0%, var(--google-green-dark) 100%);
+              background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
               color: white;
               border-radius: 12px;
-              box-shadow: 0 8px 16px var(--google-green-alpha-30);
+              box-shadow: 0 8px 16px rgba(51, 65, 85, 0.3);
               border: none;
               transition: all 0.3s ease;
+              --primary-text-color: white !important;
+              --secondary-text-color: rgba(255, 255, 255, 0.7) !important;
             }
             ha-card:hover {
               transform: translateY(-2px);
-              box-shadow: 0 12px 24px var(--google-green-alpha-40);
+              box-shadow: 0 12px 24px rgba(51, 65, 85, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+              color: white !important;
+            }
+            * {
+              color: white !important;
             }
 
       - type: tile
@@ -98,19 +116,25 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, var(--google-red) 0%, var(--google-red-dark) 100%);
+              background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
               color: white;
               border-radius: 12px;
-              box-shadow: 0 8px 16px var(--google-red-alpha-30);
+              box-shadow: 0 8px 16px rgba(51, 65, 85, 0.3);
               border: none;
               transition: all 0.3s ease;
+              --primary-text-color: white !important;
+              --secondary-text-color: rgba(255, 255, 255, 0.7) !important;
             }
             ha-card:hover {
               transform: translateY(-2px);
-              box-shadow: 0 12px 24px var(--google-red-alpha-40);
+              box-shadow: 0 12px 24px rgba(51, 65, 85, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+              color: white !important;
+            }
+            * {
+              color: white !important;
             }
 
       - type: tile
@@ -121,19 +145,25 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, #F4B400 0%, #C79100 100%);
+              background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
               color: white;
               border-radius: 12px;
-              box-shadow: 0 8px 16px rgba(244, 180, 0, 0.3);
+              box-shadow: 0 8px 16px rgba(51, 65, 85, 0.3);
               border: none;
               transition: all 0.3s ease;
+              --primary-text-color: white !important;
+              --secondary-text-color: rgba(255, 255, 255, 0.7) !important;
             }
             ha-card:hover {
               transform: translateY(-2px);
-              box-shadow: 0 12px 24px rgba(244, 180, 0, 0.4);
+              box-shadow: 0 12px 24px rgba(51, 65, 85, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+              color: white !important;
+            }
+            * {
+              color: white !important;
             }
 
   # Device overrides
@@ -166,19 +196,25 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, #F4B400 0%, #C79100 100%);
+              background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
               color: white;
               border-radius: 12px;
-              box-shadow: 0 8px 16px rgba(244, 180, 0, 0.3);
+              box-shadow: 0 8px 16px rgba(51, 65, 85, 0.3);
               border: none;
               transition: all 0.3s ease;
+              --primary-text-color: white !important;
+              --secondary-text-color: rgba(255, 255, 255, 0.7) !important;
             }
             ha-card:hover {
               transform: translateY(-2px);
-              box-shadow: 0 12px 24px rgba(244, 180, 0, 0.4);
+              box-shadow: 0 12px 24px rgba(51, 65, 85, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+              color: white !important;
+            }
+            * {
+              color: white !important;
             }
 
   # Automation toggles
@@ -205,6 +241,12 @@ cards:
       square: false
       columns: 2
       state_color: true
+      card_mod:
+        style: |
+          ha-card {
+            --primary-text-color: white !important;
+            --secondary-text-color: rgba(255, 255, 255, 0.7) !important;
+          }
     card_param: cards
     filter:
       include:
@@ -213,8 +255,42 @@ cards:
         - label: "Manual Automations"
           options:
             type: tile
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
+                  color: white;
+                  border-radius: 12px;
+                  box-shadow: 0 8px 16px rgba(51, 65, 85, 0.3);
+                  border: none;
+                  --primary-text-color: white !important;
+                  --secondary-text-color: rgba(255, 255, 255, 0.7) !important;
+                }
+                ha-tile-icon {
+                  color: white !important;
+                }
+                * {
+                  color: white !important;
+                }
         # Killswitches
         - integration: input_boolean and
         - label: Killswitch
           options:
             type: tile
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
+                  color: white;
+                  border-radius: 12px;
+                  box-shadow: 0 8px 16px rgba(51, 65, 85, 0.3);
+                  border: none;
+                  --primary-text-color: white !important;
+                  --secondary-text-color: rgba(255, 255, 255, 0.7) !important;
+                }
+                ha-tile-icon {
+                  color: white !important;
+                }
+                * {
+                  color: white !important;
+                }

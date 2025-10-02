@@ -21,6 +21,9 @@ cards:
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
           }
+          .title, .artist, .album, ha-card-content {
+            color: white !important;
+          }
 
     - type: media-control
       entity: media_player.spotify_philip_patterson
@@ -35,6 +38,9 @@ cards:
           ha-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+          }
+          .title, .artist, .album, ha-card-content {
+            color: white !important;
           }
 
     - type: media-control
@@ -51,6 +57,9 @@ cards:
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
           }
+          .title, .artist, .album, ha-card-content {
+            color: white !important;
+          }
 
     - type: media-control
       entity: media_player.kitchen
@@ -66,6 +75,9 @@ cards:
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
           }
+          .title, .artist, .album, ha-card-content {
+            color: white !important;
+          }
 
     - type: media-control
       entity: media_player.study_speaker
@@ -80,5 +92,26 @@ cards:
           ha-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+          }
+          .title, .artist, .album, ha-card-content {
+            color: white !important;
+          }
+
+    - type: media-control
+      entity: media_player.living_room_wiimamp
+      name: Living Room WiiM Amp
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+          }
+          .title, .artist, .album, ha-card-content {
+            color: white !important;
           }
 

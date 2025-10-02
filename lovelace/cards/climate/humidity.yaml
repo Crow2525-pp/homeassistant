@@ -28,11 +28,11 @@ cards:
             :host {
               --paper-item-icon-color:
                 {% if states('sensor.livingroom_irblaster_humidity') | float < 40 %}
-                  #64B5F6
+                  linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
                 {% elif states('sensor.livingroom_irblaster_humidity') | float > 60 %}
-                  #FF8A65
+                  linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
-                  #81C784
+                  linear-gradient(145deg, #0F766E 0%, #115E59 100%)
                 {% endif %};
             }
 
@@ -46,11 +46,11 @@ cards:
             :host {
               --paper-item-icon-color:
                 {% if states('sensor.study_esp32_henrysroom_humidity') | float < 40 %}
-                  #64B5F6
+                  linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
                 {% elif states('sensor.study_esp32_henrysroom_humidity') | float > 60 %}
-                  #FF8A65
+                  linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
-                  #81C784
+                  linear-gradient(145deg, #0F766E 0%, #115E59 100%)
                 {% endif %};
             }
 
@@ -64,11 +64,11 @@ cards:
             :host {
               --paper-item-icon-color:
                 {% if states('sensor.study_esp32_ottosroom_humidity') | float < 40 %}
-                  #64B5F6
+                  linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
                 {% elif states('sensor.study_esp32_ottosroom_humidity') | float > 60 %}
-                  #FF8A65
+                  linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
-                  #81C784
+                  linear-gradient(145deg, #0F766E 0%, #115E59 100%)
                 {% endif %};
             }
 
@@ -82,11 +82,11 @@ cards:
             :host {
               --paper-item-icon-color:
                 {% if states('sensor.humiditysensor_humidity') | float < 40 %}
-                  #64B5F6
+                  linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
                 {% elif states('sensor.humiditysensor_humidity') | float > 60 %}
-                  #FF8A65
+                  linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
-                  #81C784
+                  linear-gradient(145deg, #0F766E 0%, #115E59 100%)
                 {% endif %};
             }
 
@@ -100,11 +100,11 @@ cards:
             :host {
               --paper-item-icon-color:
                 {% if states('sensor.essendon_airport_humidity') | float < 40 %}
-                  #64B5F6
+                  linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
                 {% elif states('sensor.essendon_airport_humidity') | float > 60 %}
-                  #FF8A65
+                  linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
-                  #81C784
+                  linear-gradient(145deg, #0F766E 0%, #115E59 100%)
                 {% endif %};
             }
 

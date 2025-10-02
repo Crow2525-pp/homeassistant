@@ -1,12 +1,16 @@
 type: vertical-stack
 cards:
-  - features:
-      - type: cover-open-close
-    type: tile
+  - type: heading
+    heading: "Roller Blinds"
+    heading_style: subtitle
+    icon: mdi:blinds
+
+  - type: tile
     entity: cover.roller_blinds_chan1
-    hide_state: true
     name: Roller Blinds
-    color: primary
+    features:
+      - type: cover-open-close
+      - type: cover-position
     layout_options:
       grid_columns: full
     card_mod:
@@ -23,9 +27,102 @@ cards:
           transform: translateY(-2px);
           box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
         }
-        ha-tile-icon {
-          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        ha-card {
+          --primary-text-color: white !important;
+          --secondary-text-color: rgba(255, 255, 255, 0.7) !important;
+          --text-primary-color: white !important;
         }
+        ha-tile-icon {
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+          color: white !important;
+        }
+        * {
+          color: white !important;
+        }
+
+  - type: grid
+    columns: 3
+    cards:
+      - type: button
+        name: Halfway
+        icon: mdi:blinds-horizontal
+        tap_action:
+          action: call-service
+          service: script.1693262268843
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 8px rgba(51, 65, 85, 0.3);
+              border: none;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 12px rgba(51, 65, 85, 0.4);
+            }
+            ha-icon {
+              color: white;
+            }
+            .name {
+              color: white;
+            }
+      - type: button
+        name: Open
+        icon: mdi:blinds-open
+        tap_action:
+          action: call-service
+          service: script.roller_blinds_up
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 8px rgba(51, 65, 85, 0.3);
+              border: none;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 12px rgba(51, 65, 85, 0.4);
+            }
+            ha-icon {
+              color: white;
+            }
+            .name {
+              color: white;
+            }
+      - type: button
+        name: Close
+        icon: mdi:blinds
+        tap_action:
+          action: call-service
+          service: script.roller_blinds_down
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 8px rgba(51, 65, 85, 0.3);
+              border: none;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 12px rgba(51, 65, 85, 0.4);
+            }
+            ha-icon {
+              color: white;
+            }
+            .name {
+              color: white;
+            }
+
+  - type: heading
+    heading: "Other Covers"
+    heading_style: subtitle
+    icon: mdi:window-shutter
   - features:
       - type: cover-open-close
       - type: cover-position
@@ -48,8 +145,17 @@ cards:
           transform: translateY(-2px);
           box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
         }
+        ha-card {
+          --primary-text-color: white !important;
+          --secondary-text-color: rgba(255, 255, 255, 0.7) !important;
+          --text-primary-color: white !important;
+        }
         ha-tile-icon {
-          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+          color: white !important;
+        }
+        * {
+          color: white !important;
         }
   - features:
       - type: cover-open-close
@@ -73,6 +179,15 @@ cards:
           transform: translateY(-2px);
           box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
         }
+        ha-card {
+          --primary-text-color: white !important;
+          --secondary-text-color: rgba(255, 255, 255, 0.7) !important;
+          --text-primary-color: white !important;
+        }
         ha-tile-icon {
-          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+          color: white !important;
+        }
+        * {
+          color: white !important;
         }

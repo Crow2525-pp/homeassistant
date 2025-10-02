@@ -21,3 +21,10 @@ cards:
     cards:
       - !include ../cards/energy/grid_graph.yaml
       - !include ../cards/energy/consumption_graph.yaml
+
+  # Battery status
+  - type: grid
+    columns: 2
+    cards:
+      - !include ../cards/energy/battery_status.yaml
+      - !include ../cards/energy/device_battery_status.yaml

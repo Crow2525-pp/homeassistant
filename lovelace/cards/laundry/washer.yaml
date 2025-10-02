@@ -48,7 +48,7 @@ cards:
       icon: outside
       name: outside
       value: inside
-    background_style: "linear-gradient(90deg, rgba(66,165,245,1) 0%, rgba(30,136,229,1) 100%)"
+    background_style: "linear-gradient(90deg, rgba(79, 70, 229,1) 0%, rgba(79, 70, 229,1) 100%)"
     state_display: |
       [[[
         let time = parseFloat(entity.state);
@@ -70,19 +70,19 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background: linear-gradient(145deg, #4285F4 0%, #357ABD 100%);
+            background: linear-gradient(145deg, #4F46E5 0%, #3730A3 100%);
             color: white;
             border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
             border: none;
             transition: all 0.3s ease;
           }
           ha-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(66, 133, 244, 0.4);
+            box-shadow: 0 12px 24px rgba(79, 70, 229, 0.4);
           }
           ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
           }
     - type: tile
       entity: sensor.washing_machine_power_plug_power
@@ -90,19 +90,19 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background: linear-gradient(145deg, #4285F4 0%, #357ABD 100%);
+            background: linear-gradient(145deg, #4F46E5 0%, #3730A3 100%);
             color: white;
             border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
             border: none;
             transition: all 0.3s ease;
           }
           ha-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(66, 133, 244, 0.4);
+            box-shadow: 0 12px 24px rgba(79, 70, 229, 0.4);
           }
           ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
           }
     - type: tile
       entity: sensor.washing_machine_power_plug_summation_delivered
@@ -110,19 +110,19 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background: linear-gradient(145deg, #4285F4 0%, #357ABD 100%);
+            background: linear-gradient(145deg, #4F46E5 0%, #3730A3 100%);
             color: white;
             border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
             border: none;
             transition: all 0.3s ease;
           }
           ha-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(66, 133, 244, 0.4);
+            box-shadow: 0 12px 24px rgba(79, 70, 229, 0.4);
           }
           ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
           }
     - type: tile
       entity: sensor.washing_machine_power_plug_voltage
@@ -130,19 +130,19 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background: linear-gradient(145deg, #4285F4 0%, #357ABD 100%);
+            background: linear-gradient(145deg, #4F46E5 0%, #3730A3 100%);
             color: white;
             border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
             border: none;
             transition: all 0.3s ease;
           }
           ha-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(66, 133, 244, 0.4);
+            box-shadow: 0 12px 24px rgba(79, 70, 229, 0.4);
           }
           ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
           }
     - type: tile
       entity: sensor.washing_machine_estimated_remaining
@@ -150,19 +150,19 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background: linear-gradient(145deg, #4285F4 0%, #357ABD 100%);
+            background: linear-gradient(145deg, #4F46E5 0%, #3730A3 100%);
             color: white;
             border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
             border: none;
             transition: all 0.3s ease;
           }
           ha-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(66, 133, 244, 0.4);
+            box-shadow: 0 12px 24px rgba(79, 70, 229, 0.4);
           }
           ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
           }
 
 - type: history-graph

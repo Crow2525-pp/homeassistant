@@ -2181,7 +2181,7 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "input_datetime.clean_toielts",
+                  "entity": "input_datetime.masterbed_toilet_last_cleaned",
                   "hide_state": false,
                   "show_entity_picture": false,
                   "vertical": true

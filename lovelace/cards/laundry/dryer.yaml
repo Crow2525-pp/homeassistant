@@ -48,7 +48,7 @@ cards:
       icon: outside
       name: outside
       value: inside
-    background_style: "linear-gradient(90deg, rgba(255,183,77,1) 0%, rgba(245,124,0,1) 100%)"
+    background_style: "linear-gradient(90deg, rgba(217, 119, 6,1) 0%, rgba(217, 119, 6,1) 100%)"
     state_display: |
       [[[ 
         let time = parseFloat(entity.state);
@@ -70,7 +70,7 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background: linear-gradient(145deg, #F4B400 0%, #C79100 100%);
+            background: linear-gradient(145deg, #D97706 0%, #B45309 100%);
             color: white;
             border-radius: 12px;
             box-shadow: 0 8px 16px rgba(244, 180, 0, 0.3);
@@ -82,7 +82,7 @@ cards:
             box-shadow: 0 12px 24px rgba(244, 180, 0, 0.4);
           }
           ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
           }
     - type: tile
       entity: sensor.dryer_power_plug_power
@@ -90,7 +90,7 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background: linear-gradient(145deg, #F4B400 0%, #C79100 100%);
+            background: linear-gradient(145deg, #D97706 0%, #B45309 100%);
             color: white;
             border-radius: 12px;
             box-shadow: 0 8px 16px rgba(244, 180, 0, 0.3);
@@ -102,7 +102,7 @@ cards:
             box-shadow: 0 12px 24px rgba(244, 180, 0, 0.4);
           }
           ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
           }
     - type: tile
       entity: sensor.dryer_power_plug_summation_delivered
@@ -110,7 +110,7 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background: linear-gradient(145deg, #F4B400 0%, #C79100 100%);
+            background: linear-gradient(145deg, #D97706 0%, #B45309 100%);
             color: white;
             border-radius: 12px;
             box-shadow: 0 8px 16px rgba(244, 180, 0, 0.3);
@@ -122,7 +122,7 @@ cards:
             box-shadow: 0 12px 24px rgba(244, 180, 0, 0.4);
           }
           ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
           }
     - type: tile
       entity: sensor.dryer_power_plug_voltage
@@ -130,7 +130,7 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background: linear-gradient(145deg, #F4B400 0%, #C79100 100%);
+            background: linear-gradient(145deg, #D97706 0%, #B45309 100%);
             color: white;
             border-radius: 12px;
             box-shadow: 0 8px 16px rgba(244, 180, 0, 0.3);
@@ -142,7 +142,7 @@ cards:
             box-shadow: 0 12px 24px rgba(244, 180, 0, 0.4);
           }
           ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
           }
     - type: tile
       entity: sensor.dryer_estimated_remaining
@@ -150,7 +150,7 @@ cards:
       card_mod:
         style: |
           ha-card {
-            background: linear-gradient(145deg, #F4B400 0%, #C79100 100%);
+            background: linear-gradient(145deg, #D97706 0%, #B45309 100%);
             color: white;
             border-radius: 12px;
             box-shadow: 0 8px 16px rgba(244, 180, 0, 0.3);
@@ -162,7 +162,7 @@ cards:
             box-shadow: 0 12px 24px rgba(244, 180, 0, 0.4);
           }
           ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
           }
 
 - type: history-graph

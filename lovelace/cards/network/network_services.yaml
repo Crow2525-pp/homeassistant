@@ -2,6 +2,20 @@ type: vertical-stack
 cards:
 - type: entities
   title: 🔗 Network Services
+  card_mod:
+    style: |
+      ha-card {
+        background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(30, 58, 95, 0.4);
+        border: none;
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(30, 58, 95, 0.5);
+      }
   entities:
     - type: weblink
       name: SABnzbd

@@ -11,11 +11,11 @@ severity:
   red: 10
 segments:
   - from: 0
-    color: "#db4437"
+    color: "linear-gradient(145deg, #E11D48 0%, #BE123C 100%)"
   - from: 25
-    color: "#f4b400"
+    color: "linear-gradient(145deg, #D97706 0%, #B45309 100%)"
   - from: 50
-    color: "#0f9d58"
+    color: "linear-gradient(145deg, #0F766E 0%, #115E59 100%)"
 card_mod:
   style: |
     ha-card {

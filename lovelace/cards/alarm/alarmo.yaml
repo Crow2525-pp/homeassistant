@@ -52,16 +52,25 @@ cards:
             transform: translateY(-2px);
             box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
           }
+          ha-card {
+            --primary-text-color: white !important;
+            --secondary-text-color: rgba(255, 255, 255, 0.7) !important;
+            --text-primary-color: white !important;
+          }
           ha-tile-icon {
             --mdc-icon-size: 40px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            color: white !important;
+          }
+          * {
+            color: white !important;
           }
     - type: markdown
       content: "Override automatic occupancy detection  \nSet home status manually"
       card_mod:
         style: |
           ha-card {
-            background: linear-gradient(145deg, rgba(66, 66, 66, 0.95), rgba(33, 33, 33, 0.95));
+            background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
             backdrop-filter: blur(10px);
             border-radius: 0 0 16px 16px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -69,7 +78,7 @@ cards:
             font-size: 13px;
             line-height: 1.6;
             margin-top: -6px;
-            border-top: 2px solid rgba(66, 66, 66, 0.3);
+            border-top: 2px solid rgba(51, 65, 85, 0.3);
             color: white;
           }
           ha-card p {

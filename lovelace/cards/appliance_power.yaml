@@ -40,7 +40,10 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
             }
 
       # Dryer
@@ -65,7 +68,10 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
             }
 
       # Dishwasher
@@ -90,42 +96,36 @@ cards:
               box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
             }
             ha-tile-icon {
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
             }
 
-  # Running appliances indicator
-  - type: conditional
-    conditions:
-      - condition: or
-        conditions:
-          - condition: state
-            entity: input_boolean.washing_machine_on
-            state: 'on'
-          - condition: state
-            entity: input_boolean.dryer_on
-            state: 'on'
-          - condition: state
-            entity: input_boolean.dishwasher_on
-            state: 'on'
-    card:
-      type: markdown
-      content: |
-        **Currently Running:**
-        {% if is_state('input_boolean.washing_machine_on', 'on') %}
-        • Washer ({{ states('sensor.washing_machine_estimated_remaining') }} min remaining)
-        {% endif %}
-        {% if is_state('input_boolean.dryer_on', 'on') %}
-        • Dryer ({{ states('sensor.dryer_estimated_remaining') }} min remaining)
-        {% endif %}
-        {% if is_state('input_boolean.dishwasher_on', 'on') %}
-        • Dishwasher
-        {% endif %}
-      card_mod:
-        style: |
-          ha-card {
-            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
-            border-left: 4px solid #0F9D58; /* Green - Google Material Design */
-            padding: 12px 16px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          }
+      # Kitchen Smart Plug
+      - type: tile
+        entity: sensor.kitchen_smart_plug_power
+        name: Kitchen
+        icon: mdi:power-plug
+        tap_action:
+          action: more-info
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(30, 58, 95, 0.3);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(30, 58, 95, 0.4);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }

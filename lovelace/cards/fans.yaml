@@ -21,6 +21,15 @@ cards:
         transform: translateY(-2px);
         box-shadow: 0 12px 24px rgba(51, 65, 85, 0.5);
       }
+      ha-card {
+        --primary-text-color: white !important;
+        --secondary-text-color: rgba(255, 255, 255, 0.7) !important;
+        --text-primary-color: white !important;
+      }
       ha-tile-icon {
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+        color: white !important;
+      }
+      * {
+        color: white !important;
       }

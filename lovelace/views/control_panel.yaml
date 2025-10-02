@@ -34,8 +34,6 @@ cards:
     card: !include ../cards/alerts.yaml
   - !include ../cards/quick_actions.yaml
   - !include ../cards/smart_suggestions.yaml
-  - !include ../cards/security_status.yaml
-  - !include ../cards/appliance_power.yaml
   - !include ../cards/climate/hvac.yaml
   - !include ../cards/switches/lights.yaml
   - !include ../cards/fans.yaml

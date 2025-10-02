@@ -28,7 +28,31 @@
       state: "{{ states('input_select.occupancy') in ['Home', 'Sleeping', 'Guest'] }}"
       icon: "mdi:home-account"
 
+    - name: "External Door Open at Night"
+      unique_id: external_door_open_at_night
+      state: >
+        {% set is_night = states('sun.sun') == 'below_horizon' %}
+        {% set doors_open = is_state('binary_sensor.front_door_sensor_opening', 'on')
+          or is_state('binary_sensor.side_garage_door_sensor_magnet_opening', 'on')
+          or is_state('binary_sensor.balcony_door_sensor_magnet_opening_2', 'on')
+          or is_state('binary_sensor.living_room_door_sensor_opening', 'on')
+          or is_state('binary_sensor.interior_garage_door_sensor_magnet_opening', 'on') %}
+        {{ is_night and doors_open }}
+      icon: "mdi:door-open"
+
 - sensor:
+    - name: "Relevant Weather Warnings Count"
+      unique_id: relevant_weather_warnings_count
+      state: >
+        {% set warnings = state_attr('sensor.braybrook_warnings', 'warnings') %}
+        {% if warnings %}
+          {% set relevant = warnings | selectattr('title', 'defined') | rejectattr('title', 'search', 'sheep|marine|coastal|grazier', ignorecase=True) | list %}
+          {{ relevant | length }}
+        {% else %}
+          0
+        {% endif %}
+      icon: "mdi:weather-lightning"
+
     - name: "Maintenance Dates Summary"
       state: >
         {% set items = states.input_datetime

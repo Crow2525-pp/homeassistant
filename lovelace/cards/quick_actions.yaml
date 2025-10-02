@@ -40,7 +40,7 @@ cards:
                 ha-icon {
                   color: white;
                   --mdc-icon-size: 52px;
-                  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+                  filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
                 }
                 .name {
                   font-weight: 600;
@@ -53,7 +53,7 @@ cards:
             card_mod:
               style: |
                 ha-card {
-                  background: linear-gradient(145deg, rgba(66, 66, 66, 0.95), rgba(33, 33, 33, 0.95));
+                  background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
                   backdrop-filter: blur(10px);
                   border-radius: 0 0 16px 16px;
                   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -100,7 +100,7 @@ cards:
                 ha-icon {
                   color: white;
                   --mdc-icon-size: 52px;
-                  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+                  filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
                 }
                 .name {
                   font-weight: 600;
@@ -113,7 +113,7 @@ cards:
             card_mod:
               style: |
                 ha-card {
-                  background: linear-gradient(145deg, rgba(66, 66, 66, 0.95), rgba(33, 33, 33, 0.95));
+                  background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
                   backdrop-filter: blur(10px);
                   border-radius: 0 0 16px 16px;
                   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -129,29 +129,25 @@ cards:
                   color: white;
                 }
 
-      # Close Garage
+      # Arriving Home
       - type: vertical-stack
         cards:
           - type: button
-            name: Close Garage
-            icon: mdi:garage
+            name: Arriving Home
+            icon: mdi:home-import-outline
             tap_action:
               action: call-service
-              service: cover.close_cover
-              target:
-                entity_id: cover.smart_garage_door_garage
-            hold_action:
-              action: more-info
+              service: script.arriving_home
             show_name: true
             show_icon: true
             icon_height: 48px
             card_mod:
               style: |
                 ha-card {
-                  background: linear-gradient(145deg, #334155 0%, #1E293B 100%);
+                  background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
                   color: white;
                   border-radius: 16px 16px 0 0;
-                  box-shadow: 0 8px 16px rgba(51, 65, 85, 0.4);
+                  box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
                   padding: 20px;
                   min-height: 110px;
                   border: none;
@@ -159,12 +155,12 @@ cards:
                 }
                 ha-card:hover {
                   transform: translateY(-2px);
-                  box-shadow: 0 12px 24px rgba(51, 65, 85, 0.5);
+                  box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
                 }
                 ha-icon {
                   color: white;
                   --mdc-icon-size: 52px;
-                  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+                  filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
                 }
                 .name {
                   font-weight: 600;
@@ -173,11 +169,11 @@ cards:
                   letter-spacing: 0.3px;
                 }
           - type: markdown
-            content: "🚗 Toggle garage door  \n↕️ (Open ↔ Close)"
+            content: "🌡️ Adjusts climate based on weather  \n💡 Turns on lights if after dark  \n👥 Sets occupancy to **Home**"
             card_mod:
               style: |
                 ha-card {
-                  background: linear-gradient(145deg, rgba(66, 66, 66, 0.95), rgba(33, 33, 33, 0.95));
+                  background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
                   backdrop-filter: blur(10px);
                   border-radius: 0 0 16px 16px;
                   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -185,7 +181,7 @@ cards:
                   font-size: 13px;
                   line-height: 1.6;
                   margin-top: -6px;
-                  border-top: 2px solid rgba(51, 65, 85, 0.3);
+                  border-top: 2px solid rgba(15, 118, 110, 0.3);
                   color: white;
                 }
                 ha-card p {
@@ -224,7 +220,7 @@ cards:
                 ha-icon {
                   color: white;
                   --mdc-icon-size: 52px;
-                  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+                  filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
                 }
                 .name {
                   font-weight: 600;
@@ -237,7 +233,7 @@ cards:
             card_mod:
               style: |
                 ha-card {
-                  background: linear-gradient(145deg, rgba(66, 66, 66, 0.95), rgba(33, 33, 33, 0.95));
+                  background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
                   backdrop-filter: blur(10px);
                   border-radius: 0 0 16px 16px;
                   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);

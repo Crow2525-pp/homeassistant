@@ -163,3 +163,24 @@ card_rose: &card_rose
       ha-tile-icon {
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
       }
+
+# Purple Gradient Card (Special/Creative)
+# Vibrant purple for creative/special features
+card_purple: &card_purple
+  card_mod:
+    style: |
+      ha-card {
+        background: linear-gradient(145deg, #9C27B0 0%, #7B1FA2 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(156, 39, 176, 0.4);
+        border: none;
+        transition: all 0.3s ease;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(156, 39, 176, 0.5);
+      }
+      ha-tile-icon {
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      }

@@ -8,6 +8,9 @@ cards:
       - entity_id: "binary_sensor.*motion*"
         options:
           secondary_info: last-changed
+      - entity_id: "binary_sensor.*occupancy*"
+        options:
+          secondary_info: last-changed
     exclude:
       - entity_id: "*battery*"
   sort:
@@ -22,4 +25,10 @@ cards:
       ha-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
+      .card-header {
+        color: white;
+      }
+      .entity-name, .entity-state {
+        color: white !important;
       }

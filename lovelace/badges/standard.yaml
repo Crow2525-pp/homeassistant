@@ -62,38 +62,48 @@
   entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
   name: Curr. Energy Use
 
-- entity: input_boolean.washing_machine_on
+- type: entity
+  entity: weather.braybrook
+  show_name: false
+  show_state: false
+  tap_action:
+    action: more-info
+
+- type: entity
+  entity: input_boolean.washing_machine_on
   name: "Washer"
   icon: mdi:washing-machine
-  show_state: true
-  state_content:
-    - last_changed
+  show_state: false
+  show_name: false
   visibility:
     - condition: state
-      entity_id: input_boolean.washing_machine_on
+      entity: input_boolean.washing_machine_on
       state: 'on'
+  color: blue
 
-- entity: input_boolean.dryer_on
+- type: entity
+  entity: input_boolean.dryer_on
   name: "Dryer"
   icon: mdi:tumble-dryer
-  show_state: true
-  state_content:
-    - last_changed
+  show_state: false
+  show_name: false
   visibility:
     - condition: state
-      entity_id: input_boolean.dryer_on
+      entity: input_boolean.dryer_on
       state: 'on'
+  color: orange
 
-- entity: input_boolean.dishwasher_on
+- type: entity
+  entity: input_boolean.dishwasher_on
   name: "Dishwasher"
   icon: mdi:dishwasher
-  show_state: true
-  state_content:
-    - last_changed
+  show_state: false
+  show_name: false
   visibility:
     - condition: state
-      entity_id: input_boolean.dishwasher_on
+      entity: input_boolean.dishwasher_on
       state: 'on'
+  color: cyan
 
 - type: entity
   entity: binary_sensor.internet_connection
@@ -129,5 +139,63 @@
     - last_changed
   color: >
     {% if is_state('binary_sensor.network_device_down_alert_active', 'on') %} red {% else %} green {% endif %}
+  tap_action:
+    action: more-info
+
+- type: entity
+  entity: sensor.relevant_weather_warnings_count
+  name: Weather Alert
+  icon: mdi:weather-lightning
+  show_state: false
+  show_name: false
+  visibility:
+    - condition: numeric_state
+      entity: sensor.relevant_weather_warnings_count
+      above: 0
+  color: orange
+  tap_action:
+    action: more-info
+
+- type: entity
+  entity: cover.smart_garage_door_garage
+  name: Garage Open
+  icon: mdi:garage-alert
+  show_state: false
+  show_name: false
+  visibility:
+    - condition: state
+      entity: cover.smart_garage_door_garage
+      state: 'open'
+  color: red
+  tap_action:
+    action: more-info
+
+- type: entity
+  entity: binary_sensor.external_door_open_at_night
+  name: Door Open at Night
+  icon: mdi:door-open
+  show_state: false
+  show_name: false
+  visibility:
+    - condition: state
+      entity: binary_sensor.external_door_open_at_night
+      state: 'on'
+  color: red
+  tap_action:
+    action: more-info
+
+- type: entity
+  entity: alarm_control_panel.alarmo
+  name: Alarm Armed
+  icon: mdi:shield-check
+  show_state: false
+  show_name: false
+  visibility:
+    - condition: not
+      conditions:
+        - condition: state
+          entity: alarm_control_panel.alarmo
+          state: 'disarmed'
+  color: green
   tap_action:
     action: more-info

@@ -28,7 +28,7 @@ cards:
         ha-icon {
           color: white;
           --mdc-icon-size: 52px;
-          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
         }
         .name {
           font-weight: 600;
@@ -41,7 +41,7 @@ cards:
     card_mod:
       style: |
         ha-card {
-          background: linear-gradient(145deg, rgba(30, 58, 95, 0.95), rgba(13, 27, 42, 0.95));
+          background: linear-gradient(145deg, rgba(30, 58, 95, 0.95), rgba(30, 58, 95, 0.95));
           backdrop-filter: blur(10px);
           border-radius: 0 0 16px 16px;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);

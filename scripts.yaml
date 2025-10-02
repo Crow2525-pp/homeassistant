@@ -420,4 +420,62 @@ leaving_home:
     action: input_select.select_option
   mode: single
   icon: mdi:home-export-outline
+arriving_home:
+  alias: Arriving Home
+  sequence:
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity: sensor.braybrook_temperature
+        above: 24
+      sequence:
+      - action: climate.set_hvac_mode
+        data:
+          hvac_mode: cool
+        target:
+          area_id:
+          - living_room
+          - master_bedroom
+      - action: climate.set_temperature
+        data:
+          temperature: 22
+        target:
+          area_id:
+          - living_room
+          - master_bedroom
+    - conditions:
+      - condition: numeric_state
+        entity: sensor.braybrook_temperature
+        below: 16
+      sequence:
+      - action: climate.set_hvac_mode
+        data:
+          hvac_mode: heat
+        target:
+          area_id:
+          - living_room
+          - master_bedroom
+      - action: climate.set_temperature
+        data:
+          temperature: 21
+        target:
+          area_id:
+          - living_room
+          - master_bedroom
+  - condition: state
+    entity_id: sun.sun
+    state: below_horizon
+  - action: light.turn_on
+    target:
+      area_id:
+      - living_room
+      - kitchen
+      - front_entrance
+  - target:
+      entity_id: input_select.occupancy
+    data:
+      option: Home
+    action: input_select.select_option
+  mode: single
+  icon: mdi:home-import-outline
 
