@@ -59,7 +59,6 @@ cards:
                   overflow: visible !important;
                 }
                 ha-card:hover {
-                  transform: translateY(-2px);
                   box-shadow: 0 12px 24px rgba(51, 65, 85, 0.5);
                 }
                 ha-tile-icon {
@@ -68,6 +67,27 @@ cards:
                 }
                 * {
                   color: white !important;
+                }
+
+                mwc-menu {
+                  background: #1E293B !important;
+                  --mdc-theme-surface: #1E293B !important;
+                  --mdc-theme-on-surface: rgba(255, 255, 255, 0.95) !important;
+                  --mdc-theme-primary: rgba(255, 255, 255, 0.9) !important;
+                  --mdc-menu-item-height: 40px;
+                  color: white !important;
+                  border-radius: 10px !important;
+                }
+                mwc-menu::part(base), mwc-menu::part(surface) {
+                  background: #1E293B !important;
+                  color: rgba(255, 255, 255, 0.95) !important;
+                  border-radius: 10px !important;
+                }
+                mwc-list-item {
+                  color: rgba(255, 255, 255, 0.95) !important;
+                }
+                mwc-list-item[aria-selected='true'] {
+                  background: rgba(255, 255, 255, 0.15) !important;
                 }
           - type: heading
             heading_style: subtitle
@@ -115,7 +135,6 @@ cards:
                   overflow: visible !important;
                 }
                 ha-card:hover {
-                  transform: translateY(-2px);
                   box-shadow: 0 12px 24px rgba(51, 65, 85, 0.5);
                 }
                 ha-tile-icon {
@@ -124,6 +143,27 @@ cards:
                 }
                 * {
                   color: white !important;
+                }
+
+                mwc-menu {
+                  background: #1E293B !important;
+                  --mdc-theme-surface: #1E293B !important;
+                  --mdc-theme-on-surface: rgba(255, 255, 255, 0.95) !important;
+                  --mdc-theme-primary: rgba(255, 255, 255, 0.9) !important;
+                  --mdc-menu-item-height: 40px;
+                  color: white !important;
+                  border-radius: 10px !important;
+                }
+                mwc-menu::part(base), mwc-menu::part(surface) {
+                  background: #1E293B !important;
+                  color: rgba(255, 255, 255, 0.95) !important;
+                  border-radius: 10px !important;
+                }
+                mwc-list-item {
+                  color: rgba(255, 255, 255, 0.95) !important;
+                }
+                mwc-list-item[aria-selected='true'] {
+                  background: rgba(255, 255, 255, 0.15) !important;
                 }
           - type: heading
             heading_style: subtitle
@@ -169,7 +209,6 @@ cards:
                   overflow: visible !important;
                 }
                 ha-card:hover {
-                  transform: translateY(-2px);
                   box-shadow: 0 12px 24px rgba(51, 65, 85, 0.5);
                 }
                 ha-tile-icon {
@@ -178,6 +217,27 @@ cards:
                 }
                 * {
                   color: white !important;
+                }
+
+                mwc-menu {
+                  background: #1E293B !important;
+                  --mdc-theme-surface: #1E293B !important;
+                  --mdc-theme-on-surface: rgba(255, 255, 255, 0.95) !important;
+                  --mdc-theme-primary: rgba(255, 255, 255, 0.9) !important;
+                  --mdc-menu-item-height: 40px;
+                  color: white !important;
+                  border-radius: 10px !important;
+                }
+                mwc-menu::part(base), mwc-menu::part(surface) {
+                  background: #1E293B !important;
+                  color: rgba(255, 255, 255, 0.95) !important;
+                  border-radius: 10px !important;
+                }
+                mwc-list-item {
+                  color: rgba(255, 255, 255, 0.95) !important;
+                }
+                mwc-list-item[aria-selected='true'] {
+                  background: rgba(255, 255, 255, 0.15) !important;
                 }
           - type: heading
             heading_style: subtitle
@@ -220,7 +280,6 @@ cards:
                   overflow: visible !important;
                 }
                 ha-card:hover {
-                  transform: translateY(-2px);
                   box-shadow: 0 12px 24px rgba(51, 65, 85, 0.5);
                 }
                 ha-tile-icon {
@@ -229,6 +288,27 @@ cards:
                 }
                 * {
                   color: white !important;
+                }
+
+                mwc-menu {
+                  background: #1E293B !important;
+                  --mdc-theme-surface: #1E293B !important;
+                  --mdc-theme-on-surface: rgba(255, 255, 255, 0.95) !important;
+                  --mdc-theme-primary: rgba(255, 255, 255, 0.9) !important;
+                  --mdc-menu-item-height: 40px;
+                  color: white !important;
+                  border-radius: 10px !important;
+                }
+                mwc-menu::part(base), mwc-menu::part(surface) {
+                  background: #1E293B !important;
+                  color: rgba(255, 255, 255, 0.95) !important;
+                  border-radius: 10px !important;
+                }
+                mwc-list-item {
+                  color: rgba(255, 255, 255, 0.95) !important;
+                }
+                mwc-list-item[aria-selected='true'] {
+                  background: rgba(255, 255, 255, 0.15) !important;
                 }
           - type: heading
             heading_style: subtitle
@@ -257,3 +337,4 @@ cards:
                 color: state
                 tap_action:
                   action: more-info
+
