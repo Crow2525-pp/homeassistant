@@ -17,7 +17,7 @@ show:
 entities:
   - entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
     name: Home Usage
-    color: "#DB4437" # Red - Google Material Design
+    color: var(--google-red) # Red - Google Material Design
     show_state: true
     show_indicator: true
 card_mod:

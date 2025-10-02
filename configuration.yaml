@@ -166,6 +166,24 @@ input_boolean:
     icon: mdi:thermostat
     initial: false
 
+input_number:
+  living_room_heat_lead_minutes:
+    name: Living Room Heat Lead Minutes
+    icon: mdi:timer-plus
+    min: 0
+    max: 120
+    step: 5
+    unit_of_measurement: min
+    initial: 30
+  living_room_heat_comfort_minutes:
+    name: Living Room Heat Comfort Window
+    icon: mdi:timer-off
+    min: 10
+    max: 120
+    step: 5
+    unit_of_measurement: min
+    initial: 45
+
 input_datetime:
   last_climate_notification_living:
     name: Last Climate Notification - Living Room
@@ -231,3 +249,4 @@ alert:
     done_message: "✅ WAN Down Alert RESOLVED at {{ as_timestamp(states.binary_sensor.wan_down_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}"
     notifiers:
       - STD_Warning
+

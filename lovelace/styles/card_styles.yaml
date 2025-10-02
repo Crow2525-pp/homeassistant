@@ -16,6 +16,7 @@ colors:
   gradient_indigo: &gradient_indigo "linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)"
   gradient_amber: &gradient_amber "linear-gradient(145deg, #D97706 0%, #B45309 100%)"
   gradient_rose: &gradient_rose "linear-gradient(145deg, #E11D48 0%, #BE123C 100%)"
+  gradient_purple: &gradient_purple "linear-gradient(145deg, #9C27B0 0%, #7B1FA2 100%)"
 
   # Shadow Colors (rgba format for shadows)
   shadow_navy: &shadow_navy "30, 58, 95"
@@ -24,11 +25,14 @@ colors:
   shadow_indigo: &shadow_indigo "79, 70, 229"
   shadow_amber: &shadow_amber "217, 119, 6"
   shadow_rose: &shadow_rose "225, 29, 72"
+  shadow_purple: &shadow_purple "156, 39, 176"
+  shadow_dark: &shadow_dark "0, 0, 0"
+  shadow_light: &shadow_light "255, 255, 255"
 
   # Temperature/State colors (for glance cards, badges, etc.)
-  temp_cold: &temp_cold "#60A5FA"
-  temp_hot: &temp_hot "#FB923C"
-  temp_comfortable: &temp_comfortable "#34D399"
+  temp_cold: &temp_cold var(--temp-cold)
+  temp_hot: &temp_hot var(--temp-hot)
+  temp_comfortable: &temp_comfortable var(--temp-comfortable)
 
 # ==========================================
 # CARD STYLE TEMPLATES

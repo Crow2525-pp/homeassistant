@@ -364,9 +364,7 @@ good_night:
       entity_id: cover.windowcovering_cover
   - service: light.turn_off
     target:
-      entity_id:
-      - light.lounge
-      - light.tv_backlight
+      entity_id: all
   - service: cover.close_cover
     target:
       entity_id: cover.smart_garage_door_garage

@@ -19,7 +19,7 @@ cards:
         name: "Power Usage"
         icon: mdi:flash
         show_state: true
-        color: "#F4B400" # Yellow - Google Material Design
+        color: var(--google-yellow) # Yellow - Google Material Design
         tap_action:
           action: more-info
 

@@ -52,16 +52,16 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, #4285F4 0%, #357ABD 100%);
+              background: linear-gradient(145deg, var(--google-blue) 0%, var(--google-blue-dark) 100%);
               color: white;
               border-radius: 12px;
-              box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+              box-shadow: 0 8px 16px var(--google-blue-alpha-30);
               border: none;
               transition: all 0.3s ease;
             }
             ha-card:hover {
               transform: translateY(-2px);
-              box-shadow: 0 12px 24px rgba(66, 133, 244, 0.4);
+              box-shadow: 0 12px 24px var(--google-blue-alpha-40);
             }
             ha-tile-icon {
               filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
@@ -75,16 +75,16 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, #0F9D58 0%, #0A7E3E 100%);
+              background: linear-gradient(145deg, var(--google-green) 0%, var(--google-green-dark) 100%);
               color: white;
               border-radius: 12px;
-              box-shadow: 0 8px 16px rgba(15, 157, 88, 0.3);
+              box-shadow: 0 8px 16px var(--google-green-alpha-30);
               border: none;
               transition: all 0.3s ease;
             }
             ha-card:hover {
               transform: translateY(-2px);
-              box-shadow: 0 12px 24px rgba(15, 157, 88, 0.4);
+              box-shadow: 0 12px 24px var(--google-green-alpha-40);
             }
             ha-tile-icon {
               filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
@@ -98,16 +98,16 @@ cards:
         card_mod:
           style: |
             ha-card {
-              background: linear-gradient(145deg, #DB4437 0%, #B23121 100%);
+              background: linear-gradient(145deg, var(--google-red) 0%, var(--google-red-dark) 100%);
               color: white;
               border-radius: 12px;
-              box-shadow: 0 8px 16px rgba(219, 68, 55, 0.3);
+              box-shadow: 0 8px 16px var(--google-red-alpha-30);
               border: none;
               transition: all 0.3s ease;
             }
             ha-card:hover {
               transform: translateY(-2px);
-              box-shadow: 0 12px 24px rgba(219, 68, 55, 0.4);
+              box-shadow: 0 12px 24px var(--google-red-alpha-40);
             }
             ha-tile-icon {
               filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));

@@ -17,7 +17,7 @@ show:
 entities:
   - entity: sensor.gosungrow_virtual_1205796_7_1_1_p8062
     name: Grid Import
-    color: "#4285F4" # Blue - Google Material Design
+    color: var(--google-blue) # Blue - Google Material Design
     show_state: true
     show_indicator: true
 card_mod:

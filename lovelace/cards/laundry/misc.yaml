@@ -13,7 +13,7 @@ cards:
       entity: switch.washing_machine_power_plug_switch
       name: "Washer Plug"
       icon: mdi:power-plug
-      color: "#0F9D58" # Green - Google Material Design
+      color: var(--google-green) # Green - Google Material Design
       tap_action:
         action: toggle
       card_mod:
@@ -38,7 +38,7 @@ cards:
       entity: switch.dryer_power_plug_switch
       name: "Dryer Plug"
       icon: mdi:power-plug
-      color: "#0F9D58" # Green - Google Material Design
+      color: var(--google-green) # Green - Google Material Design
       tap_action:
         action: toggle
       card_mod:

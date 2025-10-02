@@ -280,13 +280,13 @@ cards:
     entities:
       - entity: sensor.ucg_ultra_microsoft_wan_latency
         name: Microsoft Latency
-        color: "#4285F4" # Blue - Google Material Design
+        color: var(--google-blue) # Blue - Google Material Design
       - entity: sensor.ucg_ultra_google_wan_latency
         name: Google Latency
-        color: "#F4B400" # Yellow - Google Material Design
+        color: var(--google-yellow) # Yellow - Google Material Design
       - entity: sensor.ucg_ultra_cloudflare_wan_latency
         name: Cloudflare Latency
-        color: "#DB4437" # Red - Google Material Design
+        color: var(--google-red) # Red - Google Material Design
     card_mod:
       style: |
         ha-card {
@@ -313,10 +313,10 @@ cards:
     entities:
       - entity: sensor.ucg_ultra_port_5_tx
         name: WAN TX
-        color: "#4285F4" # Blue - Google Material Design
+        color: var(--google-blue) # Blue - Google Material Design
       - entity: sensor.ucg_ultra_port_5_rx
         name: WAN RX
-        color: "#F4B400" # Yellow - Google Material Design
+        color: var(--google-yellow) # Yellow - Google Material Design
     card_mod:
       style: |
         ha-card {
