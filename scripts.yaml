@@ -432,7 +432,7 @@ arriving_home:
   - choose:
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.braybrook_temperature
+        entity_id: sensor.essendon_airport_temp
         above: 24
       sequence:
       - action: climate.set_hvac_mode
@@ -451,7 +451,7 @@ arriving_home:
           - master_bedroom
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.braybrook_temperature
+        entity_id: sensor.essendon_airport_temp
         below: 16
       sequence:
       - action: climate.set_hvac_mode

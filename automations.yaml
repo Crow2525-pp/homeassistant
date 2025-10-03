@@ -3819,5 +3819,26 @@
           cool
         {% endif %}
   mode: single
+- id: appliance_timeout_failsafe
+  alias: Appliances - Timeout Failsafe
+  description: Automatically turns off appliance trackers after timeout to prevent stuck states
+  triggers:
+    - trigger: state
+      entity_id:
+        - input_boolean.dishwasher_on
+        - input_boolean.washing_machine_on
+        - input_boolean.dryer_on
+      to: 'on'
+      for:
+        hours: 1
+  actions:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: '{{ trigger.entity_id }}'
+    - action: notify.std_information
+      data:
+        title: Appliance Timeout
+        message: '{{ state_attr(trigger.entity_id, "friendly_name") }} was automatically marked as done after timeout'
+  mode: parallel
 
 

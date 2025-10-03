@@ -4,3 +4,19 @@
     - service: mobile_app_samsung_galaxy_s22_ultra
     - service: mobile_app_slvdh
 
+- name: STD_Information
+  platform: group
+  services:
+    - service: notify_mobile_app_samsung_galaxy_s22_ultra
+
+- name: STD_Warning
+  platform: group
+  services:
+    - service: notify_mobile_app_samsung_galaxy_s22_ultra
+    - service: notify_mobile_app_slvdh
+
+- name: STD_Critical
+  platform: group
+  services:
+    - service: notify_mobile_app_samsung_galaxy_s22_ultra
+    - service: notify_mobile_app_slvdh

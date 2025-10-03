@@ -68,7 +68,6 @@ logger:
 
 frontend:
   themes: !include_dir_merge_named themes
-  javascript_version: latest
   extra_module_url:
     - /local/card-mod.js
 
@@ -115,22 +114,6 @@ light:
 adaptive_lighting:
 
 battery_notes:
-
-notify:
-  - name: STD_Information
-    platform: group
-    services:
-      - service: notify_mobile_app_samsung_galaxy_s22_ultra
-  - name: STD_Warning
-    platform: group
-    services:
-      - service: notify_mobile_app_samsung_galaxy_s22_ultra
-      - service: notify_mobile_app_slvdh
-  - name: STD_Critical
-    platform: group
-    services:
-      - service: notify_mobile_app_samsung_galaxy_s22_ultra
-      - service: notify_mobile_app_slvdh
 
 # Garage Door Sensors
 input_boolean:
