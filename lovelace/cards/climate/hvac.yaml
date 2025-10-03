@@ -65,29 +65,30 @@ cards:
                   filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
                   color: white !important;
                 }
-                * {
-                  color: white !important;
-                }
-
-                mwc-menu {
-                  background: #1E293B !important;
+                
+                :host {
                   --mdc-theme-surface: #1E293B !important;
                   --mdc-theme-on-surface: rgba(255, 255, 255, 0.95) !important;
                   --mdc-theme-primary: rgba(255, 255, 255, 0.9) !important;
-                  --mdc-menu-item-height: 40px;
-                  color: white !important;
-                  border-radius: 10px !important;
+                  --mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.95) !important;
+                  --mdc-theme-secondary: rgba(255, 255, 255, 0.7) !important;
                 }
-                mwc-menu::part(base), mwc-menu::part(surface) {
+
+                .mdc-menu-surface {
                   background: #1E293B !important;
                   color: rgba(255, 255, 255, 0.95) !important;
                   border-radius: 10px !important;
+                  overflow: hidden !important;
+                  border: 1px solid rgba(255, 255, 255, 0.1) !important;
                 }
-                mwc-list-item {
+                .mdc-menu-surface mwc-list-item {
                   color: rgba(255, 255, 255, 0.95) !important;
                 }
-                mwc-list-item[aria-selected='true'] {
+                .mdc-menu-surface mwc-list-item[aria-selected='true'] {
                   background: rgba(255, 255, 255, 0.15) !important;
+                }
+                .mdc-menu-surface mwc-list-item::part(text) {
+                  color: rgba(255, 255, 255, 0.95) !important;
                 }
           - type: heading
             heading_style: subtitle
@@ -141,29 +142,30 @@ cards:
                   filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
                   color: white !important;
                 }
-                * {
-                  color: white !important;
-                }
-
-                mwc-menu {
-                  background: #1E293B !important;
+                
+                :host {
                   --mdc-theme-surface: #1E293B !important;
                   --mdc-theme-on-surface: rgba(255, 255, 255, 0.95) !important;
                   --mdc-theme-primary: rgba(255, 255, 255, 0.9) !important;
-                  --mdc-menu-item-height: 40px;
-                  color: white !important;
-                  border-radius: 10px !important;
+                  --mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.95) !important;
+                  --mdc-theme-secondary: rgba(255, 255, 255, 0.7) !important;
                 }
-                mwc-menu::part(base), mwc-menu::part(surface) {
+
+                .mdc-menu-surface {
                   background: #1E293B !important;
                   color: rgba(255, 255, 255, 0.95) !important;
                   border-radius: 10px !important;
+                  overflow: hidden !important;
+                  border: 1px solid rgba(255, 255, 255, 0.1) !important;
                 }
-                mwc-list-item {
+                .mdc-menu-surface mwc-list-item {
                   color: rgba(255, 255, 255, 0.95) !important;
                 }
-                mwc-list-item[aria-selected='true'] {
+                .mdc-menu-surface mwc-list-item[aria-selected='true'] {
                   background: rgba(255, 255, 255, 0.15) !important;
+                }
+                .mdc-menu-surface mwc-list-item::part(text) {
+                  color: rgba(255, 255, 255, 0.95) !important;
                 }
           - type: heading
             heading_style: subtitle
@@ -215,29 +217,30 @@ cards:
                   filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
                   color: white !important;
                 }
-                * {
-                  color: white !important;
-                }
-
-                mwc-menu {
-                  background: #1E293B !important;
+                
+                :host {
                   --mdc-theme-surface: #1E293B !important;
                   --mdc-theme-on-surface: rgba(255, 255, 255, 0.95) !important;
                   --mdc-theme-primary: rgba(255, 255, 255, 0.9) !important;
-                  --mdc-menu-item-height: 40px;
-                  color: white !important;
-                  border-radius: 10px !important;
+                  --mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.95) !important;
+                  --mdc-theme-secondary: rgba(255, 255, 255, 0.7) !important;
                 }
-                mwc-menu::part(base), mwc-menu::part(surface) {
+
+                .mdc-menu-surface {
                   background: #1E293B !important;
                   color: rgba(255, 255, 255, 0.95) !important;
                   border-radius: 10px !important;
+                  overflow: hidden !important;
+                  border: 1px solid rgba(255, 255, 255, 0.1) !important;
                 }
-                mwc-list-item {
+                .mdc-menu-surface mwc-list-item {
                   color: rgba(255, 255, 255, 0.95) !important;
                 }
-                mwc-list-item[aria-selected='true'] {
+                .mdc-menu-surface mwc-list-item[aria-selected='true'] {
                   background: rgba(255, 255, 255, 0.15) !important;
+                }
+                .mdc-menu-surface mwc-list-item::part(text) {
+                  color: rgba(255, 255, 255, 0.95) !important;
                 }
           - type: heading
             heading_style: subtitle
@@ -286,29 +289,30 @@ cards:
                   filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
                   color: white !important;
                 }
-                * {
-                  color: white !important;
-                }
-
-                mwc-menu {
-                  background: #1E293B !important;
+                
+                :host {
                   --mdc-theme-surface: #1E293B !important;
                   --mdc-theme-on-surface: rgba(255, 255, 255, 0.95) !important;
                   --mdc-theme-primary: rgba(255, 255, 255, 0.9) !important;
-                  --mdc-menu-item-height: 40px;
-                  color: white !important;
-                  border-radius: 10px !important;
+                  --mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.95) !important;
+                  --mdc-theme-secondary: rgba(255, 255, 255, 0.7) !important;
                 }
-                mwc-menu::part(base), mwc-menu::part(surface) {
+
+                .mdc-menu-surface {
                   background: #1E293B !important;
                   color: rgba(255, 255, 255, 0.95) !important;
                   border-radius: 10px !important;
+                  overflow: hidden !important;
+                  border: 1px solid rgba(255, 255, 255, 0.1) !important;
                 }
-                mwc-list-item {
+                .mdc-menu-surface mwc-list-item {
                   color: rgba(255, 255, 255, 0.95) !important;
                 }
-                mwc-list-item[aria-selected='true'] {
+                .mdc-menu-surface mwc-list-item[aria-selected='true'] {
                   background: rgba(255, 255, 255, 0.15) !important;
+                }
+                .mdc-menu-surface mwc-list-item::part(text) {
+                  color: rgba(255, 255, 255, 0.95) !important;
                 }
           - type: heading
             heading_style: subtitle
@@ -338,3 +342,4 @@ cards:
                 tap_action:
                   action: more-info
 
+
