@@ -311,49 +311,55 @@ volume_quiet:
   mode: single
   icon: mdi:volume-vibrate
 new_roller_blind_stop:
-  sequence:
-  - service: cover.stop_cover
-    entity_id: cover.roller_blinds_chan1
-  - service: timer.cancel
-    entity_id: timer.roller_blind_timer
-  - service: input_select.select_option
-    data:
-      option: unknown
-    target:
-      entity_id: input_select.roller_blind_state
   alias: New Roller Blind Stop
   description: ''
-new_roller_blind_down:
   sequence:
-  - service: input_select.select_option
-    data:
-      entity_id: input_select.roller_blind_state
-      option: closing
-  - service: timer.start
-    data:
-      entity_id: timer.roller_blind_timer
-  - service: cover.close_cover
-    data: {}
+  - service: cover.stop_cover
     target:
       entity_id: cover.roller_blinds_chan1
+  - service: timer.cancel
+    target:
+      entity_id: timer.roller_blind_timer
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.roller_blind_state
+    data:
+      option: unknown
+  mode: single
+new_roller_blind_down:
   alias: New Roller Blind Down
   description: ''
-new_roller_blind_up:
   sequence:
   - service: input_select.select_option
-    data:
-      entity_id: input_select.roller_blind_state
-      option: opening
-  - service: timer.start
-    data:
-      entity_id: timer.roller_blind_timer
-  - service: cover.open_cover
-    data: {}
     target:
-      entity_id:
-      - cover.roller_blinds_chan1
+      entity_id: input_select.roller_blind_state
+    data:
+      option: closing
+  - service: timer.start
+    target:
+      entity_id: timer.roller_blind_timer
+  - service: cover.close_cover
+    target:
+      entity_id: cover.roller_blinds_chan1
+    data: {}
+  mode: single
+new_roller_blind_up:
   alias: New Roller Blind Up
   description: ''
+  sequence:
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.roller_blind_state
+    data:
+      option: opening
+  - service: timer.start
+    target:
+      entity_id: timer.roller_blind_timer
+  - service: cover.open_cover
+    target:
+      entity_id: cover.roller_blinds_chan1
+    data: {}
+  mode: single
 good_night:
   alias: Good Night
   sequence:
@@ -426,7 +432,7 @@ arriving_home:
   - choose:
     - conditions:
       - condition: numeric_state
-        entity: sensor.braybrook_temperature
+        entity_id: sensor.braybrook_temperature
         above: 24
       sequence:
       - action: climate.set_hvac_mode
@@ -445,7 +451,7 @@ arriving_home:
           - master_bedroom
     - conditions:
       - condition: numeric_state
-        entity: sensor.braybrook_temperature
+        entity_id: sensor.braybrook_temperature
         below: 16
       sequence:
       - action: climate.set_hvac_mode
@@ -478,4 +484,5 @@ arriving_home:
     action: input_select.select_option
   mode: single
   icon: mdi:home-import-outline
+
 

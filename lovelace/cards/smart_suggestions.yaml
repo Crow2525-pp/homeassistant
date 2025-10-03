@@ -35,6 +35,9 @@ conditions:
       - condition: state
         entity: binary_sensor.dryer_suggestion
         state: 'on'
+      - condition: state
+        entity: binary_sensor.washing_machine_suggestion
+        state: 'on'
 card:
   type: vertical-stack
   cards:
@@ -217,6 +220,27 @@ card:
             ha-card {
               background: linear-gradient(135deg, rgba(15, 118, 110, 0.1) 0%, rgba(15, 118, 110, 0.05) 100%);
               border-left: 4px solid linear-gradient(145deg, #0F766E 0%, #115E59 100%);
+              padding: 12px 16px;
+              border-radius: 8px;
+              margin-top: 8px;
+            }
+
+    # Washing Machine suggestion
+    - type: conditional
+      conditions:
+        - condition: state
+          entity: binary_sensor.washing_machine_suggestion
+          state: 'on'
+      card:
+        type: markdown
+        content: |
+          **🧺 Washing Machine**
+          {{ state_attr('binary_sensor.washing_machine_suggestion', 'message') }}
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+              border-left: 4px solid linear-gradient(145deg, #3B82F6 0%, #2563EB 100%);
               padding: 12px 16px;
               border-radius: 8px;
               margin-top: 8px;

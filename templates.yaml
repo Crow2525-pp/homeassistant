@@ -145,19 +145,19 @@
       state: "{{ now().isoformat() }}"
 
 - binary_sensor:
-    # Solar excess - when production exceeds consumption by 1000W+
+    # Solar excess - when production exceeds consumption by 1kW+
     - name: "Solar Excess Available"
       unique_id: solar_excess_available
       state: >
         {% set production = states('sensor.gosungrow_virtual_1205796_1_1_1_p24') | float(0) %}
         {% set consumption = states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) %}
-        {{ (production - consumption) > 1000 }}
+        {{ (production - consumption) > 1.0 }}
       icon: "mdi:solar-power-variant"
       attributes:
         excess_power: >
           {% set production = states('sensor.gosungrow_virtual_1205796_1_1_1_p24') | float(0) %}
           {% set consumption = states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) %}
-          {{ (production - consumption) | round(0) }}
+          {{ (production - consumption) | round(1) }}
 
 - sensor:
     # Smart appliance recommendation based on solar, season, and conditions
@@ -166,7 +166,7 @@
       state: >
         {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
         {% set month = now().month %}
-        {% set is_winter = month in [5, 6, 7, 8, 9] %}
+        {% set is_winter = month in [5, 6, 7, 8, 9, 10] %}
         {% set is_summer = month in [11, 12, 1, 2, 3] %}
 
         {% if solar_excess %}
@@ -208,17 +208,26 @@
         {% set temp = states('sensor.living_room_temperature_offset') | float(0) %}
         {% set outside_temp = state_attr('weather.braybrook', 'temperature') | float(20) %}
         {% set month = now().month %}
-        {% set is_winter = month in [5, 6, 7, 8, 9] %}
+        {% set is_winter = month in [5, 6, 7, 8, 9, 10] %}
         {% set is_summer = month in [11, 12, 1, 2, 3] %}
+        {% set is_shoulder = month in [4] %}
         {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
 
         {% if is_winter and temp < 18 and solar_excess %}
           heat_now
         {% elif is_summer and temp > 26 and solar_excess %}
           cool_now
+        {% elif is_shoulder and temp < 19 and solar_excess %}
+          heat_now
+        {% elif is_shoulder and temp > 25 and solar_excess %}
+          cool_now
         {% elif is_winter and temp < 16 %}
           heat_needed
         {% elif is_summer and temp > 28 %}
+          cool_needed
+        {% elif is_shoulder and temp < 17 %}
+          heat_needed
+        {% elif is_shoulder and temp > 27 %}
           cool_needed
         {% else %}
           comfortable
@@ -247,17 +256,26 @@
       state: >
         {% set temp = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
         {% set month = now().month %}
-        {% set is_winter = month in [5, 6, 7, 8, 9] %}
+        {% set is_winter = month in [5, 6, 7, 8, 9, 10] %}
         {% set is_summer = month in [11, 12, 1, 2, 3] %}
+        {% set is_shoulder = month in [4] %}
         {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
 
         {% if is_winter and temp < 18 and solar_excess %}
           heat_now
         {% elif is_summer and temp > 26 and solar_excess %}
           cool_now
+        {% elif is_shoulder and temp < 19 and solar_excess %}
+          heat_now
+        {% elif is_shoulder and temp > 25 and solar_excess %}
+          cool_now
         {% elif is_winter and temp < 16 %}
           heat_needed
         {% elif is_summer and temp > 28 %}
+          cool_needed
+        {% elif is_shoulder and temp < 17 %}
+          heat_needed
+        {% elif is_shoulder and temp > 27 %}
           cool_needed
         {% else %}
           comfortable
@@ -285,17 +303,26 @@
       state: >
         {% set temp = states('sensor.study_esp32_henrysroom_temperature') | float(0) %}
         {% set month = now().month %}
-        {% set is_winter = month in [5, 6, 7, 8, 9] %}
+        {% set is_winter = month in [5, 6, 7, 8, 9, 10] %}
         {% set is_summer = month in [11, 12, 1, 2, 3] %}
+        {% set is_shoulder = month in [4] %}
         {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
 
         {% if is_winter and temp < 18 and solar_excess %}
           heat_now
         {% elif is_summer and temp > 26 and solar_excess %}
           cool_now
+        {% elif is_shoulder and temp < 19 and solar_excess %}
+          heat_now
+        {% elif is_shoulder and temp > 25 and solar_excess %}
+          cool_now
         {% elif is_winter and temp < 16 %}
           heat_needed
         {% elif is_summer and temp > 28 %}
+          cool_needed
+        {% elif is_shoulder and temp < 17 %}
+          heat_needed
+        {% elif is_shoulder and temp > 27 %}
           cool_needed
         {% else %}
           comfortable
@@ -323,17 +350,26 @@
       state: >
         {% set temp = states('sensor.study_esp32_ottosroom_temperature') | float(0) %}
         {% set month = now().month %}
-        {% set is_winter = month in [5, 6, 7, 8, 9] %}
+        {% set is_winter = month in [5, 6, 7, 8, 9, 10] %}
         {% set is_summer = month in [11, 12, 1, 2, 3] %}
+        {% set is_shoulder = month in [4] %}
         {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
 
         {% if is_winter and temp < 18 and solar_excess %}
           heat_now
         {% elif is_summer and temp > 26 and solar_excess %}
           cool_now
+        {% elif is_shoulder and temp < 19 and solar_excess %}
+          heat_now
+        {% elif is_shoulder and temp > 25 and solar_excess %}
+          cool_now
         {% elif is_winter and temp < 16 %}
           heat_needed
         {% elif is_summer and temp > 28 %}
+          cool_needed
+        {% elif is_shoulder and temp < 17 %}
+          heat_needed
+        {% elif is_shoulder and temp > 27 %}
           cool_needed
         {% else %}
           comfortable
@@ -395,3 +431,97 @@
               Waiting for excess solar power
             {% endif %}
           {% endif %}
+
+    - name: "Washing Machine Suggestion"
+      unique_id: washing_machine_suggestion
+      state: >
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+        {% set washing_machine_on = is_state('input_boolean.washing_machine_on', 'on') %}
+        {{ solar_excess and not washing_machine_on }}
+      icon: "mdi:washing-machine"
+      attributes:
+        message: >
+          {% if is_state('binary_sensor.washing_machine_suggestion', 'on') %}
+            Good time to run washing machine with excess solar power!
+          {% else %}
+            {% if is_state('input_boolean.washing_machine_on', 'on') %}
+              Washing machine already running
+            {% else %}
+              Waiting for excess solar power
+            {% endif %}
+          {% endif %}
+
+- sensor:
+    # Random appliance completion messages
+    - name: "Washing Machine Random Message"
+      unique_id: washing_machine_random_message
+      state: >
+        {% set messages = [
+          "Washing is done! Henry, time to put the washing in the dryer (and maybe recruit Otto as your assistant)!",
+          "Your clothes are squeaky clean! Don't leave them to get wrinkly!",
+          "Ding ding! The washing machine has finished its spin class!",
+          "Fresh and clean! Now don't forget them in there for three days...",
+          "The washing machine says: I've done my job, now you do yours, Phil!",
+          "Clean clothes ready! They won't fold themselves... unfortunately.",
+          "Washing complete! Your socks have survived another round!",
+          "The great wash is complete! Time to transfer before they get that smell.",
+          "Your laundry adventure continues! Next stop: the dryer!",
+          "Congratulations! You've unlocked Achievement: Clean Clothes. Now claim your reward!",
+          "The washing machine is done showing off. Your turn to shine, Henry—and maybe keep Otto and Lucas from diving into the basket.",
+          "Breaking news: Clothes are clean! In other news, they need to be moved.",
+          "Wash cycle complete! The clothes are having a pool party in there.",
+          "Fresh laundry alert! Move fast before they develop their own ecosystem!",
+          "The washing machine has spoken: Thy garments art cleansed!"
+        ] %}
+        {{ messages | random }}
+      icon: "mdi:washing-machine"
+
+    - name: "Dryer Random Message"
+      unique_id: dryer_random_message
+      state: >
+        {% set messages = [
+          "Dryer is done! Phil, please don't leave it there for ages again.",
+          "Toasty warm clothes ready! While they're still warm would be nice...",
+          "The dryer has completed its tumble routine! Don't let them wrinkle!",
+          "Ding! Your clothes are now officially less wet than before!",
+          "Dryer finished! Phil, time to reunite socks with their long-lost partners before Lucas adopts them.",
+          "Hot and fresh! Like pizza, but laundry. And less delicious.",
+          "The great tumble is over! Fold now or face the wrinkle monster!",
+          "Dryer says: I gave you warm fluffy clothes, Steph. Fold them before Otto steals a sock and Lucas climbs inside.",
+          "Congratulations! Your clothes have completed their spa treatment! Henry, tell Lucas to stop dragging them around.",
+          "Breaking: Clothes are dry! Experts recommend actually putting them away this time, Phil.",
+          "The dryer has finished its interpretive dance with your clothes! Otto reviewed it with five stars.",
+          "Attention! Your previously wet items are now significantly less wet!",
+          "Dryer complete! Warning: Clothes may still be capable of wrinkling.",
+          "Fresh from the dryer! Get them while they're hot... literally!",
+          "The circle of laundry continues! Now featuring: the folding chapter!"
+        ] %}
+        {{ messages | random }}
+      icon: "mdi:tumble-dryer"
+
+    - name: "Dishwasher Random Message"
+      unique_id: dishwasher_random_message
+      state: >
+        {% set messages = [
+          "Dishwasher done! Your dishes are cleaner than your browser history!",
+          "Ding! The dish spa treatment is complete!",
+          "Dishwasher finished! Now featuring: clean dishes that need putting away!",
+          "Breaking news: Plates are clean! Still require manual relocation though.",
+          "The great dish wash is complete! Empty me before I get sad.",
+          "Dishwasher says: I cleaned them, you put them away. Deal?",
+          "Your dishes have been sanitized! Unlike your phone screen...",
+          "Wash cycle complete! Your forks are now fork-tastic!",
+          "The dishwasher has finished its mission! Your turn to complete yours!",
+          "Clean dishes ready! They're not going to put themselves away... yet.",
+          "Attention: Dishes are sparkling! Act now while they're still impressive!",
+          "Dishwasher complete! Achievement unlocked: Functional adult!",
+          "Fresh clean dishes! Warning: May cause urge to actually cook something.",
+          "The dish cleaning ceremony is complete! Now for the sacred unloading ritual!",
+          "Congratulations! Your dishes no longer have things growing on them!"
+        ] %}
+        {{ messages | random }}
+      icon: "mdi:dishwasher"
+
+
+
+

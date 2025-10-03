@@ -2178,7 +2178,27 @@
         data:
           cache: false
           entity_id: media_player.kitchen
-          message: Washing is done! Henry, time to put the washing in the dryer!
+          message: "{{ states('sensor.washing_machine_random_message') }}"
+      - action: tts.google_translate_say
+        metadata: {}
+        data:
+          cache: false
+          entity_id: media_player.study_speaker
+          message: "{{ states('sensor.washing_machine_random_message') }}"
+      - choose:
+          - conditions:
+              - condition: time
+                after: '08:00:00'
+                before: '20:00:00'
+              - condition: template
+                value_template: "{{ expand(area_entities('master_bedroom')) | selectattr('domain', 'eq', 'light') | selectattr('state', 'eq', 'on') | list | count > 0 }}"
+            sequence:
+              - action: tts.google_translate_say
+                metadata: {}
+                data:
+                  cache: false
+                  entity_id: media_player.master_bedroom_speaker
+                  message: "{{ states('sensor.washing_machine_random_message') }}"
       - delay:
           hours: 0
           minutes: 0
@@ -2349,7 +2369,27 @@
         data:
           cache: false
           entity_id: media_player.kitchen
-          message: Dryer is done, put it in the laundry and leave it there for ages!
+          message: "{{ states('sensor.dryer_random_message') }}"
+      - action: tts.google_translate_say
+        metadata: {}
+        data:
+          cache: false
+          entity_id: media_player.study_speaker
+          message: "{{ states('sensor.dryer_random_message') }}"
+      - choose:
+          - conditions:
+              - condition: time
+                after: '08:00:00'
+                before: '20:00:00'
+              - condition: template
+                value_template: "{{ expand(area_entities('master_bedroom')) | selectattr('domain', 'eq', 'light') | selectattr('state', 'eq', 'on') | list | count > 0 }}"
+            sequence:
+              - action: tts.google_translate_say
+                metadata: {}
+                data:
+                  cache: false
+                  entity_id: media_player.master_bedroom_speaker
+                  message: "{{ states('sensor.dryer_random_message') }}"
       - delay:
           hours: 0
           minutes: 0
@@ -2750,6 +2790,26 @@
       cache: false
       entity_id: media_player.kitchen
       message: Otto's doors open
+  - action: tts.cloud_say
+    metadata: {}
+    data:
+      cache: false
+      entity_id: media_player.study_speaker
+      message: Otto's doors open
+  - choose:
+      - conditions:
+          - condition: time
+            after: '08:00:00'
+            before: '20:00:00'
+          - condition: template
+            value_template: "{{ expand(area_entities('master_bedroom')) | selectattr('domain', 'eq', 'light') | selectattr('state', 'eq', 'on') | list | count > 0 }}"
+        sequence:
+          - action: tts.cloud_say
+            metadata: {}
+            data:
+              cache: false
+              entity_id: media_player.master_bedroom_speaker
+              message: Otto's doors open
   - action: light.toggle
     metadata: {}
     data: {}
