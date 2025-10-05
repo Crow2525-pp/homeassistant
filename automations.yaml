@@ -1,6 +1,7 @@
 - id: '1644318707340'
   alias: Master Bedroom - Close Blinds on High Humidity
-  description: Closes the master bedroom blinds and starts cooling between 11:00 and 18:00 when humidity stays above 20% for 5 minutes.
+  description: Closes the master bedroom blinds and starts cooling between 11:00 and
+    18:00 when humidity stays above 20% for 5 minutes.
   triggers:
   - trigger: numeric_state
     id: humidity_high
@@ -49,7 +50,8 @@
   mode: single
 - id: close_blinds_cooldown
   alias: Master Bedroom - Reopen Blinds When Room Cools
-  description: Reopens blinds, stops cooling, and turns off the fan when the bedroom stays below 20C for 5 minutes.
+  description: Reopens blinds, stops cooling, and turns off the fan when the bedroom
+    stays below 20C for 5 minutes.
   triggers:
   - trigger: numeric_state
     id: temperature_low
@@ -80,7 +82,8 @@
   mode: single
 - id: '1644398227874'
   alias: Living Areas - Lights On Before Sunset
-  description: Turns on the evening scene and area lighting when the sun elevation drops below 5 degrees and someone is home.
+  description: Turns on the evening scene and area lighting when the sun elevation
+    drops below 5 degrees and someone is home.
   triggers:
   - entity_id: sun.sun
     attribute: elevation
@@ -111,7 +114,8 @@
   mode: single
 - id: '1644398278136'
   alias: Living Areas - Lights Off for Night Routine
-  description: Turns off lounge and surrounding lights at 22:15 or when the early bedtime calendar event starts.
+  description: Turns off lounge and surrounding lights at 22:15 or when the early
+    bedtime calendar event starts.
   triggers:
   - at: '22:15:00'
     trigger: time
@@ -166,7 +170,8 @@
   mode: single
 - id: '1644402690423'
   alias: Master Bedroom - Close Blinds for Night Mode
-  description: Closes the master bedroom blinds at 21:30 when manual control is disabled and either blind is still open.
+  description: Closes the master bedroom blinds at 21:30 when manual control is disabled
+    and either blind is still open.
   trigger:
   - platform: time
     at: '21:30:00'
@@ -193,7 +198,8 @@
   mode: single
 - id: '1644437526740'
   alias: Master Bedroom - Open Blinds for Morning Routine
-  description: Opens the master bedroom blinds at the configured wake-up time when manual control is off and hot-day flags are clear.
+  description: Opens the master bedroom blinds at the configured wake-up time when
+    manual control is off and hot-day flags are clear.
   triggers:
   - at: input_datetime.wakeup_time_phil_steph
     trigger: time
@@ -220,7 +226,8 @@
   mode: single
 - id: '1647520935523'
   alias: Driveway Camera - Motion Test Stream
-  description: Streams the driveway camera feed to the kitchen display when motion is detected for testing.
+  description: Streams the driveway camera feed to the kitchen display when motion
+    is detected for testing.
   trigger:
   - type: motion
     platform: device
@@ -239,7 +246,7 @@
       title: Driveway Cam
       thumbnail: /api/camera_proxy/camera.driveway_cam
       media_class: video
-      children_media_class:
+      children_media_class: null
       navigateIds:
       - {}
       - media_content_type: app
@@ -247,7 +254,8 @@
   mode: single
 - id: '1647521016663'
   alias: Front Door Camera - Motion Test Stream
-  description: Streams the front door camera feed when motion is detected while someone is home.
+  description: Streams the front door camera feed when motion is detected while someone
+    is home.
   triggers:
   - type: motion
     device_id: 92ce4d5d5c029a9e37a00e2bf4573f3c
@@ -271,7 +279,7 @@
       title: BI Door Camera
       thumbnail: /api/camera_proxy/camera.bi_door_camera
       media_class: video
-      children_media_class:
+      children_media_class: null
       navigateIds:
       - {}
       - media_content_type: app
@@ -280,7 +288,8 @@
   mode: single
 - id: '1648979867608'
   alias: Send Phil a Door Camera Snapshot on Motion
-  description: Uses the motion snapshot blueprint to notify Phil with a front door image when motion is detected.
+  description: Uses the motion snapshot blueprint to notify Phil with a front door
+    image when motion is detected.
   use_blueprint:
     path: vorion/send-camera-snapshot-notification-on-motion.yaml
     input:
@@ -305,7 +314,8 @@
   mode: single
 - id: '1649147714100'
   alias: Open Garage When Phil or Steph Arrive Home
-  description: Opens the garage door and disarms Alarmo when Phil or Steph arrive home and the car is connected.
+  description: Opens the garage door and disarms Alarmo when Phil or Steph arrive
+    home and the car is connected.
   triggers:
   - device_id: c054264b79e6739a057236f3a3c512b4
     domain: device_tracker
@@ -337,7 +347,8 @@
   mode: single
 - id: '1649148675412'
   alias: Morning Wake-Up Lighting Routine
-  description: Turns on selected lights near sunrise, when movement is detected, or at 05:00 while someone is home.
+  description: Turns on selected lights near sunrise, when movement is detected, or
+    at 05:00 while someone is home.
   triggers:
   - type: value
     device_id: c054264b79e6739a057236f3a3c512b4
@@ -372,7 +383,8 @@
   mode: single
 - id: '1655607456252'
   alias: Master Bedroom - Dim Lights at 8 PM
-  description: Activates the master bedroom dimming scene at 20:00 if the main lights are off.
+  description: Activates the master bedroom dimming scene at 20:00 if the main lights
+    are off.
   trigger:
   - platform: time
     at: '20:00:00'
@@ -397,7 +409,8 @@
   mode: single
 - id: '1657702278131'
   alias: Master Bedroom - Keep Lights Dim After Sunrise
-  description: Reapplies the dimmed lighting scene after sunrise when either bedside light changes state.
+  description: Reapplies the dimmed lighting scene after sunrise when either bedside
+    light changes state.
   trigger:
   - platform: device
     type: changed_states
@@ -421,7 +434,8 @@
   mode: single
 - id: '1662634152654'
   alias: Master Bedroom - Bedside Lights at 1 Percent
-  description: Forces the bedside reading and sleeping lights to 1 percent brightness between 20:00 and 08:00.
+  description: Forces the bedside reading and sleeping lights to 1 percent brightness
+    between 20:00 and 08:00.
   triggers:
   - type: turned_on
     device_id: 18551c9b3c72efc901c3e35633c1e3c7
@@ -463,7 +477,8 @@
   mode: single
 - id: '1662761539613'
   alias: Reset Occupancy to Home After Wake-Up
-  description: Sets the household occupancy back to Home at the configured wake-up time while the state is Sleeping.
+  description: Sets the household occupancy back to Home at the configured wake-up
+    time while the state is Sleeping.
   trigger:
   - platform: sun
     event: sunrise
@@ -494,7 +509,8 @@
   mode: single
 - id: '1665308479762'
   alias: Living Room - Preheat at 5 30 AM if Cold
-  description: Starts the living room climate at 05:30 when temperatures are low, provided manual overrides are off and someone is home.
+  description: Starts the living room climate at 05:30 when temperatures are low,
+    provided manual overrides are off and someone is home.
   triggers:
   - at: 05:30:00
     trigger: time
@@ -544,7 +560,8 @@
   mode: single
 - id: '1677490997108'
   alias: Battery Alerts - All Sensors
-  description: Uses the community blueprint to notify both phones when any monitored battery falls below 25 percent.
+  description: Uses the community blueprint to notify both phones when any monitored
+    battery falls below 25 percent.
   use_blueprint:
     path: sbyx/low-battery-level-detection-notification-for-all-battery-sensors.yaml
     input:
@@ -567,7 +584,8 @@
         - c054264b79e6739a057236f3a3c512b4
 - id: '1681337163617'
   alias: Set Occupancy to Away
-  description: Switches the occupancy selector to Away after 10 minutes with no one in the home zone.
+  description: Switches the occupancy selector to Away after 10 minutes with no one
+    in the home zone.
   triggers:
   - entity_id:
     - zone.home
@@ -671,7 +689,8 @@
   mode: single
 - id: '1681731859692'
   alias: Alarmo - Arm Night Routine
-  description: Arms Alarmo in night mode during bedtime hours based on occupancy or manual triggers.
+  description: Arms Alarmo in night mode during bedtime hours based on occupancy or
+    manual triggers.
   triggers:
   - at: '21:00:00'
     enabled: false
@@ -782,7 +801,8 @@
   mode: single
 - id: '1682548783368'
   alias: Master Bedroom - Raise Blinds When Windy
-  description: Raises the roller blinds when wind speed exceeds 40 and manual control is off.
+  description: Raises the roller blinds when wind speed exceeds 40 and manual control
+    is off.
   trigger:
   - platform: template
     value_template: '{{ state_attr(''weather.home'', ''wind_speed'') > 40}}'
@@ -813,16 +833,17 @@
     data:
       title: Wind speed reduced
       message: Blinds can go back down
-  - action: "{% if original_position == 'closed' %}\n  cover.close_cover\n{% elif
-      original_position == 'open' %}\n  cover.open_cover\n{% else %}\n  cover.stop_cover\n{%
-      endif %}\n"
+  - action: "{% if original_position == 'closed' %}\n  cover.close_cover\n{% elif\
+      \ original_position == 'open' %}\n  cover.open_cover\n{% else %}\n  cover.stop_cover\n\
+      {% endif %}\n"
     target:
       entity_id: cover.roller_blinds_chan1
     alias: Restore Blinds to Previous Position
   mode: single
 - id: '1684410637520'
   alias: Workday Desk Power Prompt
-  description: Sends an actionable notification asking to power the computer desk at the start of a workday.
+  description: Sends an actionable notification asking to power the computer desk
+    at the start of a workday.
   use_blueprint:
     path: vorion/actionable-notifications-for-android.yaml
     input:
@@ -861,7 +882,8 @@
           milliseconds: 0
 - id: '1684787591500'
   alias: Alarmo Arming Prompt
-  description: Sends an actionable notification to choose an Alarmo arming mode when prompted.
+  description: Sends an actionable notification to choose an Alarmo arming mode when
+    prompted.
   use_blueprint:
     path: vorion/actionable-notifications-for-android.yaml
     input:
@@ -888,7 +910,8 @@
         type: disarm
 - id: '1684789400363'
   alias: Morning Shutdown for Stray Lights
-  description: Turns off selected lights shortly after sunrise if they were left on overnight.
+  description: Turns off selected lights shortly after sunrise if they were left on
+    overnight.
   triggers:
   - event: sunrise
     offset: 00:15:00
@@ -907,7 +930,8 @@
   mode: single
 - id: '1684973809451'
   alias: iOS Action Button Dispatcher
-  description: Triggers the iOS notification blueprint when the dedicated button is pressed.
+  description: Triggers the iOS notification blueprint when the dedicated button is
+    pressed.
   use_blueprint:
     path: Hypercookie/ios_notification_blueprint.yaml
     input:
@@ -927,7 +951,8 @@
       action_1_action_authentication_required: false
 - id: '1685004768034'
   alias: Detect Working From Home
-  description: Infers working-from-home status from desk usage, occupancy, and computer activity.
+  description: Infers working-from-home status from desk usage, occupancy, and computer
+    activity.
   trigger:
   - platform: device
     type: turned_on
@@ -998,7 +1023,8 @@
   mode: single
 - id: '1685791243798'
   alias: Driveway Motion Snapshot for Phil
-  description: Uses the blueprint to send Phil a driveway snapshot when motion is detected.
+  description: Uses the blueprint to send Phil a driveway snapshot when motion is
+    detected.
   use_blueprint:
     path: Stan-Gobien/CriticalCollapseOptionNotHomeMotionCameraSnapshotWithClickAction.yaml
     input:
@@ -1008,7 +1034,8 @@
       is_critical: false
 - id: '1690150562163'
   alias: Master Bedroom NFC - Heat and Lift Desk Corner
-  description: Sets the bedroom climate to heat and opens blinds after a delay when that NFC tag is scanned.
+  description: Sets the bedroom climate to heat and opens blinds after a delay when
+    that NFC tag is scanned.
   trigger:
   - platform: tag
     tag_id: 38314bff-f8ff-4949-908c-eab6853d970e
@@ -1137,7 +1164,8 @@
   mode: single
 - id: '1699526539731'
   alias: Master Bedroom - Fan On When AC Starts
-  description: Adjusts the master bedroom fan when the climate shifts between cooling and heating.
+  description: Adjusts the master bedroom fan when the climate shifts between cooling
+    and heating.
   triggers:
   - trigger: state
     entity_id: climate.masterbed_versatile_thermostat
@@ -1172,7 +1200,8 @@
   mode: single
 - id: '1700272627906'
   alias: Kitchen Display - Stream Front Door Camera
-  description: Streams the front door camera to the kitchen display when motion is detected.
+  description: Streams the front door camera to the kitchen display when motion is
+    detected.
   triggers:
   - type: motion
     device_id: 323193309f2af00ef6853c8b84e00a9f
@@ -1190,8 +1219,9 @@
     action: camera.play_stream
   mode: single
 - id: '1703583740639'
-  alias: Motion-Activated Light Front Door
-  description: Turns on the light with motion and off after no motion for 2 minutes
+  alias: Front Entrance - Motion-Activated Light
+  description: Turns on the front entrance lights when motion is detected and switches
+    them off after the timeout.
   triggers:
   - entity_id:
     - binary_sensor.motion_sensor_motion
@@ -1368,7 +1398,8 @@
   mode: single
 - id: '1707562883987'
   alias: Study - Start Workday Desk Routine
-  description: Turns on the study desk switch and preps climate when the workday toggle activates.
+  description: Turns on the study desk switch and preps climate when the workday toggle
+    activates.
   triggers:
   - type: turned_on
     device_id: dc326b28df2064ab9f7d9e983e6824e6
@@ -1477,7 +1508,8 @@
   mode: single
 - id: '1710137210171'
   alias: Climate - Track Downstairs Door State
-  description: Maintains helper booleans based on the aggregated downstairs door contact sensor.
+  description: Maintains helper booleans based on the aggregated downstairs door contact
+    sensor.
   trigger:
   - platform: state
     entity_id:
@@ -1568,11 +1600,11 @@
           - service: notify.mobile_app_samsung_galaxy_s22_ultra
             data:
               title: Master ensuite cleaning overdue
-              message: 'Toilet cleanup is {{ overdue_days }} day(s) overdue.'
+              message: Toilet cleanup is {{ overdue_days }} day(s) overdue.
           - service: notify.mobile_app_slvdh
             data:
               title: Master ensuite cleaning overdue
-              message: 'Toilet cleanup is {{ overdue_days }} day(s) overdue.'
+              message: Toilet cleanup is {{ overdue_days }} day(s) overdue.
         default:
         - service: notify.mobile_app_samsung_galaxy_s22_ultra
           data:
@@ -1587,20 +1619,13 @@
   variables:
     tracker: input_datetime.masterbed_toilet_last_cleaned
     interval_days: 7
-    days_since_last_cleaned: >-
-      {% set value = states(tracker) %}
-      {% if value in ['unknown', 'unavailable', ''] %}
-        {{ interval_days + 1 }}
-      {% else %}
-        {% set last = value | as_datetime %}
-        {{ (now().date() - last.date()).days }}
-      {% endif %}
-    overdue_days: >-
-      {% set diff = (days_since_last_cleaned | int) - interval_days %}
-      {{ diff if diff > 0 else 0 }}
+    days_since_last_cleaned: "{% set value = states(tracker) %} {% if value in ['unknown',\
+      \ 'unavailable', ''] %}\n  {{ interval_days + 1 }}\n{% else %}\n  {% set last\
+      \ = value | as_datetime %}\n  {{ (now().date() - last.date()).days }}\n{% endif\
+      \ %}"
+    overdue_days: '{% set diff = (days_since_last_cleaned | int) - interval_days %}
+      {{ diff if diff > 0 else 0 }}'
     overdue: '{{ (days_since_last_cleaned | int) > interval_days }}'
-
-
 - id: '1713092115962'
   alias: Nightly Garage Door Check
   description: Nightly Garage Door Check
@@ -1648,7 +1673,8 @@
   mode: single
 - id: '1714337117111'
   alias: Master Bedroom - Turn Off AC on Wake
-  description: Shuts down the master bedroom climate equipment when wake-up sensors fire.
+  description: Shuts down the master bedroom climate equipment when wake-up sensors
+    fire.
   triggers:
   - type: value
     device_id: c054264b79e6739a057236f3a3c512b4
@@ -1693,7 +1719,8 @@
   mode: single
 - id: '1714895967504'
   alias: Master Bedroom - Boost Cooling When Hot
-  description: Runs fan and blind scripts when the bedroom temperature climbs above comfort thresholds.
+  description: Runs fan and blind scripts when the bedroom temperature climbs above
+    comfort thresholds.
   trigger:
   - platform: numeric_state
     entity_id:
@@ -1747,8 +1774,8 @@
   mode: single
 - id: '1718513507860'
   alias: Media - Toggle Amp and Backlight
-  description: Synchronises the media amplifier outlet and TV backlight with remote power events.
-    TV backlights if it is after sundown
+  description: Synchronises the media amplifier outlet and TV backlight with remote
+    power events. TV backlights if it is after sundown
   triggers:
   - entity_id: remote.sony_kd_55x8500c
     from: 'off'
@@ -1801,7 +1828,8 @@
   mode: single
 - id: '1721641437270'
   alias: Covers - Refresh Roller Blind Positions
-  description: Periodically polls the roller blinds to keep positions accurate in Home Assistant.
+  description: Periodically polls the roller blinds to keep positions accurate in
+    Home Assistant.
   trigger:
   - platform: time_pattern
     seconds: /30
@@ -1837,7 +1865,8 @@
             '
 - id: '1723799786022'
   alias: Master Bedroom - Close Blinds and Curtains When Hot
-  description: Closes bedroom blinds and curtains with escalating responses based on indoor heat.
+  description: Closes bedroom blinds and curtains with escalating responses based
+    on indoor heat.
   triggers:
   - at: input_datetime.wakeup_time_phil_steph
     trigger: time
@@ -2039,8 +2068,8 @@
   mode: single
 - id: '1730921531314'
   alias: Living Room - Keep IR Controller Powered
-  description: Ensures the living room IR controller USB power outlets stay on.
-    on - converted to state trigger from polling
+  description: Ensures the living room IR controller USB power outlets stay on. on
+    - converted to state trigger from polling
   triggers:
   - trigger: state
     entity_id:
@@ -2076,10 +2105,9 @@
         domain: switch
   mode: single
 - id: '1732241510110'
-  alias: Adjust Floorlamp Based on Solar Production
-  description: This automation adjusts the brightness of the Yeelight (green color)
-    based on the solar production from the 5.5 kW solar system. The brightness scales
-    dynamically with production levels. It only runs between 6:00 AM and 4:00 PM
+  alias: Living Room - Adjust Floor Lamp for Solar Output
+  description: Dims or brightens the living room floor lamp based on available solar
+    production.
   triggers:
   - entity_id: sensor.gosungrow_virtual_1205796_1_1_1_p24
     trigger: state
@@ -2117,7 +2145,8 @@
   mode: single
 - id: '1732435588125'
   alias: Laundry - Washing Machine Notifications & Actions
-  description: Uses the appliance blueprint to notify and automate around the washing machine cycle.
+  description: Uses the appliance blueprint to notify and automate around the washing
+    machine cycle.
   use_blueprint:
     path: Blackshome/appliance-notifications.yaml
     input:
@@ -2178,27 +2207,29 @@
         data:
           cache: false
           entity_id: media_player.kitchen
-          message: "{{ states('sensor.washing_machine_random_message') }}"
+          message: '{{ states(''sensor.washing_machine_random_message'') }}'
       - action: tts.google_translate_say
         metadata: {}
         data:
           cache: false
           entity_id: media_player.study_speaker
-          message: "{{ states('sensor.washing_machine_random_message') }}"
+          message: '{{ states(''sensor.washing_machine_random_message'') }}'
       - choose:
-          - conditions:
-              - condition: time
-                after: '08:00:00'
-                before: '20:00:00'
-              - condition: template
-                value_template: "{{ expand(area_entities('master_bedroom')) | selectattr('domain', 'eq', 'light') | selectattr('state', 'eq', 'on') | list | count > 0 }}"
-            sequence:
-              - action: tts.google_translate_say
-                metadata: {}
-                data:
-                  cache: false
-                  entity_id: media_player.master_bedroom_speaker
-                  message: "{{ states('sensor.washing_machine_random_message') }}"
+        - conditions:
+          - condition: time
+            after: 08:00:00
+            before: '20:00:00'
+          - condition: template
+            value_template: '{{ expand(area_entities(''master_bedroom'')) | selectattr(''domain'',
+              ''eq'', ''light'') | selectattr(''state'', ''eq'', ''on'') | list |
+              count > 0 }}'
+          sequence:
+          - action: tts.google_translate_say
+            metadata: {}
+            data:
+              cache: false
+              entity_id: media_player.master_bedroom_speaker
+              message: '{{ states(''sensor.washing_machine_random_message'') }}'
       - delay:
           hours: 0
           minutes: 0
@@ -2250,7 +2281,8 @@
       power_sensor: sensor.washing_machine_power_plug_power
 - id: '1732614031949'
   alias: Garden - Run Sprinklers at Sunrise if Hot
-  description: Runs the sprinkler zone for hot days at sunrise when extreme heat is forecast.
+  description: Runs the sprinkler zone for hot days at sunrise when extreme heat is
+    forecast.
   triggers:
   - trigger: sun
     event: sunrise
@@ -2292,7 +2324,8 @@
   mode: single
 - id: '1735426056624'
   alias: Occupancy - Set Holiday Mode from Alarmo
-  description: Sets the occupancy selector to Holiday whenever Alarmo enters the holiday state.
+  description: Sets the occupancy selector to Holiday whenever Alarmo enters the holiday
+    state.
   triggers:
   - trigger: state
     entity_id:
@@ -2330,7 +2363,8 @@
   mode: single
 - id: '1735955632537'
   alias: Laundry - Dryer Notifications & Actions
-  description: Uses the appliance blueprint to notify and automate around the dryer cycle.
+  description: Uses the appliance blueprint to notify and automate around the dryer
+    cycle.
   use_blueprint:
     path: Blackshome/appliance-notifications.yaml
     input:
@@ -2369,27 +2403,29 @@
         data:
           cache: false
           entity_id: media_player.kitchen
-          message: "{{ states('sensor.dryer_random_message') }}"
+          message: '{{ states(''sensor.dryer_random_message'') }}'
       - action: tts.google_translate_say
         metadata: {}
         data:
           cache: false
           entity_id: media_player.study_speaker
-          message: "{{ states('sensor.dryer_random_message') }}"
+          message: '{{ states(''sensor.dryer_random_message'') }}'
       - choose:
-          - conditions:
-              - condition: time
-                after: '08:00:00'
-                before: '20:00:00'
-              - condition: template
-                value_template: "{{ expand(area_entities('master_bedroom')) | selectattr('domain', 'eq', 'light') | selectattr('state', 'eq', 'on') | list | count > 0 }}"
-            sequence:
-              - action: tts.google_translate_say
-                metadata: {}
-                data:
-                  cache: false
-                  entity_id: media_player.master_bedroom_speaker
-                  message: "{{ states('sensor.dryer_random_message') }}"
+        - conditions:
+          - condition: time
+            after: 08:00:00
+            before: '20:00:00'
+          - condition: template
+            value_template: '{{ expand(area_entities(''master_bedroom'')) | selectattr(''domain'',
+              ''eq'', ''light'') | selectattr(''state'', ''eq'', ''on'') | list |
+              count > 0 }}'
+          sequence:
+          - action: tts.google_translate_say
+            metadata: {}
+            data:
+              cache: false
+              entity_id: media_player.master_bedroom_speaker
+              message: '{{ states(''sensor.dryer_random_message'') }}'
       - delay:
           hours: 0
           minutes: 0
@@ -2542,7 +2578,8 @@
   mode: single
 - id: '1738226362136'
   alias: Master Bedroom Remote - Control Sleeping Light
-  description: Maps bedside remote presses to control the sleeping light brightness and power.
+  description: Maps bedside remote presses to control the sleeping light brightness
+    and power.
   triggers:
   - device_id: 8c730c300afc8f900acf8e9782eb6d62
     domain: zha
@@ -2678,8 +2715,8 @@
   mode: single
 - id: '1740132306652'
   alias: Laundry - Dishwasher Notifications & Actions
-  description: Sends start and finish notifications for the dishwasher based on power usage.
-    run
+  description: Sends start and finish notifications for the dishwasher based on power
+    usage. run
   use_blueprint:
     path: Blackshome/appliance-notifications.yaml
     input:
@@ -2759,7 +2796,8 @@
       service_reminder_counter_helper: counter.dishwasher_counter
 - id: '1740211475857'
   alias: Otto's Room - Night Door Alert
-  description: Announces when Otto's door opens during quiet hours or while the door alarm is active.
+  description: Announces when Otto's door opens during quiet hours or while the door
+    alarm is active.
   triggers:
   - trigger: state
     entity_id:
@@ -2797,19 +2835,21 @@
       entity_id: media_player.study_speaker
       message: Otto's doors open
   - choose:
-      - conditions:
-          - condition: time
-            after: '08:00:00'
-            before: '20:00:00'
-          - condition: template
-            value_template: "{{ expand(area_entities('master_bedroom')) | selectattr('domain', 'eq', 'light') | selectattr('state', 'eq', 'on') | list | count > 0 }}"
-        sequence:
-          - action: tts.cloud_say
-            metadata: {}
-            data:
-              cache: false
-              entity_id: media_player.master_bedroom_speaker
-              message: Otto's doors open
+    - conditions:
+      - condition: time
+        after: 08:00:00
+        before: '20:00:00'
+      - condition: template
+        value_template: '{{ expand(area_entities(''master_bedroom'')) | selectattr(''domain'',
+          ''eq'', ''light'') | selectattr(''state'', ''eq'', ''on'') | list | count
+          > 0 }}'
+      sequence:
+      - action: tts.cloud_say
+        metadata: {}
+        data:
+          cache: false
+          entity_id: media_player.master_bedroom_speaker
+          message: Otto's doors open
   - action: light.toggle
     metadata: {}
     data: {}
@@ -2866,7 +2906,8 @@
       is_critical: false
 - id: '1742615433146'
   alias: Maintenance - Update Cleaning Timestamp via NFC
-  description: Records the last-cleaned timestamps when toilet maintenance NFC tags are scanned.
+  description: Records the last-cleaned timestamps when toilet maintenance NFC tags
+    are scanned.
   triggers:
   - tag_id: 859e3818-e623-47aa-9062-d89afd44489b
     id: main_toilet
@@ -2982,7 +3023,8 @@
   mode: single
 - id: '1746997822978'
   alias: Living Room - Turn Off Heater When Warm
-  description: Shuts off the living room heater once the room reaches the comfort temperature.
+  description: Shuts off the living room heater once the room reaches the comfort
+    temperature.
   triggers:
   - trigger: time
     at: 06:30:00
@@ -3020,8 +3062,8 @@
   mode: single
 - id: '1747602506171'
   alias: Otto's Room - Heater Night Routine
-  description: Keeps Otto's heater running overnight when the room is cold.
-    Winter automation
+  description: Keeps Otto's heater running overnight when the room is cold. Winter
+    automation
   triggers:
   - entity_id:
     - sensor.ottos_room_temp_humidity_sensor_temperature
@@ -3104,8 +3146,8 @@
   mode: single
 - id: '1747602740394'
   alias: Master Bedroom - Heater Night Assist
-  description: Turns on the master bedroom heater overnight when temperatures fall below the threshold.
-    Winter automation
+  description: Turns on the master bedroom heater overnight when temperatures fall
+    below the threshold. Winter automation
   triggers:
   - entity_id:
     - sensor.temperaturesensor_temperature
@@ -3188,8 +3230,8 @@
   mode: single
 - id: '1747862856741'
   alias: Living Room - Night Temperature Setback
-  description: Applies an overnight setback to the living room thermostat for energy savings.
-    Winter automation
+  description: Applies an overnight setback to the living room thermostat for energy
+    savings. Winter automation
   triggers:
   - entity_id:
     - sensor.living_room_temperature_offset
@@ -3360,7 +3402,8 @@
       notify_device: c054264b79e6739a057236f3a3c512b4
 - id: '1752139587383'
   alias: Living Room - Heater Off Overnight
-  description: Turns the living room heater off each night as part of the bedtime routine.
+  description: Turns the living room heater off each night as part of the bedtime
+    routine.
   triggers:
   - type: value
     device_id: c054264b79e6739a057236f3a3c512b4
@@ -3395,7 +3438,8 @@
   mode: single
 - id: '1752213080801'
   alias: Living Room - Motion Lighting
-  description: Controls living room lighting based on motion detection during set hours.
+  description: Controls living room lighting based on motion detection during set
+    hours.
   triggers:
   - entity_id:
     - binary_sensor.aqara_motion_and_light_sensor_p2_occupancy
@@ -3564,7 +3608,8 @@
   mode: single
 - id: '1727826000000'
   alias: Garage - Handle Close Notification Action
-  description: Executes the garage close action when the mobile notification button is pressed.
+  description: Executes the garage close action when the mobile notification button
+    is pressed.
   triggers:
   - trigger: event
     event_type: mobile_app_notification_action
@@ -3576,9 +3621,9 @@
       entity_id: cover.smart_garage_door_garage
   mode: single
 - id: '1727826000001'
-  alias: Track Manual Blind Control
-  description: Sets manual override flag when blinds operated manually, clears after
-    2 hours
+  alias: Automation Tracker - Manual Blind Control
+  description: Records when manual blind control is enabled so automations can respect
+    the override.
   triggers:
   - trigger: state
     entity_id:
@@ -3587,8 +3632,7 @@
     attribute: current_position
   conditions:
   - condition: template
-    value_template: '{{ trigger.to_state.context.user_id is not none or trigger.to_state.context.parent_id
-      is none }}'
+    value_template: '{{ trigger.to_state.context.user_id is not none }}'
   actions:
   - action: input_boolean.turn_on
     target:
@@ -3600,9 +3644,9 @@
       entity_id: input_boolean.blind_manual_control
   mode: restart
 - id: '1727826000002'
-  alias: Track Manual Climate Control - Living Room
-  description: Sets manual override flag when living room climate operated manually,
-    clears after 4 hours
+  alias: Automation Tracker - Manual Climate Control (Living Room)
+  description: Captures manual climate changes in the living room to pause conflicting
+    automations.
   triggers:
   - trigger: state
     entity_id:
@@ -3610,8 +3654,7 @@
     - climate.living_room_versatile_thermastat
   conditions:
   - condition: template
-    value_template: '{{ trigger.to_state.context.user_id is not none or trigger.to_state.context.parent_id
-      is none }}'
+    value_template: '{{ trigger.to_state.context.user_id is not none }}'
   actions:
   - action: input_boolean.turn_on
     target:
@@ -3623,17 +3666,16 @@
       entity_id: input_boolean.climate_manual_control_living
   mode: restart
 - id: '1727826000003'
-  alias: Track Manual Climate Control - Master Bedroom
-  description: Sets manual override flag when master bedroom climate operated manually,
-    clears after 4 hours
+  alias: Automation Tracker - Manual Climate Control (Master Bedroom)
+  description: Logs manual climate adjustments in the master bedroom to prevent automation
+    interference.
   triggers:
   - trigger: state
     entity_id:
     - climate.masterbed_versatile_thermostat
   conditions:
   - condition: template
-    value_template: '{{ trigger.to_state.context.user_id is not none or trigger.to_state.context.parent_id
-      is none }}'
+    value_template: '{{ trigger.to_state.context.user_id is not none }}'
   actions:
   - action: input_boolean.turn_on
     target:
@@ -3645,17 +3687,16 @@
       entity_id: input_boolean.climate_manual_control_master
   mode: restart
 - id: '1727826000004'
-  alias: Track Manual Climate Control - Otto's Room
-  description: Sets manual override flag when Otto's room climate operated manually,
-    clears after 4 hours
+  alias: Automation Tracker - Manual Climate Control (Otto's Room)
+  description: Tracks manual thermostat tweaks in Otto's room and pauses automations
+    accordingly.
   triggers:
   - trigger: state
     entity_id:
     - climate.otto_s_room
   conditions:
   - condition: template
-    value_template: '{{ trigger.to_state.context.user_id is not none or trigger.to_state.context.parent_id
-      is none }}'
+    value_template: '{{ trigger.to_state.context.user_id is not none }}'
   actions:
   - action: input_boolean.turn_on
     target:
@@ -3667,17 +3708,16 @@
       entity_id: input_boolean.climate_manual_control_otto
   mode: restart
 - id: '1727826000005'
-  alias: Track Manual Climate Control - Study/Henry's Room
-  description: Sets manual override flag when study/Henry's room climate operated
-    manually, clears after 4 hours
+  alias: Automation Tracker - Manual Climate Control (Study / Henry's Room)
+  description: Monitors manual climate changes in the study/Henry's room to suspend
+    automation changes.
   triggers:
   - trigger: state
     entity_id:
     - climate.henry_s_room_versatile_thermostat
   conditions:
   - condition: template
-    value_template: '{{ trigger.to_state.context.user_id is not none or trigger.to_state.context.parent_id
-      is none }}'
+    value_template: '{{ trigger.to_state.context.user_id is not none }}'
   actions:
   - action: input_boolean.turn_on
     target:
@@ -3700,43 +3740,36 @@
     for:
       minutes: 30
   conditions:
-  # Only notify if someone is home
   - condition: state
     entity_id: binary_sensor.someone_home
     state: 'on'
-  # Don't notify if climate already running
   - condition: state
     entity_id: climate.living_room_ac
     state: 'off'
-  # Don't spam - at least 2 hours since last notification
   - condition: template
-    value_template: >
-      {% set last = states('input_datetime.last_climate_notification_living') %}
-      {% if last in ['unknown', 'unavailable', ''] %}
-        true
-      {% else %}
-        {{ (as_timestamp(now()) - as_timestamp(last)) > 7200 }}
-      {% endif %}
+    value_template: "{% set last = states('input_datetime.last_climate_notification_living')\
+      \ %} {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n \
+      \ {{ (as_timestamp(now()) - as_timestamp(last)) > 7200 }}\n{% endif %}\n"
   actions:
   - service: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
-      title: "☀️ Climate Suggestion - Living Room"
-      message: "{{ state_attr('sensor.living_room_climate_suggestion', 'message') }}"
+      title: ☀️ Climate Suggestion - Living Room
+      message: '{{ state_attr(''sensor.living_room_climate_suggestion'', ''message'')
+        }}'
       data:
         actions:
         - action: CLIMATE_LIVING_ON
-          title: "Turn On Climate"
+          title: Turn On Climate
         - action: CLIMATE_DISMISS
-          title: "Dismiss"
+          title: Dismiss
         tag: climate_suggestion_living
         importance: high
   - action: input_datetime.set_datetime
     target:
       entity_id: input_datetime.last_climate_notification_living
     data:
-      datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
   mode: single
-
 - id: '1727826100001'
   alias: Smart Climate Notification - Master Bedroom
   description: Suggests climate control when solar excess available and room uncomfortable
@@ -3749,43 +3782,36 @@
     for:
       minutes: 30
   conditions:
-  # Only notify if someone is home
   - condition: state
     entity_id: binary_sensor.someone_home
     state: 'on'
-  # Don't notify if climate already running
   - condition: state
     entity_id: climate.masterbed_versatile_thermostat
     state: 'off'
-  # Don't spam - at least 2 hours since last notification
   - condition: template
-    value_template: >
-      {% set last = states('input_datetime.last_climate_notification_master') %}
-      {% if last in ['unknown', 'unavailable', ''] %}
-        true
-      {% else %}
-        {{ (as_timestamp(now()) - as_timestamp(last)) > 7200 }}
-      {% endif %}
+    value_template: "{% set last = states('input_datetime.last_climate_notification_master')\
+      \ %} {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n \
+      \ {{ (as_timestamp(now()) - as_timestamp(last)) > 7200 }}\n{% endif %}\n"
   actions:
   - service: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
-      title: "☀️ Climate Suggestion - Master Bedroom"
-      message: "{{ state_attr('sensor.master_bedroom_climate_suggestion', 'message') }}"
+      title: ☀️ Climate Suggestion - Master Bedroom
+      message: '{{ state_attr(''sensor.master_bedroom_climate_suggestion'', ''message'')
+        }}'
       data:
         actions:
         - action: CLIMATE_MASTER_ON
-          title: "Turn On Climate"
+          title: Turn On Climate
         - action: CLIMATE_DISMISS
-          title: "Dismiss"
+          title: Dismiss
         tag: climate_suggestion_master
         importance: high
   - action: input_datetime.set_datetime
     target:
       entity_id: input_datetime.last_climate_notification_master
     data:
-      datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
   mode: single
-
 - id: '1727826100002'
   alias: Handle Climate Notification Action - Living Room
   description: Turn on living room climate when user taps notification
@@ -3802,43 +3828,275 @@
     target:
       entity_id: climate.living_room_ac
     data:
-      temperature: >
-        {% if states('sensor.living_room_climate_suggestion') == 'heat_now' %}
-          22
-        {% else %}
-          24
-        {% endif %}
+      temperature: "{% if states('sensor.living_room_climate_suggestion') == 'heat_now'\
+        \ %}\n  22\n{% else %}\n  24\n{% endif %}\n"
   - action: climate.set_hvac_mode
     target:
       entity_id: climate.living_room_ac
     data:
-      hvac_mode: >
-        {% if states('sensor.living_room_climate_suggestion') == 'heat_now' %}
-          heat
-        {% else %}
-          cool
-        {% endif %}
+      hvac_mode: "{% if states('sensor.living_room_climate_suggestion') == 'heat_now'\
+        \ %}\n  heat\n{% else %}\n  cool\n{% endif %}\n"
   mode: single
 - id: appliance_timeout_failsafe
   alias: Appliances - Timeout Failsafe
-  description: Automatically turns off appliance trackers after timeout to prevent stuck states
+  description: Automatically turns off appliance trackers after timeout to prevent
+    stuck states
   triggers:
-    - trigger: state
-      entity_id:
-        - input_boolean.dishwasher_on
-        - input_boolean.washing_machine_on
-        - input_boolean.dryer_on
-      to: 'on'
-      for:
-        hours: 1
+  - trigger: state
+    entity_id:
+    - input_boolean.dishwasher_on
+    - input_boolean.washing_machine_on
+    - input_boolean.dryer_on
+    to: 'on'
+    for:
+      hours: 1
   actions:
-    - action: input_boolean.turn_off
-      target:
-        entity_id: '{{ trigger.entity_id }}'
-    - action: notify.std_information
-      data:
-        title: Appliance Timeout
-        message: '{{ state_attr(trigger.entity_id, "friendly_name") }} was automatically marked as done after timeout'
+  - action: input_boolean.turn_off
+    target:
+      entity_id: '{{ trigger.entity_id }}'
+  - action: notify.std_information
+    data:
+      title: Appliance Timeout
+      message: '{{ state_attr(trigger.entity_id, "friendly_name") }} was automatically
+        marked as done after timeout'
   mode: parallel
+- id: bedtime_security_checklist
+  alias: Night - Bedtime Security Checklist
+  description: Provides a security checklist notification when switching to sleeping mode
+  triggers:
+  - trigger: state
+    entity_id: input_select.occupancy
+    to: 'Sleeping'
+  actions:
+  - delay:
+      minutes: 2
+  - action: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: 🌙 Bedtime Checklist
+      message: |
+        {% set issues = [] %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}{% set issues = issues + ['🚗 Garage door open'] %}{% endif %}
+        {% if is_state('binary_sensor.downstairs_doors', 'on') %}{% set issues = issues + ['🚪 Door open downstairs'] %}{% endif %}
+        {% if states('climate.living_room_ac') in ['cool', 'heat'] %}{% set issues = issues + ['❄️ Living room AC still on'] %}{% endif %}
+        {% if issues | length > 0 %}{{ issues | join('\n') }}{% else %}✅ All secure - sleep well!{% endif %}
+  mode: single
+- id: morning_energy_climate_summary
+  alias: Morning - Energy & Climate Summary
+  description: Sends a morning summary of weather, solar production, and temperature
+  triggers:
+  - trigger: time
+    at: "07:00:00"
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.someone_home
+    state: 'on'
+  actions:
+  - action: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: ☀️ Good Morning - Daily Summary
+      message: |
+        🌡️ Today's forecast: {{ states('sensor.braybrook_temp_max_0') }}°C
+        ☀️ Current solar: {{ states('sensor.gosungrow_virtual_1205796_1_1_1_p24') | round(1) }}kW
+        🏠 Home temp: {{ states('sensor.living_room_temperature_offset') }}°C
 
-
+        {% if is_state('input_boolean.super_hot_today', 'on') %}⚠️ Super hot day - blinds will stay closed{% endif %}
+  mode: single
+- id: high_power_usage_warning
+  alias: Energy - High Power Usage Warning
+  description: Alerts when power consumption is high with minimal solar production
+  triggers:
+  - trigger: numeric_state
+    entity_id: sensor.gosungrow_virtual_1205796_7_1_1_p8018
+    above: 5000
+    for:
+      minutes: 15
+  conditions:
+  - condition: numeric_state
+    entity_id: sensor.gosungrow_virtual_1205796_1_1_1_p24
+    below: 2000
+  actions:
+  - action: notify.std_warning
+    data:
+      title: ⚡ High Grid Import
+      message: "Importing {{ (states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float / 1000) | round(1) }}kW from grid with only {{ (states('sensor.gosungrow_virtual_1205796_1_1_1_p24') | float / 1000) | round(1) }}kW solar - check what's running"
+  mode: single
+- id: ac_filter_living_room_reminder
+  alias: Maintenance - Living Room AC Filter Reminder
+  description: Reminds to change Living Room AC filter every 90 days
+  triggers:
+  - trigger: time
+    at: "09:00:00"
+  conditions:
+  - condition: template
+    value_template: >
+      {% set last = states('input_datetime.ac_filter_living_room') %}
+      {% if last in ['unknown', 'unavailable', ''] %}
+        true
+      {% else %}
+        {{ (as_timestamp(now()) - as_timestamp(last)) / 86400 > 90 }}
+      {% endif %}
+  actions:
+  - action: notify.std_information
+    data:
+      title: 🔧 Living Room AC Filter Due
+      message: |
+        Living Room AC filter needs replacement
+        {% set last = states('input_datetime.ac_filter_living_room') %}
+        {% if last not in ['unknown', 'unavailable', ''] %}
+        Last changed {{ relative_time(states('input_datetime.ac_filter_living_room')) }} ago
+        {% else %}
+        No change date recorded
+        {% endif %}
+  mode: single
+- id: ac_filter_master_bedroom_reminder
+  alias: Maintenance - Master Bedroom AC Filter Reminder
+  description: Reminds to change Master Bedroom AC filter every 90 days
+  triggers:
+  - trigger: time
+    at: "09:00:00"
+  conditions:
+  - condition: template
+    value_template: >
+      {% set last = states('input_datetime.ac_filter_master_bedroom') %}
+      {% if last in ['unknown', 'unavailable', ''] %}
+        true
+      {% else %}
+        {{ (as_timestamp(now()) - as_timestamp(last)) / 86400 > 90 }}
+      {% endif %}
+  actions:
+  - action: notify.std_information
+    data:
+      title: 🔧 Master Bedroom AC Filter Due
+      message: |
+        Master Bedroom AC filter needs replacement
+        {% set last = states('input_datetime.ac_filter_master_bedroom') %}
+        {% if last not in ['unknown', 'unavailable', ''] %}
+        Last changed {{ relative_time(states('input_datetime.ac_filter_master_bedroom')) }} ago
+        {% else %}
+        No change date recorded
+        {% endif %}
+  mode: single
+- id: ac_filter_otto_room_reminder
+  alias: Maintenance - Otto's Room AC Filter Reminder
+  description: Reminds to change Otto's Room AC filter every 90 days
+  triggers:
+  - trigger: time
+    at: "09:00:00"
+  conditions:
+  - condition: template
+    value_template: >
+      {% set last = states('input_datetime.ac_filter_otto_room') %}
+      {% if last in ['unknown', 'unavailable', ''] %}
+        true
+      {% else %}
+        {{ (as_timestamp(now()) - as_timestamp(last)) / 86400 > 90 }}
+      {% endif %}
+  actions:
+  - action: notify.std_information
+    data:
+      title: 🔧 Otto's Room AC Filter Due
+      message: |
+        Otto's Room AC filter needs replacement
+        {% set last = states('input_datetime.ac_filter_otto_room') %}
+        {% if last not in ['unknown', 'unavailable', ''] %}
+        Last changed {{ relative_time(states('input_datetime.ac_filter_otto_room')) }} ago
+        {% else %}
+        No change date recorded
+        {% endif %}
+  mode: single
+- id: ac_filter_study_henry_reminder
+  alias: Maintenance - Study/Henry's Room AC Filter Reminder
+  description: Reminds to change Study/Henry's Room AC filter every 90 days
+  triggers:
+  - trigger: time
+    at: "09:00:00"
+  conditions:
+  - condition: template
+    value_template: >
+      {% set last = states('input_datetime.ac_filter_study_henry') %}
+      {% if last in ['unknown', 'unavailable', ''] %}
+        true
+      {% else %}
+        {{ (as_timestamp(now()) - as_timestamp(last)) / 86400 > 90 }}
+      {% endif %}
+  actions:
+  - action: notify.std_information
+    data:
+      title: 🔧 Study/Henry's Room AC Filter Due
+      message: |
+        Study/Henry's Room AC filter needs replacement
+        {% set last = states('input_datetime.ac_filter_study_henry') %}
+        {% if last not in ['unknown', 'unavailable', ''] %}
+        Last changed {{ relative_time(states('input_datetime.ac_filter_study_henry')) }} ago
+        {% else %}
+        No change date recorded
+        {% endif %}
+  mode: single
+- id: ac_filter_living_room_changed
+  alias: Maintenance - Living Room AC Filter Changed (NFC)
+  description: Updates the filter change date when NFC tag is scanned
+  triggers:
+  - trigger: tag
+    tag_id: REPLACE_WITH_YOUR_NFC_TAG_ID
+  actions:
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.ac_filter_living_room
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  - action: notify.std_information
+    data:
+      title: ✅ Living Room AC Filter Updated
+      message: Filter change date recorded successfully
+  mode: single
+- id: ac_filter_master_bedroom_changed
+  alias: Maintenance - Master Bedroom AC Filter Changed (NFC)
+  description: Updates the filter change date when NFC tag is scanned
+  triggers:
+  - trigger: tag
+    tag_id: REPLACE_WITH_YOUR_NFC_TAG_ID
+  actions:
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.ac_filter_master_bedroom
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  - action: notify.std_information
+    data:
+      title: ✅ Master Bedroom AC Filter Updated
+      message: Filter change date recorded successfully
+  mode: single
+- id: ac_filter_otto_room_changed
+  alias: Maintenance - Otto's Room AC Filter Changed (NFC)
+  description: Updates the filter change date when NFC tag is scanned
+  triggers:
+  - trigger: tag
+    tag_id: REPLACE_WITH_YOUR_NFC_TAG_ID
+  actions:
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.ac_filter_otto_room
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  - action: notify.std_information
+    data:
+      title: ✅ Otto's Room AC Filter Updated
+      message: Filter change date recorded successfully
+  mode: single
+- id: ac_filter_study_henry_changed
+  alias: Maintenance - Study/Henry's Room AC Filter Changed (NFC)
+  description: Updates the filter change date when NFC tag is scanned
+  triggers:
+  - trigger: tag
+    tag_id: REPLACE_WITH_YOUR_NFC_TAG_ID
+  actions:
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.ac_filter_study_henry
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  - action: notify.std_information
+    data:
+      title: ✅ Study/Henry's Room AC Filter Updated
+      message: Filter change date recorded successfully
+  mode: single
