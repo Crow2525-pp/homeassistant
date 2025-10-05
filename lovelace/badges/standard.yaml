@@ -60,7 +60,7 @@
   show_state: true
   show_icon: true
   entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
-  name: Curr. Energy Use
+  name: Net Grid Power
 
 - type: entity
   entity: weather.braybrook

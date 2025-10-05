@@ -145,19 +145,17 @@
       state: "{{ now().isoformat() }}"
 
 - binary_sensor:
-    # Solar excess - when production exceeds consumption by 1kW+
+    # Solar excess - when exporting more than 1kW to grid
     - name: "Solar Excess Available"
       unique_id: solar_excess_available
       state: >
-        {% set production = states('sensor.gosungrow_virtual_1205796_1_1_1_p24') | float(0) %}
-        {% set consumption = states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) %}
-        {{ (production - consumption) > 1.0 }}
+        {% set net_grid = states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) %}
+        {{ net_grid < -1000 }}
       icon: "mdi:solar-power-variant"
       attributes:
         excess_power: >
-          {% set production = states('sensor.gosungrow_virtual_1205796_1_1_1_p24') | float(0) %}
-          {% set consumption = states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) %}
-          {{ (production - consumption) | round(1) }}
+          {% set net_grid = states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) %}
+          {{ ((net_grid * -1) / 1000) | round(1) if net_grid < 0 else 0 }}
 
 - sensor:
     # Smart appliance recommendation based on solar, season, and conditions
@@ -195,7 +193,7 @@
           {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
           {% set excess = state_attr('binary_sensor.solar_excess_available', 'excess_power') | float(0) %}
           {% if solar_excess %}
-            Excess solar: {{ excess }}W available
+            Excess solar: {{ excess }}kW available
           {% else %}
             No excess solar power
           {% endif %}

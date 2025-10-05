@@ -176,6 +176,22 @@ input_datetime:
     name: Last Climate Notification - Master Bedroom
     has_date: true
     has_time: true
+  ac_filter_living_room:
+    name: AC Filter Last Changed - Living Room
+    has_date: true
+    has_time: true
+  ac_filter_master_bedroom:
+    name: AC Filter Last Changed - Master Bedroom
+    has_date: true
+    has_time: true
+  ac_filter_otto_room:
+    name: AC Filter Last Changed - Otto's Room
+    has_date: true
+    has_time: true
+  ac_filter_study_henry:
+    name: AC Filter Last Changed - Study/Henry's Room
+    has_date: true
+    has_time: true
 
 alert:
   garage_door_info_alert_active:
