@@ -1,117 +1,136 @@
 type: vertical-stack
 cards:
-- type: grid
-  cards:
-    - type: heading
-      heading: "Media Control"
-      heading_style: title
-      icon: mdi:television-classic
+  - type: heading
+    heading: Media Control
+    heading_style: title
+    icon: mdi:television-classic
 
-    - type: media-control
-      entity: media_player.sony_bravia
-      name: Sony Bravia TV
-      card_mod:
-        style: |
-          ha-card {
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-          }
-          .title, .artist, .album, ha-card-content {
-            color: white !important;
-          }
-
-    - type: media-control
-      entity: media_player.spotify_philip_patterson
-      name: Spotify - Philip
-      card_mod:
-        style: |
-          ha-card {
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-          }
-          .title, .artist, .album, ha-card-content {
-            color: white !important;
-          }
-
-    - type: media-control
-      entity: media_player.master_bedroom_speaker
-      name: Master Bedroom Speaker
-      card_mod:
-        style: |
-          ha-card {
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-          }
-          .title, .artist, .album, ha-card-content {
-            color: white !important;
-          }
-
-    - type: media-control
-      entity: media_player.kitchen
-      name: Kitchen Speaker
-      card_mod:
-        style: |
-          ha-card {
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-          }
-          .title, .artist, .album, ha-card-content {
-            color: white !important;
-          }
-
-    - type: media-control
-      entity: media_player.study_speaker
-      name: Study Speaker
-      card_mod:
-        style: |
-          ha-card {
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-          }
-          .title, .artist, .album, ha-card-content {
-            color: white !important;
-          }
-
-    - type: media-control
-      entity: media_player.living_room_wiimamp
-      name: Living Room WiiM Amp
-      card_mod:
-        style: |
-          ha-card {
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-          }
-          .title, .artist, .album, ha-card-content {
-            color: white !important;
-          }
-
+  - type: custom:auto-entities
+    card:
+      type: grid
+      columns: 2
+      square: false
+    card_param: cards
+    show_empty: false
+    filter:
+      include:
+        - entity_id: media_player.sony_bravia
+          state: playing
+          options:
+            type: custom:mini-media-player
+            entity: media_player.sony_bravia
+            name: Sony Bravia TV
+            artwork: cover
+            volume_step: 5
+            group: true
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 12px;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                  transition: all 0.3s ease;
+                }
+                ha-card:hover {
+                  transform: translateY(-2px);
+                  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+                }
+        - entity_id: media_player.spotify_philip_patterson
+          state: playing
+          options:
+            type: custom:mini-media-player
+            entity: media_player.spotify_philip_patterson
+            name: Spotify - Philip
+            artwork: cover
+            volume_step: 5
+            group: true
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 12px;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                  transition: all 0.3s ease;
+                }
+                ha-card:hover {
+                  transform: translateY(-2px);
+                  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+                }
+        - entity_id: media_player.master_bedroom_speaker
+          state: playing
+          options:
+            type: custom:mini-media-player
+            entity: media_player.master_bedroom_speaker
+            name: Master Bedroom Speaker
+            artwork: cover
+            volume_step: 5
+            group: true
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 12px;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                  transition: all 0.3s ease;
+                }
+                ha-card:hover {
+                  transform: translateY(-2px);
+                  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+                }
+        - entity_id: media_player.kitchen
+          state: playing
+          options:
+            type: custom:mini-media-player
+            entity: media_player.kitchen
+            name: Kitchen Speaker
+            artwork: cover
+            volume_step: 5
+            group: true
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 12px;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                  transition: all 0.3s ease;
+                }
+                ha-card:hover {
+                  transform: translateY(-2px);
+                  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+                }
+        - entity_id: media_player.study_speaker
+          state: playing
+          options:
+            type: custom:mini-media-player
+            entity: media_player.study_speaker
+            name: Study Speaker
+            artwork: cover
+            volume_step: 5
+            group: true
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 12px;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                  transition: all 0.3s ease;
+                }
+                ha-card:hover {
+                  transform: translateY(-2px);
+                  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+                }
+        - entity_id: media_player.living_room_wiimamp
+          state: playing
+          options:
+            type: custom:mini-media-player
+            entity: media_player.living_room_wiimamp
+            name: Living Room WiiM Amp
+            artwork: cover
+            volume_step: 5
+            group: true
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 12px;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                  transition: all 0.3s ease;
+                }
+                ha-card:hover {
+                  transform: translateY(-2px);
+                  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+                }

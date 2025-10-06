@@ -3,6 +3,35 @@ path: control
 icon: mdi:home
 badges: !include ../badges/standard.yaml
 cards:
+  - type: custom:navbar-card
+    layout:
+      reflect_child_state: true
+    desktop:
+      show_labels: true
+    mobile:
+      show_labels: true
+    routes:
+      - url: /lovelace/control
+        icon: mdi:home-lightbulb
+        label: Control
+      - url: /lovelace/climate
+        icon: mdi:thermometer
+        label: Climate
+      - url: /lovelace/energy
+        icon: mdi:solar-power
+        label: Energy
+      - url: /lovelace/media
+        icon: mdi:play-circle
+        label: Media
+      - url: /lovelace/alarm
+        icon: mdi:security
+        label: Security
+      - url: /lovelace/network
+        icon: mdi:server-network
+        label: Network
+      - url: /lovelace/calendar
+        icon: mdi:calendar
+        label: Calendar
   - type: conditional
     conditions:
       - condition: or
@@ -32,6 +61,30 @@ cards:
             entity: sensor.braybrook_warnings
             above: 0
     card: !include ../cards/alerts.yaml
+
+  - type: conditional
+    conditions:
+      - condition: or
+        conditions:
+          - condition: state
+            entity: media_player.sony_bravia
+            state: "playing"
+          - condition: state
+            entity: media_player.spotify_philip_patterson
+            state: "playing"
+          - condition: state
+            entity: media_player.master_bedroom_speaker
+            state: "playing"
+          - condition: state
+            entity: media_player.kitchen
+            state: "playing"
+          - condition: state
+            entity: media_player.study_speaker
+            state: "playing"
+          - condition: state
+            entity: media_player.living_room_wiimamp
+            state: "playing"
+    card: !include ../cards/media/media_control.yaml
   - !include ../cards/quick_actions.yaml
   - !include ../cards/smart_suggestions.yaml
   - !include ../cards/climate/hvac.yaml

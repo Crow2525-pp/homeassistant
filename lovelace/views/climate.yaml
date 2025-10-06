@@ -4,6 +4,7 @@ icon: mdi:thermostat-box
 badges: !include ../badges/standard.yaml
 cards:
   - !include ../cards/climate/hvac.yaml
+  - !include ../cards/climate/simple_weather.yaml
   - !include ../cards/climate/room_climate_monitor.yaml
   - !include ../cards/climate/temperature.yaml
   - !include ../cards/climate/humidity.yaml

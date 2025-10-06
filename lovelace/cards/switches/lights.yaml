@@ -76,6 +76,7 @@ cards:
       method: friendly_name
       ignore_case: true
 
+
   - type: conditional
     conditions:
       - entity: binary_sensor.holiday_season
