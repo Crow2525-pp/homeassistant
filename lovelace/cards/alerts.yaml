@@ -191,6 +191,7 @@ cards:
                 margin: 4px 0;
                 color: white;
               }
+        - !include alarm/front_door_camera.yaml
 
   - type: conditional
     conditions:
