@@ -4,6 +4,9 @@ path: energy
 icon: mdi:solar-power
 badges: !include ../badges/standard.yaml
 cards:
+  # Solar overview with debugging
+  - !include ../cards/solar.yaml
+
   # Top row - Current status
   - type: grid
     columns: 2

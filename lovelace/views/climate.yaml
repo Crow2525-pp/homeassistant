@@ -2,8 +2,9 @@ title: Climate
 path: climate
 icon: mdi:thermostat-box
 badges: !include ../badges/standard.yaml
-cards: 
+cards:
   - !include ../cards/climate/hvac.yaml
+  - !include ../cards/climate/room_climate_monitor.yaml
   - !include ../cards/climate/temperature.yaml
   - !include ../cards/climate/humidity.yaml
   - !include ../cards/climate/forecast.yaml

@@ -485,4 +485,52 @@ arriving_home:
   mode: single
   icon: mdi:home-import-outline
 
+holiday_mode:
+  alias: Holiday Mode
+  sequence:
+  # Turn off all climate devices
+  - action: climate.turn_off
+    data: {}
+    target:
+      area_id:
+      - living_room
+      - henry_s_room
+      - master_bedroom
+      - baby_room
+  # Set alarm to away/armed mode
+  - action: alarm_control_panel.alarm_arm_away
+    target:
+      entity_id: alarm_control_panel.alarmo
+    data: {}
+  # Note: Auto-presence add-on should be manually enabled in settings
+  # Set occupancy to Away
+  - target:
+      entity_id: input_select.occupancy
+    data:
+      option: Away
+    action: input_select.select_option
+  # Close garage
+  - target:
+      entity_id: cover.smart_garage_door_garage
+    action: cover.close_cover
+  # Turn off all lights
+  - action: light.turn_off
+    data: {}
+    target:
+      entity_id: all
+  mode: single
+  icon: mdi:airplane-takeoff
+
+water_plants:
+  alias: Water Plants
+  sequence:
+  # This is a reminder script - you can expand it with notifications
+  # For now, it just shows a persistent notification
+  - action: notify.persistent_notification
+    data:
+      title: "Time to Water Plants!"
+      message: "It's been hot - don't forget to water the plants today."
+  mode: single
+  icon: mdi:watering-can
+
 

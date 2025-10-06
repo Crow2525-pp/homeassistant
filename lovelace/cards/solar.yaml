@@ -1,213 +1,312 @@
-- type: heading
-  heading: "Solar Power Overview"
-  heading_style: title
-  icon: mdi:solar-power-variant
+type: vertical-stack
+cards:
+  - type: heading
+    heading: "Solar Power Overview"
+    heading_style: title
+    icon: mdi:solar-power-variant
 
-- type: grid
-  columns: 2
-  square: false
-  cards:
-    - type: tile
-      entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
-      name: Solar Power Output
-      icon: mdi:flash
-      card_mod:
-        style: |
-          ha-card {
-            background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
-            color: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
-            border: none;
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
-          }
-          ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
-          }
-          .name, .state, .label {
-            color: white !important;
-          }
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
+        name: Solar Power Output
+        icon: mdi:flash
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
 
-    - type: tile
-      entity: sensor.gosungrow_getpslist_devices_1205796_today_energy
-      name: Today's Energy
-      icon: mdi:calendar-today
-      card_mod:
-        style: |
-          ha-card {
-            background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
-            color: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
-            border: none;
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
-          }
-          ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
-          }
-          .name, .state, .label {
-            color: white !important;
-          }
+      - type: tile
+        entity: sensor.gosungrow_getpslist_devices_1205796_today_energy
+        name: Today's Energy
+        icon: mdi:calendar-today
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
 
-    - type: tile
-      entity: sensor.gosungrow_virtual_1205796_7_1_1_p8063
-      name: Battery Charge Level
-      icon: mdi:battery-charging
-      card_mod:
-        style: |
-          ha-card {
-            background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
-            color: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
-            border: none;
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
-          }
-          ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
-          }
-          .name, .state, .label {
-            color: white !important;
-          }
+      - type: tile
+        entity: sensor.gosungrow_virtual_1205796_7_1_1_p8063
+        name: Battery Charge Level
+        icon: mdi:battery-charging
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
 
-    - type: tile
-      entity: sensor.gosungrow_virtual_1205796_7_1_1_p8062
-      name: Grid Power Usage
-      icon: mdi:transmission-tower
-      card_mod:
-        style: |
-          ha-card {
-            background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
-            color: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
-            border: none;
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
-          }
-          ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
-          }
-          .name, .state, .label {
-            color: white !important;
-          }
+      - type: tile
+        entity: sensor.gosungrow_virtual_1205796_7_1_1_p8062
+        name: Grid Power Usage
+        icon: mdi:transmission-tower
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
 
-    - type: tile
-      entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
-      name: Current Energy Consumption
-      icon: mdi:power
-      card_mod:
-        style: |
-          ha-card {
-            background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
-            color: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
-            border: none;
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
-          }
-          ha-tile-icon {
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
-          }
-          .name, .state, .label {
-            color: white !important;
-          }
+      - type: tile
+        entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
+        name: Current Energy Consumption
+        icon: mdi:power
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #0F766E 0%, #115E59 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
 
-- type: grid
-  columns: 1
-  square: false
-  cards:
-    - type: heading
-      heading: "Solar Energy Trends"
-      heading_style: subtitle
-      icon: mdi:chart-line
+  - type: heading
+    heading: "Solar Excess Debugging"
+    heading_style: subtitle
+    icon: mdi:bug
 
-    - type: sensor
-      entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
-      graph: line
-      detail: 2
-      hours_to_show: 24
-      name: Solar Yield
-      card_mod:
-        style: |
-          ha-card {
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-          }
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: binary_sensor.solar_excess_available
+        name: Solar Excess Status
+        icon: mdi:solar-power-variant
+        show_entity_picture: false
+        card_mod:
+          style: |
+            ha-card {
+              background: {% if is_state('binary_sensor.solar_excess_available', 'on') %}linear-gradient(145deg, #0F766E 0%, #115E59 100%){% else %}linear-gradient(145deg, #6B7280 0%, #4B5563 100%){% endif %};
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
 
-    - type: sensor
-      entity: sensor.gosungrow_getpslist_devices_1205796_today_energy
-      graph: line
-      detail: 2
-      hours_to_show: 24
-      name: Daily Energy Production
-      card_mod:
-        style: |
-          ha-card {
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-          }
+      - type: tile
+        entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
+        name: "Net Grid Power (Threshold: -1kW)"
+        icon: mdi:transmission-tower-import
+        card_mod:
+          style: |
+            ha-card {
+              background: {% if states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) < -1 %}linear-gradient(145deg, #0F766E 0%, #115E59 100%){% elif states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) < 0 %}linear-gradient(145deg, #D97706 0%, #B45309 100%){% else %}linear-gradient(145deg, #E11D48 0%, #BE123C 100%){% endif %};
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
 
-    - type: sensor
-      entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
-      graph: line
-      detail: 2
-      hours_to_show: 24
-      name: Household Energy Usage
-      card_mod:
-        style: |
-          ha-card {
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-          }
-          ha-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-          }
+  - type: markdown
+    content: |
+      ### Solar Excess Calculation
+      **Status:** {{ 'ON ✅' if is_state('binary_sensor.solar_excess_available', 'on') else 'OFF ❌' }}
 
-- type: history-graph
-  title: "Solar Energy Data History"
-  entities:
-    - entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
-      name: Solar Yield
-    - entity: sensor.gosungrow_virtual_1205796_7_1_1_p8063
-      name: Battery Charge
-    - entity: sensor.gosungrow_virtual_1205796_7_1_1_p8062
-      name: Grid Usage
-  hours_to_show: 24
-  card_mod:
-    style: |
-      ha-card {
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
+      **Net Grid Power:** {{ states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') }}kW ({{ (states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) * 1000) | round(0) }}W)
+      **Solar Production:** {{ states('sensor.gosungrow_virtual_1205796_1_1_1_p24') }}W
+      **Excess Power:** {{ state_attr('binary_sensor.solar_excess_available', 'excess_power') }}kW
+
+      **Logic:** Excess is available when net grid < -1kW (exporting > 1kW)
+      - Negative values = Exporting to grid 📤
+      - Positive values = Importing from grid 📥
+
+      {% if states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) < -1 %}
+      **✅ Currently exporting {{ (states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) * -1) | round(2) }}kW ({{ (states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) * -1000) | round(0) }}W) to grid**
+      {% elif states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) < 0 %}
+      **⚠️ Exporting {{ (states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) * -1) | round(2) }}kW ({{ (states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) * -1000) | round(0) }}W) - below 1kW threshold**
+      {% else %}
+      **❌ Importing {{ states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) | round(2) }}kW ({{ (states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) * 1000) | round(0) }}W) from grid**
+      {% endif %}
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
+          backdrop-filter: blur(10px);
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          padding: 16px;
+          color: white;
+        }
+        ha-card p {
+          color: white;
+        }
+        ha-card h3 {
+          color: white;
+        }
+
+  - type: grid
+    columns: 1
+    square: false
+    cards:
+      - type: heading
+        heading: "Solar Energy Trends"
+        heading_style: subtitle
+        icon: mdi:chart-line
+
+      - type: sensor
+        entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
+        graph: line
+        detail: 2
+        hours_to_show: 24
+        name: Solar Yield
+        card_mod:
+          style: |
+            ha-card {
+              border-radius: 12px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            }
+
+      - type: sensor
+        entity: sensor.gosungrow_getpslist_devices_1205796_today_energy
+        graph: line
+        detail: 2
+        hours_to_show: 24
+        name: Daily Energy Production
+        card_mod:
+          style: |
+            ha-card {
+              border-radius: 12px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            }
+
+      - type: sensor
+        entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
+        graph: line
+        detail: 2
+        hours_to_show: 24
+        name: Household Energy Usage
+        card_mod:
+          style: |
+            ha-card {
+              border-radius: 12px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            }
+
+  - type: history-graph
+    title: "Solar Energy Data History"
+    entities:
+      - entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
+        name: Solar Yield
+      - entity: sensor.gosungrow_virtual_1205796_7_1_1_p8063
+        name: Battery Charge
+      - entity: sensor.gosungrow_virtual_1205796_7_1_1_p8062
+        name: Grid Usage
+    hours_to_show: 24
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }

@@ -1,0 +1,411 @@
+type: vertical-stack
+cards:
+  - type: heading
+    heading: "Room Climate Monitor"
+    heading_style: title
+    icon: mdi:home-thermometer-outline
+
+  # Alert status card - only shows if there's an issue
+  - type: conditional
+    conditions:
+      - entity: binary_sensor.room_climate_alert
+        state: "on"
+    card:
+      type: markdown
+      content: |
+        ## ⚠️ Climate Alert Active
+        **Rooms with significant differences from Master Bedroom:**
+        {{ state_attr('binary_sensor.room_climate_alert', 'rooms_with_issues') }}
+      card_mod:
+        style: |
+          ha-card {
+            background: linear-gradient(145deg, #E11D48 0%, #BE123C 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(225, 29, 72, 0.4);
+            padding: 16px;
+          }
+          ha-card p, ha-card h2 {
+            color: white;
+          }
+
+  # Summary status card
+  - type: tile
+    entity: binary_sensor.room_climate_alert
+    name: Overall Climate Status
+    icon: mdi:home-thermometer
+    card_mod:
+      style: |
+        ha-card {
+          background: {% if is_state('binary_sensor.room_climate_alert', 'on') %}linear-gradient(145deg, #E11D48 0%, #BE123C 100%){% else %}linear-gradient(145deg, #0F766E 0%, #115E59 100%){% endif %};
+          color: white;
+          border-radius: 12px;
+          box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+          border: none;
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 24px rgba(15, 118, 110, 0.5);
+        }
+        ha-tile-icon {
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+        }
+        .name, .state, .label {
+          color: white !important;
+        }
+
+  # Master Bedroom (Baseline)
+  - type: heading
+    heading: "Master Bedroom (Baseline)"
+    heading_style: subtitle
+    icon: mdi:bed
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        name: Master Temp
+        icon: mdi:thermometer
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #4F46E5 0%, #3730A3 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(79, 70, 229, 0.4);
+              border: none;
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+      - type: tile
+        entity: sensor.humiditysensor_humidity
+        name: Master Humidity
+        icon: mdi:water-percent
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #4F46E5 0%, #3730A3 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(79, 70, 229, 0.4);
+              border: none;
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+  # Living Room
+  - type: heading
+    heading: "Living Room"
+    heading_style: subtitle
+    icon: mdi:sofa
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.living_room_temperature_offset
+        name: Living Temp
+        icon: mdi:thermometer
+        card_mod:
+          style: |
+            ha-card {
+              background: {% set diff = state_attr('sensor.living_room_temp_diff_from_master', 'status') %}{% if diff == 'significant' %}linear-gradient(145deg, #E11D48 0%, #BE123C 100%){% elif diff == 'moderate' %}linear-gradient(145deg, #D97706 0%, #B45309 100%){% else %}linear-gradient(145deg, #0F766E 0%, #115E59 100%){% endif %};
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+      - type: tile
+        entity: sensor.livingroom_irblaster_humidity
+        name: Living Humidity
+        icon: mdi:water-percent
+        card_mod:
+          style: |
+            ha-card {
+              background: {% set diff = state_attr('sensor.living_room_humidity_diff_from_master', 'status') %}{% if diff == 'significant' %}linear-gradient(145deg, #E11D48 0%, #BE123C 100%){% elif diff == 'moderate' %}linear-gradient(145deg, #D97706 0%, #B45309 100%){% else %}linear-gradient(145deg, #0F766E 0%, #115E59 100%){% endif %};
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.living_room_temp_diff_from_master
+        name: Temp Diff
+        icon: mdi:delta
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+      - type: tile
+        entity: sensor.living_room_humidity_diff_from_master
+        name: Humidity Diff
+        icon: mdi:delta
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+  # Lucas Room
+  - type: heading
+    heading: "Lucas Room"
+    heading_style: subtitle
+    icon: mdi:human-child
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.study_esp32_henrysroom_temperature
+        name: Lucas Temp
+        icon: mdi:thermometer
+        card_mod:
+          style: |
+            ha-card {
+              background: {% set diff = state_attr('sensor.lucas_room_temp_diff_from_master', 'status') %}{% if diff == 'significant' %}linear-gradient(145deg, #E11D48 0%, #BE123C 100%){% elif diff == 'moderate' %}linear-gradient(145deg, #D97706 0%, #B45309 100%){% else %}linear-gradient(145deg, #0F766E 0%, #115E59 100%){% endif %};
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+      - type: tile
+        entity: sensor.study_esp32_henrysroom_humidity
+        name: Lucas Humidity
+        icon: mdi:water-percent
+        card_mod:
+          style: |
+            ha-card {
+              background: {% set diff = state_attr('sensor.lucas_room_humidity_diff_from_master', 'status') %}{% if diff == 'significant' %}linear-gradient(145deg, #E11D48 0%, #BE123C 100%){% elif diff == 'moderate' %}linear-gradient(145deg, #D97706 0%, #B45309 100%){% else %}linear-gradient(145deg, #0F766E 0%, #115E59 100%){% endif %};
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.lucas_room_temp_diff_from_master
+        name: Temp Diff
+        icon: mdi:delta
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+      - type: tile
+        entity: sensor.lucas_room_humidity_diff_from_master
+        name: Humidity Diff
+        icon: mdi:delta
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+  # Otto's Room
+  - type: heading
+    heading: "Otto's Room"
+    heading_style: subtitle
+    icon: mdi:human-child
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.study_esp32_ottosroom_temperature
+        name: Otto Temp
+        icon: mdi:thermometer
+        card_mod:
+          style: |
+            ha-card {
+              background: {% set diff = state_attr('sensor.otto_room_temp_diff_from_master', 'status') %}{% if diff == 'significant' %}linear-gradient(145deg, #E11D48 0%, #BE123C 100%){% elif diff == 'moderate' %}linear-gradient(145deg, #D97706 0%, #B45309 100%){% else %}linear-gradient(145deg, #0F766E 0%, #115E59 100%){% endif %};
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+      - type: tile
+        entity: sensor.study_esp32_ottosroom_humidity
+        name: Otto Humidity
+        icon: mdi:water-percent
+        card_mod:
+          style: |
+            ha-card {
+              background: {% set diff = state_attr('sensor.otto_room_humidity_diff_from_master', 'status') %}{% if diff == 'significant' %}linear-gradient(145deg, #E11D48 0%, #BE123C 100%){% elif diff == 'moderate' %}linear-gradient(145deg, #D97706 0%, #B45309 100%){% else %}linear-gradient(145deg, #0F766E 0%, #115E59 100%){% endif %};
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+            }
+            ha-tile-icon {
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.otto_room_temp_diff_from_master
+        name: Temp Diff
+        icon: mdi:delta
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+      - type: tile
+        entity: sensor.otto_room_humidity_diff_from_master
+        name: Humidity Diff
+        icon: mdi:delta
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+  # History graph
+  - type: heading
+    heading: "Temperature Comparison (24h)"
+    heading_style: subtitle
+    icon: mdi:chart-line
+
+  - type: history-graph
+    hours_to_show: 24
+    entities:
+      - entity: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        name: Master (Baseline)
+      - entity: sensor.living_room_temperature_offset
+        name: Living
+      - entity: sensor.study_esp32_henrysroom_temperature
+        name: Lucas
+      - entity: sensor.study_esp32_ottosroom_temperature
+        name: Otto
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+  - type: heading
+    heading: "Humidity Comparison (24h)"
+    heading_style: subtitle
+    icon: mdi:chart-line
+
+  - type: history-graph
+    hours_to_show: 24
+    entities:
+      - entity: sensor.humiditysensor_humidity
+        name: Master (Baseline)
+      - entity: sensor.livingroom_irblaster_humidity
+        name: Living
+      - entity: sensor.study_esp32_henrysroom_humidity
+        name: Lucas
+      - entity: sensor.study_esp32_ottosroom_humidity
+        name: Otto
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }

@@ -450,6 +450,208 @@
           {% endif %}
 
 - sensor:
+    # Room climate monitoring - compare to master bedroom baseline
+    - name: "Living Room Temp Diff from Master"
+      unique_id: living_room_temp_diff_from_master
+      unit_of_measurement: "°C"
+      state: >
+        {% set master = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+        {% set living = states('sensor.living_room_temperature_offset') | float(0) %}
+        {{ (living - master) | round(1) }}
+      icon: "mdi:thermometer-chevron-up"
+      attributes:
+        master_temp: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        room_temp: "{{ states('sensor.living_room_temperature_offset') }}"
+        status: >
+          {% set diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% if diff > 3 %}
+            significant
+          {% elif diff > 2 %}
+            moderate
+          {% else %}
+            normal
+          {% endif %}
+
+    - name: "Lucas Room Temp Diff from Master"
+      unique_id: lucas_room_temp_diff_from_master
+      unit_of_measurement: "°C"
+      state: >
+        {% set master = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+        {% set lucas = states('sensor.study_esp32_henrysroom_temperature') | float(0) %}
+        {{ (lucas - master) | round(1) }}
+      icon: "mdi:thermometer-chevron-up"
+      attributes:
+        master_temp: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        room_temp: "{{ states('sensor.study_esp32_henrysroom_temperature') }}"
+        status: >
+          {% set diff = (states('sensor.study_esp32_henrysroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% if diff > 3 %}
+            significant
+          {% elif diff > 2 %}
+            moderate
+          {% else %}
+            normal
+          {% endif %}
+
+    - name: "Otto Room Temp Diff from Master"
+      unique_id: otto_room_temp_diff_from_master
+      unit_of_measurement: "°C"
+      state: >
+        {% set master = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+        {% set otto = states('sensor.study_esp32_ottosroom_temperature') | float(0) %}
+        {{ (otto - master) | round(1) }}
+      icon: "mdi:thermometer-chevron-up"
+      attributes:
+        master_temp: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        room_temp: "{{ states('sensor.study_esp32_ottosroom_temperature') }}"
+        status: >
+          {% set diff = (states('sensor.study_esp32_ottosroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% if diff > 3 %}
+            significant
+          {% elif diff > 2 %}
+            moderate
+          {% else %}
+            normal
+          {% endif %}
+
+    - name: "Living Room Humidity Diff from Master"
+      unique_id: living_room_humidity_diff_from_master
+      unit_of_measurement: "%"
+      state: >
+        {% set master = states('sensor.humiditysensor_humidity') | float(0) %}
+        {% set living = states('sensor.livingroom_irblaster_humidity') | float(0) %}
+        {{ (living - master) | round(1) }}
+      icon: "mdi:water-percent"
+      attributes:
+        master_humidity: "{{ states('sensor.humiditysensor_humidity') }}"
+        room_humidity: "{{ states('sensor.livingroom_irblaster_humidity') }}"
+        status: >
+          {% set diff = (states('sensor.livingroom_irblaster_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% if diff > 15 %}
+            significant
+          {% elif diff > 10 %}
+            moderate
+          {% else %}
+            normal
+          {% endif %}
+
+    - name: "Lucas Room Humidity Diff from Master"
+      unique_id: lucas_room_humidity_diff_from_master
+      unit_of_measurement: "%"
+      state: >
+        {% set master = states('sensor.humiditysensor_humidity') | float(0) %}
+        {% set lucas = states('sensor.study_esp32_henrysroom_humidity') | float(0) %}
+        {{ (lucas - master) | round(1) }}
+      icon: "mdi:water-percent"
+      attributes:
+        master_humidity: "{{ states('sensor.humiditysensor_humidity') }}"
+        room_humidity: "{{ states('sensor.study_esp32_henrysroom_humidity') }}"
+        status: >
+          {% set diff = (states('sensor.study_esp32_henrysroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% if diff > 15 %}
+            significant
+          {% elif diff > 10 %}
+            moderate
+          {% else %}
+            normal
+          {% endif %}
+
+    - name: "Otto Room Humidity Diff from Master"
+      unique_id: otto_room_humidity_diff_from_master
+      unit_of_measurement: "%"
+      state: >
+        {% set master = states('sensor.humiditysensor_humidity') | float(0) %}
+        {% set otto = states('sensor.study_esp32_ottosroom_humidity') | float(0) %}
+        {{ (otto - master) | round(1) }}
+      icon: "mdi:water-percent"
+      attributes:
+        master_humidity: "{{ states('sensor.humiditysensor_humidity') }}"
+        room_humidity: "{{ states('sensor.study_esp32_ottosroom_humidity') }}"
+        status: >
+          {% set diff = (states('sensor.study_esp32_ottosroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% if diff > 15 %}
+            significant
+          {% elif diff > 10 %}
+            moderate
+          {% else %}
+            normal
+          {% endif %}
+
+- binary_sensor:
+    # Quick action button helpers
+    - name: "Show Good Morning Button"
+      unique_id: show_good_morning_button
+      state: >
+        {{ now().hour >= 6 and now().hour < 11 }}
+      icon: mdi:weather-sunny
+
+    - name: "Show Good Night Button"
+      unique_id: show_good_night_button
+      state: >
+        {{ now().hour >= 20 or now().hour < 6 }}
+      icon: mdi:weather-night
+
+    - name: "Show Water Plants Button"
+      unique_id: show_water_plants_button
+      state: >
+        {{ states('sensor.essendon_airport_max_temp') | float(0) > 20 }}
+      icon: mdi:watering-can
+
+    - name: "Show Arriving Home Button"
+      unique_id: show_arriving_home_button
+      state: >
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% set last_changed = as_timestamp(states.zone.home.last_changed) %}
+        {% set now = as_timestamp(now()) %}
+        {% set minutes_since_change = (now - last_changed) / 60 %}
+        {{ zone_state > 0 and minutes_since_change <= 30 }}
+      icon: mdi:home-import-outline
+
+    - name: "Show Leaving Home Button"
+      unique_id: show_leaving_home_button
+      state: >
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% set last_changed = as_timestamp(states.zone.home.last_changed) %}
+        {% set now = as_timestamp(now()) %}
+        {% set minutes_since_change = (now - last_changed) / 60 %}
+        {{ zone_state > 0 or (zone_state == 0 and minutes_since_change <= 30) }}
+      icon: mdi:home-export-outline
+
+    # Room climate alert - triggers when any room is significantly different from master
+    - name: "Room Climate Alert"
+      unique_id: room_climate_alert
+      state: >
+        {% set living_temp_diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+        {% set lucas_temp_diff = (states('sensor.study_esp32_henrysroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+        {% set otto_temp_diff = (states('sensor.study_esp32_ottosroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+        {% set living_humid_diff = (states('sensor.livingroom_irblaster_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+        {% set lucas_humid_diff = (states('sensor.study_esp32_henrysroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+        {% set otto_humid_diff = (states('sensor.study_esp32_ottosroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+        {{ living_temp_diff > 3 or lucas_temp_diff > 3 or otto_temp_diff > 3 or living_humid_diff > 15 or lucas_humid_diff > 15 or otto_humid_diff > 15 }}
+      icon: >
+        {% if is_state('binary_sensor.room_climate_alert', 'on') %}
+          mdi:alert-circle
+        {% else %}
+          mdi:check-circle
+        {% endif %}
+      attributes:
+        rooms_with_issues: >
+          {% set issues = namespace(rooms=[]) %}
+          {% set living_temp_diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% set lucas_temp_diff = (states('sensor.study_esp32_henrysroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% set otto_temp_diff = (states('sensor.study_esp32_ottosroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% set living_humid_diff = (states('sensor.livingroom_irblaster_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% set lucas_humid_diff = (states('sensor.study_esp32_henrysroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% set otto_humid_diff = (states('sensor.study_esp32_ottosroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% if living_temp_diff > 3 %}{% set issues.rooms = issues.rooms + ['Living Room (Temp)'] %}{% endif %}
+          {% if lucas_temp_diff > 3 %}{% set issues.rooms = issues.rooms + ['Lucas Room (Temp)'] %}{% endif %}
+          {% if otto_temp_diff > 3 %}{% set issues.rooms = issues.rooms + ['Otto Room (Temp)'] %}{% endif %}
+          {% if living_humid_diff > 15 %}{% set issues.rooms = issues.rooms + ['Living Room (Humidity)'] %}{% endif %}
+          {% if lucas_humid_diff > 15 %}{% set issues.rooms = issues.rooms + ['Lucas Room (Humidity)'] %}{% endif %}
+          {% if otto_humid_diff > 15 %}{% set issues.rooms = issues.rooms + ['Otto Room (Humidity)'] %}{% endif %}
+          {{ issues.rooms | join(', ') if issues.rooms | length > 0 else 'None' }}
+
+- sensor:
     # Random appliance completion messages
     - name: "Washing Machine Random Message"
       unique_id: washing_machine_random_message
