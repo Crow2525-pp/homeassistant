@@ -44,18 +44,6 @@
   name: Wendy Home
   show_entity_picture: true
 - type: entity
-  show_name: true
-  show_state: true
-  show_icon: true
-  entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
-  name: Solar Yield
-  color: ""
-  visibility:
-    - condition: numeric_state
-      entity: sensor.gosungrow_virtual_1205796_1_1_1_p24
-      above: 0
-
-- type: entity
   entity: binary_sensor.solar_excess_available
   name: "Excess Solar"
   icon: mdi:solar-power-variant
@@ -68,13 +56,6 @@
   color: amber
   tap_action:
     action: more-info
-
-- type: entity
-  show_name: true
-  show_state: true
-  show_icon: true
-  entity: sensor.gosungrow_virtual_1205796_7_1_1_p8018
-  name: Net Grid Power
 
 - type: entity
   entity: weather.braybrook
@@ -136,7 +117,6 @@
     - condition: state
       entity_id: binary_sensor.internet_connection
       state: 'on'
-
 
 - type: entity
   entity: binary_sensor.network_device_down_alert_active
