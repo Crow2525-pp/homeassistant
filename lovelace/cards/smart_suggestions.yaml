@@ -29,15 +29,6 @@ conditions:
       - condition: state
         entity: sensor.ottos_room_climate_suggestion
         state: 'cool_now'
-      - condition: state
-        entity: binary_sensor.dishwasher_suggestion
-        state: 'on'
-      - condition: state
-        entity: binary_sensor.dryer_suggestion
-        state: 'on'
-      - condition: state
-        entity: binary_sensor.washing_machine_suggestion
-        state: 'on'
 card:
   type: vertical-stack
   cards:
@@ -66,15 +57,13 @@ card:
       card:
         type: markdown
         content: |
-          **☀️ Excess Solar Power Available!**
-          {{ state_attr('binary_sensor.solar_excess_available', 'excess_power') }}W surplus
-
-          *Good time to run appliances*
+          **☀️ Good Time to Run Appliances**
+          Exporting {{ state_attr('binary_sensor.solar_excess_available', 'excess_power') }}kW to grid
         card_mod:
           style: |
             ha-card {
               background: linear-gradient(135deg, rgba(217, 119, 6, 0.2) 0%, rgba(217, 119, 6, 0.1) 100%);
-              border-left: 4px solid linear-gradient(145deg, #D97706 0%, #B45309 100%); /* Yellow - Google Material Design */
+              border-left: 4px solid #D97706;
               padding: 12px 16px;
               border-radius: 8px;
             }
@@ -183,65 +172,3 @@ card:
               margin-top: 8px;
             }
 
-    # Dishwasher suggestion
-    - type: conditional
-      conditions:
-        - condition: state
-          entity: binary_sensor.dishwasher_suggestion
-          state: 'on'
-      card:
-        type: markdown
-        content: |
-          **🍽️ Dishwasher**
-          {{ state_attr('binary_sensor.dishwasher_suggestion', 'message') }}
-        card_mod:
-          style: |
-            ha-card {
-              background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%);
-              border-left: 4px solid linear-gradient(145deg, #9C27B0 0%, #7B1FA2 100%);
-              padding: 12px 16px;
-              border-radius: 8px;
-              margin-top: 8px;
-            }
-
-    # Dryer suggestion
-    - type: conditional
-      conditions:
-        - condition: state
-          entity: binary_sensor.dryer_suggestion
-          state: 'on'
-      card:
-        type: markdown
-        content: |
-          **👔 Dryer**
-          {{ state_attr('binary_sensor.dryer_suggestion', 'message') }}
-        card_mod:
-          style: |
-            ha-card {
-              background: linear-gradient(135deg, rgba(15, 118, 110, 0.1) 0%, rgba(15, 118, 110, 0.05) 100%);
-              border-left: 4px solid linear-gradient(145deg, #0F766E 0%, #115E59 100%);
-              padding: 12px 16px;
-              border-radius: 8px;
-              margin-top: 8px;
-            }
-
-    # Washing Machine suggestion
-    - type: conditional
-      conditions:
-        - condition: state
-          entity: binary_sensor.washing_machine_suggestion
-          state: 'on'
-      card:
-        type: markdown
-        content: |
-          **🧺 Washing Machine**
-          {{ state_attr('binary_sensor.washing_machine_suggestion', 'message') }}
-        card_mod:
-          style: |
-            ha-card {
-              background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-              border-left: 4px solid linear-gradient(145deg, #3B82F6 0%, #2563EB 100%);
-              padding: 12px 16px;
-              border-radius: 8px;
-              margin-top: 8px;
-            }

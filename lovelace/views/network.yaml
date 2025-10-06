@@ -3,6 +3,7 @@ path: network
 icon: mdi:server-network
 badges: !include ../badges/network.yaml
 cards: 
+  - !include ../cards/navbar.yaml
   - !include ../cards/network/network_services.yaml
   - !include ../cards/network/network_status.yaml
   - !include ../cards/network/network_portainer.yaml

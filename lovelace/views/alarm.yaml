@@ -4,6 +4,7 @@ path: alarm
 icon: mdi:security
 badges: !include ../badges/standard.yaml
 cards: 
+  - !include ../cards/navbar.yaml
   - !include ../cards/alarm/cameras.yaml
   - !include ../cards/alarm/doors_and_water.yaml
   - !include ../cards/alarm/presence.yaml

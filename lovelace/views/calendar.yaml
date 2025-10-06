@@ -4,6 +4,7 @@ path: calendar
 icon: mdi:calendar
 badges: !include ../badges/standard.yaml
 cards:
+  - !include ../cards/navbar.yaml
   # Top row - Today's info in a grid
   - type: grid
     columns: 2

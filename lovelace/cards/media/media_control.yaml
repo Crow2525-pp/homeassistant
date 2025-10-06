@@ -5,132 +5,237 @@ cards:
     heading_style: title
     icon: mdi:television-classic
 
-  - type: custom:auto-entities
+  # WiiM Amp - Full width showcase card
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: media_player.living_room_wiimamp
+        state: playing
     card:
-      type: grid
-      columns: 2
-      square: false
-    card_param: cards
-    show_empty: false
-    filter:
-      include:
-        - entity_id: media_player.sony_bravia
-          state: playing
-          options:
-            type: custom:mini-media-player
-            entity: media_player.sony_bravia
-            name: Sony Bravia TV
-            artwork: cover
-            volume_step: 5
-            group: true
-            card_mod:
-              style: |
-                ha-card {
-                  border-radius: 12px;
-                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                  transition: all 0.3s ease;
-                }
-                ha-card:hover {
-                  transform: translateY(-2px);
-                  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-                }
-        - entity_id: media_player.spotify_philip_patterson
-          state: playing
-          options:
-            type: custom:mini-media-player
-            entity: media_player.spotify_philip_patterson
-            name: Spotify - Philip
-            artwork: cover
-            volume_step: 5
-            group: true
-            card_mod:
-              style: |
-                ha-card {
-                  border-radius: 12px;
-                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                  transition: all 0.3s ease;
-                }
-                ha-card:hover {
-                  transform: translateY(-2px);
-                  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-                }
-        - entity_id: media_player.master_bedroom_speaker
-          state: playing
-          options:
-            type: custom:mini-media-player
-            entity: media_player.master_bedroom_speaker
-            name: Master Bedroom Speaker
-            artwork: cover
-            volume_step: 5
-            group: true
-            card_mod:
-              style: |
-                ha-card {
-                  border-radius: 12px;
-                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                  transition: all 0.3s ease;
-                }
-                ha-card:hover {
-                  transform: translateY(-2px);
-                  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-                }
-        - entity_id: media_player.kitchen
-          state: playing
-          options:
-            type: custom:mini-media-player
-            entity: media_player.kitchen
-            name: Kitchen Speaker
-            artwork: cover
-            volume_step: 5
-            group: true
-            card_mod:
-              style: |
-                ha-card {
-                  border-radius: 12px;
-                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                  transition: all 0.3s ease;
-                }
-                ha-card:hover {
-                  transform: translateY(-2px);
-                  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-                }
-        - entity_id: media_player.study_speaker
-          state: playing
-          options:
-            type: custom:mini-media-player
-            entity: media_player.study_speaker
-            name: Study Speaker
-            artwork: cover
-            volume_step: 5
-            group: true
-            card_mod:
-              style: |
-                ha-card {
-                  border-radius: 12px;
-                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                  transition: all 0.3s ease;
-                }
-                ha-card:hover {
-                  transform: translateY(-2px);
-                  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-                }
-        - entity_id: media_player.living_room_wiimamp
-          state: playing
-          options:
-            type: custom:mini-media-player
-            entity: media_player.living_room_wiimamp
-            name: Living Room WiiM Amp
-            artwork: cover
-            volume_step: 5
-            group: true
-            card_mod:
-              style: |
-                ha-card {
-                  border-radius: 12px;
-                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                  transition: all 0.3s ease;
-                }
-                ha-card:hover {
-                  transform: translateY(-2px);
-                  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-                }
+      type: custom:mini-media-player
+      entity: media_player.living_room_wiimamp
+      name: Living Room WiiM Amp
+      artwork: cover
+      icon: mdi:amplifier
+      info: scroll
+      volume_step: 5
+      group: true
+      hide:
+        power: false
+        source: false
+        volume: false
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            transition: all 0.3s ease;
+            padding: 16px;
+          }
+          ha-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+          }
+          .entity__info__name {
+            font-size: 1.2em !important;
+            font-weight: 600 !important;
+          }
+          .entity__info {
+            font-size: 1em !important;
+          }
+
+  # Sony Bravia TV
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: media_player.sony_bravia
+        state: playing
+    card:
+      type: custom:mini-media-player
+      entity: media_player.sony_bravia
+      name: Sony Bravia TV
+      artwork: cover
+      info: scroll
+      volume_step: 5
+      group: true
+      hide:
+        power: false
+        source: false
+        volume: false
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            transition: all 0.3s ease;
+            padding: 16px;
+          }
+          ha-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+          }
+          .entity__info__name {
+            font-size: 1.2em !important;
+            font-weight: 600 !important;
+          }
+          .entity__info {
+            font-size: 1em !important;
+          }
+
+  # Spotify
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: media_player.spotify_philip_patterson
+        state: playing
+    card:
+      type: custom:mini-media-player
+      entity: media_player.spotify_philip_patterson
+      name: Spotify - Philip
+      artwork: cover
+      info: scroll
+      volume_step: 5
+      group: true
+      hide:
+        power: false
+        source: false
+        volume: false
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            transition: all 0.3s ease;
+            padding: 16px;
+          }
+          ha-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+          }
+          .entity__info__name {
+            font-size: 1.2em !important;
+            font-weight: 600 !important;
+          }
+          .entity__info {
+            font-size: 1em !important;
+          }
+
+  # Master Bedroom Speaker
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: media_player.master_bedroom_speaker
+        state: playing
+    card:
+      type: custom:mini-media-player
+      entity: media_player.master_bedroom_speaker
+      name: Master Bedroom Speaker
+      artwork: cover
+      info: scroll
+      volume_step: 5
+      group: true
+      hide:
+        power: false
+        source: false
+        volume: false
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            transition: all 0.3s ease;
+            padding: 16px;
+          }
+          ha-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+          }
+          .entity__info__name {
+            font-size: 1.2em !important;
+            font-weight: 600 !important;
+          }
+          .entity__info {
+            font-size: 1em !important;
+          }
+
+  # Kitchen Speaker
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: media_player.kitchen
+        state: playing
+    card:
+      type: custom:mini-media-player
+      entity: media_player.kitchen
+      name: Kitchen Speaker
+      artwork: cover
+      info: scroll
+      volume_step: 5
+      group: true
+      hide:
+        power: false
+        source: false
+        volume: false
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            transition: all 0.3s ease;
+            padding: 16px;
+          }
+          ha-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+          }
+          .entity__info__name {
+            font-size: 1.2em !important;
+            font-weight: 600 !important;
+          }
+          .entity__info {
+            font-size: 1em !important;
+          }
+
+  # Study Speaker
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: media_player.study_speaker
+        state: playing
+    card:
+      type: custom:mini-media-player
+      entity: media_player.study_speaker
+      name: Study Speaker
+      artwork: cover
+      info: scroll
+      volume_step: 5
+      group: true
+      hide:
+        power: false
+        source: false
+        volume: false
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            transition: all 0.3s ease;
+            padding: 16px;
+          }
+          ha-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+          }
+          .entity__info__name {
+            font-size: 1.2em !important;
+            font-weight: 600 !important;
+          }
+          .entity__info {
+            font-size: 1em !important;
+          }

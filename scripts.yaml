@@ -533,4 +533,41 @@ water_plants:
   mode: single
   icon: mdi:watering-can
 
+play_music:
+  alias: Play Music
+  sequence:
+  # Start playing music on kitchen speaker (default media player)
+  - action: media_player.play_media
+    target:
+      entity_id: media_player.kitchen
+    data:
+      media_content_type: music
+      media_content_id: ""
+  mode: single
+  icon: mdi:music
+
+open_garage:
+  alias: Open Garage
+  sequence:
+  - action: cover.open_cover
+    target:
+      entity_id: cover.smart_garage_door_garage
+  mode: single
+  icon: mdi:garage-open
+
+read_news:
+  alias: Read the News
+  sequence:
+  # Play news briefing on all media players
+  - action: tts.google_translate_say
+    target:
+      entity_id:
+        - media_player.kitchen
+        - media_player.study_speaker
+        - media_player.master_bedroom_speaker
+    data:
+      message: "Here are your news headlines for today. You can customize this message with actual news sources."
+  mode: single
+  icon: mdi:newspaper
+
 

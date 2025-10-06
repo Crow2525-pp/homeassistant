@@ -4,6 +4,7 @@ path: energy
 icon: mdi:solar-power
 badges: !include ../badges/standard.yaml
 cards:
+  - !include ../cards/navbar.yaml
   # Solar overview with debugging
   - !include ../cards/solar.yaml
 

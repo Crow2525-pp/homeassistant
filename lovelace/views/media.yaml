@@ -2,6 +2,7 @@ title: Media
 path: media
 icon: mdi:play-circle
 cards: 
+  - !include ../cards/navbar.yaml
   - !include ../cards/media/media_recent_played.yaml
   - !include ../cards/media/sonarr_upcoming.yaml
 # - !include ../cards/media/sonarr_missing.yaml

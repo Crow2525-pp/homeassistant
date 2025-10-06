@@ -1,0 +1,35 @@
+type: custom:navbar-card
+layout:
+  reflect_child_state: true
+desktop:
+  show_labels: true
+mobile:
+  show_labels: true
+routes:
+  - url: /lovelace/control
+    icon: mdi:home-lightbulb
+    label: Control
+  - url: /lovelace/climate
+    icon: mdi:thermometer
+    label: Climate
+  - url: /lovelace/energy
+    icon: mdi:solar-power
+    label: Energy
+  - url: /lovelace/media
+    icon: mdi:play-circle
+    label: Media
+  - url: /lovelace/alarm
+    icon: mdi:security
+    label: Security
+  - url: /lovelace/network
+    icon: mdi:server-network
+    label: Network
+  - url: /lovelace/calendar
+    icon: mdi:calendar
+    label: Calendar
+  - url: /lovelace/laundry
+    icon: mdi:washing-machine
+    label: Laundry
+  - url: /lovelace/maintenance
+    icon: mdi:tools
+    label: Maintenance

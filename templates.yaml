@@ -150,12 +150,12 @@
       unique_id: solar_excess_available
       state: >
         {% set net_grid = states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) %}
-        {{ net_grid < -1000 }}
+        {{ net_grid < -1 }}
       icon: "mdi:solar-power-variant"
       attributes:
         excess_power: >
           {% set net_grid = states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) %}
-          {{ ((net_grid * -1) / 1000) | round(1) if net_grid < 0 else 0 }}
+          {{ (net_grid * -1) | round(2) if net_grid < 0 else 0 }}
 
 - sensor:
     # Smart appliance recommendation based on solar, season, and conditions

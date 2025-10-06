@@ -3,6 +3,7 @@ path: laundry
 icon: mdi:washing-machine
 badges: !include ../badges/laundry.yaml
 cards: 
+  - !include ../cards/navbar.yaml
   - !include ../cards/laundry/washer.yaml
   - !include ../cards/laundry/dryer.yaml
   - !include ../cards/laundry/dishwasher.yaml
