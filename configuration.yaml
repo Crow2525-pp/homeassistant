@@ -58,6 +58,7 @@ lovelace:
       type: module
     - url: /hacsfiles/lovelace-navbar-card/navbar-card.js
       type: module
+    - url: /hacsfiles/lovelace-layout-card/layout-card.js"
 
 logger:
   default: warning
