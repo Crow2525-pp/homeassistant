@@ -187,7 +187,7 @@ cards:
                     letter-spacing: 0.3px;
                   }
             - type: markdown
-              content: "🌙 Closes blinds, curtains & garage  \n💡 Turns off lights  \n😴 Sets occupancy to **Sleeping**"
+              content: "🌙 Closes blinds & curtains  \n💡 Turns off lights  \n😴 Sets occupancy to **Sleeping**"
               card_mod:
                 style: |
                   ha-card {
@@ -339,7 +339,7 @@ cards:
                     color: white;
                   }
 
-      # Leaving Home - show when someone is home or for 30 min after last person leaves
+      # Leaving Home - show when everyone is away
       - type: conditional
         conditions:
           - condition: state
@@ -445,7 +445,7 @@ cards:
                   letter-spacing: 0.3px;
                 }
           - type: markdown
-            content: "🎵 Start music playback  \n🔊 Kitchen speaker"
+            content: "🎵 Start music playback  \n🔊 WiiM Amp"
             card_mod:
               style: |
                 ha-card {
@@ -465,65 +465,138 @@ cards:
                   color: white;
                 }
 
-      # Open Garage - always available fallback button
-      - type: vertical-stack
-        cards:
-          - type: button
-            name: Open Garage
-            icon: mdi:garage-open
-            tap_action:
-              action: call-service
-              service: script.open_garage
-            show_name: true
-            show_icon: true
-            icon_height: 48px
-            card_mod:
-              style: |
-                ha-card {
-                  background: linear-gradient(145deg, #0EA5E9 0%, #0284C7 100%);
-                  color: white;
-                  border-radius: 16px 16px 0 0;
-                  box-shadow: 0 8px 16px rgba(14, 165, 233, 0.4);
-                  padding: 20px;
-                  min-height: 110px;
-                  border: none;
-                  transition: all 0.3s ease;
-                }
-                ha-card:hover {
-                  transform: translateY(-2px);
-                  box-shadow: 0 12px 24px rgba(14, 165, 233, 0.5);
-                }
-                ha-icon {
-                  color: white;
-                  --mdc-icon-size: 52px;
-                  filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
-                }
-                .name {
-                  font-weight: 600;
-                  font-size: 19px;
-                  margin-top: 10px;
-                  letter-spacing: 0.3px;
-                }
-          - type: markdown
-            content: "🚗 Opens garage door  \n🏠 Smart garage control"
-            card_mod:
-              style: |
-                ha-card {
-                  background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
-                  backdrop-filter: blur(10px);
-                  border-radius: 0 0 16px 16px;
-                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-                  padding: 14px;
-                  font-size: 13px;
-                  line-height: 1.6;
-                  margin-top: -6px;
-                  border-top: 2px solid rgba(14, 165, 233, 0.3);
-                  color: white;
-                }
-                ha-card p {
-                  margin: 4px 0;
-                  color: white;
-                }
+      # Garage control quick actions
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: cover.smart_garage_door_garage
+            state: 'open'
+        card:
+          type: vertical-stack
+          cards:
+            - type: button
+              name: Close Garage
+              icon: mdi:garage
+              tap_action:
+                action: call-service
+                service: cover.close_cover
+                target:
+                  entity_id: cover.smart_garage_door_garage
+              show_name: true
+              show_icon: true
+              icon_height: 48px
+              card_mod:
+                style: |
+                  ha-card {
+                    background: linear-gradient(145deg, #DC2626 0%, #B91C1C 100%);
+                    color: white;
+                    border-radius: 16px 16px 0 0;
+                    box-shadow: 0 8px 16px rgba(220, 38, 38, 0.4);
+                    padding: 20px;
+                    min-height: 110px;
+                    border: none;
+                    transition: all 0.3s ease;
+                  }
+                  ha-card:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 12px 24px rgba(220, 38, 38, 0.5);
+                  }
+                  ha-icon {
+                    color: white;
+                    --mdc-icon-size: 52px;
+                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+                  }
+                  .name {
+                    font-weight: 600;
+                    font-size: 19px;
+                    margin-top: 10px;
+                    letter-spacing: 0.3px;
+                  }
+            - type: markdown
+              content: "🔒 Close garage door  \n🚘 Tap to secure entry"
+              card_mod:
+                style: |
+                  ha-card {
+                    background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
+                    backdrop-filter: blur(10px);
+                    border-radius: 0 0 16px 16px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                    padding: 14px;
+                    font-size: 13px;
+                    line-height: 1.6;
+                    margin-top: -6px;
+                    border-top: 2px solid rgba(220, 38, 38, 0.3);
+                    color: white;
+                  }
+                  ha-card p {
+                    margin: 4px 0;
+                    color: white;
+                  }
+
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: cover.smart_garage_door_garage
+            state: 'closed'
+        card:
+          type: vertical-stack
+          cards:
+            - type: button
+              name: Open Garage
+              icon: mdi:garage-open
+              tap_action:
+                action: call-service
+                service: script.open_garage
+              show_name: true
+              show_icon: true
+              icon_height: 48px
+              card_mod:
+                style: |
+                  ha-card {
+                    background: linear-gradient(145deg, #0EA5E9 0%, #0284C7 100%);
+                    color: white;
+                    border-radius: 16px 16px 0 0;
+                    box-shadow: 0 8px 16px rgba(14, 165, 233, 0.4);
+                    padding: 20px;
+                    min-height: 110px;
+                    border: none;
+                    transition: all 0.3s ease;
+                  }
+                  ha-card:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 12px 24px rgba(14, 165, 233, 0.5);
+                  }
+                  ha-icon {
+                    color: white;
+                    --mdc-icon-size: 52px;
+                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+                  }
+                  .name {
+                    font-weight: 600;
+                    font-size: 19px;
+                    margin-top: 10px;
+                    letter-spacing: 0.3px;
+                  }
+            - type: markdown
+              content: "🚗 Opens garage door"
+              card_mod:
+                style: |
+                  ha-card {
+                    background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(51, 65, 85, 0.95));
+                    backdrop-filter: blur(10px);
+                    border-radius: 0 0 16px 16px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                    padding: 14px;
+                    font-size: 13px;
+                    line-height: 1.6;
+                    margin-top: -6px;
+                    border-top: 2px solid rgba(14, 165, 233, 0.3);
+                    color: white;
+                  }
+                  ha-card p {
+                    margin: 4px 0;
+                    color: white;
+                  }
 
       # Read News - always available fallback button
       - type: vertical-stack

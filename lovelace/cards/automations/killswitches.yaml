@@ -23,29 +23,6 @@ cards:
           font-style: italic;
         }
 
-  # Climate overrides
-  - type: markdown
-    content: |
-      **Climate Overrides**
-
-      💡 **OFF** = Automations control climate (normal mode)
-      🔒 **ON** = You control climate manually (automations disabled)
-    card_mod:
-      style: |
-        ha-card {
-          background: transparent;
-          box-shadow: none;
-          padding: 8px 16px 4px;
-        }
-        ha-markdown p {
-          font-size: 0.9em;
-          margin: 0;
-        }
-        ha-markdown p:first-child {
-          font-size: 0.95em;
-          font-weight: 500;
-        }
-
   - type: grid
     columns: 2
     square: false

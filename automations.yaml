@@ -4100,3 +4100,48 @@
       title: ✅ Study/Henry's Room AC Filter Updated
       message: Filter change date recorded successfully
   mode: single
+
+- id: keep_computer_desk_light_socket_2_on
+  alias: Keep Computer Desk Light Socket 2 Always On
+  description: Ensures switch.computer_desk_light_socket_2 is always turned on
+  trigger:
+    - platform: state
+      entity_id: switch.computer_desk_light_socket_2
+      to: 'off'
+  actions:
+    - action: switch.turn_on
+      target:
+        entity_id: switch.computer_desk_light_socket_2
+  mode: single
+
+- id: garage_door_open_display_cameras
+  alias: Garage Door - Cast Front Door Camera on Open
+  description: Casts the front door camera to the kitchen display when the garage door opens
+  triggers:
+    - trigger: state
+      entity_id: cover.smart_garage_door_garage
+      to: 'open'
+  conditions: []
+  actions:
+    - service: camera.play_stream
+      data:
+        media_player: media_player.kitchen
+        format: hls
+      target:
+        entity_id: camera.bi_front_door_camera
+  mode: single
+
+- id: garage_door_close_stop_kitchen
+  alias: Garage Door - Stop Kitchen Stream on Close
+  description: Stops any kitchen playback once the garage door closes
+  triggers:
+    - trigger: state
+      entity_id: cover.smart_garage_door_garage
+      to: 'closed'
+      from: 'open'
+  conditions: []
+  actions:
+    - service: media_player.media_stop
+      target:
+        entity_id: media_player.kitchen
+  mode: single

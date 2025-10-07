@@ -611,10 +611,7 @@
       unique_id: show_leaving_home_button
       state: >
         {% set zone_state = states('zone.home') | int(0) %}
-        {% set last_changed = as_timestamp(states.zone.home.last_changed) %}
-        {% set now = as_timestamp(now()) %}
-        {% set minutes_since_change = (now - last_changed) / 60 %}
-        {{ zone_state > 0 or (zone_state == 0 and minutes_since_change <= 30) }}
+        {{ zone_state == 0 }}
       icon: mdi:home-export-outline
 
     # Room climate alert - triggers when any room is significantly different from master

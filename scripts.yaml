@@ -211,27 +211,19 @@ curtains_half_way:
 spotify_tv:
   alias: Spotify Tv On
   sequence:
-  - action: remote.turn_on
+  - action: media_player.turn_on
+    target:
+      entity_id: media_player.living_room_wiimamp
+    data: {}
+  - action: media_player.select_source
+    target:
+      entity_id: media_player.spotify_philip_patterson
     data:
-      activity: spotify://
+      source: 'Living Room WiiM Amp'
+  - action: media_player.media_play
     target:
-      device_id: 1dd250129defd8ff84726a6e7d45aee6
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 7
-      milliseconds: 0
-    enabled: true
-  - metadata: {}
+      entity_id: media_player.spotify_philip_patterson
     data: {}
-    action: media_player.media_play
-    target:
-      device_id: 1dd250129defd8ff84726a6e7d45aee6
-  - metadata: {}
-    data: {}
-    action: media_player.media_play
-    target:
-      device_id: 1dd250129defd8ff84726a6e7d45aee6
   mode: single
   icon: mdi:spotify
 volume_talking:
@@ -270,12 +262,14 @@ volume_high:
 spotify_off:
   alias: Spotify Tv Off
   sequence:
-  - action: media_player.turn_off
-    metadata: {}
-    data: {}
+  - action: media_player.media_stop
     target:
-      entity_id: media_player.tv_2
-      device_id: 1dd250129defd8ff84726a6e7d45aee6
+      entity_id: media_player.living_room_wiimamp
+    data: {}
+  - action: media_player.media_pause
+    target:
+      entity_id: media_player.spotify_philip_patterson
+    data: {}
   mode: single
   icon: mdi:spotify
 new_script:
@@ -291,12 +285,10 @@ new_script:
 spotify:
   alias: Spotify
   sequence:
-  - action: remote.turn_on
-    metadata: {}
-    data:
-      activity: spotify://
+  - service: script.turn_on
     target:
-      entity_id: remote.tv
+      entity_id: script.spotify_tv
+    data: {}
   icon: mdi:spotify
   mode: single
 volume_quiet:
@@ -371,9 +363,6 @@ good_night:
   - service: light.turn_off
     target:
       entity_id: all
-  - service: cover.close_cover
-    target:
-      entity_id: cover.smart_garage_door_garage
   - service: input_select.select_option
     target:
       entity_id: input_select.occupancy
@@ -536,13 +525,11 @@ water_plants:
 play_music:
   alias: Play Music
   sequence:
-  # Start playing music on kitchen speaker (default media player)
-  - action: media_player.play_media
+  # Resume playback on the living room WiiM Amp
+  - action: media_player.media_play
     target:
-      entity_id: media_player.kitchen
-    data:
-      media_content_type: music
-      media_content_id: ""
+      entity_id: media_player.living_room_wiimamp
+    data: {}
   mode: single
   icon: mdi:music
 
@@ -569,5 +556,54 @@ read_news:
       message: "Here are your news headlines for today. You can customize this message with actual news sources."
   mode: single
   icon: mdi:newspaper
-
+morning_news_briefing:
+  alias: Morning News Briefing
+  sequence:
+    - service: media_player.play_media
+      target:
+        entity_id: media_player.kitchen
+      data:
+        media_content_id: "{{ states('sensor.bbc_hourly_bulletin') }}"
+        media_content_type: music
+    - wait_for_trigger:
+        - platform: state
+          entity_id:
+            - media_player.kitchen
+          from: 'playing'
+          to: 'idle'
+      continue_on_timeout: false
+    - service: media_player.play_media
+      target:
+        entity_id: media_player.kitchen
+      data:
+        media_content_id: "{{ states('sensor.fiveminutenews') }}"
+        media_content_type: music
+    - wait_for_trigger:
+        - platform: state
+          entity_id:
+            - media_player.kitchen
+          from: 'playing'
+          to: 'idle'
+      continue_on_timeout: false
+    - service: media_player.play_media
+      target:
+        entity_id: media_player.kitchen
+      data:
+        media_content_id: "{{ states('sensor.daily_tech_headlines') }}"
+        media_content_type: music
+    - wait_for_trigger:
+        - platform: state
+          entity_id:
+            - media_player.kitchen
+          from: 'playing'
+          to: 'idle'
+      continue_on_timeout: false
+    - service: media_player.play_media
+      target:
+        entity_id: media_player.kitchen
+      data:
+        media_content_id: "{{ states('sensor.60_second_sci') }}"
+        media_content_type: music
+  mode: restart
+  icon: mdi:radio
 
