@@ -3779,6 +3779,8 @@
     to:
     - heat_now
     - cool_now
+    - heat_needed
+    - cool_needed
     for:
       minutes: 30
   conditions:
@@ -3787,6 +3789,12 @@
     state: 'on'
   - condition: state
     entity_id: climate.masterbed_versatile_thermostat
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.climate_manual_control_master
+    state: 'off'
+  - condition: state
+    entity_id: binary_sensor.master_bedroom_door_sensor_opening
     state: 'off'
   - condition: template
     value_template: "{% set last = states('input_datetime.last_climate_notification_master')\
@@ -3836,6 +3844,69 @@
     data:
       hvac_mode: "{% if states('sensor.living_room_climate_suggestion') == 'heat_now'\
         \ %}\n  heat\n{% else %}\n  cool\n{% endif %}\n"
+  mode: single
+- id: '1727826100003'
+  alias: Handle Climate Notification Action - Master Bedroom
+  description: Turns on master bedroom climate when the user approves a notification
+  triggers:
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: CLIMATE_MASTER_ON
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.master_bedroom_door_sensor_opening
+        state: 'on'
+      sequence:
+      - service: notify.mobile_app_samsung_galaxy_s22_ultra
+        data:
+          title: Door is open
+          message: Close the master bedroom door before starting the climate system.
+      - stop: true
+  - service: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.climate_manual_control_master
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{ states('sensor.master_bedroom_climate_suggestion') in ['heat_now', 'heat_needed'] }}"
+      sequence:
+      - service: script.roller_blinds_up
+      - service: cover.open_cover
+        target:
+          entity_id: cover.windowcovering_cover
+      - service: fan.turn_off
+        target:
+          entity_id: fan.masterbedroom_fan
+      - service: climate.set_temperature
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          temperature: 20
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          hvac_mode: heat
+    default:
+      - service: script.1693262268843
+      - service: fan.set_percentage
+        target:
+          entity_id: fan.masterbedroom_fan
+        data:
+          percentage: 33
+      - service: climate.set_temperature
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          temperature: 23
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          hvac_mode: cool
   mode: single
 - id: appliance_timeout_failsafe
   alias: Appliances - Timeout Failsafe
@@ -4144,4 +4215,163 @@
     - service: media_player.media_stop
       target:
         entity_id: media_player.kitchen
+  mode: single
+- id: '1728310000000'
+  alias: Master Bedroom - Solar Assisted Climate Control
+  description: Uses solar excess, shading, and fan control to keep the master bedroom between 18-24C while respecting manual overrides.
+  triggers:
+  - platform: state
+    entity_id: sensor.master_bedroom_climate_suggestion
+  - platform: state
+    entity_id: binary_sensor.solar_excess_available
+  - platform: state
+    entity_id: binary_sensor.master_bedroom_door_sensor_opening
+  - platform: state
+    entity_id: input_boolean.climate_manual_control_master
+  - platform: state
+    entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+  - platform: time_pattern
+    minutes: "/5"
+  - platform: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.climate_manual_control_master
+        state: 'on'
+      sequence:
+      - stop: true
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.master_bedroom_door_sensor_opening
+        state: 'on'
+      sequence:
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          hvac_mode: 'off'
+      - service: fan.turn_off
+        target:
+          entity_id: fan.masterbedroom_fan
+      - stop: true
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.solar_excess_available
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.master_bedroom_door_sensor_opening
+        state: 'off'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: numeric_state
+            entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+            above: 26
+          sequence:
+          - service: cover.close_cover
+            target:
+              entity_id: cover.roller_blinds_chan1
+          - service: cover.close_cover
+            target:
+              entity_id: cover.windowcovering_cover
+          - service: fan.set_percentage
+            target:
+              entity_id: fan.masterbedroom_fan
+            data:
+              percentage: 66
+          - service: climate.set_temperature
+            target:
+              entity_id: climate.masterbed_versatile_thermostat
+            data:
+              temperature: 23
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.masterbed_versatile_thermostat
+            data:
+              hvac_mode: cool
+        - conditions:
+          - condition: numeric_state
+            entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+            above: 24
+          sequence:
+          - service: script.1693262268843
+          - service: fan.set_percentage
+            target:
+              entity_id: fan.masterbedroom_fan
+            data:
+              percentage: 33
+          - service: climate.set_temperature
+            target:
+              entity_id: climate.masterbed_versatile_thermostat
+            data:
+              temperature: 23
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.masterbed_versatile_thermostat
+            data:
+              hvac_mode: cool
+        - conditions:
+          - condition: numeric_state
+            entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+            below: 18
+          sequence:
+          - service: script.roller_blinds_up
+          - service: cover.open_cover
+            target:
+              entity_id: cover.windowcovering_cover
+          - service: fan.turn_off
+            target:
+              entity_id: fan.masterbedroom_fan
+          - service: climate.set_temperature
+            target:
+              entity_id: climate.masterbed_versatile_thermostat
+            data:
+              temperature: 20
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.masterbed_versatile_thermostat
+            data:
+              hvac_mode: heat
+        default:
+          - service: fan.turn_off
+            target:
+              entity_id: fan.masterbedroom_fan
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.masterbed_versatile_thermostat
+            data:
+              hvac_mode: 'off'
+    default:
+      - choose:
+        - conditions:
+          - condition: numeric_state
+            entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+            above: 24
+          sequence:
+          - service: script.1693262268843
+          - service: fan.set_percentage
+            target:
+              entity_id: fan.masterbedroom_fan
+            data:
+              percentage: 33
+        - conditions:
+          - condition: numeric_state
+            entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+            below: 18
+          sequence:
+          - service: cover.close_cover
+            target:
+              entity_id: cover.windowcovering_cover
+          - service: fan.turn_off
+            target:
+              entity_id: fan.masterbedroom_fan
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          hvac_mode: 'off'
   mode: single

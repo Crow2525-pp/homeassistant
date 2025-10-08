@@ -65,6 +65,24 @@
     action: more-info
 
 - type: entity
+  entity: binary_sensor.hot_weather_alert
+  name: "Hot Weather"
+  show_state: true
+  show_name: false
+  visibility:
+    - condition: state
+      entity: binary_sensor.hot_weather_alert
+      state_not: 'normal'
+  color: >
+    {% set state = states('binary_sensor.hot_weather_alert') %}
+    {% if state == 'superhot' %} red
+    {% elif state == 'hot' %} orange
+    {% elif state == 'mild' %} amber
+    {% else %} blue {% endif %}
+  tap_action:
+    action: more-info
+
+- type: entity
   entity: input_boolean.washing_machine_on
   name: "Washer"
   icon: mdi:washing-machine

@@ -20,13 +20,13 @@ cards:
           content: |
             **Currently Running:**
             {% if is_state('input_boolean.washing_machine_on', 'on') %}
-            • Washer ({{ states('sensor.washing_machine_estimated_remaining') }} min remaining)
+            - Washer ({{ states('sensor.washing_machine_estimated_remaining') }} min remaining)
             {% endif %}
             {% if is_state('input_boolean.dryer_on', 'on') %}
-            • Dryer ({{ states('sensor.dryer_estimated_remaining') }} min remaining)
+            - Dryer ({{ states('sensor.dryer_estimated_remaining') }} min remaining)
             {% endif %}
             {% if is_state('input_boolean.dishwasher_on', 'on') %}
-            • Dishwasher
+            - Dishwasher
             {% endif %}
           card_mod:
             style: |
@@ -41,7 +41,6 @@ cards:
               ha-card p {
                 color: white;
               }
-
       card_mod:
         style: |
           ha-card {
@@ -55,6 +54,36 @@ cards:
           ha-card p {
             color: white;
           }
+
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: binary_sensor.hvac_door_open_alert
+        state: 'on'
+    card:
+      type: vertical-stack
+      cards:
+        - type: markdown
+          content: >-
+            **Door open while AC running**  \n            {% set summary = state_attr('binary_sensor.hvac_door_open_alert', 'summary') %}
+            {% if summary not in [None, '', 'None'] %}
+            {{ summary | replace('\n', '  \n') }}
+            {% else %}
+            Close the door to keep the cool air in.
+            {% endif %}
+          card_mod:
+            style: |
+              ha-card {
+                background: linear-gradient(145deg, rgba(225, 29, 72, 0.12), rgba(225, 29, 72, 0.05));
+                border-left: 4px solid #E11D48;
+                padding: 12px 16px;
+                border-radius: 12px;
+                box-shadow: none;
+                color: white;
+              }
+              ha-card p {
+                color: white;
+              }
 
   - type: conditional
     conditions:

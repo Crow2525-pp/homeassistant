@@ -209,21 +209,33 @@ curtains_half_way:
   mode: single
   icon: mdi:curtains
 spotify_tv:
-  alias: Spotify Tv On
+  alias: Spotify - WiiM Amp
   sequence:
-  - action: media_player.turn_on
-    target:
-      entity_id: media_player.living_room_wiimamp
-    data: {}
-  - action: media_player.select_source
-    target:
-      entity_id: media_player.spotify_philip_patterson
-    data:
-      source: 'Living Room WiiM Amp'
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ 'Living Room WiiM Amp' in (state_attr('media_player.spotify_philip_patterson', 'source_list') or []) }}
+        sequence:
+          - action: media_player.select_source
+            target:
+              entity_id: media_player.spotify_philip_patterson
+            data:
+              source: 'Living Room WiiM Amp'
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ 'WiiM Amp' in (state_attr('media_player.spotify_philip_patterson', 'source_list') or []) }}
+        sequence:
+          - action: media_player.select_source
+            target:
+              entity_id: media_player.spotify_philip_patterson
+            data:
+              source: 'WiiM Amp'
+    default: []
   - action: media_player.media_play
     target:
       entity_id: media_player.spotify_philip_patterson
-    data: {}
   mode: single
   icon: mdi:spotify
 volume_talking:
@@ -234,7 +246,7 @@ volume_talking:
       volume_level: 0.2
     action: media_player.volume_set
     target:
-      entity_id: media_player.sony_bravia
+      entity_id: media_player.living_room_wiimamp
   mode: single
   icon: mdi:volume-low
 volume_medium:
@@ -245,7 +257,7 @@ volume_medium:
       volume_level: 0.4
     action: media_player.volume_set
     target:
-      entity_id: media_player.sony_bravia
+      entity_id: media_player.living_room_wiimamp
   mode: single
   icon: mdi:volume-medium
 volume_high:
@@ -256,20 +268,18 @@ volume_high:
       volume_level: 0.59
     action: media_player.volume_set
     target:
-      entity_id: media_player.sony_bravia
+      entity_id: media_player.living_room_wiimamp
   mode: single
   icon: mdi:volume-high
 spotify_off:
-  alias: Spotify Tv Off
+  alias: Stop Spotify
   sequence:
   - action: media_player.media_stop
     target:
       entity_id: media_player.living_room_wiimamp
-    data: {}
   - action: media_player.media_pause
     target:
       entity_id: media_player.spotify_philip_patterson
-    data: {}
   mode: single
   icon: mdi:spotify
 new_script:
@@ -283,12 +293,11 @@ new_script:
   icon: mdi:youtube
   mode: single
 spotify:
-  alias: Spotify
+  alias: Spotify Shortcut
   sequence:
   - service: script.turn_on
     target:
       entity_id: script.spotify_tv
-    data: {}
   icon: mdi:spotify
   mode: single
 volume_quiet:
@@ -299,7 +308,7 @@ volume_quiet:
       volume_level: 0.1
     action: media_player.volume_set
     target:
-      entity_id: media_player.sony_bravia
+      entity_id: media_player.living_room_wiimamp
   mode: single
   icon: mdi:volume-vibrate
 new_roller_blind_stop:
@@ -606,4 +615,60 @@ morning_news_briefing:
         media_content_type: music
   mode: restart
   icon: mdi:radio
+
+naptime:
+  alias: Naptime
+  sequence:
+  # Close blinds
+  - service: script.roller_blinds_down
+    data: {}
+  # Close curtains
+  - service: cover.close_cover
+    target:
+      entity_id: cover.windowcovering_cover
+  # Turn off lights in master bedroom only
+  - service: light.turn_off
+    target:
+      area_id: master_bedroom
+  # Set comfortable climate in master bedroom
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.essendon_airport_temp
+        above: 24
+      sequence:
+      - action: climate.set_hvac_mode
+        data:
+          hvac_mode: cool
+        target:
+          area_id: master_bedroom
+      - action: climate.set_temperature
+        data:
+          temperature: 22
+        target:
+          area_id: master_bedroom
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.essendon_airport_temp
+        below: 18
+      sequence:
+      - action: climate.set_hvac_mode
+        data:
+          hvac_mode: heat
+        target:
+          area_id: master_bedroom
+      - action: climate.set_temperature
+        data:
+          temperature: 21
+        target:
+          area_id: master_bedroom
+  # Set ceiling fan to low speed (speed 1)
+  - service: script.fan_speed_1
+    data: {}
+  # Stop music in master bedroom only
+  - service: media_player.media_stop
+    target:
+      area_id: master_bedroom
+  mode: single
+  icon: mdi:sleep
 

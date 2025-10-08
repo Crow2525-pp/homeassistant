@@ -19,7 +19,7 @@ cards:
         hold_action:
           action: call-service
           service: script.spotify_off
-        name: Spotify TV
+        name: Spotify on WiiM Amp
         icon: mdi:spotify
         card_mod:
           style: |
@@ -49,7 +49,7 @@ cards:
               letter-spacing: 0.3px;
             }
       - type: markdown
-        content: "Tap: Start Spotify on TV  \nHold: Turn off Spotify"
+        content: "Tap: Play Spotify on WiiM Amp  \nHold: Stop Spotify"
         card_mod:
           style: |
             ha-card {

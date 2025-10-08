@@ -597,6 +597,44 @@
         {{ states('sensor.essendon_airport_max_temp') | float(0) > 20 }}
       icon: mdi:watering-can
 
+    - name: "Hot Weather Alert"
+      unique_id: hot_weather_alert
+      state: >
+        {% set max_temp = states('sensor.essendon_airport_max_temp') | float(0) %}
+        {% if max_temp >= 35 %}
+          superhot
+        {% elif max_temp >= 28 %}
+          hot
+        {% elif max_temp >= 24 %}
+          mild
+        {% else %}
+          normal
+        {% endif %}
+      icon: >
+        {% set max_temp = states('sensor.essendon_airport_max_temp') | float(0) %}
+        {% if max_temp >= 35 %}
+          mdi:weather-sunny-alert
+        {% elif max_temp >= 28 %}
+          mdi:weather-sunny
+        {% elif max_temp >= 24 %}
+          mdi:white-balance-sunny
+        {% else %}
+          mdi:thermometer
+        {% endif %}
+      attributes:
+        temperature: "{{ states('sensor.essendon_airport_max_temp') }}"
+        suggestion: >
+          {% set max_temp = states('sensor.essendon_airport_max_temp') | float(0) %}
+          {% if max_temp >= 35 %}
+            Close blinds, run AC early
+          {% elif max_temp >= 28 %}
+            Consider closing blinds during peak sun
+          {% elif max_temp >= 24 %}
+            Pleasant day, open windows
+          {% else %}
+            Enjoy the mild weather
+          {% endif %}
+
     - name: "Show Arriving Home Button"
       unique_id: show_arriving_home_button
       state: >
@@ -613,6 +651,17 @@
         {% set zone_state = states('zone.home') | int(0) %}
         {{ zone_state == 0 }}
       icon: mdi:home-export-outline
+
+    - name: "Show Naptime Button"
+      unique_id: show_naptime_button
+      state: >
+        {% set current_hour = now().hour %}
+        {% set current_minute = now().minute %}
+        {% set current_time_minutes = (current_hour * 60) + current_minute %}
+        {% set naptime_start = (12 * 60) + 30 %}
+        {% set naptime_end = 16 * 60 %}
+        {{ current_time_minutes >= naptime_start and current_time_minutes < naptime_end }}
+      icon: mdi:sleep
 
     # Room climate alert - triggers when any room is significantly different from master
     - name: "Room Climate Alert"
@@ -718,7 +767,411 @@
         ] %}
         {{ messages | random }}
       icon: "mdi:dishwasher"
+- sensor:
+    - name: HVAC Door Open Summary
+      unique_id: hvac_door_open_summary
+      state: >-
+        {% set alerts = namespace(items=[]) %}
+        {% set living_doors = [
+          ('Living Room Door', 'binary_sensor.living_room_door_sensor_opening'),
+          ('Front Door', 'binary_sensor.front_door_sensor_opening'),
+          ('Interior Garage Door', 'binary_sensor.interior_garage_door_sensor_magnet_opening')
+        ] %}
+        {% set living = namespace(open=[]) %}
+        {% for name, entity in living_doors %}
+          {% if is_state(entity, 'on') %}
+            {% set living.open = living.open + [name] %}
+          {% endif %}
+        {% endfor %}
+        {% set living_climate = states('climate.living_room_ac') %}
+        {% if living_climate not in ['off', 'unavailable', 'unknown'] and living.open %}
+          {% set mode = state_attr('climate.living_room_ac', 'hvac_action') or 'running' %}
+          {% if mode == 'cooling' %}
+            {% set alerts.items = alerts.items + ['- Living Room AC: ' ~ (living.open | join(', '))] %}
+          {% elif mode == 'heating' %}
+            {% set alerts.items = alerts.items + ['- Living Room Heater: ' ~ (living.open | join(', '))] %}
+          {% else %}
+            {% set alerts.items = alerts.items + ['- Living Room HVAC: ' ~ (living.open | join(', '))] %}
+          {% endif %}
+        {% endif %}
+        {% set master_doors = [
+          ('Master Bedroom Door', 'binary_sensor.master_bedroom_door_sensor_opening'),
+          ('Balcony Door', 'binary_sensor.balcony_door_sensor_magnet_opening_2')
+        ] %}
+        {% set master = namespace(open=[]) %}
+        {% for name, entity in master_doors %}
+          {% if is_state(entity, 'on') %}
+            {% set master.open = master.open + [name] %}
+          {% endif %}
+        {% endfor %}
+        {% set master_climate = states('climate.masterbed_ac') %}
+        {% if master_climate not in ['off', 'unavailable', 'unknown'] and master.open %}
+          {% set mode = state_attr('climate.masterbed_ac', 'hvac_action') or 'running' %}
+          {% if mode == 'cooling' %}
+            {% set alerts.items = alerts.items + ['- Master Bedroom AC: ' ~ (master.open | join(', '))] %}
+          {% elif mode == 'heating' %}
+            {% set alerts.items = alerts.items + ['- Master Bedroom Heater: ' ~ (master.open | join(', '))] %}
+          {% else %}
+            {% set alerts.items = alerts.items + ['- Master Bedroom HVAC: ' ~ (master.open | join(', '))] %}
+          {% endif %}
+        {% endif %}
+        {% set otto_doors = [
+          ("Otto's Room Door", 'binary_sensor.otto_room_door_sensor_opening')
+        ] %}
+        {% set otto = namespace(open=[]) %}
+        {% for name, entity in otto_doors %}
+          {% if is_state(entity, 'on') %}
+            {% set otto.open = otto.open + [name] %}
+          {% endif %}
+        {% endfor %}
+        {% set otto_climate = states('climate.otto_ac') %}
+        {% if otto_climate not in ['off', 'unavailable', 'unknown'] and otto.open %}
+          {% set mode = state_attr('climate.otto_ac', 'hvac_action') or 'running' %}
+          {% if mode == 'cooling' %}
+            {% set alerts.items = alerts.items + ["- Otto's Room AC: " ~ (otto.open | join(', '))] %}
+          {% elif mode == 'heating' %}
+            {% set alerts.items = alerts.items + ["- Otto's Room Heater: " ~ (otto.open | join(', '))] %}
+          {% else %}
+            {% set alerts.items = alerts.items + ["- Otto's Room HVAC: " ~ (otto.open | join(', '))] %}
+          {% endif %}
+        {% endif %}
+        {% set study_doors = [
+          ("Henry's Room Door", 'binary_sensor.henry_door_sensor_magnet_opening')
+        ] %}
+        {% set study = namespace(open=[]) %}
+        {% for name, entity in study_doors %}
+          {% if is_state(entity, 'on') %}
+            {% set study.open = study.open + [name] %}
+          {% endif %}
+        {% endfor %}
+        {% set study_climate = states('climate.study_ac') %}
+        {% if study_climate not in ['off', 'unavailable', 'unknown'] and study.open %}
+          {% set mode = state_attr('climate.study_ac', 'hvac_action') or 'running' %}
+          {% if mode == 'cooling' %}
+            {% set alerts.items = alerts.items + ["- Henry's Room AC: " ~ (study.open | join(', '))] %}
+          {% elif mode == 'heating' %}
+            {% set alerts.items = alerts.items + ["- Henry's Room Heater: " ~ (study.open | join(', '))] %}
+          {% else %}
+            {% set alerts.items = alerts.items + ["- Henry's Room HVAC: " ~ (study.open | join(', '))] %}
+          {% endif %}
+        {% endif %}
+        {% if alerts.items %}
+          {{ alerts.items | join('\n') }}
+        {% else %}
+          None
+        {% endif %}
 
+- binary_sensor:
+    - name: HVAC Door Open Alert
+      unique_id: hvac_door_open_alert
+      state: >-
+        {% set summary = states('sensor.hvac_door_open_summary') %}
+        {{ summary not in ['None', 'unknown', 'unavailable'] }}
+      attributes:
+        summary: "{{ states('sensor.hvac_door_open_summary') }}"
 
+    # Quick Action Priority Filters - Only show top 4 by priority
+    - name: "Show Good Morning Button Filtered"
+      unique_id: show_good_morning_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'good_morning' in top_4 | map(attribute='name') | list }}
 
+    - name: "Show Naptime Button Filtered"
+      unique_id: show_naptime_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'naptime' in top_4 | map(attribute='name') | list }}
+
+    - name: "Show Water Plants Button Filtered"
+      unique_id: show_water_plants_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'water_plants' in top_4 | map(attribute='name') | list }}
+
+    - name: "Show Good Night Button Filtered"
+      unique_id: show_good_night_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'good_night' in top_4 | map(attribute='name') | list }}
+
+    - name: "Show Arriving Home Button Filtered"
+      unique_id: show_arriving_home_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'arriving_home' in top_4 | map(attribute='name') | list }}
+
+    - name: "Show Leaving Home Button Filtered"
+      unique_id: show_leaving_home_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'leaving_home' in top_4 | map(attribute='name') | list }}
+
+    - name: "Show Play Music Button Filtered"
+      unique_id: show_play_music_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'play_music' in top_4 | map(attribute='name') | list }}
+
+    - name: "Show Read News Button Filtered"
+      unique_id: show_read_news_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'read_news' in top_4 | map(attribute='name') | list }}
 

@@ -1,0 +1,21 @@
+# Quick Action Priority Configuration
+# Lower numbers = higher priority
+# Only the top 4 buttons will be shown based on this priority order
+# Edit the priority values to change the order of buttons shown
+
+priorities:
+  good_morning: 1          # Show Good Morning button first when visible
+  naptime: 2               # Show Naptime button second when visible (12:30-4pm)
+  arriving_home: 3         # Show Arriving Home when someone just arrived
+  water_plants: 4          # Show Water Plants when temp > 20°C
+  good_night: 5            # Show Good Night in evening/night
+  leaving_home: 6          # Show Leaving Home when everyone is away
+  holiday_mode: 7          # Show Holiday Mode when nobody is home
+  close_garage: 8          # Show Close Garage when garage is open
+  open_garage: 9           # Show Open Garage when garage is closed
+  play_music: 10           # Always available fallback
+  read_news: 11            # Always available fallback
+
+# Note: Some buttons are conditional and only appear based on time,
+# occupancy, or other conditions. The priority order determines which
+# buttons are shown when multiple conditions are met simultaneously.
