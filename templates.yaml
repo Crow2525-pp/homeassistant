@@ -596,43 +596,22 @@
       state: >
         {{ states('sensor.essendon_airport_max_temp') | float(0) > 20 }}
       icon: mdi:watering-can
-
-    - name: "Hot Weather Alert"
-      unique_id: hot_weather_alert
-      state: >
-        {% set max_temp = states('sensor.essendon_airport_max_temp') | float(0) %}
-        {% if max_temp >= 35 %}
-          superhot
-        {% elif max_temp >= 28 %}
-          hot
-        {% elif max_temp >= 24 %}
-          mild
-        {% else %}
-          normal
-        {% endif %}
-      icon: >
-        {% set max_temp = states('sensor.essendon_airport_max_temp') | float(0) %}
-        {% if max_temp >= 35 %}
-          mdi:weather-sunny-alert
-        {% elif max_temp >= 28 %}
-          mdi:weather-sunny
-        {% elif max_temp >= 24 %}
-          mdi:white-balance-sunny
-        {% else %}
-          mdi:thermometer
-        {% endif %}
       attributes:
-        temperature: "{{ states('sensor.essendon_airport_max_temp') }}"
-        suggestion: >
-          {% set max_temp = states('sensor.essendon_airport_max_temp') | float(0) %}
-          {% if max_temp >= 35 %}
-            Close blinds, run AC early
-          {% elif max_temp >= 28 %}
-            Consider closing blinds during peak sun
-          {% elif max_temp >= 24 %}
-            Pleasant day, open windows
+        forecast_day: >
+          {% set temp_time = state_attr('sensor.essendon_airport_max_temp', 'forecast_time') %}
+          {% if temp_time %}
+            {% set forecast_date = as_timestamp(temp_time) | timestamp_custom('%Y-%m-%d') %}
+            {% set today = now().strftime('%Y-%m-%d') %}
+            {% set tomorrow = (now() + timedelta(days=1)).strftime('%Y-%m-%d') %}
+            {% if forecast_date == today %}
+              today
+            {% elif forecast_date == tomorrow %}
+              tomorrow
+            {% else %}
+              {{ forecast_date }}
+            {% endif %}
           {% else %}
-            Enjoy the mild weather
+            today
           {% endif %}
 
     - name: "Show Arriving Home Button"
@@ -696,6 +675,141 @@
           {% if lucas_humid_diff > 15 %}{% set issues.rooms = issues.rooms + ['Lucas Room (Humidity)'] %}{% endif %}
           {% if otto_humid_diff > 15 %}{% set issues.rooms = issues.rooms + ['Otto Room (Humidity)'] %}{% endif %}
           {{ issues.rooms | join(', ') if issues.rooms | length > 0 else 'None' }}
+
+- sensor:
+    - name: "Hot Weather Alert"
+      unique_id: hot_weather_alert
+      state: >
+        {% set max_temp = states('sensor.essendon_airport_max_temp') | float(0) %}
+        {% if max_temp >= 35 %}
+          superhot
+        {% elif max_temp >= 28 %}
+          hot
+        {% elif max_temp >= 24 %}
+          mild
+        {% else %}
+          normal
+        {% endif %}
+      icon: >
+        {% set max_temp = states('sensor.essendon_airport_max_temp') | float(0) %}
+        {% if max_temp >= 35 %}
+          mdi:weather-sunny-alert
+        {% elif max_temp >= 28 %}
+          mdi:weather-sunny
+        {% elif max_temp >= 24 %}
+          mdi:white-balance-sunny
+        {% else %}
+          mdi:thermometer
+        {% endif %}
+      attributes:
+        temperature: "{{ states('sensor.essendon_airport_max_temp') }}"
+        suggestion: >
+          {% set max_temp = states('sensor.essendon_airport_max_temp') | float(0) %}
+          {% if max_temp >= 35 %}
+            Close blinds, run AC early
+          {% elif max_temp >= 28 %}
+            Consider closing blinds during peak sun
+          {% elif max_temp >= 24 %}
+            Pleasant day, open windows
+          {% else %}
+            Enjoy the mild weather
+          {% endif %}
+
+    - name: "Cold Weather Alert"
+      unique_id: cold_weather_alert
+      state: >
+        {% set min_temp = states('sensor.essendon_airport_min_temp') | float(20) %}
+        {% if min_temp <= 0 %}
+          freezing
+        {% elif min_temp <= 5 %}
+          supercold
+        {% elif min_temp <= 10 %}
+          cold
+        {% else %}
+          normal
+        {% endif %}
+      icon: >
+        {% set min_temp = states('sensor.essendon_airport_min_temp') | float(20) %}
+        {% if min_temp <= 0 %}
+          mdi:snowflake-alert
+        {% elif min_temp <= 5 %}
+          mdi:snowflake
+        {% elif min_temp <= 10 %}
+          mdi:thermometer-low
+        {% else %}
+          mdi:thermometer
+        {% endif %}
+      attributes:
+        temperature: "{{ states('sensor.essendon_airport_min_temp') }}"
+        suggestion: >
+          {% set min_temp = states('sensor.essendon_airport_min_temp') | float(20) %}
+          {% if min_temp <= 0 %}
+            Protect pipes, run heating
+          {% elif min_temp <= 5 %}
+            Very cold morning, dress warmly
+          {% elif min_temp <= 10 %}
+            Cool morning, layer up
+          {% else %}
+            Mild temperatures expected
+          {% endif %}
+
+    - name: "Rain Alert"
+      unique_id: rain_alert
+      state: >
+        {% set weather_condition = states('weather.braybrook') %}
+        {% set forecast = state_attr('weather.braybrook', 'forecast') %}
+        {% set is_rainy = weather_condition in ['rainy', 'pouring', 'lightning-rainy'] %}
+        {% if is_rainy %}
+          {% if weather_condition == 'pouring' %}
+            heavy
+          {% else %}
+            rainy
+          {% endif %}
+        {% elif forecast and forecast|length > 0 %}
+          {% set next_condition = forecast[0].condition %}
+          {% if next_condition in ['rainy', 'pouring', 'lightning-rainy'] %}
+            soon
+          {% else %}
+            normal
+          {% endif %}
+        {% else %}
+          normal
+        {% endif %}
+      icon: >
+        {% set weather_condition = states('weather.braybrook') %}
+        {% set forecast = state_attr('weather.braybrook', 'forecast') %}
+        {% set next_condition = forecast[0].condition if forecast and forecast|length > 0 else None %}
+        {% if weather_condition in ['rainy', 'pouring', 'lightning-rainy'] %}
+          {% set state_val = 'heavy' if weather_condition == 'pouring' else 'rainy' %}
+        {% elif next_condition in ['rainy', 'pouring', 'lightning-rainy'] %}
+          {% set state_val = 'soon' %}
+        {% else %}
+          {% set state_val = 'normal' %}
+        {% endif %}
+        {% if state_val == 'heavy' %}
+          mdi:weather-pouring
+        {% elif state_val == 'rainy' %}
+          mdi:weather-rainy
+        {% elif state_val == 'soon' %}
+          mdi:weather-partly-rainy
+        {% else %}
+          mdi:weather-cloudy
+        {% endif %}
+      attributes:
+        condition: "{{ states('weather.braybrook') }}"
+        suggestion: >
+          {% set weather_condition = states('weather.braybrook') %}
+          {% set forecast = state_attr('weather.braybrook', 'forecast') %}
+          {% set next_condition = forecast[0].condition if forecast and forecast|length > 0 else None %}
+          {% if weather_condition == 'pouring' %}
+            Heavy rain, stay indoors
+          {% elif weather_condition in ['rainy', 'lightning-rainy'] %}
+            Raining, bring an umbrella
+          {% elif next_condition in ['rainy', 'pouring', 'lightning-rainy'] %}
+            Rain expected soon
+          {% else %}
+            No rain expected
+          {% endif %}
 
 - sensor:
     # Random appliance completion messages

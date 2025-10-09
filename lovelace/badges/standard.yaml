@@ -65,20 +65,56 @@
     action: more-info
 
 - type: entity
-  entity: binary_sensor.hot_weather_alert
+  entity: sensor.hot_weather_alert
   name: "Hot Weather"
   show_state: true
   show_name: false
   visibility:
     - condition: state
-      entity: binary_sensor.hot_weather_alert
+      entity: sensor.hot_weather_alert
       state_not: 'normal'
   color: >
-    {% set state = states('binary_sensor.hot_weather_alert') %}
+    {% set state = states('sensor.hot_weather_alert') %}
     {% if state == 'superhot' %} red
     {% elif state == 'hot' %} orange
     {% elif state == 'mild' %} amber
     {% else %} blue {% endif %}
+  tap_action:
+    action: more-info
+
+- type: entity
+  entity: sensor.cold_weather_alert
+  name: "Cold Weather"
+  show_state: true
+  show_name: false
+  visibility:
+    - condition: state
+      entity: sensor.cold_weather_alert
+      state_not: 'normal'
+  color: >
+    {% set state = states('sensor.cold_weather_alert') %}
+    {% if state == 'freezing' %} purple
+    {% elif state == 'supercold' %} blue
+    {% elif state == 'cold' %} cyan
+    {% else %} grey {% endif %}
+  tap_action:
+    action: more-info
+
+- type: entity
+  entity: sensor.rain_alert
+  name: "Rain"
+  show_state: true
+  show_name: false
+  visibility:
+    - condition: state
+      entity: sensor.rain_alert
+      state_not: 'normal'
+  color: >
+    {% set state = states('sensor.rain_alert') %}
+    {% if state == 'heavy' %} blue
+    {% elif state == 'rainy' %} cyan
+    {% elif state == 'soon' %} grey
+    {% else %} grey {% endif %}
   tap_action:
     action: more-info
 

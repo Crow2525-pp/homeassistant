@@ -522,12 +522,22 @@ holiday_mode:
 water_plants:
   alias: Water Plants
   sequence:
-  # This is a reminder script - you can expand it with notifications
-  # For now, it just shows a persistent notification
   - action: notify.persistent_notification
     data:
-      title: "Time to Water Plants!"
-      message: "It's been hot - don't forget to water the plants today."
+      title: "Watering Plants"
+      message: "Running sprinkler for 10 minutes."
+  - action: switch.turn_on
+    target:
+      entity_id: switch.water_switch_switch
+  - delay:
+      minutes: 10
+  - action: switch.turn_off
+    target:
+      entity_id: switch.water_switch_switch
+  - action: notify.persistent_notification
+    data:
+      title: "Plants Watered"
+      message: "Sprinkler finished - plants watered!"
   mode: single
   icon: mdi:watering-can
 

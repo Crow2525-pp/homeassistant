@@ -121,7 +121,12 @@ cards:
                     letter-spacing: 0.3px;
                   }
             - type: markdown
-              content: "💧 Warm day reminder  \n🌱 Water the plants today  \n🌡️ Max: {{ states('sensor.essendon_airport_max_temp') }}°C"
+              content: >
+                💧 Warm day reminder
+
+                🌱 Water the plants {{ state_attr('binary_sensor.show_water_plants_button_filtered', 'forecast_day') or 'today' }}
+
+                🌡️ Max: {{ states('sensor.essendon_airport_max_temp') }}°C
               card_mod:
                 style: |
                   ha-card {

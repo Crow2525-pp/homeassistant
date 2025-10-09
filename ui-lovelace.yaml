@@ -3,6 +3,15 @@ resources:
     type: js
 
 title: Home Dashboard
+card_mod:
+  style: |
+    /* Hide the default view tabs */
+    hui-view {
+      display: none !important;
+    }
+    paper-tabs {
+      display: none !important;
+    }
 views:
   - !include lovelace/views/control_panel.yaml
   - !include lovelace/views/climate.yaml
