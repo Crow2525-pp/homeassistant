@@ -1289,3 +1289,23 @@
         {% set top_4 = sorted_items[:4] %}
         {{ 'read_news' in top_4 | map(attribute='name') | list }}
 
+- binary_sensor:
+    - name: "Working From Home"
+      state: >
+        {% set is_weekday = now().weekday() in [0, 1, 2, 3, 4] %}
+        {% set is_work_hours = now().hour >= 8 and now().hour < 17 %}
+        {% set desk_on = is_state('switch.computer_plug_switch', 'on') %}
+        {% set computer_online = is_state('device_tracker.aolt002068_3', 'home') %}
+        {{ is_weekday and is_work_hours and desk_on and computer_online }}
+      icon: >
+        {% if is_state('binary_sensor.working_from_home', 'on') %}
+          mdi:home-account
+        {% else %}
+          mdi:office-building
+        {% endif %}
+      attributes:
+        is_weekday: "{{ now().weekday() in [0, 1, 2, 3, 4] }}"
+        is_work_hours: "{{ now().hour >= 8 and now().hour < 17 }}"
+        desk_switch_on: "{{ is_state('switch.computer_plug_switch', 'on') }}"
+        computer_online: "{{ is_state('device_tracker.aolt002068_3', 'home') }}"
+

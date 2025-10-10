@@ -117,6 +117,14 @@ adaptive_lighting:
 
 battery_notes:
 
+recorder:
+  purge_keep_days: 730
+  include:
+    entity_globs:
+      - binary_sensor.working_from_home_3
+      - device_tracker.aolt002068_3
+      - switch.computer_plug_switch
+
 # Garage Door Sensors
 input_boolean:
   garage_door_notify:

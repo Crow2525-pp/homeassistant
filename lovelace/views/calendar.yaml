@@ -17,3 +17,38 @@ cards:
 
   # Full width week planner
   - !include ../cards/calendar/week_planner.yaml
+
+  # Work from home history
+  - type: history-graph
+    title: Work From Home - Last 4 Weeks
+    hours_to_show: 672
+    entities:
+      - entity: binary_sensor.working_from_home_3
+        name: Working From Home
+
+  # Debug card for work from home sensor
+  - type: entities
+    title: Work From Home Debug
+    entities:
+      - entity: binary_sensor.working_from_home_3
+        name: WFH Status
+      - type: attribute
+        entity: binary_sensor.working_from_home_3
+        attribute: is_weekday
+        name: Is Weekday
+      - type: attribute
+        entity: binary_sensor.working_from_home_3
+        attribute: is_work_hours
+        name: Is Work Hours (8am-5pm)
+      - type: attribute
+        entity: binary_sensor.working_from_home_3
+        attribute: desk_switch_on
+        name: Desk Switch On
+      - type: attribute
+        entity: binary_sensor.working_from_home_3
+        attribute: computer_online
+        name: Computer Online
+      - entity: switch.computer_plug_switch
+        name: Desk Switch
+      - entity: device_tracker.aolt002068_3
+        name: Computer Tracker
