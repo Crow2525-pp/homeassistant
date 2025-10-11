@@ -69,7 +69,7 @@ cards:
 
   # Volume Controls Grid
   - type: grid
-    columns: 2
+    columns: 3
     square: false
     cards:
       - type: button
@@ -198,6 +198,76 @@ cards:
             ha-card:hover {
               transform: translateY(-2px);
               box-shadow: 0 6px 16px rgba(225, 29, 72, 0.35);
+            }
+            ha-icon {
+              color: white;
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name {
+              font-weight: 500;
+              margin-top: 8px;
+            }
+
+      - type: button
+        show_name: true
+        show_icon: true
+        tap_action:
+          action: call-service
+          service: media_player.volume_down
+          target:
+            entity_id: media_player.living_room_wiimamp
+        name: Vol Down
+        icon: mdi:volume-minus
+        icon_height: 30px
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #64748B 0%, #475569 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25);
+              padding: 16px;
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 16px rgba(100, 116, 139, 0.35);
+            }
+            ha-icon {
+              color: white;
+              filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
+            }
+            .name {
+              font-weight: 500;
+              margin-top: 8px;
+            }
+
+      - type: button
+        show_name: true
+        show_icon: true
+        tap_action:
+          action: call-service
+          service: media_player.volume_up
+          target:
+            entity_id: media_player.living_room_wiimamp
+        name: Vol Up
+        icon: mdi:volume-plus
+        icon_height: 30px
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(145deg, #64748B 0%, #475569 100%);
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25);
+              padding: 16px;
+              border: none;
+              transition: all 0.3s ease;
+            }
+            ha-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 16px rgba(100, 116, 139, 0.35);
             }
             ha-icon {
               color: white;
