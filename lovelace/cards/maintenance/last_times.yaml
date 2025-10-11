@@ -8,15 +8,7 @@ cards:
     filter:
       include:
         - domain: input_datetime and
-        - label: Maintenance
-          options:
-            type: custom:template-entity-row
-            secondary: |
-              {% if states(config.entity) not in ['unknown', 'unavailable'] %}
-                {{ as_timestamp(config.entity, 0) | timestamp_custom('%d %b %Y at %I:%M %p', true) }} ({{ relative_time(config.entity) }})
-              {% else %}
-                Not set
-              {% endif %}
+        - label: "Maintenance"
     sort:
       method: domain
     card_mod:
