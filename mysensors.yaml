@@ -33,3 +33,66 @@
   attribute: url
   scan_interval: 1800
 
+# Work location statistics - 4 weeks
+- platform: history_stats
+  name: WFH Days Last 4 Weeks
+  entity_id: binary_sensor.working_from_home
+  state: 'on'
+  type: time
+  duration:
+    days: 28
+  end: "{{ now() }}"
+
+- platform: history_stats
+  name: Office Days Last 4 Weeks
+  entity_id: binary_sensor.working_at_office
+  state: 'on'
+  type: time
+  duration:
+    days: 28
+  end: "{{ now() }}"
+
+# Work location statistics - This year (for tax)
+- platform: history_stats
+  name: WFH Days This Year
+  entity_id: binary_sensor.working_from_home
+  state: 'on'
+  type: time
+  start: "{{ now().replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0) }}"
+  end: "{{ now() }}"
+
+- platform: history_stats
+  name: Office Days This Year
+  entity_id: binary_sensor.working_at_office
+  state: 'on'
+  type: time
+  start: "{{ now().replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0) }}"
+  end: "{{ now() }}"
+
+# Work location statistics - This financial year (July 1 - June 30)
+- platform: history_stats
+  name: WFH Days This Financial Year
+  entity_id: binary_sensor.working_from_home
+  state: 'on'
+  type: time
+  start: >
+    {% if now().month >= 7 %}
+      {{ now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) }}
+    {% else %}
+      {{ (now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=365)) }}
+    {% endif %}
+  end: "{{ now() }}"
+
+- platform: history_stats
+  name: Office Days This Financial Year
+  entity_id: binary_sensor.working_at_office
+  state: 'on'
+  type: time
+  start: >
+    {% if now().month >= 7 %}
+      {{ now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) }}
+    {% else %}
+      {{ (now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=365)) }}
+    {% endif %}
+  end: "{{ now() }}"
+

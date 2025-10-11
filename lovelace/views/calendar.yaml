@@ -18,37 +18,69 @@ cards:
   # Full width week planner
   - !include ../cards/calendar/week_planner.yaml
 
+  # Work location stats - Last 4 weeks
+  - type: grid
+    columns: 3
+    cards:
+      - type: entity
+        entity: sensor.wfh_days_count
+        name: WFH Days (4 weeks)
+        icon: mdi:home-account
+      - type: entity
+        entity: sensor.office_days_count
+        name: Office Days (4 weeks)
+        icon: mdi:office-building
+      - type: entity
+        entity: sensor.total_work_days_count
+        name: Total Work Days (4 weeks)
+        icon: mdi:calendar-check
+
+  # Work location stats - Tax year
+  - type: grid
+    columns: 2
+    cards:
+      - type: entity
+        entity: sensor.wfh_days_financial_year_count
+        name: WFH Days (FY 2024-25)
+        icon: mdi:home-account
+      - type: entity
+        entity: sensor.office_days_financial_year_count
+        name: Office Days (FY 2024-25)
+        icon: mdi:office-building
+
   # Work from home history
   - type: history-graph
-    title: Work From Home - Last 4 Weeks
+    title: Phil's Work Location - Last 4 Weeks
     hours_to_show: 672
     entities:
-      - entity: binary_sensor.working_from_home_3
+      - entity: binary_sensor.working_from_home
         name: Working From Home
+      - entity: binary_sensor.working_at_office
+        name: Working at Office
 
-  # Debug card for work from home sensor
-  - type: entities
-    title: Work From Home Debug
-    entities:
-      - entity: binary_sensor.working_from_home_3
-        name: WFH Status
-      - type: attribute
-        entity: binary_sensor.working_from_home_3
-        attribute: is_weekday
-        name: Is Weekday
-      - type: attribute
-        entity: binary_sensor.working_from_home_3
-        attribute: is_work_hours
-        name: Is Work Hours (8am-5pm)
-      - type: attribute
-        entity: binary_sensor.working_from_home_3
-        attribute: desk_switch_on
-        name: Desk Switch On
-      - type: attribute
-        entity: binary_sensor.working_from_home_3
-        attribute: computer_online
-        name: Computer Online
-      - entity: switch.computer_plug_switch
-        name: Desk Switch
-      - entity: device_tracker.aolt002068_3
-        name: Computer Tracker
+  # # Debug card for work from home sensor
+  # - type: entities
+  #   title: Work From Home Debug
+  #   entities:
+  #     - entity: binary_sensor.working_from_home_3
+  #       name: WFH Status
+  #     - type: attribute
+  #       entity: binary_sensor.working_from_home_3
+  #       attribute: is_weekday
+  #       name: Is Weekday
+  #     - type: attribute
+  #       entity: binary_sensor.working_from_home_3
+  #       attribute: is_work_hours
+  #       name: Is Work Hours (8am-5pm)
+  #     - type: attribute
+  #       entity: binary_sensor.working_from_home_3
+  #       attribute: desk_switch_on
+  #       name: Desk Switch On
+  #     - type: attribute
+  #       entity: binary_sensor.working_from_home_3
+  #       attribute: computer_online
+  #       name: Computer Online
+  #     - entity: switch.computer_plug_switch
+  #       name: Desk Switch
+  #     - entity: device_tracker.aolt002068_3
+  #       name: Computer Tracker

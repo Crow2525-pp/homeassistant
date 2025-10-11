@@ -949,28 +949,6 @@
       camera_hide_thumbnail: false
       target_for_notifications: mobile_app_slvdh
       action_1_action_authentication_required: false
-- id: '1685004768034'
-  alias: Detect Working From Home
-  description: Infers working-from-home status from desk usage, occupancy, and computer
-    activity.
-  trigger:
-  - platform: device
-    type: turned_on
-    device_id: 399b754fdf1cb07ed6c2bfcf22f86dce
-    entity_id: switch.computer_desk_light_socket_1
-    domain: switch
-  condition:
-  - condition: time
-    before: 09:00:00
-  - condition: state
-    entity_id: input_boolean.working_from_home
-    state: 'on'
-  action:
-  - service: input_boolean.turn_on
-    data: {}
-    target:
-      entity_id: input_boolean.working_from_home
-  mode: single
 - id: '1685157513874'
   alias: Study Desk NFC - Toggle Desk Switch
   description: Toggles the study desk switch when its NFC tag is scanned.

@@ -1309,3 +1309,60 @@
         desk_switch_on: "{{ is_state('switch.computer_plug_switch', 'on') }}"
         computer_online: "{{ is_state('device_tracker.aolt002068_3', 'home') }}"
 
+    - name: "Working at Office"
+      state: >
+        {% set is_weekday = now().weekday() in [0, 1, 2, 3, 4] %}
+        {% set is_work_hours = now().hour >= 8 and now().hour < 17 %}
+        {% set at_work = is_state('device_tracker.phils_phone', 'work') %}
+        {{ is_weekday and is_work_hours and at_work }}
+      icon: >
+        {% if is_state('binary_sensor.working_at_office', 'on') %}
+          mdi:office-building
+        {% else %}
+          mdi:home-account
+        {% endif %}
+      attributes:
+        is_weekday: "{{ now().weekday() in [0, 1, 2, 3, 4] }}"
+        is_work_hours: "{{ now().hour >= 8 and now().hour < 17 }}"
+        phone_at_work: "{{ is_state('device_tracker.phils_phone', 'work') }}"
+        phone_location: "{{ states('device_tracker.phils_phone') }}"
+
+- sensor:
+    # Last 4 weeks counts
+    - name: "WFH Days Count"
+      state: "{{ (states('sensor.wfh_days_last_4_weeks') | float(0) / 9) | round(1) }}"
+      unit_of_measurement: "days"
+      icon: mdi:home-account
+
+    - name: "Office Days Count"
+      state: "{{ (states('sensor.office_days_last_4_weeks') | float(0) / 9) | round(1) }}"
+      unit_of_measurement: "days"
+      icon: mdi:office-building
+
+    - name: "Total Work Days Count"
+      state: "{{ ((states('sensor.wfh_days_last_4_weeks') | float(0) + states('sensor.office_days_last_4_weeks') | float(0)) / 9) | round(1) }}"
+      unit_of_measurement: "days"
+      icon: mdi:calendar-check
+
+    # This year counts (for tax)
+    - name: "WFH Days This Year Count"
+      state: "{{ (states('sensor.wfh_days_this_year') | float(0) / 9) | round(0) }}"
+      unit_of_measurement: "days"
+      icon: mdi:home-account
+
+    - name: "Office Days This Year Count"
+      state: "{{ (states('sensor.office_days_this_year') | float(0) / 9) | round(0) }}"
+      unit_of_measurement: "days"
+      icon: mdi:office-building
+
+    # Financial year counts (July 1 - June 30, for Australian tax)
+    - name: "WFH Days Financial Year Count"
+      state: "{{ (states('sensor.wfh_days_this_financial_year') | float(0) / 9) | round(0) }}"
+      unit_of_measurement: "days"
+      icon: mdi:home-account
+
+    - name: "Office Days Financial Year Count"
+      state: "{{ (states('sensor.office_days_this_financial_year') | float(0) / 9) | round(0) }}"
+      unit_of_measurement: "days"
+      icon: mdi:office-building
+
