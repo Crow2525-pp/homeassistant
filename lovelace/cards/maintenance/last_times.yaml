@@ -1,16 +1,38 @@
 type: vertical-stack
 cards:
-  - type: custom:auto-entities
-    card:
-      type: entities
-      title: "🔧 Maintenance Schedule"
-      state_color: false
-    filter:
-      include:
-        - domain: input_datetime and
-        - label: "Maintenance"
-    sort:
-      method: domain
+  - type: entities
+    title: "🚽 Toilet Cleaning Schedule"
+    state_color: false
+    entities:
+      - entity: sensor.master_toilet_last_cleaned_date
+        name: Master Toilet
+      - entity: sensor.downstairs_toilet_last_cleaned_date
+        name: Downstairs Toilet
+      - entity: sensor.oma_s_toilet_last_cleaned_date
+        name: Oma's Toilet
+      - entity: sensor.kids_toilet_last_cleaned_date
+        name: Kids Toilet
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+        }
+  - type: entities
+    title: "❄️ AC Filter Maintenance"
+    state_color: false
+    entities:
+      - entity: sensor.living_room_ac_filter_last_changed_date
+        name: Living Room AC Filter
+      - entity: sensor.master_bedroom_ac_filter_last_changed_date
+        name: Master Bedroom AC Filter
+      - entity: sensor.otto_s_room_ac_filter_last_changed_date
+        name: Otto's Room AC Filter
+      - entity: sensor.study_henry_s_room_ac_filter_last_changed_date
+        name: Study/Henry's Room AC Filter
     card_mod:
       style: |
         ha-card {

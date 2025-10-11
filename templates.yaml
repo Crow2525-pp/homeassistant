@@ -1366,3 +1366,44 @@
       unit_of_measurement: "days"
       icon: mdi:office-building
 
+    # Maintenance date sensors (date only, no time)
+    - name: "Master Toilet Last Cleaned Date"
+      unique_id: master_toilet_last_cleaned_date
+      state: "{{ states('input_datetime.masterbed_toilet_last_cleaned') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.masterbed_toilet_last_cleaned') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:toilet
+
+    - name: "Downstairs Toilet Last Cleaned Date"
+      unique_id: downstairs_toilet_last_cleaned_date
+      state: "{{ states('input_datetime.downstairs_toilet_last_cleaned') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.downstairs_toilet_last_cleaned') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:toilet
+
+    - name: "Oma's Toilet Last Cleaned Date"
+      unique_id: omas_toilet_last_cleaned_date
+      state: "{{ states('input_datetime.omas_toilet_last_cleaned') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.omas_toilet_last_cleaned') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:toilet
+
+    - name: "Kids Toilet Last Cleaned Date"
+      unique_id: kids_toilet_last_cleaned_date
+      state: "{{ states('input_datetime.kids_toilet_last_cleaned') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.kids_toilet_last_cleaned') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:toilet
+
+    - name: "Living Room AC Filter Last Changed Date"
+      unique_id: living_room_ac_filter_last_changed_date
+      state: "{{ states('input_datetime.ac_filter_living_room') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.ac_filter_living_room') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:air-filter
+
+    - name: "Master Bedroom AC Filter Last Changed Date"
+      unique_id: master_bedroom_ac_filter_last_changed_date
+      state: "{{ states('input_datetime.ac_filter_master_bedroom') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.ac_filter_master_bedroom') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:air-filter
+
+    - name: "Otto's Room AC Filter Last Changed Date"
+      unique_id: ottos_room_ac_filter_last_changed_date
+      state: "{{ states('input_datetime.ac_filter_otto_room') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.ac_filter_otto_room') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:air-filter
+
+    - name: "Study/Henry's Room AC Filter Last Changed Date"
+      unique_id: study_henry_ac_filter_last_changed_date
+      state: "{{ states('input_datetime.ac_filter_study_henry') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.ac_filter_study_henry') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:air-filter
+

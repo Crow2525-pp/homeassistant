@@ -5,11 +5,14 @@ resources:
 title: Home Dashboard
 card_mod:
   style: |
-    /* Hide the default view tabs */
+    /* Hide the default view tabs and navigation bar */
     hui-view {
       display: none !important;
     }
     paper-tabs {
+      display: none !important;
+    }
+    app-header {
       display: none !important;
     }
 views:

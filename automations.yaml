@@ -1564,34 +1564,6 @@
         data:
           title: Master ensuite cleaned
           message: Toilets marked as done
-    - conditions:
-      - condition: trigger
-        id: schedule
-      - condition: template
-        value_template: '{{ (days_since_last_cleaned | int) >= interval_days }}'
-      sequence:
-      - choose:
-        - conditions:
-          - condition: template
-            value_template: '{{ overdue }}'
-          sequence:
-          - service: notify.mobile_app_samsung_galaxy_s22_ultra
-            data:
-              title: Master ensuite cleaning overdue
-              message: Toilet cleanup is {{ overdue_days }} day(s) overdue.
-          - service: notify.mobile_app_slvdh
-            data:
-              title: Master ensuite cleaning overdue
-              message: Toilet cleanup is {{ overdue_days }} day(s) overdue.
-        default:
-        - service: notify.mobile_app_samsung_galaxy_s22_ultra
-          data:
-            title: Master ensuite cleaning due
-            message: Toilets need cleaning today
-        - service: notify.mobile_app_slvdh
-          data:
-            title: Master ensuite cleaning due
-            message: Toilets need cleaning today
   mode: single
   max_exceeded: silent
   variables:
@@ -2888,7 +2860,7 @@
     are scanned.
   triggers:
   - tag_id: 859e3818-e623-47aa-9062-d89afd44489b
-    id: main_toilet
+    id: downstairs_toilet
     trigger: tag
   - tag_id: 14544260-abc9-4e84-be5b-20b3df57978d
     id: masterbed_toilet
@@ -2907,10 +2879,10 @@
   - choose:
     - conditions:
       - condition: template
-        value_template: '{{ trigger.id == ''main_toilet'' }}'
+        value_template: '{{ trigger.id == ''downstairs_toilet'' }}'
       sequence:
       - target:
-          entity_id: input_datetime.main_toilet_last_cleaned
+          entity_id: input_datetime.downstairs_toilet_last_cleaned
         data:
           timestamp: '{{ now().timestamp() }}'
         service: input_datetime.set_datetime
@@ -4352,4 +4324,109 @@
           entity_id: climate.masterbed_versatile_thermostat
         data:
           hvac_mode: 'off'
+  mode: single
+- id: '1747000000001'
+  alias: Maintenance - Consolidated Daily Check
+  description: Checks all maintenance items daily and sends a single consolidated notification
+  triggers:
+  - at: '08:00:00'
+    trigger: time
+  conditions:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Sleeping
+  actions:
+  - variables:
+      toilets:
+        - name: Master Toilet
+          entity: input_datetime.masterbed_toilet_last_cleaned
+          interval: 7
+        - name: Downstairs Toilet
+          entity: input_datetime.downstairs_toilet_last_cleaned
+          interval: 7
+        - name: Oma's Toilet
+          entity: input_datetime.omas_toilet_last_cleaned
+          interval: 30
+        - name: Kids Toilet
+          entity: input_datetime.kids_toilet_last_cleaned
+          interval: 14
+      filters:
+        - name: Living Room AC Filter
+          entity: input_datetime.ac_filter_living_room
+          interval: 90
+        - name: Master Bedroom AC Filter
+          entity: input_datetime.ac_filter_master_bedroom
+          interval: 90
+        - name: Otto's Room AC Filter
+          entity: input_datetime.ac_filter_otto_room
+          interval: 90
+        - name: Study/Henry's Room AC Filter
+          entity: input_datetime.ac_filter_study_henry
+          interval: 90
+      overdue_items: []
+      due_items: []
+  - repeat:
+      for_each: '{{ toilets + filters }}'
+      sequence:
+      - variables:
+          days_since: >
+            {% set value = states(repeat.item.entity) %}
+            {% if value in ['unknown', 'unavailable', ''] %}
+              {{ repeat.item.interval + 1 }}
+            {% else %}
+              {% set last = value | as_datetime %}
+              {{ (now().date() - last.date()).days }}
+            {% endif %}
+          overdue_days: >
+            {% set diff = (days_since | int) - repeat.item.interval %}
+            {{ diff if diff > 0 else 0 }}
+      - if:
+        - condition: template
+          value_template: '{{ (days_since | int) > repeat.item.interval }}'
+        then:
+        - variables:
+            overdue_items: >
+              {{ overdue_items + [repeat.item.name ~ ' (' ~ overdue_days ~ ' day(s) overdue)'] }}
+        else:
+        - if:
+          - condition: template
+            value_template: '{{ (days_since | int) >= repeat.item.interval }}'
+          then:
+          - variables:
+              due_items: >
+                {{ due_items + [repeat.item.name] }}
+  - if:
+    - condition: template
+      value_template: '{{ overdue_items | length > 0 or due_items | length > 0 }}'
+    then:
+    - variables:
+        message_body: >
+          {% if overdue_items | length > 0 %}
+          ⚠️ OVERDUE:
+          {% for item in overdue_items %}
+          • {{ item }}
+          {% endfor %}
+          {% endif %}
+          {% if due_items | length > 0 %}
+          {% if overdue_items | length > 0 %}
+
+          {% endif %}
+          📋 DUE TODAY:
+          {% for item in due_items %}
+          • {{ item }}
+          {% endfor %}
+          {% endif %}
+    - service: notify.mobile_app_samsung_galaxy_s22_ultra
+      data:
+        title: 🔧 Maintenance Reminder
+        message: '{{ message_body }}'
+    - service: notify.mobile_app_slvdh
+      data:
+        title: 🔧 Maintenance Reminder
+        message: '{{ message_body }}'
   mode: single
