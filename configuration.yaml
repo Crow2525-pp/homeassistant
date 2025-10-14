@@ -119,16 +119,14 @@ battery_notes:
 
 recorder:
   purge_keep_days: 730
-  include:
+  exclude:
     entity_globs:
-      - binary_sensor.working_from_home
-      - binary_sensor.working_at_office
-      - device_tracker.aolt002068_3
-      - device_tracker.phils_phone
-      - switch.computer_plug_switch
-      - sensor.wfh_days_*
-      - sensor.office_days_*
-      - sensor.total_work_days_*
+      - sensor.*_rssi
+      - sensor.*_linkquality
+      - sensor.*_last_seen
+      - sensor.*_last_boot
+      - sensor.*_uptime
+      - update.*
 
 # Garage Door Sensors
 input_boolean:
