@@ -4168,7 +4168,7 @@
   mode: single
 - id: '1728310000000'
   alias: Master Bedroom - Solar Assisted Climate Control
-  description: Uses solar excess, shading, and fan control to keep the master bedroom between 18-24C while respecting manual overrides.
+  description: Uses solar excess, shading, and fan control to keep the master bedroom between 18-24C while respecting manual overrides. When working from home before 3pm, keeps roller blinds at half height to reduce glare.
   triggers:
   - platform: state
     entity_id: sensor.master_bedroom_climate_suggestion
@@ -4180,6 +4180,10 @@
     entity_id: input_boolean.climate_manual_control_master
   - platform: state
     entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+  - platform: state
+    entity_id: binary_sensor.working_from_home
+  - platform: time
+    at: '15:00:00'
   - platform: time_pattern
     minutes: "/5"
   - platform: homeassistant
@@ -4188,9 +4192,14 @@
   actions:
   - choose:
     - conditions:
-      - condition: state
-        entity_id: input_boolean.climate_manual_control_master
-        state: 'on'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_boolean.climate_manual_control_master
+          state: 'on'
+        - condition: state
+          entity_id: input_boolean.blind_manual_control
+          state: 'on'
       sequence:
       - stop: true
     - conditions:
@@ -4206,6 +4215,16 @@
       - service: fan.turn_off
         target:
           entity_id: fan.masterbedroom_fan
+      - stop: true
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.working_from_home
+        state: 'on'
+      - condition: time
+        before: '15:00:00'
+      sequence:
+      - service: script.1693262268843
+        data: {}
       - stop: true
   - choose:
     - conditions:
@@ -4313,9 +4332,10 @@
             entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
             below: 18
           sequence:
-          - service: cover.close_cover
+          - service: cover.open_cover
             target:
               entity_id: cover.windowcovering_cover
+          - service: script.roller_blinds_up
           - service: fan.turn_off
             target:
               entity_id: fan.masterbedroom_fan
