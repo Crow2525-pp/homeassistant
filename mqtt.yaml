@@ -7,3 +7,12 @@ binary_sensor:
     device_class: "motion"
     value_template: "{{ value_json.trigger }}"
     qos: 1
+
+  - name: "Blue Iris Cam Driveway"
+    unique_id: bi_cam_driveway
+    state_topic: "BlueIris/Driveway/Status"
+    payload_on: "ON"
+    payload_off: "OFF"
+    device_class: "motion"
+    value_template: "{{ value_json.trigger }}"
+    qos: 1
