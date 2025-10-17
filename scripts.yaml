@@ -183,8 +183,15 @@ led_off_henry:
           milliseconds: 50
   mode: single
 '1693262268843':
-  alias: Blinds Close Halfway
+  alias: Blinds Halfway (from any position)
   sequence:
+  - service: script.roller_blinds_up
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 18
+      milliseconds: 0
   - service: script.roller_blinds_down
     data: {}
   - delay:
@@ -196,18 +203,6 @@ led_off_henry:
     data: {}
   mode: single
   icon: mdi:roller-shade
-curtains_half_way:
-  alias: Curtains half way
-  sequence:
-  - target:
-      device_id: []
-      area_id: []
-      entity_id: cover.windowcovering_cover
-    data:
-      position: 50
-    action: cover.set_cover_position
-  mode: single
-  icon: mdi:curtains
 spotify_tv:
   alias: Spotify - WiiM Amp
   sequence:
@@ -366,9 +361,6 @@ good_night:
   sequence:
   - service: script.roller_blinds_down
     data: {}
-  - service: cover.close_cover
-    target:
-      entity_id: cover.windowcovering_cover
   - service: light.turn_off
     target:
       entity_id: all
@@ -384,9 +376,6 @@ good_morning:
   sequence:
   - service: script.roller_blinds_up
     data: {}
-  - service: cover.open_cover
-    target:
-      entity_id: cover.windowcovering_cover
   - service: input_select.select_option
     target:
       entity_id: input_select.occupancy
@@ -632,10 +621,6 @@ naptime:
   # Close blinds
   - service: script.roller_blinds_down
     data: {}
-  # Close curtains
-  - service: cover.close_cover
-    target:
-      entity_id: cover.windowcovering_cover
   # Turn off lights in master bedroom only
   - service: light.turn_off
     target:

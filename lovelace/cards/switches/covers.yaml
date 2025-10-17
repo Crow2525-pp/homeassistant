@@ -127,7 +127,7 @@ cards:
       - type: cover-open-close
       - type: cover-position
     type: tile
-    entity: cover.windowcovering_cover
+    entity: cover.curtain_3_b3bb
     name: Curtains
     layout_options:
       grid_columns: full
