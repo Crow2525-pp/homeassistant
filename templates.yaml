@@ -918,7 +918,7 @@
             {% set master.open = master.open + [name] %}
           {% endif %}
         {% endfor %}
-        {% set master_climate = states('climate.masterbed_ac') %}
+        {% set master_climate = states('climate.masterbed_versatile_thermostat') %}
         {% if master_climate not in ['off', 'unavailable', 'unknown'] and master.open %}
           {% set mode = state_attr('climate.masterbed_ac', 'hvac_action') or 'running' %}
           {% if mode == 'cooling' %}
@@ -938,9 +938,9 @@
             {% set otto.open = otto.open + [name] %}
           {% endif %}
         {% endfor %}
-        {% set otto_climate = states('climate.otto_ac') %}
+        {% set otto_climate = states('climate.otto_s_room') %}
         {% if otto_climate not in ['off', 'unavailable', 'unknown'] and otto.open %}
-          {% set mode = state_attr('climate.otto_ac', 'hvac_action') or 'running' %}
+          {% set mode = state_attr('climate.otto_s_ac', 'hvac_action') or 'running' %}
           {% if mode == 'cooling' %}
             {% set alerts.items = alerts.items + ["- Otto's Room AC: " ~ (otto.open | join(', '))] %}
           {% elif mode == 'heating' %}
@@ -958,7 +958,7 @@
             {% set study.open = study.open + [name] %}
           {% endif %}
         {% endfor %}
-        {% set study_climate = states('climate.study_ac') %}
+        {% set study_climate = states('climate.henry_s_room_versatile_thermostat') %}
         {% if study_climate not in ['off', 'unavailable', 'unknown'] and study.open %}
           {% set mode = state_attr('climate.study_ac', 'hvac_action') or 'running' %}
           {% if mode == 'cooling' %}
@@ -1313,7 +1313,7 @@
       state: >
         {% set is_weekday = now().weekday() in [0, 1, 2, 3, 4] %}
         {% set is_work_hours = now().hour >= 8 and now().hour < 17 %}
-        {% set at_work = is_state('device_tracker.phils_phone', 'work') %}
+        {% set at_work = is_state('person.phil_patterson', 'work') %}
         {{ is_weekday and is_work_hours and at_work }}
       icon: >
         {% if is_state('binary_sensor.working_at_office', 'on') %}
@@ -1324,8 +1324,8 @@
       attributes:
         is_weekday: "{{ now().weekday() in [0, 1, 2, 3, 4] }}"
         is_work_hours: "{{ now().hour >= 8 and now().hour < 17 }}"
-        phone_at_work: "{{ is_state('device_tracker.phils_phone', 'work') }}"
-        phone_location: "{{ states('device_tracker.phils_phone') }}"
+        person_at_work: "{{ is_state('person.phil_patterson', 'work') }}"
+        person_location: "{{ states('person.phil_patterson') }}"
 
 - sensor:
     # Last 4 weeks counts

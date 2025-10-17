@@ -6,24 +6,6 @@ cards:
     icon: mdi:home-thermometer
     heading: "Climate Control"
 
-  # Home Occupancy Status
-  - type: heading
-    heading_style: subtitle
-    heading: "Home Occupancy"
-    badges:
-      - type: entity
-        entity: zone.home
-        name: "People at Home"
-        icon: mdi:account-group
-        show_state: true
-        state_content:
-          - state
-          - last_changed
-        color: >
-          {% if states('zone.home') | int == 0 %} red {% else %} blue {% endif %}
-        tap_action:
-          action: more-info
-
   - type: grid
     columns: 2
     cards:

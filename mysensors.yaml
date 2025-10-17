@@ -42,7 +42,6 @@
   duration:
     days: 28
   end: "{{ now() }}"
-
 - platform: history_stats
   name: Office Days Last 4 Weeks
   entity_id: binary_sensor.working_at_office
@@ -60,7 +59,6 @@
   type: time
   start: "{{ now().replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0) }}"
   end: "{{ now() }}"
-
 - platform: history_stats
   name: Office Days This Year
   entity_id: binary_sensor.working_at_office
@@ -82,7 +80,6 @@
       {{ (now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=365)) }}
     {% endif %}
   end: "{{ now() }}"
-
 - platform: history_stats
   name: Office Days This Financial Year
   entity_id: binary_sensor.working_at_office
