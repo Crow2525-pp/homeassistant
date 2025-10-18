@@ -107,6 +107,27 @@
         unit_of_measurement: "min"
       icon: mdi:timer
 
+    - name: "Dishwasher Estimated Remaining"
+      unique_id: dishwasher_estimated_remaining
+      state: >
+        {% set cycle_time = 150 %}
+        {% if is_state('input_boolean.dishwasher_on', 'on') and states.input_boolean.dishwasher_on.last_changed %}
+          {% set last_changed = as_timestamp(states.input_boolean.dishwasher_on.last_changed) %}
+          {% if last_changed is not none %}
+            {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
+            {% set remaining = cycle_time - elapsed %}
+            {{ [remaining | round(0), 0] | max }}
+          {% else %}
+            0
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+      attributes:
+        friendly_name: "Dishwasher Estimated Remaining"
+        unit_of_measurement: "min"
+      icon: mdi:timer
+
     - name: "Living Room Temperature (Offset)"
       unique_id: livingroom_irblaster_temperature_offset
       unit_of_measurement: "°C"

@@ -17,8 +17,9 @@ cards:
       **Month:** {{ now().strftime('%B') }} ({{ now().month }})
 
       ### Hot Day Flags
-      - **Super Hot Today:** {{ 'YES 🔥' if is_state('input_boolean.super_hot_today', 'on') else 'No' }}
-      - **Hot Today:** {{ 'YES ☀️' if is_state('input_boolean.hot_today_flag', 'on') else 'No' }}
+      - **Super Hot Today (>25°C):** {{ 'YES 🔥' if is_state('input_boolean.super_hot_today', 'on') else 'No' }}
+      - **Hot Today (>21°C):** {{ 'YES ☀️' if is_state('input_boolean.hot_today_flag', 'on') else 'No' }}
+      - **Warm Today (>18°C):** {{ 'YES 🌤️' if is_state('input_boolean.warm_today_flag', 'on') else 'No' }}
       - **Max Temp Forecast:** {{ states('sensor.braybrook_temp_max_0') }}°C
 
       ---
@@ -42,11 +43,14 @@ cards:
         icon: mdi:home-account
       - type: divider
       - entity: input_boolean.super_hot_today
-        name: "Super Hot Day Flag"
+        name: "Super Hot Day Flag (>25°C)"
         icon: mdi:weather-sunny-alert
       - entity: input_boolean.hot_today_flag
-        name: "Hot Day Flag"
+        name: "Hot Day Flag (>21°C)"
         icon: mdi:weather-sunny
+      - entity: input_boolean.warm_today_flag
+        name: "Warm Day Flag (>18°C)"
+        icon: mdi:weather-partly-sunny
       - type: divider
       - entity: zone.home
         name: "People at Home"
@@ -64,6 +68,8 @@ cards:
     content: |
       ### Climate State
       **HVAC Mode:** {{ states('climate.masterbed_versatile_thermostat') | upper }}
+      **Preset Mode:** {{ state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') | default('none') | title }}
+      - Available: {{ state_attr('climate.masterbed_versatile_thermostat', 'preset_modes') | join(', ') }}
       **Target Temp:** {{ state_attr('climate.masterbed_versatile_thermostat', 'temperature') }}°C
       **Current Temp:** {{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}°C
       **Humidity:** {{ states('sensor.ble_humidity_masterbed_temp_humidity_sensor') }}%
@@ -199,6 +205,15 @@ cards:
         - Last run: {{ relative_time(cooling_night_last) }} ago
         {% endif %}
 
+      {% set hot_night_last = state_attr('automation.bedrooms_overnight_ac_on_hot_days', 'last_triggered') %}
+      - **🔥 Warm/Hot Night Bedroom Cooling:** {{ '✅ ON' if is_state('automation.bedrooms_overnight_ac_on_hot_days', 'on') else '🔴 OFF' }}
+        - Triggers: 9:00pm when day was >18°C (warm/hot/super hot)
+        - Mode: Boost cooling for comfort
+        - Auto-off: 6:00am next morning
+        {% if hot_night_last %}
+        - Last run: {{ relative_time(hot_night_last) }} ago
+        {% endif %}
+
       ---
 
   # Living Room Status
@@ -212,7 +227,9 @@ cards:
         }
     content: |
       ### Climate State
-      **HVAC Mode:** {{ states('climate.living_room_ac') | upper }}
+      **HVAC Mode:** {{ states('climate.living_room_versatile_thermostat') | upper }}
+      **Preset Mode:** {{ state_attr('climate.living_room_versatile_thermostat', 'preset_mode') | default('none') | title }}
+      - Available: {{ state_attr('climate.living_room_versatile_thermostat', 'preset_modes') | join(', ') }}
       **Target Temp:** {{ state_attr('climate.living_room_versatile_thermostat', 'temperature') }}°C
       **Current Temp:** {{ states('sensor.living_room_temperature_offset') }}°C
       **Kitchen Temp:** {{ states('sensor.ble_temperature_kitchen_temp_humidity_sensor') }}°C
@@ -329,6 +346,9 @@ cards:
     content: |
       ### Otto's Room
       **HVAC Mode:** {{ states('climate.otto_s_room') | upper }}
+      **Preset Mode:** {{ state_attr('climate.otto_s_room', 'preset_mode') | default('none') | title }}
+      - Available: {{ state_attr('climate.otto_s_room', 'preset_modes') | join(', ') }}
+      **Target Temp:** {{ state_attr('climate.otto_s_room', 'temperature') }}°C
       **Current Temp:** {{ states('sensor.ottos_room_temp_humidity_sensor_temperature') }}°C
       **Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.otto_room_door_sensor_opening', 'on') else 'Closed' }}
       **Manual Override:** {{ '🔴 ACTIVE' if is_state('input_boolean.climate_manual_control_otto', 'on') else '✅ Off' }}
@@ -357,10 +377,21 @@ cards:
       **Cooling Night Routine:** {{ '✅ ON' if is_state('automation.otto_s_room_cooling_night_routine', 'on') else '🔴 OFF' }}
       - Active: 18:00-06:00 in summer
 
+      {% set warm_or_hot_day = is_state('input_boolean.warm_today_flag', 'on') or is_state('input_boolean.hot_today_flag', 'on') or is_state('input_boolean.super_hot_today', 'on') %}
+      {% if warm_or_hot_day %}
+      **🔥 WARM/HOT NIGHT COOLING:** {{ '✅ ACTIVE' if hvac == 'cool' else 'Scheduled' }}
+      - Triggers at 6:45pm when day >18°C
+      - Mode: Boost cooling overnight
+      - Auto-off at 6:00am
+      {% endif %}
+
       ---
 
       ### Henry's Room / Study
       **HVAC Mode:** {{ states('climate.henry_s_room_versatile_thermostat') | upper }}
+      **Preset Mode:** {{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') | default('none') | title }}
+      - Available: {{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_modes') | join(', ') }}
+      **Target Temp:** {{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') }}°C
       **Current Temp:** {{ states('sensor.study_esp32_henrysroom_temperature') }}°C
       **Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.henry_door_sensor_magnet_opening', 'on') else 'Closed' }}
       **Manual Override:** {{ '🔴 ACTIVE' if is_state('input_boolean.climate_manual_control_study', 'on') else '✅ Off' }}
@@ -388,6 +419,14 @@ cards:
       **Heater Night Routine:** {{ '✅ ON' if is_state('automation.henry_s_room_heater_night_routine', 'on') else '🔴 OFF' }}
       **Cooling Night Routine:** {{ '✅ ON' if is_state('automation.henry_s_room_cooling_night_routine', 'on') else '🔴 OFF' }}
       - Active: 18:00-06:00 in summer
+
+      {% set warm_or_hot_day = is_state('input_boolean.warm_today_flag', 'on') or is_state('input_boolean.hot_today_flag', 'on') or is_state('input_boolean.super_hot_today', 'on') %}
+      {% if warm_or_hot_day %}
+      **🔥 WARM/HOT NIGHT COOLING:** {{ '✅ ACTIVE' if hvac == 'cool' else 'Scheduled' }}
+      - Triggers at 6:45pm when day >18°C
+      - Mode: Boost cooling overnight
+      - Auto-off at 6:00am
+      {% endif %}
 
       ---
 
@@ -439,7 +478,7 @@ cards:
       **Climate Flags - Mark Hot Day:** {{ '✅ ON' if is_state('automation.climate_flags_mark_hot_day', 'on') else '🔴 OFF' }}
       - Runs: Daily at 04:30 AM
       - Max temp forecast: {{ states('sensor.braybrook_temp_max_0') }}°C
-      - Sets hot_today_flag if >21°C, super_hot_today if >25°C
+      - Sets warm_today_flag if >18°C, hot_today_flag if >21°C, super_hot_today if >25°C
       {% set flags_last = state_attr('automation.climate_flags_mark_hot_day', 'last_triggered') %}
       {% if flags_last %}
       - Last run: {{ relative_time(flags_last) }} ago
@@ -451,6 +490,24 @@ cards:
       {% set door_last = state_attr('automation.climate_track_downstairs_door_state', 'last_triggered') %}
       {% if door_last %}
       - Last run: {{ relative_time(door_last) }} ago
+      {% endif %}
+
+      ### Overnight Cooling on Hot Days
+      **Bedrooms - Overnight AC on Hot Days:** {{ '✅ ON' if is_state('automation.bedrooms_overnight_ac_on_hot_days', 'on') else '🔴 OFF' }}
+      - Triggers: 6:45pm (kids), 9:00pm (master) when warm/hot day
+      - Condition: Day max temp >18°C (warm_today_flag, hot_today_flag, or super_hot_today)
+      - Action: AC boost mode overnight for comfort
+      {% set hot_night_last = state_attr('automation.bedrooms_overnight_ac_on_hot_days', 'last_triggered') %}
+      {% if hot_night_last %}
+      - Last run: {{ relative_time(hot_night_last) }} ago
+      {% endif %}
+
+      **Bedrooms - Turn Off Overnight AC in Morning:** {{ '✅ ON' if is_state('automation.bedrooms_turn_off_overnight_ac_in_morning', 'on') else '🔴 OFF' }}
+      - Triggers: 6:00am
+      - Action: Turns off all bedroom ACs
+      {% set hot_off_last = state_attr('automation.bedrooms_turn_off_overnight_ac_in_morning', 'last_triggered') %}
+      {% if hot_off_last %}
+      - Last run: {{ relative_time(hot_off_last) }} ago
       {% endif %}
 
       ---

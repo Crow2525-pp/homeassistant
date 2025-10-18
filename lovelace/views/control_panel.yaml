@@ -15,6 +15,9 @@ cards:
             entity: input_boolean.dryer_on
             state: "on"
           - condition: state
+            entity: input_boolean.dishwasher_on
+            state: "on"
+          - condition: state
             entity: cover.smart_garage_door_garage
             state: "open"
           - condition: state

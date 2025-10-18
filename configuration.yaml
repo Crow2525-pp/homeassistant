@@ -169,6 +169,10 @@ input_boolean:
     name: Hot Day Flag
     icon: mdi:weather-sunny
     initial: false
+  warm_today_flag:
+    name: Warm Day Flag
+    icon: mdi:weather-partly-sunny
+    initial: false
   downstairs_doors_open:
     name: Downstairs Doors Open
     icon: mdi:door-open

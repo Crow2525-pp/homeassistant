@@ -26,7 +26,7 @@ cards:
             - Dryer ({{ states('sensor.dryer_estimated_remaining') }} min remaining)
             {% endif %}
             {% if is_state('input_boolean.dishwasher_on', 'on') %}
-            - Dishwasher
+            - Dishwasher ({{ states('sensor.dishwasher_estimated_remaining') }} min remaining)
             {% endif %}
           card_mod:
             style: |
