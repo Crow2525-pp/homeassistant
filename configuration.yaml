@@ -244,7 +244,7 @@ input_number:
     min: 20
     max: 28
     step: 0.5
-    initial: 24
+    initial: 22
     unit_of_measurement: "°C"
     icon: mdi:thermometer
   # Living Room Climate Thresholds

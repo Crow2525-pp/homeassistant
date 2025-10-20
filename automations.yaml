@@ -724,79 +724,45 @@
     above the comfortable sleeping threshold. Summer automation to complement heating
     night assist.
   triggers:
-  - entity_id:
-    - sensor.ble_temperature_masterbed_temp_humidity_sensor
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-    below: input_number.master_bedroom_temp_comfort_high
-    id: Cool
-    trigger: numeric_state
-  - entity_id:
-    - sensor.ble_temperature_masterbed_temp_humidity_sensor
-    for:
-      hours: 0
-      minutes: 10
-      seconds: 0
-    above: input_number.master_bedroom_temp_comfort_high
-    id: Hot
-    trigger: numeric_state
+  - trigger: time
+    at: '21:00:00'
   conditions:
-  - condition: time
-    after: '20:00:00'
-    before: 06:00:00
-    weekday:
-    - sun
-    - mon
-    - tue
-    - wed
-    - thu
-    - fri
-    - sat
   - condition: state
     entity_id: input_boolean.climate_manual_control_master
     state: 'off'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.climate_season
+      state: summer
+    - condition: state
+      entity_id: input_select.climate_season
+      state: spring
+    - condition: state
+      entity_id: input_select.climate_season
+      state: autumn
   - condition: state
-    entity_id: input_select.climate_season
-    state: summer
+    entity_id: input_boolean.warm_today_flag
+    state: 'on'
   actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - Cool
-      sequence:
-      - metadata: {}
-        data:
-          preset_mode: none
-        target:
-          entity_id: climate.masterbed_versatile_thermostat
-        enabled: true
-        action: climate.set_preset_mode
-      - metadata: {}
-        data:
-          hvac_mode: 'off'
-        action: climate.set_hvac_mode
-        target:
-          entity_id: climate.masterbed_versatile_thermostat
-    - conditions:
-      - condition: trigger
-        id:
-        - Hot
-      sequence:
-      - metadata: {}
-        data:
-          preset_mode: boost
-        action: climate.set_preset_mode
-        target:
-          entity_id: climate.masterbed_versatile_thermostat
-      - metadata: {}
-        data:
-          hvac_mode: cool
-        action: climate.set_hvac_mode
-        target:
-          entity_id: climate.masterbed_versatile_thermostat
+  - metadata: {}
+    data:
+      preset_mode: boost
+    action: climate.set_preset_mode
+    target:
+      entity_id: climate.masterbed_versatile_thermostat
+  - action: climate.set_preset_mode
+    metadata: {}
+    data:
+      preset_mode: boost
+    target:
+      entity_id: climate.masterbed_versatile_thermostat
+  - metadata: {}
+    data:
+      hvac_mode: cool
+    action: climate.set_hvac_mode
+    target:
+      entity_id: climate.masterbed_versatile_thermostat
   mode: single
 - id: '1724061115527'
   alias: Henry's Room - Heater Night Routine
@@ -1004,7 +970,7 @@
       sequence:
       - metadata: {}
         data:
-          preset_mode: eco
+          preset_mode: boost
         action: climate.set_preset_mode
         target:
           entity_id: climate.henry_s_room_versatile_thermostat
@@ -1620,15 +1586,9 @@
                 entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
                 above: input_number.master_bedroom_temp_comfort_high
               sequence:
-              - if:
-                - condition: time
-                  before: '15:00:00'
-                then:
-                - service: script.1693262268843
-                else:
-                - service: cover.open_cover
-                  target:
-                    entity_id: cover.roller_blinds_chan1
+              - service: cover.close_cover
+                target:
+                  entity_id: cover.roller_blinds_chan1
               - service: fan.set_percentage
                 target:
                   entity_id: fan.masterbedroom_fan
@@ -4934,7 +4894,7 @@
       minutes: 5
   conditions:
   - condition: time
-    after: '08:00:00'
+    after: 08:00:00
     before: '20:00:00'
   actions:
   - action: media_player.play_media
