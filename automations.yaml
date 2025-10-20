@@ -6849,7 +6849,7 @@
             - condition: state
               entity_id: binary_sensor.otto_room_door_sensor_opening
               state: 'off'
-         sequence:
+          sequence:
             - service: climate.set_preset_mode
               target:
                 entity_id: climate.otto_s_room

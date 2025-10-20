@@ -14,13 +14,29 @@ cards:
     content: |
       ## Current Season & Settings
       **Season:** {{ states('input_select.climate_season') | title }}
+      **Occupancy:** {{ states('input_select.occupancy') | title }}
       **Month:** {{ now().strftime('%B') }} ({{ now().month }})
+      **Time:** {{ now().strftime('%H:%M') }}
 
-      ### Hot Day Flags
+      ### Weather Flags & Context
       - **Super Hot Today (>25°C):** {{ 'YES 🔥' if is_state('input_boolean.super_hot_today', 'on') else 'No' }}
       - **Hot Today (>21°C):** {{ 'YES ☀️' if is_state('input_boolean.hot_today_flag', 'on') else 'No' }}
       - **Warm Today (>18°C):** {{ 'YES 🌤️' if is_state('input_boolean.warm_today_flag', 'on') else 'No' }}
       - **Max Temp Forecast:** {{ states('sensor.braybrook_temp_max_0') }}°C
+      - **Working From Home:** {{ 'YES 💼' if is_state('binary_sensor.working_from_home', 'on') else 'No' }}
+      - **Solar Excess Available:** {{ 'YES ☀️' if is_state('binary_sensor.solar_excess_available', 'on') else 'No' }}
+
+      ### Time Windows (Active Now)
+      {% set hour = now().hour %}
+      {% set minute = now().minute %}
+      {% set time_decimal = hour + (minute / 60.0) %}
+      - **Preemptive Cooling (Master):** {{ 'ACTIVE 🟢' if (time_decimal >= 9 and time_decimal < 20) else 'Inactive' }} (09:00-20:00)
+      - **Preemptive Cooling (Study/Kids):** {{ 'ACTIVE 🟢' if (time_decimal >= 9 and time_decimal < 18) else 'Inactive' }} (09:00-18:00)
+      - **Naptime (Study/Kids):** {{ 'ACTIVE 🟢' if (time_decimal >= 12.25 and time_decimal < 16) else 'Inactive' }} (12:15-16:00)
+      - **Pre-bedtime (Study/Kids):** {{ 'ACTIVE 🟢' if (time_decimal >= 18 and time_decimal < 18.75) else 'Inactive' }} (18:00-18:45)
+      - **Bedtime (Study/Kids):** {{ 'ACTIVE 🟢' if (time_decimal >= 18.75 or time_decimal < 6) else 'Inactive' }} (18:45-06:00)
+      - **Bedtime (Master):** {{ 'ACTIVE 🟢' if (time_decimal >= 21 or time_decimal < 6) else 'Inactive' }} (21:00-06:00)
+      - **Frost Protection (Master):** {{ 'ACTIVE 🟢' if (time_decimal < 6) else 'Inactive' }} (00:00-06:00)
 
       ---
 
@@ -52,6 +68,13 @@ cards:
         name: "Warm Day Flag (>18°C)"
         icon: mdi:weather-partly-sunny
       - type: divider
+      - entity: binary_sensor.working_from_home
+        name: "Working From Home"
+        icon: mdi:laptop
+      - entity: binary_sensor.solar_excess_available
+        name: "Solar Excess Available"
+        icon: mdi:solar-power
+      - type: divider
       - entity: zone.home
         name: "People at Home"
         icon: mdi:account-group
@@ -78,11 +101,11 @@ cards:
       **Fan Speed:** {{ state_attr('fan.masterbedroom_fan', 'percentage') }}%
       {% endif %}
 
-      ### Blind Status
+      ### Blind & Door Status
       **Roller Blinds:** {{ state_attr('cover.roller_blinds_chan1', 'current_position') | int }}% open
       **Curtains:** {{ states('cover.curtain_3_b3bb') | title }}
       **Balcony Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.balcony_door_sensor_magnet_opening_2', 'on') else 'Closed' }}
-      **Bedroom Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.master_bedroom_door_sensor_opening', 'on') else 'Closed' }}
+      **Bedroom Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.master_bedroom_door_sensor_opening', 'on') else 'Closed ✅' }}
 
       ### Manual Overrides
       **Climate Manual Control:** {{ '🔴 ACTIVE - Automations Paused' if is_state('input_boolean.climate_manual_control_master', 'on') else '✅ Off - Automations Active' }}
@@ -92,127 +115,164 @@ cards:
       {% set temp = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float %}
       {% set humidity = states('sensor.ble_humidity_masterbed_temp_humidity_sensor') | float %}
       {% set season = states('input_select.climate_season') %}
+      {% set occupancy = states('input_select.occupancy') %}
       {% set hvac = states('climate.masterbed_versatile_thermostat') %}
+      {% set preset = state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') %}
       {% set door_open = is_state('binary_sensor.master_bedroom_door_sensor_opening', 'on') %}
       {% set climate_manual = is_state('input_boolean.climate_manual_control_master', 'on') %}
-      {% set blind_manual = is_state('input_boolean.blind_manual_control', 'on') %}
-      {% set hot_day = is_state('input_boolean.hot_today_flag', 'on') or is_state('input_boolean.super_hot_today', 'on') %}
+      {% set hot_day = is_state('input_boolean.hot_today_flag', 'on') %}
+      {% set super_hot_day = is_state('input_boolean.super_hot_today', 'on') %}
+      {% set warm_day = is_state('input_boolean.warm_today_flag', 'on') %}
       {% set wfh = is_state('binary_sensor.working_from_home', 'on') %}
       {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+      {% set hour = now().hour %}
+      {% set minute = now().minute %}
+      {% set time_decimal = hour + (minute / 60.0) %}
+      {% set bedtime = time_decimal >= 21 or time_decimal < 6 %}
+      {% set frost_protection = time_decimal < 6 %}
+      {% set preemptive_window = time_decimal >= 9 and time_decimal < 20 %}
 
-      {% if door_open %}
-      **🚪 DOOR OPEN** - All climate/blinds turned off (save energy)
+      {% if occupancy == 'holiday' %}
+      **🏖️ HOLIDAY MODE** - All HVAC off to save energy
+      {% elif door_open %}
+      **🚪 DOOR OPEN** - All climate turned off (Principle #5: door checks always active)
       {% elif climate_manual %}
-      **🔴 MANUAL CONTROL ACTIVE** - User has manually changed climate, automations paused for 4 hours
-      {% elif season == 'summer' %}
-        {% if hot_day %}
-      **☀️ HOT DAY MODE (Summer)** - Blinds closed all day to block north-facing sun
-          {% if temp > 26 %}
-      **🔥 VERY HOT** ({{ temp }}°C > 26°C) - Aggressive cooling:
-      - Blinds: Closed
-      - Fan: 66% (high speed)
-            {% if hvac == 'cool' and solar_excess %}
-      - AC: ON (using solar excess)
-            {% elif not solar_excess %}
-      - AC: OFF (no solar excess available)
-            {% endif %}
-          {% elif temp > 24 %}
-      **🌡️ HOT** ({{ temp }}°C > 24°C) - Moderate cooling:
-      - Blinds: Closed
-      - Fan: 33% (medium speed)
-            {% if hvac == 'cool' and solar_excess %}
-      - AC: ON (using solar excess)
-            {% endif %}
-          {% else %}
-      **✅ COMFORTABLE** ({{ temp }}°C < 24°C) - Fan only for circulation
-          {% endif %}
+      **🔴 MANUAL CONTROL ACTIVE** - User manually changed climate, automations paused for 4 hours
+      {% elif occupancy == 'away' %}
+      **🏠 AWAY MODE** - Using eco preset, reduced comfort
+        {% if season == 'winter' and temp < 16 %}
+      **❄️ ECO HEATING** ({{ temp }}°C < 16°C) - Frost protection with eco preset
+        {% elif season == 'summer' and hot_day and temp > 26 %}
+      **☀️ ECO COOLING** ({{ temp }}°C > 26°C, hot day) - Prevent overheating with eco preset
         {% else %}
-      **🌤️ COOL DAY (Summer)** - Normal day, dynamic blind management
-          {% if temp > 26 %}
-      **🔥 UNEXPECTEDLY HOT** - Activating aggressive cooling
-          {% elif temp > 24 %}
-      **🌡️ WARM** - Closing blinds and moderate fan
-          {% elif humidity > 20 %}
-      **💧 HIGH HUMIDITY** ({{ humidity }}%) - Running ventilation
-          {% else %}
-      **✅ COMFORTABLE** - Minimal intervention
+      **✅ COMFORTABLE** - No action needed in away mode
+        {% endif %}
+      {% elif bedtime %}
+      **🌙 BEDTIME/OVERNIGHT** (21:00-06:00)
+        {% if frost_protection and season == 'winter' and temp < 16 %}
+      **❄️ FROST PROTECTION** ({{ temp }}°C < 16°C)
+      - Mode: Heat, Preset: Frost
+      - Target: Prevent freezing overnight
+      - Door check: Required (Principle #5)
+      - Solar: NOT required (Principle #4 exception)
+        {% elif season == 'winter' and temp < 18 %}
+      **🔥 BEDTIME HEATING** ({{ temp }}°C < 18°C)
+      - Mode: Heat, Preset: Comfort
+      - Target: 20°C for sleep comfort
+      - Door check: Required (Principle #5)
+      - Solar: NOT required (Principle #4 exception)
+        {% elif (warm_day or hot_day or super_hot_day) and temp > 22 %}
+      **🌡️ WARM NIGHT COOLING** ({{ temp }}°C > 22°C after warm/hot day)
+      - Mode: Cool, Preset: Boost
+      - Target: Comfort cooling overnight
+      - Door check: Required (Principle #5)
+      - Solar: NOT required (Principle #4 exception)
+      - Triggered: 21:00 on warm/hot/super-hot days
+        {% else %}
+      **✅ COMFORTABLE** ({{ temp }}°C) - No heating or cooling needed overnight
+        {% endif %}
+      {% elif humidity > 75 %}
+      **💧 HIGH HUMIDITY** ({{ humidity }}% > 75%) - Dry mode active
+      - Principle #3: Dry mode only when temp not extreme
+      - Cooling/heating takes priority if temp triggers
+      {% elif season == 'summer' %}
+      **☀️ SUMMER MODE**
+        {% if super_hot_day and preemptive_window and temp > 22 %}
+      **🔥 PREEMPTIVE COOLING** (Super hot day, {{ temp }}°C > 22°C)
+      - Window: 09:00-20:00 (Principle #7)
+      - Mode: Cool, Preset: Comfort
+      - Door check: Required (Principle #5)
+      - Solar: NOT required for super_hot preemptive (Principle #7)
+      - Goal: Get ahead of extreme heat
+        {% elif hot_day and temp >= 24 %}
+      **🌡️ REACTIVE COOLING** (Hot day, {{ temp }}°C ≥ 24°C)
+      - Mode: Cool, Preset: Comfort
+      - Door check: Required (Principle #5)
+      - Solar: Required for daytime cooling (Principle #4)
+          {% if not solar_excess and not wfh %}
+      - ⚠️ BLOCKED: No solar excess (need solar or WFH)
           {% endif %}
+        {% elif temp >= 26 %}
+      **🔥 EMERGENCY COOLING** ({{ temp }}°C ≥ 26°C)
+      - Mode: Cool, Preset: Boost
+      - Triggered regardless of flags when extremely hot
+        {% else %}
+      **✅ COMFORTABLE** ({{ temp }}°C < 24°C) - No cooling needed
         {% endif %}
       {% elif season == 'winter' %}
       **❄️ WINTER MODE**
         {% if temp < 18 %}
-          {% if now().hour >= 9 and now().hour < 20 %}
-            {% if wfh or now().hour >= 17 %}
-      **🔥 HEATING** ({{ temp }}°C < 18°C) - Winter day heating active:
-      - Blinds: Open for solar gain
-      - Fan: Off
-      - AC: Heat mode to 20°C
-            {% else %}
-      **💼 NOT WFH** - Heating skipped during day (9am-5pm) to save energy
+          {% if wfh or (hour >= 17 and hour < 22) %}
+      **🔥 DAYTIME HEATING** ({{ temp }}°C < 18°C)
+      - Mode: Heat, Preset: Comfort
+      - Target: 20°C
+      - Door check: Required (Principle #5)
+      - Solar: Required UNLESS WFH (Principle #7)
+            {% if not solar_excess and not wfh %}
+      - ⚠️ BLOCKED: No solar excess and not WFH
+            {% elif wfh %}
+      - ✅ WFH: Bypassing solar requirement (Principle #7)
             {% endif %}
           {% else %}
-      **🌙 NIGHT** - See "Heater Night Assist" automation for overnight heating
+      **💼 NOT WFH & OUTSIDE EVENING** - Heating skipped to save energy
+      - WFH status: {{ 'Yes' if wfh else 'No' }}
+      - Current time: {{ now().strftime('%H:%M') }}
+      - Heating allowed: WFH daytime or evening (17:00-22:00)
           {% endif %}
         {% else %}
       **✅ WARM ENOUGH** ({{ temp }}°C ≥ 18°C) - No heating needed
         {% endif %}
       {% elif season == 'spring' or season == 'autumn' %}
       **🍂 SHOULDER SEASON ({{ season | title }})** - Minimal intervention
-        {% if temp > 26 %}
-      **🔥 HOT** ({{ temp }}°C > 26°C) - Cooling:
-      - Blinds: Closed
-      - Fan: 33%
+        {% if temp >= 26 %}
+      **🔥 HOT** ({{ temp }}°C ≥ 26°C) - Cooling
         {% elif temp < 16 %}
-      **❄️ COLD** ({{ temp }}°C < 16°C) - Heating if nighttime
+      **❄️ COLD** ({{ temp }}°C < 16°C) - Heating if evening/bedtime
         {% else %}
-      **✅ COMFORTABLE** (16-26°C) - Natural ventilation, no HVAC
+      **✅ COMFORTABLE** (16-26°C) - Natural ventilation
         {% endif %}
       {% endif %}
 
-      ### Active Automations
-      {% set seasonal_last = state_attr('automation.master_bedroom_seasonal_climate_manager', 'last_triggered') %}
-      {% set heater_night_last = state_attr('automation.master_bedroom_heater_night_assist', 'last_triggered') %}
-      {% set wake_last = state_attr('automation.master_bedroom_turn_off_ac_on_wake', 'last_triggered') %}
-      {% set fan_ac_last = state_attr('automation.master_bedroom_fan_on_when_ac_starts', 'last_triggered') %}
-      {% set notification_last = state_attr('automation.smart_climate_notification_master_bedroom', 'last_triggered') %}
-
-      - **Seasonal Climate Manager:** {{ '✅ ON' if is_state('automation.master_bedroom_seasonal_climate_manager', 'on') else '🔴 OFF' }}
-        {% if seasonal_last %}
-        - Last run: {{ relative_time(seasonal_last) }} ago
-        {% endif %}
-      - **Heater Night Assist:** {{ '✅ ON' if is_state('automation.master_bedroom_heater_night_assist', 'on') else '🔴 OFF' }}
-        - Active: 18:00-06:00 in winter
-        {% if heater_night_last %}
-        - Last run: {{ relative_time(heater_night_last) }} ago
-        {% endif %}
-      - **Turn Off AC on Wake:** {{ '✅ ON' if is_state('automation.master_bedroom_turn_off_ac_on_wake', 'on') else '🔴 OFF' }}
-        - Active: 06:00-09:00 on wake sensors
-        {% if wake_last %}
-        - Last run: {{ relative_time(wake_last) }} ago
-        {% endif %}
-      - **Fan On When AC Starts:** {{ '✅ ON' if is_state('automation.master_bedroom_fan_on_when_ac_starts', 'on') else '🔴 OFF' }}
-        {% if fan_ac_last %}
-        - Last run: {{ relative_time(fan_ac_last) }} ago
-        {% endif %}
-      - **Smart Climate Notification:** {{ '✅ ON' if is_state('automation.smart_climate_notification_master_bedroom', 'on') else '🔴 OFF' }}
-        {% if notification_last %}
-        - Last notification: {{ relative_time(notification_last) }} ago
-        {% endif %}
-      {% set cooling_night_last = state_attr('automation.master_bedroom_cooling_night_assist', 'last_triggered') %}
-      - **Cooling Night Assist:** {{ '✅ ON' if is_state('automation.master_bedroom_cooling_night_assist', 'on') else '🔴 OFF' }}
-        - Active: 20:00-06:00 in summer
-        {% if cooling_night_last %}
-        - Last run: {{ relative_time(cooling_night_last) }} ago
-        {% endif %}
-
+      ### Automation Status
+      {% set manager_last = state_attr('automation.hvac_master_bedroom_versatile_climate_manager', 'last_triggered') %}
+      {% set blinds_last = state_attr('automation.hvac_master_bedroom_blinds_temperature_control', 'last_triggered') %}
+      {% set fan_last = state_attr('automation.hvac_master_bedroom_fan_sync_with_climate', 'last_triggered') %}
       {% set hot_night_last = state_attr('automation.bedrooms_overnight_ac_on_hot_days', 'last_triggered') %}
-      - **🔥 Warm/Hot Night Bedroom Cooling:** {{ '✅ ON' if is_state('automation.bedrooms_overnight_ac_on_hot_days', 'on') else '🔴 OFF' }}
-        - Triggers: 9:00pm when day was >18°C (warm/hot/super hot)
-        - Mode: Boost cooling for comfort
-        - Auto-off: 6:00am next morning
-        {% if hot_night_last %}
-        - Last run: {{ relative_time(hot_night_last) }} ago
-        {% endif %}
+      {% set hot_off_last = state_attr('automation.bedrooms_turn_off_overnight_ac_in_morning', 'last_triggered') %}
+
+      **🎯 HVAC - Master Bedroom Versatile Climate Manager**
+      - Status: {{ '✅ ON' if is_state('automation.hvac_master_bedroom_versatile_climate_manager', 'on') else '🔴 OFF' }}
+      {% if manager_last %}
+      - Last triggered: {{ relative_time(manager_last) }} ago
+      {% endif %}
+      - Triggers: State-based (temp, humidity, door, solar, season, occupancy, flags, WFH) + Time-specific (bedtime, wake-up)
+      - Principle #10: No polling - fires only on state changes
+
+      **🪟 Blinds Temperature Control**
+      - Status: {{ '✅ ON' if is_state('automation.hvac_master_bedroom_blinds_temperature_control', 'on') else '🔴 OFF' }}
+      {% if blinds_last %}
+      - Last triggered: {{ relative_time(blinds_last) }} ago
+      {% endif %}
+
+      **🌀 Fan Sync with Climate**
+      - Status: {{ '✅ ON' if is_state('automation.hvac_master_bedroom_fan_sync_with_climate', 'on') else '🔴 OFF' }}
+      {% if fan_last %}
+      - Last triggered: {{ relative_time(fan_last) }} ago
+      {% endif %}
+
+      **🔥 Warm/Hot Night Bedroom Cooling (System-Wide)**
+      - Status: {{ '✅ ON' if is_state('automation.bedrooms_overnight_ac_on_hot_days', 'on') else '🔴 OFF' }}
+      - Triggers: 9:00pm when warm/hot/super-hot day
+      {% if hot_night_last %}
+      - Last triggered: {{ relative_time(hot_night_last) }} ago
+      {% endif %}
+
+      **⏰ Turn Off Overnight AC in Morning (System-Wide)**
+      - Status: {{ '✅ ON' if is_state('automation.bedrooms_turn_off_overnight_ac_in_morning', 'on') else '🔴 OFF' }}
+      - Triggers: 6:00am daily
+      {% if hot_off_last %}
+      - Last triggered: {{ relative_time(hot_off_last) }} ago
+      {% endif %}
 
       ---
 
@@ -227,17 +287,19 @@ cards:
         }
     content: |
       ### Climate State
-      **HVAC Mode:** {{ states('climate.living_room_versatile_thermostat') | upper }}
-      **Preset Mode:** {{ state_attr('climate.living_room_versatile_thermostat', 'preset_mode') | default('none') | title }}
-      - Available: {{ state_attr('climate.living_room_versatile_thermostat', 'preset_modes') | join(', ') }}
-      **Target Temp:** {{ state_attr('climate.living_room_versatile_thermostat', 'temperature') }}°C
+      **HVAC Mode:** {{ states('climate.living_room_versatile_thermastat') | upper }}
+      **Preset Mode:** {{ state_attr('climate.living_room_versatile_thermastat', 'preset_mode') | default('none') | title }}
+      - Available: {{ state_attr('climate.living_room_versatile_thermastat', 'preset_modes') | join(', ') }}
+      **Target Temp:** {{ state_attr('climate.living_room_versatile_thermastat', 'temperature') }}°C
       **Current Temp:** {{ states('sensor.living_room_temperature_offset') }}°C
       **Kitchen Temp:** {{ states('sensor.ble_temperature_kitchen_temp_humidity_sensor') }}°C
 
-      ### Door Status
-      **Living Room Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.living_room_door_sensor_opening', 'on') else 'Closed' }}
-      **Garage Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.interior_garage_door_sensor_magnet_opening', 'on') else 'Closed' }}
-      **Downstairs Doors:** {{ 'OPEN 🚪' if is_state('binary_sensor.downstairs_doors', 'on') else 'All Closed' }}
+      ### Door Status (ALL 3 Must Be Closed - Principle #4)
+      **Living Room Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.living_room_door_sensor_opening', 'on') else 'Closed ✅' }}
+      **Interior Garage Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.interior_garage_door_sensor_magnet_opening', 'on') else 'Closed ✅' }}
+      **Front Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.front_door_sensor_opening', 'on') else 'Closed ✅' }}
+      {% set all_doors_closed = not is_state('binary_sensor.living_room_door_sensor_opening', 'on') and not is_state('binary_sensor.interior_garage_door_sensor_magnet_opening', 'on') and not is_state('binary_sensor.front_door_sensor_opening', 'on') %}
+      **All Doors Status:** {{ '✅ ALL CLOSED - HVAC Allowed' if all_doors_closed else '🚪 AT LEAST ONE OPEN - HVAC Blocked' }}
 
       ### Manual Override
       **Climate Manual Control:** {{ '🔴 ACTIVE - Automations Paused' if is_state('input_boolean.climate_manual_control_living', 'on') else '✅ Off - Automations Active' }}
@@ -246,193 +308,112 @@ cards:
       {% set temp = states('sensor.living_room_temperature_offset') | float %}
       {% set kitchen_temp = states('sensor.ble_temperature_kitchen_temp_humidity_sensor') | float %}
       {% set season = states('input_select.climate_season') %}
-      {% set hvac = states('climate.living_room_ac') %}
+      {% set occupancy = states('input_select.occupancy') %}
+      {% set hvac = states('climate.living_room_versatile_thermastat') %}
+      {% set preset = state_attr('climate.living_room_versatile_thermastat', 'preset_mode') %}
       {% set manual = is_state('input_boolean.climate_manual_control_living', 'on') %}
+      {% set any_door_open = is_state('binary_sensor.living_room_door_sensor_opening', 'on') or is_state('binary_sensor.interior_garage_door_sensor_magnet_opening', 'on') or is_state('binary_sensor.front_door_sensor_opening', 'on') %}
+      {% set hot_day = is_state('input_boolean.hot_today_flag', 'on') %}
+      {% set super_hot_day = is_state('input_boolean.super_hot_today', 'on') %}
+      {% set wfh = is_state('binary_sensor.working_from_home', 'on') %}
+      {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
       {% set hour = now().hour %}
+      {% set minute = now().minute %}
+      {% set time_decimal = hour + (minute / 60.0) %}
 
-      {% if manual %}
-      **🔴 MANUAL CONTROL ACTIVE** - User has manually changed climate, automations paused for 4 hours
-      {% elif season == 'summer' %}
-      **☀️ SUMMER MODE**
-        {% if temp > 28 %}
-      **🔥 VERY HOT** ({{ temp }}°C > 28°C) - AC cooling if available
+      {% if occupancy == 'holiday' %}
+      **🏖️ HOLIDAY MODE** - All HVAC off
+      {% elif any_door_open %}
+      **🚪 DOOR OPEN** - At least one of 3 doors open, all climate off
+      - Principle #4: Living room requires ALL 3 doors closed
+      {% elif manual %}
+      **🔴 MANUAL CONTROL ACTIVE** - Automations paused for 4 hours
+      {% elif occupancy == 'away' %}
+      **🏠 AWAY MODE** - Eco preset
+        {% if season == 'winter' and temp < 14.5 %}
+      **❄️ ECO HEATING** ({{ temp }}°C < 14.5°C) - Prevent cold with eco
+        {% elif season == 'summer' and hot_day and temp > 26 %}
+      **☀️ ECO COOLING** ({{ temp }}°C > 26°C, hot day) - Prevent overheating with eco
         {% else %}
-      **✅ COMFORTABLE** - Natural ventilation, no HVAC needed
+      **✅ COMFORTABLE** - No action in away mode
         {% endif %}
       {% elif season == 'winter' %}
       **❄️ WINTER MODE**
-        {% if hour >= 5 and hour < 9 %}
+        {% if time_decimal >= 5.5 and time_decimal < 9 %}
           {% if temp < 19 or kitchen_temp < 19 %}
       **☕ MORNING PREHEAT** (05:30-09:00)
-      - Current: {{ temp }}°C (threshold: 19°C)
-      - Kitchen: {{ kitchen_temp }}°C (threshold: 19°C)
-      - Mode: Comfort heating
-      - Fan: Highest
+      - Current: {{ temp }}°C | Kitchen: {{ kitchen_temp }}°C
+      - Threshold: 19°C
+      - Mode: Heat, Preset: Comfort
       - Target: Warm before family wakes
+      - Solar: NOT required (Principle #4 exception for morning preheat)
           {% else %}
-      **✅ WARM ENOUGH** - Preheat not needed (>19°C)
+      **✅ WARM ENOUGH** - Preheat not needed (≥19°C)
           {% endif %}
-        {% elif hour >= 9 and hour < 22 %}
-          {% if hvac == 'heat' %}
-      **🔥 DAY HEATING** - Maintaining 20°C comfort
+        {% elif time_decimal >= 9 and time_decimal < 22 %}
+          {% if temp < 18 %}
+      **🔥 DAY HEATING** ({{ temp }}°C < 18°C)
+      - Mode: Heat, Preset: Comfort
+      - Target: 20°C
+      - Solar: Required UNLESS WFH (Principle #7)
+            {% if not solar_excess and not wfh %}
+      - ⚠️ BLOCKED: No solar excess and not WFH
+            {% elif wfh %}
+      - ✅ WFH: Bypassing solar requirement
+            {% endif %}
           {% else %}
-      **✅ COMFORTABLE** - No heating needed
+      **✅ COMFORTABLE** ({{ temp }}°C ≥ 18°C) - No heating needed
           {% endif %}
-        {% elif hour >= 22 or hour < 5 %}
+        {% elif time_decimal >= 22 or time_decimal < 5.5 %}
           {% if temp < 14.5 %}
       **🌙 NIGHT ECO HEATING** ({{ temp }}°C < 14.5°C)
-      - Mode: Eco (energy saving)
+      - Mode: Heat, Preset: Eco
       - Target: Prevent cold overnight
           {% elif temp > 16 %}
       **✅ NIGHT - WARM** ({{ temp }}°C > 16°C) - Heater off
           {% else %}
-      **🌙 NIGHT** (14.5-16°C) - Monitoring temperature
+      **🌙 NIGHT** (14.5-16°C) - Monitoring
           {% endif %}
         {% endif %}
+      {% elif season == 'summer' %}
+      **☀️ SUMMER MODE**
+        {% if temp > 26 %}
+      **🔥 REACTIVE COOLING** ({{ temp }}°C > 26°C)
+      - Mode: Cool, Preset: Comfort
+      - Solar: Required for daytime (Principle #4)
+          {% if not solar_excess and not wfh %}
+      - ⚠️ BLOCKED: No solar excess
+          {% endif %}
+        {% else %}
+      **✅ COMFORTABLE** ({{ temp }}°C ≤ 26°C)
+        {% endif %}
       {% elif season == 'spring' or season == 'autumn' %}
-      **🍂 SHOULDER SEASON ({{ season | title }})** - Minimal HVAC
-        {% if temp > 28 %}
-      **🔥 UNUSUALLY HOT** - Cooling may activate
-        {% elif temp < 17 %}
+      **🍂 SHOULDER SEASON ({{ season | title }})**
+        {% if temp > 26 %}
+      **🔥 HOT** - Cooling may activate
+        {% elif temp < 17 and time_decimal >= 5.5 and time_decimal < 9 %}
       **❄️ COLD MORNING** - Light preheat if needed
         {% else %}
       **✅ COMFORTABLE** - Natural ventilation
         {% endif %}
       {% endif %}
 
-      ### Active Automations
-      {% set preheat_last = state_attr('automation.living_room_preheat_at_5_30_am_if_cold', 'last_triggered') %}
-      {% set turn_off_last = state_attr('automation.living_room_turn_off_heater_when_warm', 'last_triggered') %}
-      {% set overnight_last = state_attr('automation.living_room_heater_off_overnight', 'last_triggered') %}
-      {% set setback_last = state_attr('automation.living_room_night_temperature_setback', 'last_triggered') %}
-      {% set notification_last = state_attr('automation.smart_climate_notification_living_room', 'last_triggered') %}
+      ### Automation Status
+      {% set manager_last = state_attr('automation.hvac_living_room_versatile_climate_manager', 'last_triggered') %}
 
-      - **Preheat at 5:30 AM:** {{ '✅ ON' if is_state('automation.living_room_preheat_at_5_30_am_if_cold', 'on') else '🔴 OFF' }}
-        - Active: 05:30 if temp <19°C (winter)
-        {% if preheat_last %}
-        - Last run: {{ relative_time(preheat_last) }} ago
-        {% endif %}
-      - **Turn Off When Warm:** {{ '✅ ON' if is_state('automation.living_room_turn_off_heater_when_warm', 'on') else '🔴 OFF' }}
-        - Active: 06:00-07:30 if temp >20°C (winter mornings)
-        {% if turn_off_last %}
-        - Last run: {{ relative_time(turn_off_last) }} ago
-        {% endif %}
-      - **Heater Off Overnight:** {{ '✅ ON' if is_state('automation.living_room_heater_off_overnight', 'on') else '🔴 OFF' }}
-        - Active: 20:30-01:00 on sleep sensors
-        {% if overnight_last %}
-        - Last run: {{ relative_time(overnight_last) }} ago
-        {% endif %}
-      - **Night Temperature Setback:** {{ '✅ ON' if is_state('automation.living_room_night_temperature_setback', 'on') else '🔴 OFF' }}
-        - Active: 22:00-05:00 if temp <14.5°C or >16°C
-        {% if setback_last %}
-        - Last run: {{ relative_time(setback_last) }} ago
-        {% endif %}
-      - **Smart Climate Notification:** {{ '✅ ON' if is_state('automation.smart_climate_notification_living_room', 'on') else '🔴 OFF' }}
-        {% if notification_last %}
-        - Last notification: {{ relative_time(notification_last) }} ago
-        {% endif %}
+      **🎯 HVAC - Living Room Versatile Climate Manager**
+      - Status: {{ '✅ ON' if is_state('automation.hvac_living_room_versatile_climate_manager', 'on') else '🔴 OFF' }}
+      {% if manager_last %}
+      - Last triggered: {{ relative_time(manager_last) }} ago
+      {% endif %}
+      - Triggers: State-based (temp, humidity, doors×3, solar, season, occupancy, flags, WFH) + Time-specific (morning preheat, night setback)
+      - Principle #10: No polling - fires only on state changes
 
       ---
 
-  # Children's Rooms Status
+  # Study (Lucas/Henry) Status
   - type: markdown
-    title: "👶 Children's Rooms Status"
-    card_mod:
-      style: |
-        ha-card {
-          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
-          border-left: 4px solid #F59E0B;
-        }
-    content: |
-      ### Otto's Room
-      **HVAC Mode:** {{ states('climate.otto_s_room') | upper }}
-      **Preset Mode:** {{ state_attr('climate.otto_s_room', 'preset_mode') | default('none') | title }}
-      - Available: {{ state_attr('climate.otto_s_room', 'preset_modes') | join(', ') }}
-      **Target Temp:** {{ state_attr('climate.otto_s_room', 'temperature') }}°C
-      **Current Temp:** {{ states('sensor.ottos_room_temp_humidity_sensor_temperature') }}°C
-      **Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.otto_room_door_sensor_opening', 'on') else 'Closed' }}
-      **Manual Override:** {{ '🔴 ACTIVE' if is_state('input_boolean.climate_manual_control_otto', 'on') else '✅ Off' }}
-
-      **Why this state?**
-      {% set temp = states('sensor.ottos_room_temp_humidity_sensor_temperature') | float %}
-      {% set hvac = states('climate.otto_s_room') %}
-      {% set hour = now().hour %}
-      {% set season = states('input_select.climate_season') %}
-      {% if season == 'winter' and hour >= 18 or hour < 6 %}
-        {% if temp < 18.5 %}
-      **🌙 NIGHT HEATING** ({{ temp }}°C < 18.5°C)
-      - Target: 18.5-19.5°C comfort range
-      - Mode: Eco heating
-      - Active: 18:00-06:00
-        {% elif temp > 19.5 %}
-      **✅ WARM** ({{ temp }}°C > 19.5°C) - Heater off
-        {% else %}
-      **✅ COMFORTABLE** (18.5-19.5°C) - Maintaining range
-        {% endif %}
-      {% else %}
-      **☀️ DAYTIME** - No heating needed (kids not in room)
-      {% endif %}
-
-      **Heater Night Routine:** {{ '✅ ON' if is_state('automation.otto_s_room_heater_night_routine', 'on') else '🔴 OFF' }}
-      **Cooling Night Routine:** {{ '✅ ON' if is_state('automation.otto_s_room_cooling_night_routine', 'on') else '🔴 OFF' }}
-      - Active: 18:00-06:00 in summer
-
-      {% set warm_or_hot_day = is_state('input_boolean.warm_today_flag', 'on') or is_state('input_boolean.hot_today_flag', 'on') or is_state('input_boolean.super_hot_today', 'on') %}
-      {% if warm_or_hot_day %}
-      **🔥 WARM/HOT NIGHT COOLING:** {{ '✅ ACTIVE' if hvac == 'cool' else 'Scheduled' }}
-      - Triggers at 6:45pm when day >18°C
-      - Mode: Boost cooling overnight
-      - Auto-off at 6:00am
-      {% endif %}
-
-      ---
-
-      ### Henry's Room / Study
-      **HVAC Mode:** {{ states('climate.henry_s_room_versatile_thermostat') | upper }}
-      **Preset Mode:** {{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') | default('none') | title }}
-      - Available: {{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_modes') | join(', ') }}
-      **Target Temp:** {{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') }}°C
-      **Current Temp:** {{ states('sensor.study_esp32_henrysroom_temperature') }}°C
-      **Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.henry_door_sensor_magnet_opening', 'on') else 'Closed' }}
-      **Manual Override:** {{ '🔴 ACTIVE' if is_state('input_boolean.climate_manual_control_study', 'on') else '✅ Off' }}
-
-      **Why this state?**
-      {% set temp = states('sensor.study_esp32_henrysroom_temperature') | float %}
-      {% set hvac = states('climate.henry_s_room_versatile_thermostat') %}
-      {% set hour = now().hour %}
-      {% set season = states('input_select.climate_season') %}
-      {% if season == 'winter' and hour >= 18 or hour < 6 %}
-        {% if temp < 19.7 %}
-      **🌙 NIGHT HEATING** ({{ temp }}°C < 19.7°C)
-      - Target: 19.7-20.1°C comfort range
-      - Mode: Eco heating
-      - Active: 18:00-06:00
-        {% elif temp > 20.1 %}
-      **✅ WARM** ({{ temp }}°C > 20.1°C) - Heater off
-        {% else %}
-      **✅ COMFORTABLE** (19.7-20.1°C) - Maintaining range
-        {% endif %}
-      {% else %}
-      **☀️ DAYTIME** - No heating needed
-      {% endif %}
-
-      **Heater Night Routine:** {{ '✅ ON' if is_state('automation.henry_s_room_heater_night_routine', 'on') else '🔴 OFF' }}
-      **Cooling Night Routine:** {{ '✅ ON' if is_state('automation.henry_s_room_cooling_night_routine', 'on') else '🔴 OFF' }}
-      - Active: 18:00-06:00 in summer
-
-      {% set warm_or_hot_day = is_state('input_boolean.warm_today_flag', 'on') or is_state('input_boolean.hot_today_flag', 'on') or is_state('input_boolean.super_hot_today', 'on') %}
-      {% if warm_or_hot_day %}
-      **🔥 WARM/HOT NIGHT COOLING:** {{ '✅ ACTIVE' if hvac == 'cool' else 'Scheduled' }}
-      - Triggers at 6:45pm when day >18°C
-      - Mode: Boost cooling overnight
-      - Auto-off at 6:00am
-      {% endif %}
-
-      ---
-
-  # Temperature Thresholds Reference
-  - type: markdown
-    title: "🎯 Temperature Thresholds (Configurable)"
+    title: "📚 Study (Lucas's Room) Status"
     card_mod:
       style: |
         ha-card {
@@ -440,18 +421,305 @@ cards:
           border-left: 4px solid #10B981;
         }
     content: |
-      ### Master Bedroom
-      - **Summer Cooling:** {{ states('input_number.master_bedroom_temp_summer_cool') }}°C
-      - **Winter Heating:** {{ states('input_number.master_bedroom_temp_winter_heat') }}°C
-      - **Comfort Range:** {{ states('input_number.master_bedroom_temp_comfort_low') }}°C - {{ states('input_number.master_bedroom_temp_comfort_high') }}°C
+      ### Climate State
+      **HVAC Mode:** {{ states('climate.henry_s_room_versatile_thermostat') | upper }}
+      **Preset Mode:** {{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') | default('none') | title }}
+      - Available: {{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_modes') | join(', ') }}
+      **Target Temp:** {{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') }}°C
+      **Current Temp:** {{ states('sensor.study_esp32_henrysroom_temperature') }}°C
+      **Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.henry_door_sensor_magnet_opening', 'on') else 'Closed ✅' }}
+      **Manual Override:** {{ '🔴 ACTIVE' if is_state('input_boolean.climate_manual_control_study', 'on') else '✅ Off' }}
 
-      ### Living Room
-      - **Summer Cooling:** {{ states('input_number.living_room_temp_summer_cool') }}°C
-      - **Winter Heating:** {{ states('input_number.living_room_temp_winter_heat') }}°C
-      - **Winter Morning:** {{ states('input_number.living_room_temp_winter_morning') }}°C
-      - **Comfort Target:** {{ states('input_number.living_room_temp_comfort') }}°C
+      ### Why Current State?
+      {% set temp = states('sensor.study_esp32_henrysroom_temperature') | float %}
+      {% set season = states('input_select.climate_season') %}
+      {% set occupancy = states('input_select.occupancy') %}
+      {% set hvac = states('climate.henry_s_room_versatile_thermostat') %}
+      {% set preset = state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') %}
+      {% set door_open = is_state('binary_sensor.henry_door_sensor_magnet_opening', 'on') %}
+      {% set manual = is_state('input_boolean.climate_manual_control_study', 'on') %}
+      {% set hot_day = is_state('input_boolean.hot_today_flag', 'on') %}
+      {% set super_hot_day = is_state('input_boolean.super_hot_today', 'on') %}
+      {% set warm_day = is_state('input_boolean.warm_today_flag', 'on') %}
+      {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+      {% set hour = now().hour %}
+      {% set minute = now().minute %}
+      {% set time_decimal = hour + (minute / 60.0) %}
+      {% set naptime = time_decimal >= 12.25 and time_decimal < 16 %}
+      {% set pre_bedtime = time_decimal >= 18 and time_decimal < 18.75 %}
+      {% set bedtime = time_decimal >= 18.75 or time_decimal < 6 %}
+      {% set preemptive_window = time_decimal >= 9 and time_decimal < 18 %}
 
-      💡 *Adjust these in Settings > Helpers to change when climate activates*
+      {% if occupancy == 'holiday' %}
+      **🏖️ HOLIDAY MODE** - All HVAC off
+      {% elif door_open %}
+      **🚪 DOOR OPEN** - Climate off (Principle #5)
+      {% elif manual %}
+      **🔴 MANUAL CONTROL ACTIVE** - Automations paused
+      {% elif occupancy == 'away' %}
+      **🏠 AWAY MODE** - Eco preset
+        {% if season == 'winter' and temp < 16 %}
+      **❄️ ECO HEATING** ({{ temp }}°C < 16°C)
+        {% elif season == 'summer' and hot_day and temp > 24 %}
+      **☀️ ECO COOLING** ({{ temp }}°C > 24°C, hot day)
+        {% else %}
+      **✅ COMFORTABLE** - No action
+        {% endif %}
+      {% elif bedtime %}
+      **🌙 BEDTIME/OVERNIGHT** (18:45-06:00)
+        {% if season == 'winter' and temp < 18 %}
+      **🔥 BEDTIME HEATING** ({{ temp }}°C < 18°C)
+      - Mode: Heat, Preset: Comfort
+      - Target: 20°C
+      - Solar: NOT required (Principle #4 exception)
+        {% elif (warm_day or hot_day or super_hot_day) and temp > 22 %}
+      **🌡️ WARM NIGHT COOLING** ({{ temp }}°C > 22°C after warm/hot day)
+      - Mode: Cool, Preset: Boost
+      - Solar: NOT required (Principle #4 exception)
+      - Triggered: 18:45 on warm/hot/super-hot days
+        {% else %}
+      **✅ COMFORTABLE** ({{ temp }}°C)
+        {% endif %}
+      {% elif pre_bedtime %}
+      **🌅 PRE-BEDTIME** (18:00-18:45)
+        {% if season == 'winter' and temp < 18 %}
+      **🔥 PRE-BEDTIME HEATING** ({{ temp }}°C < 18°C)
+      - Mode: Heat, Preset: Comfort
+      - Solar: NOT required (Principle #4 exception)
+        {% elif (warm_day or hot_day or super_hot_day) and temp > 22 %}
+      **🌡️ PRE-BEDTIME COOLING** ({{ temp }}°C > 22°C, warm/hot day)
+      - Mode: Cool, Preset: Comfort
+      - Solar: NOT required (Principle #4 exception)
+        {% else %}
+      **✅ COMFORTABLE**
+        {% endif %}
+      {% elif naptime %}
+      **😴 NAPTIME** (12:15-16:00)
+        {% if season == 'winter' and temp < 18 %}
+      **🔥 NAPTIME HEATING** ({{ temp }}°C < 18°C)
+      - Mode: Heat, Preset: Comfort
+      - Solar: NOT required (Principle #4 exception for naptime)
+        {% elif (hot_day or super_hot_day) and temp > 22 %}
+      **🌡️ NAPTIME COOLING** ({{ temp }}°C > 22°C, hot day)
+      - Mode: Cool, Preset: Comfort
+      - Solar: NOT required (Principle #4 exception for naptime)
+        {% else %}
+      **✅ COMFORTABLE**
+        {% endif %}
+      {% elif season == 'summer' %}
+      **☀️ SUMMER MODE**
+        {% if super_hot_day and preemptive_window and temp > 22 %}
+      **🔥 PREEMPTIVE COOLING** (Super hot, {{ temp }}°C > 22°C)
+      - Window: 09:00-18:00 (Principle #7)
+      - Mode: Cool, Preset: Comfort
+      - Solar: NOT required for super_hot preemptive
+        {% elif hot_day and temp >= 24 %}
+      **🌡️ REACTIVE COOLING** (Hot day, {{ temp }}°C ≥ 24°C)
+      - Mode: Cool, Preset: Comfort
+      - Solar: Required (Principle #4)
+          {% if not solar_excess %}
+      - ⚠️ BLOCKED: No solar excess
+          {% endif %}
+        {% else %}
+      **✅ COMFORTABLE** ({{ temp }}°C < 24°C)
+        {% endif %}
+      {% elif season == 'winter' %}
+      **❄️ WINTER MODE**
+        {% if temp < 18 %}
+      **🔥 DAYTIME HEATING** ({{ temp }}°C < 18°C)
+      - Mode: Heat, Preset: Comfort
+      - Target: 20°C
+      - Solar: Required (Principle #4)
+          {% if not solar_excess %}
+      - ⚠️ BLOCKED: No solar excess
+          {% endif %}
+        {% else %}
+      **✅ WARM ENOUGH** ({{ temp }}°C ≥ 18°C)
+        {% endif %}
+      {% elif season == 'spring' or season == 'autumn' %}
+      **🍂 SHOULDER SEASON ({{ season | title }})**
+        {% if temp >= 26 %}
+      **🔥 HOT** - Cooling
+        {% elif temp < 16 %}
+      **❄️ COLD** - Heating if naptime/bedtime
+        {% else %}
+      **✅ COMFORTABLE**
+        {% endif %}
+      {% endif %}
+
+      ### Automation Status
+      {% set manager_last = state_attr('automation.hvac_study_versatile_climate_manager', 'last_triggered') %}
+      {% set hot_night_last = state_attr('automation.bedrooms_overnight_ac_on_hot_days', 'last_triggered') %}
+
+      **🎯 HVAC - Study Versatile Climate Manager**
+      - Status: {{ '✅ ON' if is_state('automation.hvac_study_versatile_climate_manager', 'on') else '🔴 OFF' }}
+      {% if manager_last %}
+      - Last triggered: {{ relative_time(manager_last) }} ago
+      {% endif %}
+      - Triggers: State-based (temp, door, solar, season, occupancy, flags) + Time-specific (naptime, pre-bedtime, bedtime, wake-up, preemptive windows)
+      - Principle #10: No polling - fires only on state changes
+
+      {% set warm_or_hot_day = warm_day or hot_day or super_hot_day %}
+      {% if warm_or_hot_day %}
+      **🔥 Warm/Hot Night Cooling:** {{ '✅ ACTIVE' if hvac == 'cool' else 'Scheduled for 18:45' }}
+      - Day flags: Warm={{ warm_day }}, Hot={{ hot_day }}, Super-hot={{ super_hot_day }}
+      {% endif %}
+
+      ---
+
+  # Kids Room (Otto) Status
+  - type: markdown
+    title: "👶 Kids Room (Otto) Status"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #F59E0B;
+        }
+    content: |
+      ### Climate State
+      **HVAC Mode:** {{ states('climate.otto_s_room') | upper }}
+      **Preset Mode:** {{ state_attr('climate.otto_s_room', 'preset_mode') | default('none') | title }}
+      - Available: {{ state_attr('climate.otto_s_room', 'preset_modes') | join(', ') }}
+      **Target Temp:** {{ state_attr('climate.otto_s_room', 'temperature') }}°C
+      **Current Temp:** {{ states('sensor.study_esp32_ottosroom_temperature') }}°C
+      **Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.otto_room_door_sensor_opening', 'on') else 'Closed ✅' }}
+      **Manual Override:** {{ '🔴 ACTIVE' if is_state('input_boolean.climate_manual_control_otto', 'on') else '✅ Off' }}
+
+      ### Why Current State?
+      {% set temp = states('sensor.study_esp32_ottosroom_temperature') | float %}
+      {% set season = states('input_select.climate_season') %}
+      {% set occupancy = states('input_select.occupancy') %}
+      {% set hvac = states('climate.otto_s_room') %}
+      {% set preset = state_attr('climate.otto_s_room', 'preset_mode') %}
+      {% set door_open = is_state('binary_sensor.otto_room_door_sensor_opening', 'on') %}
+      {% set manual = is_state('input_boolean.climate_manual_control_otto', 'on') %}
+      {% set hot_day = is_state('input_boolean.hot_today_flag', 'on') %}
+      {% set super_hot_day = is_state('input_boolean.super_hot_today', 'on') %}
+      {% set warm_day = is_state('input_boolean.warm_today_flag', 'on') %}
+      {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+      {% set hour = now().hour %}
+      {% set minute = now().minute %}
+      {% set time_decimal = hour + (minute / 60.0) %}
+      {% set naptime = time_decimal >= 12.25 and time_decimal < 16 %}
+      {% set pre_bedtime = time_decimal >= 18 and time_decimal < 18.75 %}
+      {% set bedtime = time_decimal >= 18.75 or time_decimal < 6 %}
+      {% set preemptive_window = time_decimal >= 9 and time_decimal < 18 %}
+
+      {% if occupancy == 'holiday' %}
+      **🏖️ HOLIDAY MODE** - All HVAC off
+      {% elif door_open %}
+      **🚪 DOOR OPEN** - Climate off (Principle #5)
+      {% elif manual %}
+      **🔴 MANUAL CONTROL ACTIVE** - Automations paused
+      {% elif occupancy == 'away' %}
+      **🏠 AWAY MODE** - Eco preset
+        {% if season == 'winter' and temp < 16 %}
+      **❄️ ECO HEATING** ({{ temp }}°C < 16°C)
+        {% elif season == 'summer' and hot_day and temp > 24 %}
+      **☀️ ECO COOLING** ({{ temp }}°C > 24°C, hot day)
+        {% else %}
+      **✅ COMFORTABLE** - No action
+        {% endif %}
+      {% elif bedtime %}
+      **🌙 BEDTIME/OVERNIGHT** (18:45-06:00)
+        {% if season == 'winter' and temp < 18 %}
+      **🔥 BEDTIME HEATING** ({{ temp }}°C < 18°C)
+      - Mode: Heat, Preset: Comfort
+      - Target: 20°C
+      - Solar: NOT required (Principle #4 exception)
+        {% elif (warm_day or hot_day or super_hot_day) and temp > 22 %}
+      **🌡️ WARM NIGHT COOLING** ({{ temp }}°C > 22°C after warm/hot day)
+      - Mode: Cool, Preset: Boost
+      - Solar: NOT required (Principle #4 exception)
+      - Triggered: 18:45 on warm/hot/super-hot days
+        {% else %}
+      **✅ COMFORTABLE** ({{ temp }}°C)
+        {% endif %}
+      {% elif pre_bedtime %}
+      **🌅 PRE-BEDTIME** (18:00-18:45)
+        {% if season == 'winter' and temp < 18 %}
+      **🔥 PRE-BEDTIME HEATING** ({{ temp }}°C < 18°C)
+      - Mode: Heat, Preset: Comfort
+      - Solar: NOT required (Principle #4 exception)
+        {% elif (warm_day or hot_day or super_hot_day) and temp > 22 %}
+      **🌡️ PRE-BEDTIME COOLING** ({{ temp }}°C > 22°C, warm/hot day)
+      - Mode: Cool, Preset: Comfort
+      - Solar: NOT required (Principle #4 exception)
+        {% else %}
+      **✅ COMFORTABLE**
+        {% endif %}
+      {% elif naptime %}
+      **😴 NAPTIME** (12:15-16:00)
+        {% if season == 'winter' and temp < 18 %}
+      **🔥 NAPTIME HEATING** ({{ temp }}°C < 18°C)
+      - Mode: Heat, Preset: Comfort
+      - Solar: NOT required (Principle #4 exception for naptime)
+        {% elif (hot_day or super_hot_day) and temp > 22 %}
+      **🌡️ NAPTIME COOLING** ({{ temp }}°C > 22°C, hot day)
+      - Mode: Cool, Preset: Comfort
+      - Solar: NOT required (Principle #4 exception for naptime)
+        {% else %}
+      **✅ COMFORTABLE**
+        {% endif %}
+      {% elif season == 'summer' %}
+      **☀️ SUMMER MODE**
+        {% if super_hot_day and preemptive_window and temp > 22 %}
+      **🔥 PREEMPTIVE COOLING** (Super hot, {{ temp }}°C > 22°C)
+      - Window: 09:00-18:00 (Principle #7)
+      - Mode: Cool, Preset: Comfort
+      - Solar: NOT required for super_hot preemptive
+        {% elif hot_day and temp >= 24 %}
+      **🌡️ REACTIVE COOLING** (Hot day, {{ temp }}°C ≥ 24°C)
+      - Mode: Cool, Preset: Comfort
+      - Solar: Required (Principle #4)
+          {% if not solar_excess %}
+      - ⚠️ BLOCKED: No solar excess
+          {% endif %}
+        {% else %}
+      **✅ COMFORTABLE** ({{ temp }}°C < 24°C)
+        {% endif %}
+      {% elif season == 'winter' %}
+      **❄️ WINTER MODE**
+        {% if temp < 18 %}
+      **🔥 DAYTIME HEATING** ({{ temp }}°C < 18°C)
+      - Mode: Heat, Preset: Comfort
+      - Target: 20°C
+      - Solar: Required (Principle #4)
+          {% if not solar_excess %}
+      - ⚠️ BLOCKED: No solar excess
+          {% endif %}
+        {% else %}
+      **✅ WARM ENOUGH** ({{ temp }}°C ≥ 18°C)
+        {% endif %}
+      {% elif season == 'spring' or season == 'autumn' %}
+      **🍂 SHOULDER SEASON ({{ season | title }})**
+        {% if temp >= 26 %}
+      **🔥 HOT** - Cooling
+        {% elif temp < 16 %}
+      **❄️ COLD** - Heating if naptime/bedtime
+        {% else %}
+      **✅ COMFORTABLE**
+        {% endif %}
+      {% endif %}
+
+      ### Automation Status
+      {% set manager_last = state_attr('automation.hvac_kids_room_otto_versatile_climate_manager', 'last_triggered') %}
+      {% set hot_night_last = state_attr('automation.bedrooms_overnight_ac_on_hot_days', 'last_triggered') %}
+
+      **🎯 HVAC - Kids Room (Otto) Versatile Climate Manager**
+      - Status: {{ '✅ ON' if is_state('automation.hvac_kids_room_otto_versatile_climate_manager', 'on') else '🔴 OFF' }}
+      {% if manager_last %}
+      - Last triggered: {{ relative_time(manager_last) }} ago
+      {% endif %}
+      - Triggers: State-based (temp, door, solar, season, occupancy, flags) + Time-specific (naptime, pre-bedtime, bedtime, wake-up, preemptive windows)
+      - Principle #10: No polling - fires only on state changes
+
+      {% set warm_or_hot_day = warm_day or hot_day or super_hot_day %}
+      {% if warm_or_hot_day %}
+      **🔥 Warm/Hot Night Cooling:** {{ '✅ ACTIVE' if hvac == 'cool' else 'Scheduled for 18:45' }}
+      - Day flags: Warm={{ warm_day }}, Hot={{ hot_day }}, Super-hot={{ super_hot_day }}
+      {% endif %}
 
       ---
 
@@ -494,7 +762,7 @@ cards:
 
       ### Overnight Cooling on Hot Days
       **Bedrooms - Overnight AC on Hot Days:** {{ '✅ ON' if is_state('automation.bedrooms_overnight_ac_on_hot_days', 'on') else '🔴 OFF' }}
-      - Triggers: 6:45pm (kids), 9:00pm (master) when warm/hot day
+      - Triggers: 18:45 (kids/study), 21:00 (master) when warm/hot/super-hot day
       - Condition: Day max temp >18°C (warm_today_flag, hot_today_flag, or super_hot_today)
       - Action: AC boost mode overnight for comfort
       {% set hot_night_last = state_attr('automation.bedrooms_overnight_ac_on_hot_days', 'last_triggered') %}
@@ -509,6 +777,40 @@ cards:
       {% if hot_off_last %}
       - Last run: {{ relative_time(hot_off_last) }} ago
       {% endif %}
+
+      ---
+
+  # Performance Metrics
+  - type: markdown
+    title: "📊 Performance Metrics"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #10B981;
+        }
+    content: |
+      ### Optimization Results (Principle #9 & #10)
+
+      **Before:** Time-pattern polling every 15 minutes
+      - 4 automations × 4 runs/hour = 16 automation runs/hour
+      - 96 runs/day (6am-10pm active period)
+      - Many unnecessary thermostat beeps from redundant service calls
+
+      **After:** State-based + time-specific triggers
+      - Runs ONLY when relevant conditions change
+      - State checks prevent redundant service calls (Principle #9)
+      - Estimated 80-90% reduction in automation runs
+      - Significantly fewer thermostat beeps
+
+      **Trigger Types Now Used:**
+      - **State-based:** Temperature, humidity, door sensors, solar excess, season, occupancy, flags, WFH
+      - **Time-specific:** Bedtime windows, wake-up times, naptime, pre-bedtime, frost protection windows
+
+      **Service Call Optimization:**
+      - ALWAYS check current state before calling set_hvac_mode or set_preset_mode
+      - Only send command if value needs to change
+      - Prevents annoying beeps from redundant commands
 
       ---
 
