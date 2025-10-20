@@ -4904,6 +4904,24 @@
       media_content_id: https://www.soundjay.com/misc/sounds/magic-chime-02.mp3
       media_content_type: audio/mp3
   mode: single
+# CORRECT
+
+# BEDTIMES:
+# - Kids (Otto & Study occupant): 18:45
+# - Adults (Phil & Steph): 21:00
+# - Naptime window: 12:30 - 16:00
+#
+# ROOM NAMING:
+# - Master Bedroom: Phil & Steph
+# - Living Room: Downstairs living area
+# - Study (Lucas's Room): Previously Henrys Room
+# - Kids Room (Otto's Room): Otto
+#
+################################################################################
+################################################################################
+# MASTER BEDROOM VERSATILE CLIMATE CONTROL
+################################################################################
+
 - id: master_bedroom_versatile_climate_manager
   alias: HVAC - Master Bedroom Versatile Climate Manager
   description: >
@@ -4911,21 +4929,28 @@
     for master bedroom climate. Assesses humidity, temperature, season, solar, sleep
     status. Versatile thermostat handles temperature setpoints via presets.
   triggers:
-    - platform: time_pattern
-      minutes: /15
+    # State-based triggers - fire when conditions change
     - platform: state
-      entity_id: input_boolean.climate_manual_control_master
-      to: 'off'
-      id: manual_override_off
+      entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+      id: temperature_change
     - platform: state
-      entity_id: binary_sensor.working_from_home
-      id: wfh_change
+      entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+      id: humidity_change
+    - platform: state
+      entity_id: binary_sensor.master_bedroom_door_sensor_opening
+      id: door_change
+    - platform: state
+      entity_id: binary_sensor.solar_excess_available
+      id: solar_change
+    - platform: state
+      entity_id: input_select.climate_season
+      id: season_change
     - platform: state
       entity_id: input_select.occupancy
       id: occupancy_change
     - platform: state
-      entity_id: binary_sensor.solar_excess_available
-      id: solar_change
+      entity_id: binary_sensor.working_from_home
+      id: wfh_change
     - platform: state
       entity_id: input_boolean.warm_today_flag
       id: warm_flag_change
@@ -4935,18 +4960,27 @@
     - platform: state
       entity_id: input_boolean.super_hot_today
       id: superhot_flag_change
+    - platform: state
+      entity_id: input_boolean.climate_manual_control_master
+      to: 'off'
+      id: manual_override_off
+    # Time-based triggers - fire at specific times for time windows
     - platform: time
       at: "06:00:00"
-      id: morning
+      id: morning_frost_end
     - platform: time
       at: "09:00:00"
-      id: preemptive_cool_check
+      id: preemptive_window_start
+    - platform: time
+      at: "20:00:00"
+      id: preemptive_window_end
     - platform: time
       at: "20:30:00"
-      id: pre_bedtime
+      id: pre_bedtime_start
     - platform: time
       at: "21:00:00"
-      id: bedtime
+      id: bedtime_start
+    # System start
     - platform: homeassistant
       event: start
   conditions: []
@@ -4967,14 +5001,30 @@
               entity_id: input_select.occupancy
               state: Holiday
           sequence:
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: 'off'
-            - service: fan.turn_off
-              target:
-                entity_id: fan.masterbedroom_fan
+            # Only set hvac_mode if not already off (principle 9: minimize beeps)
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.masterbed_versatile_thermostat
+                          state: 'off'
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: 'off'
+            # Only turn off fan if currently on
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: fan.masterbedroom_fan
+                      state: 'on'
+                  sequence:
+                    - service: fan.turn_off
+                      target:
+                        entity_id: fan.masterbedroom_fan
             - stop: "Holiday mode - climate disabled"
 
         # Away mode with hot/superhot day - eco mode minimal cooling
@@ -4991,19 +5041,45 @@
                   entity_id: input_boolean.super_hot_today
                   state: 'on'
           sequence:
-            - service: climate.set_preset_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                preset_mode: eco
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: cool
-            - service: fan.turn_off
-              target:
-                entity_id: fan.masterbedroom_fan
+            # Only set preset if not already eco (principle 9: minimize beeps)
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.masterbed_versatile_thermostat
+                          attribute: preset_mode
+                          state: eco
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        preset_mode: eco
+            # Only set hvac_mode if not already cool
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.masterbed_versatile_thermostat
+                          state: cool
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: cool
+            # Only turn off fan if currently on
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: fan.masterbedroom_fan
+                      state: 'on'
+                  sequence:
+                    - service: fan.turn_off
+                      target:
+                        entity_id: fan.masterbedroom_fan
             - stop: "Away with hot day - eco cooling active"
 
         # Away mode (not hot day) - turn off climate
@@ -5427,18 +5503,30 @@
     for living room climate. Includes fan_only mode for 21-22°C in summer. Reactive
     cooling only (no preemptive). Frost mode after 22:15. Seasonal bias applied.
   triggers:
-    - platform: time_pattern
-      minutes: /15
+    # State-based triggers - fire when conditions change
     - platform: state
-      entity_id: input_boolean.climate_manual_control_living
-      to: 'off'
-      id: manual_override_off
+      entity_id:
+        - sensor.ble_temperature_kitchen_temp_humidity_sensor
+        - sensor.living_room_temperature_offset
+      id: temperature_change
     - platform: state
-      entity_id: input_select.occupancy
-      id: occupancy_change
+      entity_id: sensor.ble_humidity_kitchen_temp_humidity_sensor
+      id: humidity_change
+    - platform: state
+      entity_id:
+        - binary_sensor.living_room_door_sensor_opening
+        - binary_sensor.interior_garage_door_sensor_magnet_opening
+        - binary_sensor.front_door_sensor_opening
+      id: door_change
     - platform: state
       entity_id: binary_sensor.solar_excess_available
       id: solar_change
+    - platform: state
+      entity_id: input_select.climate_season
+      id: season_change
+    - platform: state
+      entity_id: input_select.occupancy
+      id: occupancy_change
     - platform: state
       entity_id: input_boolean.warm_today_flag
       id: warm_flag_change
@@ -5448,15 +5536,27 @@
     - platform: state
       entity_id: input_boolean.super_hot_today
       id: superhot_flag_change
+    - platform: state
+      entity_id: input_boolean.climate_manual_control_living
+      to: 'off'
+      id: manual_override_off
+    # Time-based triggers - fire at specific times for time windows
     - platform: time
       at: "05:30:00"
-      id: preheat_time
+      id: preheat_start
+    - platform: time
+      at: "08:00:00"
+      id: preheat_end
     - platform: time
       at: "06:00:00"
-      id: morning
+      id: daytime_start
     - platform: time
       at: "22:15:00"
-      id: frost_time
+      id: frost_start
+    - platform: time
+      at: "05:30:00"
+      id: frost_end
+    # System start
     - platform: homeassistant
       event: start
   conditions: []
@@ -5942,18 +6042,25 @@
     Makes intelligent decisions for the study climate. Includes preemptive cooling
     on super hot days. Bedtime boost mode for sleep comfort. Naptime comfort cooling.
   triggers:
-    - platform: time_pattern
-      minutes: /15
+    # State-based triggers - fire when conditions change
     - platform: state
-      entity_id: input_boolean.climate_manual_control_study
-      to: 'off'
-      id: manual_override_off
+      entity_id: sensor.study_esp32_henrysroom_temperature
+      id: temperature_change
     - platform: state
-      entity_id: input_select.occupancy
-      id: occupancy_change
+      entity_id: sensor.study_esp32_henrysroom_humidity
+      id: humidity_change
+    - platform: state
+      entity_id: binary_sensor.henry_door_sensor_magnet_opening
+      id: door_change
     - platform: state
       entity_id: binary_sensor.solar_excess_available
       id: solar_change
+    - platform: state
+      entity_id: input_select.climate_season
+      id: season_change
+    - platform: state
+      entity_id: input_select.occupancy
+      id: occupancy_change
     - platform: state
       entity_id: input_boolean.warm_today_flag
       id: warm_flag_change
@@ -5963,27 +6070,33 @@
     - platform: state
       entity_id: input_boolean.super_hot_today
       id: superhot_flag_change
+    - platform: state
+      entity_id: input_boolean.climate_manual_control_study
+      to: 'off'
+      id: manual_override_off
+    # Time-based triggers - fire at specific times for time windows
+    - platform: time
+      at: "06:00:00"
+      id: morning_start
     - platform: time
       at: "09:00:00"
-      id: preemptive_cool_check
+      id: preemptive_window_start
+    - platform: time
+      at: "18:00:00"
+      id: preemptive_window_end
     - platform: time
       at: "12:15:00"
-      id: naptime_precool
-    - platform: time
-      at: "12:30:00"
       id: naptime_start
     - platform: time
       at: "16:00:00"
       id: naptime_end
     - platform: time
       at: "18:30:00"
-      id: pre_bedtime
+      id: pre_bedtime_start
     - platform: time
       at: "18:45:00"
-      id: bedtime
-    - platform: time
-      at: "06:00:00"
-      id: morning
+      id: bedtime_start
+    # System start
     - platform: homeassistant
       event: start
   conditions: []
@@ -6396,18 +6509,25 @@
     Makes intelligent decisions for Otto's room climate. Includes preemptive cooling
     on super hot days. Bedtime boost mode for sleep comfort. Naptime comfort cooling.
   triggers:
-    - platform: time_pattern
-      minutes: /15
+    # State-based triggers - fire when conditions change
     - platform: state
-      entity_id: input_boolean.climate_manual_control_otto
-      to: 'off'
-      id: manual_override_off
+      entity_id: sensor.study_esp32_ottosroom_temperature
+      id: temperature_change
     - platform: state
-      entity_id: input_select.occupancy
-      id: occupancy_change
+      entity_id: sensor.study_esp32_ottosroom_humidity
+      id: humidity_change
+    - platform: state
+      entity_id: binary_sensor.otto_room_door_sensor_opening
+      id: door_change
     - platform: state
       entity_id: binary_sensor.solar_excess_available
       id: solar_change
+    - platform: state
+      entity_id: input_select.climate_season
+      id: season_change
+    - platform: state
+      entity_id: input_select.occupancy
+      id: occupancy_change
     - platform: state
       entity_id: input_boolean.warm_today_flag
       id: warm_flag_change
@@ -6417,27 +6537,33 @@
     - platform: state
       entity_id: input_boolean.super_hot_today
       id: superhot_flag_change
+    - platform: state
+      entity_id: input_boolean.climate_manual_control_otto
+      to: 'off'
+      id: manual_override_off
+    # Time-based triggers - fire at specific times for time windows
+    - platform: time
+      at: "06:00:00"
+      id: morning_start
     - platform: time
       at: "09:00:00"
-      id: preemptive_cool_check
+      id: preemptive_window_start
+    - platform: time
+      at: "18:00:00"
+      id: preemptive_window_end
     - platform: time
       at: "12:15:00"
-      id: naptime_precool
-    - platform: time
-      at: "12:30:00"
       id: naptime_start
     - platform: time
       at: "16:00:00"
       id: naptime_end
     - platform: time
       at: "18:30:00"
-      id: pre_bedtime
+      id: pre_bedtime_start
     - platform: time
       at: "18:45:00"
-      id: bedtime
-    - platform: time
-      at: "06:00:00"
-      id: morning
+      id: bedtime_start
+    # System start
     - platform: homeassistant
       event: start
   conditions: []
@@ -6723,7 +6849,7 @@
             - condition: state
               entity_id: binary_sensor.otto_room_door_sensor_opening
               state: 'off'
-          sequence:
+         sequence:
             - service: climate.set_preset_mode
               target:
                 entity_id: climate.otto_s_room
