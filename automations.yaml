@@ -2900,13 +2900,23 @@
       - auto_shading_enabled
       cover_status_options: cover_helper_enabled
       cover_status_helper: input_text.cover_status_helper
+      cover_drive_time: 90  # Time to recognize manual control (seconds)
       workday_sensor: binary_sensor.workday_sensor
       default_brightness_sensor: sensor.hub_2_0be5_illuminance
       brightness_up: 4673
+      brightness_down: 3500
       contact_window_opened: binary_sensor.balcony_door_sensor_magnet_opening_2
       resident_sensor: input_boolean.home_presence
+      resident_config:
+      - resident_closing_enabled
+      - resident_allow_opening
       check_config: true
       blind: cover.roller_blinds_chan1
+      open_position: 100
+      close_position: 0
+      ventilate_position: 30
+      shading_position: 25
+      position_tolerance: 0
       shading_brightness_sensor: sensor.hub_2_0be5_illuminance
       shading_temperatur_sensor1: sensor.ble_temperature_masterbed_temp_humidity_sensor
       shading_temperatur_sensor2: sensor.essendon_airport_temp
@@ -2921,11 +2931,8 @@
       auto_shading_end_condition:
       - condition: sun
         after: sunset
-      brightness_down: 3500
-      resident_config:
-      - resident_closing_enabled
-      - resident_allow_opening
       drive_delay_fix: 16
+      drive_delay_random: 5
   conditions:
   - condition: state
     entity_id: input_boolean.blind_manual_control
@@ -2933,7 +2940,7 @@
 - id: '1721641437270'
   alias: Covers - Refresh Roller Blind Positions
   description: Periodically polls the roller blinds to keep positions accurate in
-    Home Assistant.
+    Home Assistant. Updates every 30 seconds based on 18-minute full travel time.
   trigger:
   - platform: time_pattern
     seconds: /30
@@ -2945,28 +2952,154 @@
   - choose:
     - conditions:
       - condition: state
-        entity_id: cover.roller_blinds_chan1
+        entity_id: input_select.roller_blind_state
         state: opening
       sequence:
       - service: input_number.set_value
-        data_template:
+        target:
           entity_id: input_number.roller_blind_position
-          value: '{{ [states(''input_number.roller_blind_position'')|int + (100 /
-            30), 100] | min }}
-
-            '
+        data:
+          # Full travel = 18min = 1080sec, update every 30sec = 36 increments
+          # Each increment = 100/36 = 2.78%
+          value: '{{ [states(''input_number.roller_blind_position'')|int(0) + 2.78, 100] | min }}'
     - conditions:
       - condition: state
-        entity_id: cover.roller_blinds_chan1
+        entity_id: input_select.roller_blind_state
         state: closing
       sequence:
       - service: input_number.set_value
-        data_template:
+        target:
           entity_id: input_number.roller_blind_position
-          value: '{{ [states(''input_number.roller_blind_position'')|int - (100 /
-            30), 0] | max }}
-
-            '
+        data:
+          value: '{{ [states(''input_number.roller_blind_position'')|int(0) - 2.78, 0] | max }}'
+- id: '1749869999001'
+  alias: Covers - Roller Blind Timer Finished (Full Open)
+  description: When timer finishes, set position to 100 if opening to full open
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.roller_blind_timer
+  condition:
+  - condition: state
+    entity_id: input_select.roller_blind_state
+    state: 'opening'
+  - condition: template
+    value_template: '{{ states(''input_number.roller_blind_target_position'') | int(0) == 100 }}'
+  action:
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.roller_blind_position
+    data:
+      value: 100
+  - action: input_select.select_option
+    target:
+      entity_id: input_select.roller_blind_state
+    data:
+      option: "open"
+  mode: single
+- id: '1749869999002'
+  alias: Covers - Roller Blind Timer Finished (Full Close)
+  description: When timer finishes, set position to 0 if closing to full close
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.roller_blind_timer
+  condition:
+  - condition: state
+    entity_id: input_select.roller_blind_state
+    state: 'closing'
+  - condition: template
+    value_template: '{{ states(''input_number.roller_blind_target_position'') | int(0) == 0 }}'
+  action:
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.roller_blind_position
+    data:
+      value: 0
+  - action: input_select.select_option
+    target:
+      entity_id: input_select.roller_blind_state
+    data:
+      option: "closed"
+  mode: single
+- id: '1749869999003'
+  alias: Covers - Roller Blind Partial Position Stop
+  description: Stops blind when reaching target partial position during movement
+  trigger:
+  - platform: time_pattern
+    seconds: '/5'  # Check every 5 seconds while moving
+  condition:
+  - condition: state
+    entity_id: timer.roller_blind_timer
+    state: 'active'
+  - condition: template
+    value_template: >-
+      {% set target = states('input_number.roller_blind_target_position') | int(0) %}
+      {% set current = states('input_number.roller_blind_position') | int(0) %}
+      {% set state = states('input_select.roller_blind_state') %}
+      {% set tolerance = 3 %}
+      {# Only check for partial positions (not 0 or 100) #}
+      {% if target > 0 and target < 100 %}
+        {# Check if we've reached target within tolerance #}
+        {# IMPORTANT: Timer must have been running for at least 10 seconds to avoid immediate stop #}
+        {% set timer_running = as_timestamp(now()) - as_timestamp(state_attr('timer.roller_blind_timer', 'finishes_at')) + 1080 %}
+        {% if timer_running > 10 %}
+          {% if state == 'opening' %}
+            {{ current >= (target - tolerance) }}
+          {% elif state == 'closing' %}
+            {{ current <= (target + tolerance) }}
+          {% else %}
+            false
+          {% endif %}
+        {% else %}
+          false
+        {% endif %}
+      {% else %}
+        false
+      {% endif %}
+  action:
+  - action: script.roller_blinds_stop
+  - action: timer.cancel
+    target:
+      entity_id: timer.roller_blind_timer
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.roller_blind_position
+    data:
+      value: "{{ states('input_number.roller_blind_target_position') | int(0) }}"
+  - action: input_select.select_option
+    target:
+      entity_id: input_select.roller_blind_state
+    data:
+      option: "{{ 'open' if states('input_number.roller_blind_target_position') | int(0) > 50 else 'closed' }}"
+  mode: single
+- id: '1749869999004'
+  alias: Covers - Roller Blind Position Debug Logger
+  description: Logs position changes for debugging (disable after testing)
+  trigger:
+  - platform: state
+    entity_id: input_number.roller_blind_target_position
+    id: target_changed
+  - platform: state
+    entity_id: input_number.roller_blind_position
+    id: position_changed
+  - platform: state
+    entity_id: input_select.roller_blind_state
+    id: state_changed
+  action:
+  - action: logbook.log
+    data:
+      name: "Roller Blind Debug"
+      message: >-
+        {{ trigger.id }}:
+        Target={{ states('input_number.roller_blind_target_position') }}%,
+        Current={{ states('input_number.roller_blind_position') }}%,
+        State={{ states('input_select.roller_blind_state') }},
+        Timer={{ states('timer.roller_blind_timer') }}
+  mode: queued
+  max: 10
 - id: '1727826000001'
   alias: Automation Tracker - Manual Blind Control
   description: Records when manual blind control is enabled so automations can respect
