@@ -401,6 +401,10 @@
   - condition: state
     entity_id: input_boolean.climate_manual_control_living
     state: 'off'
+  - condition: state
+    entity_id: input_boolean.hvac_living_room_should_be_on
+    state: 'on'
+    alias: Living Room HVAC Master On
   actions:
   - data:
       preset_mode: comfort
@@ -452,6 +456,10 @@
   - condition: state
     entity_id: input_boolean.climate_manual_control_living
     state: 'off'
+  - condition: state
+    entity_id: input_boolean.hvac_living_room_should_be_on
+    state: 'on'
+    alias: Living Room HVAC Master On
   actions:
   - device_id: b084d1fcd04470308deb597901c61d5c
     domain: climate
@@ -487,6 +495,10 @@
   - condition: state
     entity_id: input_boolean.climate_manual_control_living
     state: 'off'
+  - condition: state
+    entity_id: input_boolean.hvac_living_room_should_be_on
+    state: 'on'
+    alias: Living Room HVAC Master On
   actions:
   - metadata: {}
     data:
@@ -533,6 +545,10 @@
   - condition: state
     entity_id: input_boolean.climate_manual_control_living
     state: 'off'
+  - condition: state
+    entity_id: input_boolean.hvac_living_room_should_be_on
+    state: 'on'
+    alias: Living Room HVAC Master On
   actions:
   - choose:
     - conditions:
@@ -593,6 +609,10 @@
   - condition: state
     entity_id: input_boolean.climate_manual_control_master
     state: 'off'
+  - condition: state
+    entity_id: input_boolean.hvac_master_bedroom_should_be_on
+    state: 'on'
+    alias: Master Bedroom HVAC Master On
   actions:
   - metadata: {}
     data:
@@ -619,7 +639,11 @@
     entity_id: climate.masterbed_versatile_thermostat
     to: heat
     id: Heat
-  condition: []
+  conditions:
+  - condition: state
+    entity_id: input_boolean.hvac_master_bedroom_should_be_on
+    state: 'on'
+    alias: Master Bedroom HVAC Master On
   actions:
   - choose:
     - conditions:
@@ -680,6 +704,10 @@
   - condition: state
     entity_id: input_boolean.climate_manual_control_master
     state: 'off'
+  - condition: state
+    entity_id: input_boolean.hvac_master_bedroom_should_be_on
+    state: 'on'
+    alias: Master Bedroom HVAC Master On
   actions:
   - choose:
     - conditions:
@@ -744,6 +772,10 @@
   - condition: state
     entity_id: input_boolean.warm_today_flag
     state: 'on'
+  - condition: state
+    entity_id: input_boolean.hvac_master_bedroom_should_be_on
+    state: 'on'
+    alias: Master Bedroom HVAC Master On
   actions:
   - metadata: {}
     data:
@@ -802,6 +834,10 @@
   - condition: state
     entity_id: input_boolean.climate_manual_control_study
     state: 'off'
+  - condition: state
+    entity_id: input_boolean.hvac_study_should_be_on
+    state: 'on'
+    alias: Study HVAC Master On
   actions:
   - choose:
     - conditions:
@@ -871,6 +907,10 @@
   - condition: state
     entity_id: input_boolean.climate_manual_control_otto
     state: 'off'
+  - condition: state
+    entity_id: input_boolean.hvac_kids_room_should_be_on
+    state: 'on'
+    alias: Kids Room HVAC Master On
   actions:
   - choose:
     - conditions:
@@ -950,6 +990,10 @@
   - condition: state
     entity_id: input_select.climate_season
     state: summer
+  - condition: state
+    entity_id: input_boolean.hvac_study_should_be_on
+    state: 'on'
+    alias: Study HVAC Master On
   actions:
   - choose:
     - conditions:
@@ -1022,6 +1066,10 @@
   - condition: state
     entity_id: input_select.climate_season
     state: summer
+  - condition: state
+    entity_id: input_boolean.hvac_kids_room_should_be_on
+    state: 'on'
+    alias: Kids Room HVAC Master On
   actions:
   - choose:
     - conditions:
@@ -1474,7 +1522,11 @@
     id: evening
   - platform: homeassistant
     event: start
-  conditions: []
+  conditions:
+  - condition: state
+    entity_id: input_boolean.hvac_master_bedroom_should_be_on
+    state: 'on'
+    alias: Master Bedroom HVAC Master On
   actions:
   - choose:
     - conditions:
@@ -2010,6 +2062,11 @@
     - conditions:
       - condition: trigger
         id: kids_bedtime
+      - condition: and
+        conditions:
+        - condition: state
+          entity_id: input_boolean.hvac_kids_room_should_be_on
+          state: 'on'
       sequence:
       - service: climate.set_hvac_mode
         target:
@@ -2028,6 +2085,11 @@
     - conditions:
       - condition: trigger
         id: master_bedtime
+      - condition: and
+        conditions:
+        - condition: state
+          entity_id: input_boolean.hvac_master_bedroom_should_be_on
+          state: 'on'
       sequence:
       - service: climate.set_hvac_mode
         target:
@@ -2049,15 +2111,30 @@
   conditions:
   - condition: or
     conditions:
-    - condition: state
-      entity_id: climate.otto_s_room
-      state: cool
-    - condition: state
-      entity_id: climate.henry_s_room_versatile_thermostat
-      state: cool
-    - condition: state
-      entity_id: climate.masterbed_versatile_thermostat
-      state: cool
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: climate.otto_s_room
+        state: cool
+      - condition: state
+        entity_id: input_boolean.hvac_kids_room_should_be_on
+        state: 'on'
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: climate.henry_s_room_versatile_thermostat
+        state: cool
+      - condition: state
+        entity_id: input_boolean.hvac_study_should_be_on
+        state: 'on'
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: climate.masterbed_versatile_thermostat
+        state: cool
+      - condition: state
+        entity_id: input_boolean.hvac_master_bedroom_should_be_on
+        state: 'on'
   actions:
   - service: climate.set_hvac_mode
     target:
@@ -5120,6 +5197,14 @@
   actions:
     # STOP CONDITIONS
     - choose:
+        # Door open - ALWAYS stop (Principle #5: door checks always active)
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.master_bedroom_door_sensor_opening
+              state: 'on'
+          sequence:
+            - stop: "Master bedroom door open - HVAC disabled (Principle #5)"
+
         # Manual override active - stop
         - conditions:
             - condition: state
@@ -5221,15 +5306,43 @@
               entity_id: input_select.occupancy
               state: Away
           sequence:
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: 'off'
-            - service: fan.turn_off
-              target:
-                entity_id: fan.masterbedroom_fan
+            # Only set hvac_mode if not already off (principle 9: minimize beeps)
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.masterbed_versatile_thermostat
+                          state: 'off'
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: 'off'
+            # Only turn off fan if currently on
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: fan.masterbedroom_fan
+                      state: 'on'
+                  sequence:
+                    - service: fan.turn_off
+                      target:
+                        entity_id: fan.masterbedroom_fan
             - stop: "Away mode - climate disabled"
+
+        # HVAC already off and temperature in comfort range - let thermostat manage (Principle #9)
+        - conditions:
+            - condition: state
+              entity_id: climate.masterbed_versatile_thermostat
+              state: 'off'
+            - condition: numeric_state
+              entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+              above: 17
+              below: 25
+          sequence:
+            - stop: "HVAC off and temperature in comfort range (17-25°C) - let thermostat manage"
 
     # MODE DECISION LOGIC
     - choose:
@@ -5249,16 +5362,33 @@
                       entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
                       above: 75
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        hvac_mode: dry
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  state: dry
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                hvac_mode: dry
 
                 # Priority 2: Warm/hot/super hot day - cool with boost for sleep
                 - conditions:
@@ -5274,21 +5404,47 @@
                           entity_id: input_boolean.super_hot_today
                           state: 'on'
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        preset_mode: boost
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        hvac_mode: cool
-                    - service: fan.set_percentage
-                      target:
-                        entity_id: fan.masterbedroom_fan
-                      data:
-                        percentage: 33
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: boost
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                preset_mode: boost
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  state: cool
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                hvac_mode: cool
+                    - choose:
+                        - conditions:
+                            - condition: state
+                              entity_id: fan.masterbedroom_fan
+                              state: 'off'
+                          sequence:
+                            - service: fan.turn_on
+                              target:
+                                entity_id: fan.masterbedroom_fan
+                            - service: fan.set_percentage
+                              target:
+                                entity_id: fan.masterbedroom_fan
+                              data:
+                                percentage: 33
 
                 # Priority 3: Winter cold - heat with frost (nighttime minimum)
                 - conditions:
@@ -5299,30 +5455,67 @@
                       entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
                       below: 21
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        preset_mode: frost
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        hvac_mode: heat
-                    - service: fan.turn_off
-                      target:
-                        entity_id: fan.masterbedroom_fan
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: frost
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                preset_mode: frost
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  state: heat
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                hvac_mode: heat
+                    - choose:
+                        - conditions:
+                            - condition: state
+                              entity_id: fan.masterbedroom_fan
+                              state: 'on'
+                          sequence:
+                            - service: fan.turn_off
+                              target:
+                                entity_id: fan.masterbedroom_fan
 
               # Default: Off
               default:
-                - service: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.masterbed_versatile_thermostat
-                  data:
-                    hvac_mode: 'off'
-                - service: fan.turn_off
-                  target:
-                    entity_id: fan.masterbedroom_fan
+                - choose:
+                    - conditions:
+                        - condition: not
+                          conditions:
+                            - condition: state
+                              entity_id: climate.masterbed_versatile_thermostat
+                              state: 'off'
+                      sequence:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.masterbed_versatile_thermostat
+                          data:
+                            hvac_mode: 'off'
+                - choose:
+                    - conditions:
+                        - condition: state
+                          entity_id: fan.masterbedroom_fan
+                          state: 'on'
+                      sequence:
+                        - service: fan.turn_off
+                          target:
+                            entity_id: fan.masterbedroom_fan
 
         # PRE-BEDTIME (20:30-21:00) - Prepare room
         - conditions:
@@ -5343,16 +5536,33 @@
                       entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
                       above: 75
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        hvac_mode: dry
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  state: dry
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                hvac_mode: dry
 
                 # Warm evening - cool
                 - conditions:
@@ -5365,16 +5575,33 @@
                           entity_id: input_boolean.hot_today_flag
                           state: 'on'
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        hvac_mode: cool
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  state: cool
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                hvac_mode: cool
 
                 # Winter cold - heat
                 - conditions:
@@ -5385,23 +5612,48 @@
                       entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
                       below: 21
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        hvac_mode: heat
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  state: heat
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                hvac_mode: heat
 
               default:
-                - service: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.masterbed_versatile_thermostat
-                  data:
-                    hvac_mode: 'off'
+                - choose:
+                    - conditions:
+                        - condition: not
+                          conditions:
+                            - condition: state
+                              entity_id: climate.masterbed_versatile_thermostat
+                              state: 'off'
+                      sequence:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.masterbed_versatile_thermostat
+                          data:
+                            hvac_mode: 'off'
 
         # PREEMPTIVE COOLING - Super hot days (09:00-20:00), lower threshold at 22°C
         - conditions:
@@ -5424,27 +5676,61 @@
                       entity_id: binary_sensor.solar_excess_available
                       state: 'on'
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        hvac_mode: cool
-                    - service: fan.set_percentage
-                      target:
-                        entity_id: fan.masterbedroom_fan
-                      data:
-                        percentage: 33
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  state: cool
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                hvac_mode: cool
+                    - choose:
+                        - conditions:
+                            - condition: state
+                              entity_id: fan.masterbedroom_fan
+                              state: 'off'
+                          sequence:
+                            - service: fan.turn_on
+                              target:
+                                entity_id: fan.masterbedroom_fan
+                            - service: fan.set_percentage
+                              target:
+                                entity_id: fan.masterbedroom_fan
+                              data:
+                                percentage: 33
               default:
-                - service: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.masterbed_versatile_thermostat
-                  data:
-                    hvac_mode: 'off'
+                - choose:
+                    - conditions:
+                        - condition: not
+                          conditions:
+                            - condition: state
+                              entity_id: climate.masterbed_versatile_thermostat
+                              state: 'off'
+                      sequence:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.masterbed_versatile_thermostat
+                          data:
+                            hvac_mode: 'off'
 
         # WORKING FROM HOME (08:00-17:00)
         - conditions:
@@ -5465,16 +5751,33 @@
                       entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
                       above: 75
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        hvac_mode: dry
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  state: dry
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                hvac_mode: dry
 
                 # Summer cooling - WFH BYPASSES solar requirement
                 - conditions:
@@ -5485,21 +5788,47 @@
                       entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
                       above: 24
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        hvac_mode: cool
-                    - service: fan.set_percentage
-                      target:
-                        entity_id: fan.masterbedroom_fan
-                      data:
-                        percentage: 33
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  state: cool
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                hvac_mode: cool
+                    - choose:
+                        - conditions:
+                            - condition: state
+                              entity_id: fan.masterbedroom_fan
+                              state: 'off'
+                          sequence:
+                            - service: fan.turn_on
+                              target:
+                                entity_id: fan.masterbedroom_fan
+                            - service: fan.set_percentage
+                              target:
+                                entity_id: fan.masterbedroom_fan
+                              data:
+                                percentage: 33
 
                 # Winter heating - WFH BYPASSES solar requirement
                 - conditions:
@@ -5510,19 +5839,42 @@
                       entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
                       below: 21
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        hvac_mode: heat
-                    - service: fan.turn_off
-                      target:
-                        entity_id: fan.masterbedroom_fan
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  state: heat
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                hvac_mode: heat
+                    - choose:
+                        - conditions:
+                            - condition: state
+                              entity_id: fan.masterbedroom_fan
+                              state: 'on'
+                          sequence:
+                            - service: fan.turn_off
+                              target:
+                                entity_id: fan.masterbedroom_fan
 
                 # Spring - favour cooling, WFH bypasses solar
                 - conditions:
@@ -5533,21 +5885,47 @@
                       entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
                       above: 24
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        hvac_mode: cool
-                    - service: fan.set_percentage
-                      target:
-                        entity_id: fan.masterbedroom_fan
-                      data:
-                        percentage: 33
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.masterbed_versatile_thermostat
+                                  state: cool
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                hvac_mode: cool
+                    - choose:
+                        - conditions:
+                            - condition: state
+                              entity_id: fan.masterbedroom_fan
+                              state: 'off'
+                          sequence:
+                            - service: fan.turn_on
+                              target:
+                                entity_id: fan.masterbedroom_fan
+                            - service: fan.set_percentage
+                              target:
+                                entity_id: fan.masterbedroom_fan
+                              data:
+                                percentage: 33
 
                 # Autumn - favour heating, WFH bypasses solar
                 - conditions:
@@ -5565,64 +5943,143 @@
                               entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
                               above: 24
                           sequence:
-                            - service: climate.set_preset_mode
-                              target:
-                                entity_id: climate.masterbed_versatile_thermostat
-                              data:
-                                preset_mode: comfort
-                            - service: climate.set_hvac_mode
-                              target:
-                                entity_id: climate.masterbed_versatile_thermostat
-                              data:
-                                hvac_mode: cool
-                            - service: fan.set_percentage
-                              target:
-                                entity_id: fan.masterbedroom_fan
-                              data:
-                                percentage: 33
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.masterbed_versatile_thermostat
+                                          attribute: preset_mode
+                                          state: comfort
+                                  sequence:
+                                    - service: climate.set_preset_mode
+                                      target:
+                                        entity_id: climate.masterbed_versatile_thermostat
+                                      data:
+                                        preset_mode: comfort
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.masterbed_versatile_thermostat
+                                          state: cool
+                                  sequence:
+                                    - service: climate.set_hvac_mode
+                                      target:
+                                        entity_id: climate.masterbed_versatile_thermostat
+                                      data:
+                                        hvac_mode: cool
+                            - choose:
+                                - conditions:
+                                    - condition: state
+                                      entity_id: fan.masterbedroom_fan
+                                      state: 'off'
+                                  sequence:
+                                    - service: fan.turn_on
+                                      target:
+                                        entity_id: fan.masterbedroom_fan
+                                    - service: fan.set_percentage
+                                      target:
+                                        entity_id: fan.masterbedroom_fan
+                                      data:
+                                        percentage: 33
                         # Default bias to heat when cool
                         - conditions:
                             - condition: numeric_state
                               entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
                               below: 21
                           sequence:
-                            - service: climate.set_preset_mode
-                              target:
-                                entity_id: climate.masterbed_versatile_thermostat
-                              data:
-                                preset_mode: comfort
-                            - service: climate.set_hvac_mode
-                              target:
-                                entity_id: climate.masterbed_versatile_thermostat
-                              data:
-                                hvac_mode: heat
-                            - service: fan.turn_off
-                              target:
-                                entity_id: fan.masterbedroom_fan
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.masterbed_versatile_thermostat
+                                          attribute: preset_mode
+                                          state: comfort
+                                  sequence:
+                                    - service: climate.set_preset_mode
+                                      target:
+                                        entity_id: climate.masterbed_versatile_thermostat
+                                      data:
+                                        preset_mode: comfort
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.masterbed_versatile_thermostat
+                                          state: heat
+                                  sequence:
+                                    - service: climate.set_hvac_mode
+                                      target:
+                                        entity_id: climate.masterbed_versatile_thermostat
+                                      data:
+                                        hvac_mode: heat
+                            - choose:
+                                - conditions:
+                                    - condition: state
+                                      entity_id: fan.masterbedroom_fan
+                                      state: 'on'
+                                  sequence:
+                                    - service: fan.turn_off
+                                      target:
+                                        entity_id: fan.masterbedroom_fan
                       default:
+                        - choose:
+                            - conditions:
+                                - condition: not
+                                  conditions:
+                                    - condition: state
+                                      entity_id: climate.masterbed_versatile_thermostat
+                                      state: 'off'
+                              sequence:
+                                - service: climate.set_hvac_mode
+                                  target:
+                                    entity_id: climate.masterbed_versatile_thermostat
+                                  data:
+                                    hvac_mode: 'off'
+
+              default:
+                - choose:
+                    - conditions:
+                        - condition: not
+                          conditions:
+                            - condition: state
+                              entity_id: climate.masterbed_versatile_thermostat
+                              state: 'off'
+                      sequence:
                         - service: climate.set_hvac_mode
                           target:
                             entity_id: climate.masterbed_versatile_thermostat
                           data:
                             hvac_mode: 'off'
 
-              default:
+      # DEFAULT - Turn off climate
+      default:
+        - choose:
+            - conditions:
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: climate.masterbed_versatile_thermostat
+                      state: 'off'
+              sequence:
                 - service: climate.set_hvac_mode
                   target:
                     entity_id: climate.masterbed_versatile_thermostat
                   data:
                     hvac_mode: 'off'
-
-      # DEFAULT - Turn off climate
-      default:
-        - service: climate.set_hvac_mode
-          target:
-            entity_id: climate.masterbed_versatile_thermostat
-          data:
-            hvac_mode: 'off'
-        - service: fan.turn_off
-          target:
-            entity_id: fan.masterbedroom_fan
+        - choose:
+            - conditions:
+                - condition: state
+                  entity_id: fan.masterbedroom_fan
+                  state: 'on'
+              sequence:
+                - service: fan.turn_off
+                  target:
+                    entity_id: fan.masterbedroom_fan
   mode: single
 
 ################################################################################
@@ -5696,6 +6153,14 @@
   actions:
     # STOP CONDITIONS
     - choose:
+        # Door open check - stop immediately (Principle #5)
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.living_room_door_sensor_opening
+              state: 'on'
+          sequence:
+            - stop: "Living room door open - HVAC disabled (Principle #5)"
+
         # Manual override active - stop
         - conditions:
             - condition: state
@@ -5710,11 +6175,19 @@
               entity_id: input_select.occupancy
               state: Holiday
           sequence:
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.living_room_versatile_thermastat
-              data:
-                hvac_mode: 'off'
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.living_room_versatile_thermastat
+                          state: 'off'
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_versatile_thermastat
+                      data:
+                        hvac_mode: 'off'
             - stop: "Holiday mode - climate disabled"
 
         # Away mode with hot/superhot day - eco mode minimal cooling
@@ -5731,16 +6204,33 @@
                   entity_id: input_boolean.super_hot_today
                   state: 'on'
           sequence:
-            - service: climate.set_preset_mode
-              target:
-                entity_id: climate.living_room_versatile_thermastat
-              data:
-                preset_mode: eco
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.living_room_versatile_thermastat
-              data:
-                hvac_mode: cool
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.living_room_versatile_thermastat
+                          attribute: preset_mode
+                          state: eco
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.living_room_versatile_thermastat
+                      data:
+                        preset_mode: eco
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.living_room_versatile_thermastat
+                          state: cool
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_versatile_thermastat
+                      data:
+                        hvac_mode: cool
             - stop: "Away with hot day - eco cooling active"
 
         # Away mode (not hot day) - turn off climate
@@ -5749,11 +6239,19 @@
               entity_id: input_select.occupancy
               state: Away
           sequence:
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.living_room_versatile_thermastat
-              data:
-                hvac_mode: 'off'
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.living_room_versatile_thermastat
+                          state: 'off'
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_versatile_thermastat
+                      data:
+                        hvac_mode: 'off'
             - stop: "Away mode - climate disabled"
 
         # SAFETY SHUTOFF - Turn off when target temp reached (after 30 min heating)
@@ -5772,12 +6270,32 @@
                   entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
                   above: 20
           sequence:
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.living_room_versatile_thermastat
-              data:
-                hvac_mode: 'off'
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.living_room_versatile_thermastat
+                          state: 'off'
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_versatile_thermastat
+                      data:
+                        hvac_mode: 'off'
             - stop: "Target temperature reached - shutting off"
+
+        # HVAC already off and temperature in comfort range - let thermostat manage (Principle #9)
+        - conditions:
+            - condition: state
+              entity_id: climate.living_room_versatile_thermastat
+              state: 'off'
+            - condition: numeric_state
+              entity_id: sensor.living_room_temperature_offset
+              above: 16
+              below: 26
+          sequence:
+            - stop: "HVAC off and temperature in comfort range (16-26°C) - let thermostat manage"
 
     # MODE DECISION LOGIC
     - choose:
@@ -5803,16 +6321,33 @@
               entity_id: binary_sensor.front_door_sensor_opening
               state: 'off'
           sequence:
-            - service: climate.set_preset_mode
-              target:
-                entity_id: climate.living_room_versatile_thermastat
-              data:
-                preset_mode: frost
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.living_room_versatile_thermastat
-              data:
-                hvac_mode: heat
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.living_room_versatile_thermastat
+                          attribute: preset_mode
+                          state: frost
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.living_room_versatile_thermastat
+                      data:
+                        preset_mode: frost
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.living_room_versatile_thermastat
+                          state: heat
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_versatile_thermastat
+                      data:
+                        hvac_mode: heat
 
         # PREHEAT (05:30-08:00) - Temperature-based, winter only
         - conditions:
@@ -5844,16 +6379,33 @@
                   entity_id: sensor.living_room_temperature_offset
                   below: 17
           sequence:
-            - service: climate.set_preset_mode
-              target:
-                entity_id: climate.living_room_versatile_thermastat
-              data:
-                preset_mode: comfort
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.living_room_versatile_thermastat
-              data:
-                hvac_mode: heat
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.living_room_versatile_thermastat
+                          attribute: preset_mode
+                          state: comfort
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.living_room_versatile_thermastat
+                      data:
+                        preset_mode: comfort
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.living_room_versatile_thermastat
+                          state: heat
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_versatile_thermastat
+                      data:
+                        hvac_mode: heat
 
         # DAYTIME (06:00-22:15) - Assess and choose mode
         - conditions:
@@ -5881,16 +6433,33 @@
                       entity_id: sensor.ble_humidity_kitchen_temp_humidity_sensor
                       above: 75
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.living_room_versatile_thermastat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.living_room_versatile_thermastat
-                      data:
-                        hvac_mode: dry
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.living_room_versatile_thermastat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermastat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.living_room_versatile_thermastat
+                                  state: dry
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermastat
+                              data:
+                                hvac_mode: dry
 
                 # WINTER - Heat only
                 - conditions:
@@ -5910,22 +6479,47 @@
                                   entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
                                   below: 17
                           sequence:
-                            - service: climate.set_preset_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                preset_mode: comfort
-                            - service: climate.set_hvac_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                hvac_mode: heat
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          attribute: preset_mode
+                                          state: comfort
+                                  sequence:
+                                    - service: climate.set_preset_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        preset_mode: comfort
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          state: heat
+                                  sequence:
+                                    - service: climate.set_hvac_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        hvac_mode: heat
                       default:
-                        - service: climate.set_hvac_mode
-                          target:
-                            entity_id: climate.living_room_versatile_thermastat
-                          data:
-                            hvac_mode: 'off'
+                        - choose:
+                            - conditions:
+                                - condition: not
+                                  conditions:
+                                    - condition: state
+                                      entity_id: climate.living_room_versatile_thermastat
+                                      state: 'off'
+                              sequence:
+                                - service: climate.set_hvac_mode
+                                  target:
+                                    entity_id: climate.living_room_versatile_thermastat
+                                  data:
+                                    hvac_mode: 'off'
 
                 # SUMMER - Cool or fan only with dual threshold
                 - conditions:
@@ -5962,16 +6556,33 @@
                                       entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
                                       above: 24
                           sequence:
-                            - service: climate.set_preset_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                preset_mode: comfort
-                            - service: climate.set_hvac_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                hvac_mode: cool
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          attribute: preset_mode
+                                          state: comfort
+                                  sequence:
+                                    - service: climate.set_preset_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        preset_mode: comfort
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          state: cool
+                                  sequence:
+                                    - service: climate.set_hvac_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        hvac_mode: cool
 
                         # Comfortable range (21-22°C) - fan only
                         - conditions:
@@ -5980,22 +6591,47 @@
                               above: 21
                               below: 22
                           sequence:
-                            - service: climate.set_preset_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                preset_mode: eco
-                            - service: climate.set_hvac_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                hvac_mode: fan_only
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          attribute: preset_mode
+                                          state: eco
+                                  sequence:
+                                    - service: climate.set_preset_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        preset_mode: eco
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          state: fan_only
+                                  sequence:
+                                    - service: climate.set_hvac_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        hvac_mode: fan_only
                       default:
-                        - service: climate.set_hvac_mode
-                          target:
-                            entity_id: climate.living_room_versatile_thermastat
-                          data:
-                            hvac_mode: 'off'
+                        - choose:
+                            - conditions:
+                                - condition: not
+                                  conditions:
+                                    - condition: state
+                                      entity_id: climate.living_room_versatile_thermastat
+                                      state: 'off'
+                              sequence:
+                                - service: climate.set_hvac_mode
+                                  target:
+                                    entity_id: climate.living_room_versatile_thermastat
+                                  data:
+                                    hvac_mode: 'off'
 
                 # AUTUMN - Favour heat, allow cool if super hot
                 - conditions:
@@ -6015,16 +6651,33 @@
                                   entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
                                   below: 17
                           sequence:
-                            - service: climate.set_preset_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                preset_mode: comfort
-                            - service: climate.set_hvac_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                hvac_mode: heat
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          attribute: preset_mode
+                                          state: comfort
+                                  sequence:
+                                    - service: climate.set_preset_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        preset_mode: comfort
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          state: heat
+                                  sequence:
+                                    - service: climate.set_hvac_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        hvac_mode: heat
 
                         # Super hot + hot temp - cool with dual threshold
                         - conditions:
@@ -6057,22 +6710,47 @@
                                       entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
                                       above: 24
                           sequence:
-                            - service: climate.set_preset_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                preset_mode: comfort
-                            - service: climate.set_hvac_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                hvac_mode: cool
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          attribute: preset_mode
+                                          state: comfort
+                                  sequence:
+                                    - service: climate.set_preset_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        preset_mode: comfort
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          state: cool
+                                  sequence:
+                                    - service: climate.set_hvac_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        hvac_mode: cool
                       default:
-                        - service: climate.set_hvac_mode
-                          target:
-                            entity_id: climate.living_room_versatile_thermastat
-                          data:
-                            hvac_mode: 'off'
+                        - choose:
+                            - conditions:
+                                - condition: not
+                                  conditions:
+                                    - condition: state
+                                      entity_id: climate.living_room_versatile_thermastat
+                                      state: 'off'
+                              sequence:
+                                - service: climate.set_hvac_mode
+                                  target:
+                                    entity_id: climate.living_room_versatile_thermastat
+                                  data:
+                                    hvac_mode: 'off'
 
                 # SPRING - Favour cool with dual threshold, allow heat if very cold
                 - conditions:
@@ -6109,16 +6787,33 @@
                                       entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
                                       above: 24
                           sequence:
-                            - service: climate.set_preset_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                preset_mode: comfort
-                            - service: climate.set_hvac_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                hvac_mode: cool
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          attribute: preset_mode
+                                          state: comfort
+                                  sequence:
+                                    - service: climate.set_preset_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        preset_mode: comfort
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          state: cool
+                                  sequence:
+                                    - service: climate.set_hvac_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        hvac_mode: cool
 
                         # Very cold - heat
                         - conditions:
@@ -6131,38 +6826,79 @@
                                   entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
                                   below: 15
                           sequence:
-                            - service: climate.set_preset_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                preset_mode: comfort
-                            - service: climate.set_hvac_mode
-                              target:
-                                entity_id: climate.living_room_versatile_thermastat
-                              data:
-                                hvac_mode: heat
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          attribute: preset_mode
+                                          state: comfort
+                                  sequence:
+                                    - service: climate.set_preset_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        preset_mode: comfort
+                            - choose:
+                                - conditions:
+                                    - condition: not
+                                      conditions:
+                                        - condition: state
+                                          entity_id: climate.living_room_versatile_thermastat
+                                          state: heat
+                                  sequence:
+                                    - service: climate.set_hvac_mode
+                                      target:
+                                        entity_id: climate.living_room_versatile_thermastat
+                                      data:
+                                        hvac_mode: heat
                       default:
+                        - choose:
+                            - conditions:
+                                - condition: not
+                                  conditions:
+                                    - condition: state
+                                      entity_id: climate.living_room_versatile_thermastat
+                                      state: 'off'
+                              sequence:
+                                - service: climate.set_hvac_mode
+                                  target:
+                                    entity_id: climate.living_room_versatile_thermastat
+                                  data:
+                                    hvac_mode: 'off'
+
+              # Default - off
+              default:
+                - choose:
+                    - conditions:
+                        - condition: not
+                          conditions:
+                            - condition: state
+                              entity_id: climate.living_room_versatile_thermastat
+                              state: 'off'
+                      sequence:
                         - service: climate.set_hvac_mode
                           target:
                             entity_id: climate.living_room_versatile_thermastat
                           data:
                             hvac_mode: 'off'
 
-              # Default - off
-              default:
+      # DEFAULT - Turn off
+      default:
+        - choose:
+            - conditions:
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      state: 'off'
+              sequence:
                 - service: climate.set_hvac_mode
                   target:
                     entity_id: climate.living_room_versatile_thermastat
                   data:
                     hvac_mode: 'off'
-
-      # DEFAULT - Turn off
-      default:
-        - service: climate.set_hvac_mode
-          target:
-            entity_id: climate.living_room_versatile_thermastat
-          data:
-            hvac_mode: 'off'
   mode: single
 
 ################################################################################
@@ -6236,6 +6972,14 @@
   actions:
     # STOP CONDITIONS
     - choose:
+        # Door open check - stop immediately (Principle #5)
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.henry_door_sensor_magnet_opening
+              state: 'on'
+          sequence:
+            - stop: "Study door open - HVAC disabled (Principle #5)"
+
         # Manual override active - stop
         - conditions:
             - condition: state
@@ -6250,11 +6994,19 @@
               entity_id: input_select.occupancy
               state: Holiday
           sequence:
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: 'off'
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.henry_s_room_versatile_thermostat
+                          state: 'off'
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: 'off'
             - stop: "Holiday mode - climate disabled"
 
         # Away + hot/superhot - eco cooling
@@ -6271,16 +7023,33 @@
                   entity_id: input_boolean.super_hot_today
                   state: 'on'
           sequence:
-            - service: climate.set_preset_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                preset_mode: eco
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: cool
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.henry_s_room_versatile_thermostat
+                          attribute: preset_mode
+                          state: eco
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        preset_mode: eco
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.henry_s_room_versatile_thermostat
+                          state: cool
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: cool
             - stop: "Away with hot day - eco cooling active"
 
         # Away - turn off
@@ -6289,11 +7058,19 @@
               entity_id: input_select.occupancy
               state: Away
           sequence:
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: 'off'
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.henry_s_room_versatile_thermostat
+                          state: 'off'
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: 'off'
             - stop: "Away mode - climate disabled"
 
     # MODE DECISION LOGIC
@@ -6318,22 +7095,47 @@
                           entity_id: input_boolean.super_hot_today
                           state: 'on'
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        preset_mode: boost
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        hvac_mode: cool
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: boost
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                preset_mode: boost
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  state: cool
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                hvac_mode: cool
               default:
-                - service: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.henry_s_room_versatile_thermostat
-                  data:
-                    hvac_mode: 'off'
+                - choose:
+                    - conditions:
+                        - condition: not
+                          conditions:
+                            - condition: state
+                              entity_id: climate.henry_s_room_versatile_thermostat
+                              state: 'off'
+                      sequence:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.henry_s_room_versatile_thermostat
+                          data:
+                            hvac_mode: 'off'
 
         # PRE-BEDTIME (18:30-18:45) - Prepare room, NO SOLAR REQUIRED
         - conditions:
@@ -6353,16 +7155,33 @@
                       entity_id: sensor.study_esp32_henrysroom_humidity
                       above: 75
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        hvac_mode: dry
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  state: dry
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                hvac_mode: dry
                 # PRE-BEDTIME COOLING - NO solar requirement
                 - conditions:
                     - condition: or
@@ -6377,16 +7196,33 @@
                           entity_id: input_boolean.super_hot_today
                           state: 'on'
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        hvac_mode: cool
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  state: cool
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                hvac_mode: cool
                 # PRE-BEDTIME HEATING - NO solar requirement
                 - conditions:
                     - condition: or
@@ -6401,22 +7237,47 @@
                       entity_id: sensor.study_esp32_henrysroom_temperature
                       below: 21
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        hvac_mode: heat
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  state: heat
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                hvac_mode: heat
               default:
-                - service: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.henry_s_room_versatile_thermostat
-                  data:
-                    hvac_mode: 'off'
+                - choose:
+                    - conditions:
+                        - condition: not
+                          conditions:
+                            - condition: state
+                              entity_id: climate.henry_s_room_versatile_thermostat
+                              state: 'off'
+                      sequence:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.henry_s_room_versatile_thermostat
+                          data:
+                            hvac_mode: 'off'
 
         # NAPTIME (12:15-16:00) - Maintain comfort, NO SOLAR REQUIRED
         - conditions:
@@ -6436,16 +7297,33 @@
                       entity_id: sensor.study_esp32_henrysroom_humidity
                       above: 75
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        hvac_mode: dry
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  state: dry
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                hvac_mode: dry
                 # NAPTIME COOLING - NO solar requirement
                 - conditions:
                     - condition: or
@@ -6463,16 +7341,33 @@
                           entity_id: sensor.study_esp32_henrysroom_temperature
                           above: 24
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        hvac_mode: cool
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  state: cool
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                hvac_mode: cool
                 # NAPTIME HEATING - NO solar requirement
                 - conditions:
                     - condition: or
@@ -6487,22 +7382,47 @@
                       entity_id: sensor.study_esp32_henrysroom_temperature
                       below: 21
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        hvac_mode: heat
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  state: heat
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                hvac_mode: heat
               default:
-                - service: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.henry_s_room_versatile_thermostat
-                  data:
-                    hvac_mode: 'off'
+                - choose:
+                    - conditions:
+                        - condition: not
+                          conditions:
+                            - condition: state
+                              entity_id: climate.henry_s_room_versatile_thermostat
+                              state: 'off'
+                      sequence:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.henry_s_room_versatile_thermostat
+                          data:
+                            hvac_mode: 'off'
 
         # PREEMPTIVE COOLING - Super hot days (09:00-18:00), threshold at 22°C
         - conditions:
@@ -6522,16 +7442,33 @@
               entity_id: binary_sensor.henry_door_sensor_magnet_opening
               state: 'off'
           sequence:
-            - service: climate.set_preset_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                preset_mode: comfort
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: cool
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.henry_s_room_versatile_thermostat
+                          attribute: preset_mode
+                          state: comfort
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.henry_s_room_versatile_thermostat
+                          state: cool
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: cool
 
         # DAYTIME COMFORT CONTROL (06:00-18:30)
         - conditions:
@@ -6551,16 +7488,33 @@
                       entity_id: sensor.study_esp32_henrysroom_humidity
                       above: 75
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        hvac_mode: dry
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  state: dry
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                hvac_mode: dry
                 - conditions:
                     - condition: state
                       entity_id: binary_sensor.solar_excess_available
@@ -6580,16 +7534,33 @@
                           entity_id: sensor.study_esp32_henrysroom_temperature
                           above: 24
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        hvac_mode: cool
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  state: cool
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                hvac_mode: cool
                 - conditions:
                     - condition: or
                       conditions:
@@ -6606,30 +7577,63 @@
                       entity_id: binary_sensor.solar_excess_available
                       state: 'on'
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        hvac_mode: heat
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.henry_s_room_versatile_thermostat
+                                  state: heat
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.henry_s_room_versatile_thermostat
+                              data:
+                                hvac_mode: heat
               default:
+                - choose:
+                    - conditions:
+                        - condition: not
+                          conditions:
+                            - condition: state
+                              entity_id: climate.henry_s_room_versatile_thermostat
+                              state: 'off'
+                      sequence:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.henry_s_room_versatile_thermostat
+                          data:
+                            hvac_mode: 'off'
+
+      # DEFAULT - Turn off
+      default:
+        - choose:
+            - conditions:
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: climate.henry_s_room_versatile_thermostat
+                      state: 'off'
+              sequence:
                 - service: climate.set_hvac_mode
                   target:
                     entity_id: climate.henry_s_room_versatile_thermostat
                   data:
                     hvac_mode: 'off'
-
-      # DEFAULT - Turn off
-      default:
-        - service: climate.set_hvac_mode
-          target:
-            entity_id: climate.henry_s_room_versatile_thermostat
-          data:
-            hvac_mode: 'off'
   mode: single
 
 ################################################################################
@@ -6703,6 +7707,14 @@
   actions:
     # STOP CONDITIONS
     - choose:
+        # Door open check - stop immediately (Principle #5)
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.otto_room_door_sensor_opening
+              state: 'on'
+          sequence:
+            - stop: "Kids room door open - HVAC disabled (Principle #5)"
+
         # Manual override active - stop
         - conditions:
             - condition: state
@@ -6717,11 +7729,19 @@
               entity_id: input_select.occupancy
               state: Holiday
           sequence:
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: 'off'
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.otto_s_room
+                          state: 'off'
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: 'off'
             - stop: "Holiday mode - climate disabled"
 
         # Away + hot/superhot - eco cooling
@@ -6738,16 +7758,33 @@
                   entity_id: input_boolean.super_hot_today
                   state: 'on'
           sequence:
-            - service: climate.set_preset_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                preset_mode: eco
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: cool
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.otto_s_room
+                          attribute: preset_mode
+                          state: eco
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        preset_mode: eco
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.otto_s_room
+                          state: cool
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: cool
             - stop: "Away with hot day - eco cooling active"
 
         # Away - turn off
@@ -6756,11 +7793,19 @@
               entity_id: input_select.occupancy
               state: Away
           sequence:
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: 'off'
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.otto_s_room
+                          state: 'off'
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: 'off'
             - stop: "Away mode - climate disabled"
 
     # MODE DECISION LOGIC
@@ -6785,16 +7830,33 @@
                           entity_id: input_boolean.super_hot_today
                           state: 'on'
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        preset_mode: boost
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        hvac_mode: cool
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  attribute: preset_mode
+                                  state: boost
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                preset_mode: boost
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  state: cool
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                hvac_mode: cool
 
         # PRE-BEDTIME (18:30-18:45) - Prepare room, NO SOLAR REQUIRED
         - conditions:
@@ -6814,16 +7876,33 @@
                       entity_id: sensor.study_esp32_ottosroom_humidity
                       above: 75
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        hvac_mode: dry
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  state: dry
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                hvac_mode: dry
                 # PRE-BEDTIME COOLING - NO solar requirement
                 - conditions:
                     - condition: or
@@ -6838,16 +7917,33 @@
                           entity_id: input_boolean.super_hot_today
                           state: 'on'
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        hvac_mode: cool
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  state: cool
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                hvac_mode: cool
                 # PRE-BEDTIME HEATING - NO solar requirement
                 - conditions:
                     - condition: or
@@ -6862,22 +7958,47 @@
                       entity_id: sensor.study_esp32_ottosroom_temperature
                       below: 21
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        hvac_mode: heat
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  state: heat
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                hvac_mode: heat
               default:
-                - service: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.otto_s_room
-                  data:
-                    hvac_mode: 'off'
+                - choose:
+                    - conditions:
+                        - condition: not
+                          conditions:
+                            - condition: state
+                              entity_id: climate.otto_s_room
+                              state: 'off'
+                      sequence:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.otto_s_room
+                          data:
+                            hvac_mode: 'off'
 
         # NAPTIME (12:15-16:00) - Maintain comfort, NO SOLAR REQUIRED
         - conditions:
@@ -6897,16 +8018,33 @@
                       entity_id: sensor.study_esp32_ottosroom_humidity
                       above: 75
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        hvac_mode: dry
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  state: dry
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                hvac_mode: dry
                 # NAPTIME COOLING - NO solar requirement
                 - conditions:
                     - condition: or
@@ -6924,16 +8062,33 @@
                           entity_id: sensor.study_esp32_ottosroom_temperature
                           above: 24
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        hvac_mode: cool
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  state: cool
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                hvac_mode: cool
                 # NAPTIME HEATING - NO solar requirement
                 - conditions:
                     - condition: or
@@ -6948,22 +8103,47 @@
                       entity_id: sensor.study_esp32_ottosroom_temperature
                       below: 21
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        hvac_mode: heat
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  state: heat
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                hvac_mode: heat
               default:
-                - service: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.otto_s_room
-                  data:
-                    hvac_mode: 'off'
+                - choose:
+                    - conditions:
+                        - condition: not
+                          conditions:
+                            - condition: state
+                              entity_id: climate.otto_s_room
+                              state: 'off'
+                      sequence:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.otto_s_room
+                          data:
+                            hvac_mode: 'off'
 
         # PREEMPTIVE COOLING - Super hot days (09:00-18:00), threshold at 22°C
         - conditions:
@@ -6983,16 +8163,33 @@
               entity_id: binary_sensor.otto_room_door_sensor_opening
               state: 'off'
           sequence:
-            - service: climate.set_preset_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                preset_mode: comfort
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: cool
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.otto_s_room
+                          attribute: preset_mode
+                          state: comfort
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        preset_mode: comfort
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.otto_s_room
+                          state: cool
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: cool
 
         # DAYTIME COMFORT CONTROL (06:00-18:30)
         - conditions:
@@ -7012,16 +8209,33 @@
                       entity_id: sensor.study_esp32_ottosroom_humidity
                       above: 75
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        hvac_mode: dry
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  state: dry
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                hvac_mode: dry
                 - conditions:
                     - condition: state
                       entity_id: binary_sensor.solar_excess_available
@@ -7041,16 +8255,33 @@
                           entity_id: sensor.study_esp32_ottosroom_temperature
                           above: 24
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        hvac_mode: cool
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  state: cool
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                hvac_mode: cool
                 - conditions:
                     - condition: or
                       conditions:
@@ -7067,30 +8298,63 @@
                       entity_id: sensor.study_esp32_ottosroom_temperature
                       below: 21
                   sequence:
-                    - service: climate.set_preset_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        preset_mode: comfort
-                    - service: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        hvac_mode: heat
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  attribute: preset_mode
+                                  state: comfort
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                preset_mode: comfort
+                    - choose:
+                        - conditions:
+                            - condition: not
+                              conditions:
+                                - condition: state
+                                  entity_id: climate.otto_s_room
+                                  state: heat
+                          sequence:
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.otto_s_room
+                              data:
+                                hvac_mode: heat
               default:
+                - choose:
+                    - conditions:
+                        - condition: not
+                          conditions:
+                            - condition: state
+                              entity_id: climate.otto_s_room
+                              state: 'off'
+                      sequence:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.otto_s_room
+                          data:
+                            hvac_mode: 'off'
+
+      # DEFAULT - Turn off
+      default:
+        - choose:
+            - conditions:
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: climate.otto_s_room
+                      state: 'off'
+              sequence:
                 - service: climate.set_hvac_mode
                   target:
                     entity_id: climate.otto_s_room
                   data:
                     hvac_mode: 'off'
-
-      # DEFAULT - Turn off
-      default:
-        - service: climate.set_hvac_mode
-          target:
-            entity_id: climate.otto_s_room
-          data:
-            hvac_mode: 'off'
   mode: single
 
 ################################################################################
@@ -7209,7 +8473,11 @@
       entity_id: climate.masterbed_versatile_thermostat
       to: 'off'
       id: climate_off
-  conditions: []
+  conditions:
+    - condition: state
+      entity_id: input_boolean.hvac_master_bedroom_should_be_on
+      state: 'on'
+      alias: Master Bedroom HVAC Master On
   actions:
     - choose:
         # Cooling started - turn on fan at low speed if not already on

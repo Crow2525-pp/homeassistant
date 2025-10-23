@@ -282,6 +282,23 @@ input_boolean:
     name: Downstairs Doors Open
     icon: mdi:door-open
     initial: false
+  # HVAC Master Switches - Track whether automation thinks HVAC should be on (Principle #11)
+  hvac_master_bedroom_should_be_on:
+    name: Master Bedroom HVAC Should Be On
+    icon: mdi:thermometer
+    initial: false
+  hvac_living_room_should_be_on:
+    name: Living Room HVAC Should Be On
+    icon: mdi:thermometer
+    initial: false
+  hvac_study_should_be_on:
+    name: Study HVAC Should Be On
+    icon: mdi:thermometer
+    initial: false
+  hvac_kids_room_should_be_on:
+    name: Kids Room HVAC Should Be On
+    icon: mdi:thermometer
+    initial: false
 
 # Cover Control Automation Status Helpers
 input_text:
