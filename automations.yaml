@@ -1184,6 +1184,57 @@
           entity_id:
           - input_boolean.hot_today_flag
           - input_boolean.super_hot_today
+    # Cold conditions evaluation
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.braybrook_temp_min_0
+        below: 5
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.super_cold_today
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.cold_today_flag
+          - input_boolean.cool_today_flag
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.braybrook_temp_min_0
+        above: 5
+        below: 10
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.cold_today_flag
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.super_cold_today
+          - input_boolean.cool_today_flag
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.braybrook_temp_min_0
+        above: 10
+        below: 15
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.cool_today_flag
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.super_cold_today
+          - input_boolean.cold_today_flag
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
     - conditions:
       - condition: numeric_state
         entity_id: sensor.braybrook_temp_max_0
@@ -1195,32 +1246,23 @@
           - input_boolean.hot_today_flag
           - input_boolean.super_hot_today
           - input_boolean.warm_today_flag
+          - input_boolean.cold_today_flag
+          - input_boolean.super_cold_today
+          - input_boolean.cool_today_flag
         action: input_boolean.turn_off
   mode: single
 - id: climate_flags_afternoon_recheck
   alias: Climate Flags - Afternoon Re-check (3-4pm)
   description: >
-    Re-evaluates hot/warm day flags at 3-4pm (15:30) based on ACTUAL
+    Re-evaluates hot/warm/cold day flags at 3-4pm (15:30) based on ACTUAL
     current temperature (not forecast). Allows automations like overnight cooling
-    to use real conditions instead of morning forecast. Only runs in summer,
-    autumn, and spring (not winter).
+    or heating to use real conditions instead of morning forecast. Runs year-round:
+    warm season check (summer/autumn/spring) and cold season check (winter).
   triggers:
   - trigger: time
     at: '15:30:00'
     id: afternoon_check
-  conditions:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.climate_season
-      state: summer
-    - condition: state
-      entity_id: input_select.climate_season
-      state: autumn
-    - condition: state
-      entity_id: input_select.climate_season
-      state: spring
-    alias: Not Winter (only recheck warm seasons)
+  conditions: []
   actions:
   - choose:
     # Super hot: actual temp >26°C
@@ -1279,12 +1321,78 @@
           - input_boolean.super_hot_today
         alias: Clear Hot and Super Hot (warm takes priority)
 
-    # Cool: actual temp <20°C (clear all hot flags)
+    # Super cold: actual temp <5°C
     - conditions:
       - condition: numeric_state
         entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        below: 5
+        alias: Actual Temp <5°C (Super Cold)
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.super_cold_today
+        alias: Set Super Cold Today (actual condition)
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.cold_today_flag
+          - input_boolean.cool_today_flag
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+        alias: Clear all other flags (super cold takes priority)
+
+    # Cold: actual temp 5-10°C
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        above: 5
+        below: 10
+        alias: Actual Temp 5-10°C (Cold)
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.cold_today_flag
+        alias: Set Cold Today (actual condition)
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.super_cold_today
+          - input_boolean.cool_today_flag
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+        alias: Clear all other flags (cold takes priority)
+
+    # Cool: actual temp 10-15°C
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        above: 10
+        below: 15
+        alias: Actual Temp 10-15°C (Cool)
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.cool_today_flag
+        alias: Set Cool Today (actual condition)
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.super_cold_today
+          - input_boolean.cold_today_flag
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+        alias: Clear all other flags (cool takes priority)
+
+    # Mild: actual temp 15-20°C (clear all flags)
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        above: 15
         below: 20
-        alias: Actual Temp <20°C (Cool)
+        alias: Actual Temp 15-20°C (Mild)
       sequence:
       - service: input_boolean.turn_off
         target:
@@ -1292,7 +1400,10 @@
           - input_boolean.hot_today_flag
           - input_boolean.super_hot_today
           - input_boolean.warm_today_flag
-        alias: Clear all hot flags (cool afternoon)
+          - input_boolean.cold_today_flag
+          - input_boolean.super_cold_today
+          - input_boolean.cool_today_flag
+        alias: Clear all temperature flags (mild conditions)
 
   mode: single
 - id: '1747620000010'

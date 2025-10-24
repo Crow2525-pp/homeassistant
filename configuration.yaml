@@ -278,6 +278,18 @@ input_boolean:
     name: Warm Day Flag
     icon: mdi:weather-partly-sunny
     initial: false
+  cool_today_flag:
+    name: Cool Day Flag
+    icon: mdi:weather-cloudy
+    initial: false
+  cold_today_flag:
+    name: Cold Day Flag
+    icon: mdi:snowflake
+    initial: false
+  super_cold_today:
+    name: Super Cold Day Flag
+    icon: mdi:snowflake-alert
+    initial: false
   downstairs_doors_open:
     name: Downstairs Doors Open
     icon: mdi:door-open
