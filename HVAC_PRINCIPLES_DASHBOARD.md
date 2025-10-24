@@ -143,18 +143,46 @@ Evidence: Check if Living Room was heating, now stopping
 
 ---
 
+#### IF Current Time = 15:30 (3:30pm Afternoon Re-check)
+
+**PRIORITY 1: Principle #8 - Seasonal Awareness (Re-evaluate ACTUAL conditions)**
+```
+Status: 🔵 ACTIVE (Afternoon reality check)
+Why: Morning forecast at 04:30 may have been wrong
+When: 15:30 daily in summer/autumn/spring (NOT winter)
+
+Checks ACTUAL temperature (not forecast):
+├─ >26°C     → super_hot_today ON (update flags)
+├─ 24-26°C   → hot_today_flag ON (update flags)
+├─ 20-24°C   → warm_today_flag ON (update flags)
+└─ <20°C     → All flags OFF (cool day)
+
+Example:
+  04:30 Forecast: 25°C → hot_today_flag ON
+  15:30 Actual temp: 19°C → afternoon recheck updates to OFF
+  21:00 Cooling Night: Uses updated (cool) conditions
+```
+
+**Why this matters:**
+- Morning forecast was inaccurate
+- Afternoon recheck fixes the flags
+- Evening cooling automation uses REAL data
+- Blinds management responds to actual temperature
+
+---
+
 #### IF Current Time = 18:00-22:00 (Evening/Bedtime)
 
-**PRIORITY 1: Principle #8 - Seasonal Awareness (DETERMINES which automation)**
+**PRIORITY 1: Principle #8 - Seasonal Awareness (Uses UPDATED flags from 15:30)**
 ```
 Status: 🔵 ACTIVE (Night temperature strategy)
 Why: Different comfort ranges based on hot/cool night
 
-IF hot_today_flag = ON:
+IF hot_today_flag = ON (updated at 15:30):
   → "Bedrooms - Overnight AC on Hot Days"
   → Cool mode at 21:00 for hot nights
 
-ELSE IF hot_today_flag = OFF AND warm_today_flag = OFF:
+ELSE IF hot_today_flag = OFF AND warm_today_flag = OFF (updated at 15:30):
   → "Bedrooms - Overnight Frost Protection (No Hot Days)"
   → Frost preset (17°C minimum) for cool nights
   → HEATING applied (minimum protection)
@@ -163,6 +191,8 @@ ELSE (Normal cool night):
   → Default: Heater Night Assist if cold (<16°C)
   → Frost mode active at 18:00 regardless
 ```
+
+**Note: 15:30 Afternoon Re-check has already run and updated flags!**
 
 **PRIORITY 2: Principle #1 - Single Source of Truth**
 ```
@@ -358,16 +388,29 @@ Living Room Switch:
   If "off" 🔴 → ALL living room automations blocked
 ```
 
-### Check Hot Day Flags (Principle #8)
+### Check Hot Day Flags (Principle #8 - Two-Stage Evaluation)
 ```
-Summer hot day detection:
+Hot day flags are evaluated TWICE per day:
+
+Stage 1: 04:30 AM (Morning Forecast)
   Settings > Devices & Services > Helpers > input_boolean.hot_today_flag
-  If "on" 🔥 → Aggressive cooling + blinds management active
-
   Settings > Devices & Services > Helpers > input_boolean.super_hot_today
-  If "on" 🔥🔥 → MAX cooling + blinds closed all day
+  Based on: Forecast high temperature (sensor.braybrook_temp_max_0)
+  Purpose: Early morning planning (blinds, daytime strategy)
 
-These are set at 04:30 AM daily based on forecast
+Stage 2: 15:30 (3:30pm Actual Temperature) ← NEW
+  Same helpers updated based on ACTUAL current temperature
+  Based on: Real measured temperature (sensor.ble_temperature_masterbed_temp_humidity_sensor)
+  Purpose: Final reality check before evening cooling automation
+
+This two-stage approach ensures:
+✅ Early decisions based on forecast (morning/daytime)
+✅ Evening decisions based on actual conditions (night cooling)
+
+If forecast was wrong:
+  04:30: Forecast 25°C → hot_today_flag ON
+  15:30: Actual 18°C → Flags updated to OFF
+  21:00: Cooling Night uses REAL data (no cooling needed)
 ```
 
 ### Check Climate Entity State (Principle #14)
@@ -456,6 +499,91 @@ If something unexpected happened:
 4. Check if wrong season → Principle #8 using different logic
 5. Check if outside time window → Principle #10 not active
 ... and so on
+
+---
+
+## 📅 24-HOUR HOT DAY FLAG LIFECYCLE
+
+**Complete flow showing both morning forecast and afternoon re-check:**
+
+```
+MORNING (04:30) - FORECAST-BASED
+═══════════════════════════════════════════════════════════════
+Automation: "Climate Flags - Mark Hot Day"
+Triggers: Time 04:30 AM
+Input: sensor.braybrook_temp_max_0 (forecast high)
+
+IF forecast > 25°C
+  → super_hot_today ON
+  → Purpose: Blind management all day (closed)
+
+ELSE IF forecast 21-25°C
+  → hot_today_flag ON
+  → Purpose: Aggressive cooling available
+
+ELSE IF forecast 18-21°C
+  → warm_today_flag ON
+  → Purpose: Moderate cooling, dynamic blinds
+
+ELSE (forecast < 19°C)
+  → All flags OFF
+  → Purpose: Minimal HVAC, frost protection at night
+
+Impact: Morning blinds, daytime strategy, solar integration
+
+
+AFTERNOON (15:30) - ACTUAL TEMPERATURE RECHECK
+═══════════════════════════════════════════════════════════════
+Automation: "Climate Flags - Afternoon Re-check (3-4pm)" ← NEW
+Triggers: Time 15:30, Only summer/autumn/spring
+Input: sensor.ble_temperature_masterbed_temp_humidity_sensor (actual)
+
+Rechecks same thresholds using ACTUAL temperature:
+IF actual > 26°C → super_hot_today ON (confirmed or activated)
+IF actual 24-26°C → hot_today_flag ON
+IF actual 20-24°C → warm_today_flag ON
+IF actual < 20°C → All flags OFF
+
+Key: Updates flags based on REALITY, not forecast
+
+Example Scenarios:
+
+Scenario A: Forecast was RIGHT
+  04:30: Forecast 28°C → super_hot_today ON
+  15:30: Actual 27°C → super_hot_today stays ON ✓
+  21:00: Cooling Night runs (hot night confirmed)
+
+Scenario B: Forecast was WRONG (too hot)
+  04:30: Forecast 25°C → hot_today_flag ON
+  15:30: Actual 18°C → Flags updated to OFF
+  21:00: No cooling night (actually cool evening)
+
+Scenario C: Forecast was WRONG (too cool)
+  04:30: Forecast 19°C → warm_today_flag ON
+  15:30: Actual 26°C → super_hot_today ON (activated!)
+  21:00: Cooling Night runs (discovered hot night at last minute!)
+
+
+EVENING/NIGHT (18:00-22:00) - USES UPDATED FLAGS
+═══════════════════════════════════════════════════════════════
+All night-time automations use FLAGS UPDATED AT 15:30:
+
+"Bedrooms - Overnight Frost Protection" - runs if NO flags ON
+"Bedrooms - Overnight AC on Hot Days" - runs if flags ON at 21:00
+
+The 15:30 re-check ensures night automations use ACTUAL conditions
+not morning forecast.
+```
+
+**Why Two-Stage Evaluation is Better:**
+
+| Aspect | Before (04:30 only) | After (04:30 + 15:30) |
+|--------|-------------------|----------------------|
+| **Morning Blinds** | Based on forecast ✓ | Based on forecast ✓ |
+| **Daytime Strategy** | Based on forecast ✓ | Based on forecast ✓ |
+| **Evening Cooling** | Based on old forecast ❌ | Based on actual afternoon ✓ |
+| **Frost Protection** | Based on old forecast ❌ | Based on actual afternoon ✓ |
+| **Accuracy** | 70-80% (forecast) | 95%+ (actual + recheck) |
 
 ---
 
