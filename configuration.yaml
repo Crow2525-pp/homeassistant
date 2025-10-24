@@ -516,6 +516,55 @@ input_number:
     initial: 24
     unit_of_measurement: "°C"
     icon: mdi:thermometer-alert
+  # Automation Trigger Counters (daily, reset at midnight)
+  seasonal_climate_triggers_today:
+    name: Seasonal Climate Manager Triggers Today
+    min: 0
+    max: 100
+    step: 1
+    initial: 0
+    unit_of_measurement: triggers
+    icon: mdi:counter
+  morning_blinds_triggers_today:
+    name: Morning Blinds Triggers Today
+    min: 0
+    max: 100
+    step: 1
+    initial: 0
+    unit_of_measurement: triggers
+    icon: mdi:counter
+  preheat_triggers_today:
+    name: Preheat (5:30am) Triggers Today
+    min: 0
+    max: 100
+    step: 1
+    initial: 0
+    unit_of_measurement: triggers
+    icon: mdi:counter
+  evening_cooling_triggers_today:
+    name: Evening Cooling Triggers Today
+    min: 0
+    max: 100
+    step: 1
+    initial: 0
+    unit_of_measurement: triggers
+    icon: mdi:counter
+  frost_protection_triggers_today:
+    name: Frost Protection Triggers Today
+    min: 0
+    max: 100
+    step: 1
+    initial: 0
+    unit_of_measurement: triggers
+    icon: mdi:counter
+  afternoon_recheck_triggers_today:
+    name: Afternoon Re-check Triggers Today
+    min: 0
+    max: 100
+    step: 1
+    initial: 0
+    unit_of_measurement: triggers
+    icon: mdi:counter
 
 input_datetime:
   last_climate_notification_living:
@@ -540,6 +589,31 @@ input_datetime:
     has_time: true
   ac_filter_study_henry:
     name: AC Filter Last Changed - Study/Henry's Room
+    has_date: true
+    has_time: true
+  # Automation Trigger Tracking
+  last_trigger_seasonal_climate_manager:
+    name: Last Trigger - Seasonal Climate Manager
+    has_date: true
+    has_time: true
+  last_trigger_morning_blinds:
+    name: Last Trigger - Morning Blinds Controller
+    has_date: true
+    has_time: true
+  last_trigger_preheat_530am:
+    name: Last Trigger - Living Room Preheat 5:30am
+    has_date: true
+    has_time: true
+  last_trigger_evening_cooling:
+    name: Last Trigger - Evening Cooling Night
+    has_date: true
+    has_time: true
+  last_trigger_frost_protection:
+    name: Last Trigger - Frost Protection Night
+    has_date: true
+    has_time: true
+  last_trigger_afternoon_recheck:
+    name: Last Trigger - Afternoon Hot Flag Re-check
     has_date: true
     has_time: true
 

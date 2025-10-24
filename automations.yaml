@@ -24,6 +24,26 @@
       entity_id: input_select.occupancy
     action: input_select.select_option
   mode: single
+- id: '1747620000001'
+  alias: Reset Daily Automation Trigger Counters (Midnight)
+  description: Resets all daily trigger counters at midnight. Used to track how many times each climate automation has triggered throughout the day.
+  triggers:
+  - at: '00:00:00'
+    trigger: time
+  conditions: []
+  actions:
+  - action: input_number.set_value
+    target:
+      entity_id:
+      - input_number.seasonal_climate_triggers_today
+      - input_number.morning_blinds_triggers_today
+      - input_number.preheat_triggers_today
+      - input_number.evening_cooling_triggers_today
+      - input_number.frost_protection_triggers_today
+      - input_number.afternoon_recheck_triggers_today
+    data:
+      value: 0
+  mode: single
 - id: '1681548980319'
   alias: Set Occupancy to Home
   description: Returns the occupancy selector to Home as soon as either resident arrives.
@@ -1606,6 +1626,16 @@
     state: 'on'
     alias: Master Bedroom HVAC Master On
   actions:
+  # Track automation trigger (for historical analysis)
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.last_trigger_seasonal_climate_manager
+    data:
+      datetime: "{{ now().isoformat() }}"
+  - action: input_number.increment
+    target:
+      entity_id: input_number.seasonal_climate_triggers_today
+  # End tracking
   - choose:
     - conditions:
       - condition: or
