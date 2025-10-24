@@ -27,6 +27,250 @@
 
 ---
 
+## 🎯 ACTIVE PRINCIPLES RIGHT NOW
+
+### Real-Time Principle Prioritization
+
+These principles are **ACTIVELY ENFORCED** right now based on current system state. Watch this section change throughout the day!
+
+#### IF Current Season = WINTER (Jun-Aug)
+
+**PRIORITY 1: Principle #7 - Hysteresis Prevention**
+```
+Status: ⚠️ ACTIVE (Winter heating in progress)
+Why: Preventing AC cycling during cold snaps
+Active in: Master Bedroom (<16°C), Children's rooms
+Duration: 18:00-06:00 (night heating window)
+Evidence: Check if temperature >16°C but <17.2°C = hysteresis working
+```
+
+**PRIORITY 2: Principle #8 - Seasonal Awareness**
+```
+Status: 🔵 ACTIVE (Winter mode selected)
+Why: Using winter-optimized heating strategy
+Active in: All rooms with different thresholds
+Evidence: Check input_select.climate_season = "winter"
+```
+
+**PRIORITY 3: Principle #2 - Manual Override Protection**
+```
+Status: 🔵 ACTIVE (If manual_control = off)
+Why: Automations only run if user hasn't overridden
+Active in: All rooms
+Evidence: Check climate_manual_control_* booleans
+```
+
+**PRIORITY 4: Principle #4 - Door Checks**
+```
+Status: 🔵 ACTIVE (If door closed)
+Why: Don't heat/cool with door open (energy + safety)
+Active in: Master Bedroom, possibly children's rooms
+Evidence: Check master_bedroom_door_sensor_opening = off
+```
+
+**PRIORITY 5: Principle #13 - Configurable Thresholds**
+```
+Status: 🔵 ACTIVE (Winter heating thresholds)
+Why: Different heating triggers for different rooms
+Active in: Master (<16°C), Living (19°C), Kids (18-20°C)
+Evidence: Check input_number.* values in Helpers
+```
+
+---
+
+#### IF Current Season = SUMMER (Dec-Feb)
+
+**PRIORITY 1: Principle #3 - Master On/Off Switch**
+```
+Status: 🔴 CRITICAL (If hot day flag = on)
+Why: Summer cooling needs centralized control
+Active in: All rooms with cooling needs
+Evidence: Check hvac_*_should_be_on booleans
+```
+
+**PRIORITY 2: Principle #8 - Seasonal Awareness**
+```
+Status: 🔥 ACTIVE (Summer mode + hot day detection)
+Why: Aggressive cooling + blinds management on hot days
+Active in: Master Bedroom (blinds, AC, fan)
+Evidence: Check input_select.climate_season = "summer"
+         Check input_boolean.hot_today_flag = on/off
+```
+
+**PRIORITY 3: Principle #7 - Hysteresis Prevention**
+```
+Status: 🔥 ACTIVE (Preventing rapid AC cycling)
+Why: AC turns on/off frequently in hot weather
+Active in: Master Bedroom (>24°C threshold with 10 min delay)
+Evidence: Check if AC state changes but remains same for 10+ min
+```
+
+**PRIORITY 4: Principle #4 - Door Checks BLOCK Cooling**
+```
+Status: 🔴 BLOCKING (If any door open)
+Why: Don't cool with doors open (energy waste)
+Active in: Living Room (checks downstairs_doors)
+Evidence: Check binary_sensor.downstairs_doors = off
+```
+
+**PRIORITY 5: Principle #9 - Common Area Door Checks**
+```
+Status: 🔴 BLOCKING (If downstairs door open)
+Why: Prevents trying to cool whole house
+Active in: Living Room
+Evidence: Check downstairs_doors = off before cooling
+```
+
+---
+
+#### IF Current Time = 05:30-09:00 AM
+
+**PRIORITY 1: Principle #10 - Non-Overlapping Time Windows**
+```
+Status: ✅ ACTIVE (Morning preheat window)
+Why: Clear ownership of morning heating
+Active in: Living Room (preheat 05:30)
+Evidence: Automation "Living Room - Preheat at 5:30 AM if Cold"
+```
+
+**PRIORITY 2: Principle #7 - Hysteresis**
+```
+Status: 🔵 ACTIVE (10 minute warmup before stopping)
+Why: Don't turn off heater immediately when warm
+Active in: Living Room (at 09:00, turn off after 30+ min heat)
+Evidence: Check if Living Room was heating, now stopping
+```
+
+---
+
+#### IF Current Time = 18:00-22:00 (Evening/Bedtime)
+
+**PRIORITY 1: Principle #1 - Single Source of Truth**
+```
+Status: 🔵 ACTIVE (Night automation takes over)
+Why: Transition from day to night strategy
+Active in: Master Bedroom, Children's rooms
+Evidence: Check if "Heater Night Assist" or "Cooling Night Assist" triggered
+```
+
+**PRIORITY 2: Principle #8 - Seasonal Awareness**
+```
+Status: 🔵 ACTIVE (Night temperature strategy)
+Why: Different comfort ranges for sleeping
+Active in: All bedrooms
+Evidence: Check active night automations by season
+```
+
+**PRIORITY 3: Principle #4 - Door Checks**
+```
+Status: 🔵 ACTIVE (Doors closed for sleep)
+Why: Ensure privacy/safety before nighttime heating/cooling
+Active in: Master Bedroom
+Evidence: Check bedroom_door_sensor = off
+```
+
+---
+
+#### IF Door is OPEN
+
+**PRIORITY 1: Principle #4 - Door/Window Checks**
+```
+Status: 🔴 BLOCKS ALL AUTOMATIONS
+Why: Safety first - don't condition open space
+Active in: Whichever room's door is open
+Evidence: binary_sensor.*.door_sensor_opening = on
+Result: All climate control stops immediately
+```
+
+**PRIORITY 2: Principle #9 - Common Area Doors**
+```
+Status: 🔴 BLOCKS ALL COOLING (Living Room)
+Why: Multiple doors could be open downstairs
+Active in: Living Room, downstairs areas
+Evidence: Check any downstairs_door = on
+Result: No cooling in living room until all close
+```
+
+---
+
+#### IF Manual Override is ACTIVE
+
+**PRIORITY 1: Principle #2 - Respect Manual Overrides**
+```
+Status: 🔴 AUTOMATIONS PAUSED FOR 4 HOURS
+Why: User manual change = user takes precedence
+Active in: Room with active override
+Evidence: Check climate_manual_control_* = on
+Result: All automations for that room are skipped
+Expires: 4 hours after manual change
+```
+
+**PRIORITY 2: Principle #15 - Aliases for Debugging**
+```
+Status: 🔵 ACTIVE (Tracking why automations paused)
+Why: Clear audit trail of manual overrides
+Active in: All rooms with manual control active
+Evidence: Automation traces show "Manual Control Off" condition
+```
+
+---
+
+#### IF Master On/Off Switch = OFF
+
+**PRIORITY 1: Principle #3 - Master On/Off Switch**
+```
+Status: 🔴 ENTIRE ROOM DISABLED
+Why: User has disabled all automations for this room
+Active in: Specified room
+Evidence: Check hvac_*_should_be_on = off
+Result: No automations run, manual control only
+Use Case: Away mode, maintenance, troubleshooting
+```
+
+---
+
+### Dynamic Principle Priority Scoring
+
+**Calculate which principle is MOST CRITICAL right now:**
+
+```
+IF door_open = true
+  → Principle #4 wins (SAFETY)
+  → All climate control stops
+
+ELSE IF manual_override_active = true
+  → Principle #2 wins (USER CHOICE)
+  → Automations paused
+
+ELSE IF hvac_master_switch = off
+  → Principle #3 wins (MASTER CONTROL)
+  → All automations blocked
+
+ELSE IF season = winter AND time between 18:00-06:00
+  → Principle #8 + #1 wins (SEASONAL + SINGLE SOURCE)
+  → Night heating strategy active
+
+ELSE IF season = summer AND hot_day_flag = on AND time 09:00-20:00
+  → Principle #8 + #3 wins (SEASONAL + MASTER CONTROL)
+  → Aggressive cooling strategy
+
+ELSE IF time 05:30-09:00
+  → Principle #10 wins (TIME WINDOW)
+  → Morning preheat strategy
+
+ELSE IF season = summer AND temp > 24°C
+  → Principle #7 wins (HYSTERESIS)
+  → Prevent AC rapid cycling
+
+ELSE
+  → Principle #13 wins (CONFIGURED THRESHOLDS)
+  → Use temperature-based logic
+```
+
+**This decision tree ensures correct principle priority at all times!**
+
+---
+
 ## HEATING SYSTEM DIAGNOSIS
 
 ### Winter Strategy (June-August in Melbourne)
