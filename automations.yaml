@@ -1172,6 +1172,104 @@
           - input_boolean.warm_today_flag
         action: input_boolean.turn_off
   mode: single
+- id: climate_flags_afternoon_recheck
+  alias: Climate Flags - Afternoon Re-check (3-4pm)
+  description: >
+    Re-evaluates hot/warm day flags at 3-4pm (15:30) based on ACTUAL
+    current temperature (not forecast). Allows automations like overnight cooling
+    to use real conditions instead of morning forecast. Only runs in summer,
+    autumn, and spring (not winter).
+  triggers:
+  - trigger: time
+    at: '15:30:00'
+    id: afternoon_check
+  conditions:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.climate_season
+      state: summer
+    - condition: state
+      entity_id: input_select.climate_season
+      state: autumn
+    - condition: state
+      entity_id: input_select.climate_season
+      state: spring
+    alias: Not Winter (only recheck warm seasons)
+  actions:
+  - choose:
+    # Super hot: actual temp >26°C
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        above: 26
+        alias: Actual Temp >26°C (Super Hot)
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.super_hot_today
+        alias: Set Super Hot Today (actual condition)
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.hot_today_flag
+          - input_boolean.warm_today_flag
+        alias: Clear Hot and Warm (super hot takes priority)
+
+    # Hot: actual temp 24-26°C
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        above: 24
+        below: 26
+        alias: Actual Temp 24-26°C (Hot)
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.hot_today_flag
+        alias: Set Hot Today (actual condition)
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+        alias: Clear Super Hot and Warm (hot takes priority)
+
+    # Warm: actual temp 20-24°C
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        above: 20
+        below: 24
+        alias: Actual Temp 20-24°C (Warm)
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.warm_today_flag
+        alias: Set Warm Today (actual condition)
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+        alias: Clear Hot and Super Hot (warm takes priority)
+
+    # Cool: actual temp <20°C (clear all hot flags)
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        below: 20
+        alias: Actual Temp <20°C (Cool)
+      sequence:
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+        alias: Clear all hot flags (cool afternoon)
+
+  mode: single
 - id: '1727826100000'
   alias: Smart Climate Notification - Living Room
   description: Suggests climate control when solar excess available and room uncomfortable
