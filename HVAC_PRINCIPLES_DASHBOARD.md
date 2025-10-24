@@ -145,27 +145,41 @@ Evidence: Check if Living Room was heating, now stopping
 
 #### IF Current Time = 18:00-22:00 (Evening/Bedtime)
 
-**PRIORITY 1: Principle #1 - Single Source of Truth**
-```
-Status: 🔵 ACTIVE (Night automation takes over)
-Why: Transition from day to night strategy
-Active in: Master Bedroom, Children's rooms
-Evidence: Check if "Heater Night Assist" or "Cooling Night Assist" triggered
-```
-
-**PRIORITY 2: Principle #8 - Seasonal Awareness**
+**PRIORITY 1: Principle #8 - Seasonal Awareness (DETERMINES which automation)**
 ```
 Status: 🔵 ACTIVE (Night temperature strategy)
-Why: Different comfort ranges for sleeping
-Active in: All bedrooms
-Evidence: Check active night automations by season
+Why: Different comfort ranges based on hot/cool night
+
+IF hot_today_flag = ON:
+  → "Bedrooms - Overnight AC on Hot Days"
+  → Cool mode at 21:00 for hot nights
+
+ELSE IF hot_today_flag = OFF AND warm_today_flag = OFF:
+  → "Bedrooms - Overnight Frost Protection (No Hot Days)"
+  → Frost preset (17°C minimum) for cool nights
+  → HEATING applied (minimum protection)
+
+ELSE (Normal cool night):
+  → Default: Heater Night Assist if cold (<16°C)
+  → Frost mode active at 18:00 regardless
+```
+
+**PRIORITY 2: Principle #1 - Single Source of Truth**
+```
+Status: 🔵 ACTIVE (Night automation takes over)
+Why: Single automation owns each time window
+Active in: Master Bedroom, Children's rooms
+Evidence: Check which night automation is active:
+  - "Heater Night Assist" (active cold nights)
+  - "Cooling Night Assist" (active hot nights only)
+  - "Frost Protection" (active cool nights, no hot flags)
 ```
 
 **PRIORITY 3: Principle #4 - Door Checks**
 ```
 Status: 🔵 ACTIVE (Doors closed for sleep)
-Why: Ensure privacy/safety before nighttime heating/cooling
-Active in: Master Bedroom
+Why: Ensure safety before nighttime heating/cooling
+Active in: Master Bedroom (frost automation checks door)
 Evidence: Check bedroom_door_sensor = off
 ```
 
@@ -485,6 +499,65 @@ WINTER HEATING LOGIC:
 **Principle #4 - Door Checks:**
 - Heating STOPS if door open (Balcony door sensor)
 - Safety: Don't heat with door open ✅
+
+#### All Bedrooms - Cool Night Frost Protection (NEW!)
+
+**When:** 18:00-06:00 on cool nights (no hot day flags)
+**What:** Applies frost preset (17°C minimum) + heat mode
+**Why:** Ensures minimum temperature protection on mild winter nights
+
+**Principle #1 - Single Source of Truth:**
+- New automation owns: "Cool nights without hot flags" scenario
+- Complements existing automations:
+  - `Heater Night Assist` - owns "cold nights" (<16°C)
+  - `Cooling Night Assist` - owns "hot nights" (with flag)
+  - `Frost Protection` - owns "cool nights" (no flags) ← NEW
+
+**Principle #8 - Seasonal Awareness:**
+```
+Night-Time Heating Decision Tree:
+├─ 18:00 each evening
+│
+├─ IF hot_today_flag = ON or warm_today_flag = ON
+│  └─ Cooling Night Assist (cool mode, boost preset)
+│  └─ Maintains sleep comfort on hot nights
+│
+└─ ELSE (cool night, NO hot flags)
+   └─ Frost Protection ← NEW AUTOMATION
+   └─ Applies frost preset (17°C minimum)
+   └─ Heat mode active for minimum protection
+   └─ Prevents freezing without aggressive heating
+```
+
+**Night-Time Heating Coverage Now Complete:**
+```
+Cold Night (<16°C):        Heater Night Assist (eco, 16-17.2°C)
+Cool Night (no flags):     Frost Protection (frost, 17°C minimum) ← NEW
+Hot Night (flag on):       Cooling Night Assist (cool, boost)
+```
+
+**Example Scenario - Cool September Night:**
+```
+Time: 18:00
+Season: Spring
+Forecast: 15°C
+hot_today_flag: OFF ← Cool day, no hot flag
+warm_today_flag: OFF ← Not even warm
+
+Frost Protection Automation:
+  ✅ Time window: 18:00-06:00 ✓
+  ✅ Condition: NOT hot ✓
+  ✅ Condition: NOT warm ✓
+  ✅ Manual override: OFF ✓
+  ✅ Master switch: ON ✓
+
+  → FIRES at 18:00
+  → Sets all bedrooms to frost preset (17°C + heat)
+  → Ensures minimum temperature protection
+  → No beeping (time-based, only at 18:00)
+  → Thermostat maintains 17°C all night
+  → If temp drops below 16°C, Heater Night Assist takes over
+```
 
 #### Living Room Winter Heating
 
@@ -881,7 +954,8 @@ Status: ✅ PASS - Hysteresis prevents excessive cycling
 ```
 🎯 PRINCIPLE #1: Single Source of Truth
    ✅ One automation per room per time window
-   ✅ Master Bedroom: Seasonal (day) + Night Assist (night)
+   ✅ Master Bedroom: Seasonal (day) + Night Assist (cold) + Frost (cool) + Cool Assist (hot)
+   ✅ All Bedrooms: Frost Protection (cool nights) + Cooling Night Assist (hot nights)
    ✅ Living Room: Preheat (morning) + Setback (night)
 
 🎯 PRINCIPLE #2: Respect Manual Overrides
