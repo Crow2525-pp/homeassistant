@@ -1,0 +1,223 @@
+# Automation Trigger History & Pattern Analysis
+type: vertical-stack
+title: "📊 Automation Trigger History & Patterns"
+cards:
+  # Summary Statistics
+  - type: markdown
+    title: "📈 Today's Trigger Summary"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #0F172A 0%, #1E293B 100%);
+          border: 2px solid #3B82F6;
+          border-radius: 12px;
+        }
+    content: |
+      ## Climate Automation Trigger Counts (Today)
+
+      | Automation | Triggers Today | Last Trigger | Status |
+      |-----------|-----------------|--------------|--------|
+      | Seasonal Climate Manager | {{ (states('input_number.seasonal_climate_triggers_today') | int(0)) }} | {{ states('input_datetime.last_trigger_seasonal_climate_manager') | default('Never') }} | {% if (states('input_number.seasonal_climate_triggers_today') | int(0)) > 20 %}⚠️ High{% elif (states('input_number.seasonal_climate_triggers_today') | int(0)) > 0 %}✅ Normal{% else %}❌ No triggers{% endif %} |
+      | Morning Blinds Controller | {{ (states('input_number.morning_blinds_triggers_today') | int(0)) }} | {{ states('input_datetime.last_trigger_morning_blinds') | default('Never') }} | {% if (states('input_number.morning_blinds_triggers_today') | int(0)) > 0 %}✅ Active{% else %}❌ Inactive{% endif %} |
+      | Living Room Preheat 5:30am | {{ (states('input_number.preheat_triggers_today') | int(0)) }} | {{ states('input_datetime.last_trigger_preheat_530am') | default('Never') }} | {% if (states('input_number.preheat_triggers_today') | int(0)) > 0 %}✅ Active{% else %}❌ Inactive{% endif %} |
+      | Evening Cooling Night | {{ (states('input_number.evening_cooling_triggers_today') | int(0)) }} | {{ states('input_datetime.last_trigger_evening_cooling') | default('Never') }} | {% if (states('input_number.evening_cooling_triggers_today') | int(0)) > 0 %}✅ Active{% else %}❌ Inactive{% endif %} |
+      | Frost Protection Night | {{ (states('input_number.frost_protection_triggers_today') | int(0)) }} | {{ states('input_datetime.last_trigger_frost_protection') | default('Never') }} | {% if (states('input_number.frost_protection_triggers_today') | int(0)) > 0 %}✅ Active{% else %}❌ Inactive{% endif %} |
+      | Afternoon Re-check 15:30 | {{ (states('input_number.afternoon_recheck_triggers_today') | int(0)) }} | {{ states('input_datetime.last_trigger_afternoon_recheck') | default('Never') }} | {% if (states('input_number.afternoon_recheck_triggers_today') | int(0)) > 0 %}✅ Active{% else %}❌ Inactive{% endif %} |
+
+      **Total Triggers Today:** {{ ((states('input_number.seasonal_climate_triggers_today') | int(0)) + (states('input_number.morning_blinds_triggers_today') | int(0)) + (states('input_number.preheat_triggers_today') | int(0)) + (states('input_number.evening_cooling_triggers_today') | int(0)) + (states('input_number.frost_protection_triggers_today') | int(0)) + (states('input_number.afternoon_recheck_triggers_today') | int(0))) }}
+
+      ---
+
+  # Trigger Counters
+  - type: entities
+    title: "📊 Daily Trigger Counters"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #10B981;
+        }
+    entities:
+      - entity: input_number.seasonal_climate_triggers_today
+        name: Seasonal Climate Manager (15-min intervals)
+        icon: mdi:counter
+      - entity: input_number.morning_blinds_triggers_today
+        name: Morning Blinds (06:30-09:00)
+        icon: mdi:counter
+      - entity: input_number.preheat_triggers_today
+        name: Preheat 5:30am (winter)
+        icon: mdi:counter
+      - entity: input_number.evening_cooling_triggers_today
+        name: Evening Cooling (18:00-22:00)
+        icon: mdi:counter
+      - entity: input_number.frost_protection_triggers_today
+        name: Frost Protection (18:00-06:00)
+        icon: mdi:counter
+      - entity: input_number.afternoon_recheck_triggers_today
+        name: Afternoon Re-check (15:30)
+        icon: mdi:counter
+
+  # Last Trigger Times
+  - type: entities
+    title: "⏰ Last Automation Trigger Times"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #EC4899;
+        }
+    entities:
+      - entity: input_datetime.last_trigger_seasonal_climate_manager
+        name: Seasonal Climate Manager
+        icon: mdi:clock-outline
+      - entity: input_datetime.last_trigger_morning_blinds
+        name: Morning Blinds Controller
+        icon: mdi:clock-outline
+      - entity: input_datetime.last_trigger_preheat_530am
+        name: Preheat 5:30am
+        icon: mdi:clock-outline
+      - entity: input_datetime.last_trigger_evening_cooling
+        name: Evening Cooling Night
+        icon: mdi:clock-outline
+      - entity: input_datetime.last_trigger_frost_protection
+        name: Frost Protection Night
+        icon: mdi:clock-outline
+      - entity: input_datetime.last_trigger_afternoon_recheck
+        name: Afternoon Re-check
+        icon: mdi:clock-outline
+
+  # Pattern Analysis Guide
+  - type: markdown
+    title: "🔍 Understanding Trigger Patterns"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #F59E0B;
+        }
+    content: |
+      ## What Do These Counters Mean?
+
+      ### Seasonal Climate Manager (Target: 50-100/day in active season)
+      - Runs every 15 minutes during relevant times
+      - HIGH COUNT (>100): May indicate temperature instability or excessive cycling
+      - LOW COUNT (<10): May indicate automation disabled or inactive season
+      - PATTERN: Should be consistent throughout day if active
+
+      ### Morning Blinds Controller (Target: 1-3/day)
+      - Runs when blinds need adjustment based on time and season
+      - SHOULD TRIGGER: Summer mornings, seasonal transitions
+      - ZERO: Normal in winter (blinds not managed in cold season)
+
+      ### Living Room Preheat 5:30am (Target: 0-1/day in winter)
+      - Runs once at 5:30am if needed in winter
+      - SHOULD TRIGGER: Winter mornings when temp <19°C
+      - ZERO: Normal in summer (no preheating needed)
+
+      ### Evening Cooling Night (Target: 0-1/day in summer)
+      - Activates when room temperature rises above comfort in evening
+      - HIGH COUNT: Indicates room stays hot through night (check blinds)
+      - ZERO: Normal - room cools naturally or is cool enough
+
+      ### Frost Protection Night (Target: 1/day in cold season)
+      - Activates at 18:00 on cool nights without hot day flags
+      - Should prevent damage on cold nights
+      - ZERO: Normal - either not winter or hot day flags active
+
+      ### Afternoon Re-check 15:30 (Target: 0-1/day in warm season)
+      - Runs once daily at 3:30pm to validate morning forecast
+      - Adjusts hot day flags based on actual temperature
+      - ZERO: Normal - only runs in spring/summer/autumn
+
+      ---
+
+  # Troubleshooting Guide
+  - type: markdown
+    title: "🐛 Troubleshooting High Trigger Counts"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #EF4444;
+        }
+    content: |
+      ## If Seasonal Climate Manager triggers >150/day:
+
+      1. **Temperature Cycling**
+         - Check: Is actual temperature hovering around a threshold?
+         - Fix: Increase hysteresis (`for:` minutes in automation)
+
+      2. **Sensor Noise**
+         - Check: Is temperature sensor value jumping ±1°C frequently?
+         - Fix: Verify sensor is working correctly, consider filtering
+
+      3. **Overly Aggressive AC**
+         - Check: Is AC turning on/off repeatedly?
+         - Fix: Lower cooling threshold (increase comfort_high value)
+
+      4. **Manual Overrides Active**
+         - Check: Is climate_manual_control_master = ON?
+         - Fix: Turn off manual override to resume automations
+
+      5. **Door Open/Close Events**
+         - Check: Are doors being opened/closed frequently?
+         - Fix: Normal behavior - HVAC reacts to door state changes
+
+      ## If Preheat Never Triggers (Winter):
+
+      1. Check season is set to "winter"
+      2. Check living_room temp is below 19°C at 5:30am
+      3. Check manual override is OFF
+      4. Check hvac_living_room_should_be_on is ON
+
+      ## If Afternoon Re-check Never Triggers:
+
+      1. Check season is spring/summer/autumn (not winter)
+      2. Verify time 15:30 is reached each day
+      3. Check automations are enabled
+      4. Look at previous day's counter (should be 1 if season correct)
+
+      ---
+
+  # Data Collection Tips
+  - type: markdown
+    title: "💡 Using This Data"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #6366F1;
+        }
+    content: |
+      ## What to Track Over Time
+
+      ### Daily Pattern (Keep logs for 2-4 weeks)
+      - Seasonal Climate Manager count should be consistent within season
+      - Example: Summer might be 80-100 triggers, Winter 40-60
+
+      ### Weekly Pattern
+      - Should see similar totals each week during same season
+      - Variations indicate changes (weather, occupancy, settings)
+
+      ### Seasonal Pattern
+      - Different automations active in different seasons
+      - Summer: High Seasonal, Morning Blinds, Evening Cooling active
+      - Winter: High Seasonal, Preheat active, Frost Protection active
+
+      ### Problem Detection
+      - Sudden spike = Manual override or sensor issue
+      - Sudden drop = Automation disabled or master switch OFF
+      - Zero for a week = Likely problem (check logs)
+
+      ### Optimization Opportunities
+      - If Seasonal triggers <20/day in summer: Increase time window
+      - If Evening Cooling >10/day: Blinds not closing early enough
+      - If Preheat never: May not be needed (current temp always above 19°C)
+
+      ## Next Steps for Analysis
+
+      1. **Record baseline** - Note current counts for reference
+      2. **Monitor for one week** - See if patterns are consistent
+      3. **Compare seasons** - Note differences summer vs winter
+      4. **Adjust thresholds** - If high counts, increase for: minutes
+      5. **Review effectiveness** - Check comfort levels while watching counts
