@@ -19,10 +19,22 @@ cards:
       **Time:** {{ now().strftime('%H:%M') }}
 
       ### Weather Flags & Context
+
+      **HEATING CONDITIONS (Cold):**
+      - **Super Cold Today (<5°C):** {{ 'YES ❄️' if is_state('input_boolean.super_cold_today', 'on') else 'No' }}
+      - **Cold Today (5-10°C):** {{ 'YES ❄️' if is_state('input_boolean.cold_today_flag', 'on') else 'No' }}
+      - **Cool Today (10-15°C):** {{ 'YES ☁️' if is_state('input_boolean.cool_today_flag', 'on') else 'No' }}
+
+      **COOLING CONDITIONS (Hot):**
       - **Super Hot Today (>25°C):** {{ 'YES 🔥' if is_state('input_boolean.super_hot_today', 'on') else 'No' }}
       - **Hot Today (>21°C):** {{ 'YES ☀️' if is_state('input_boolean.hot_today_flag', 'on') else 'No' }}
       - **Warm Today (>18°C):** {{ 'YES 🌤️' if is_state('input_boolean.warm_today_flag', 'on') else 'No' }}
-      - **Max Temp Forecast:** {{ states('sensor.braybrook_temp_max_0') }}°C
+
+      **Forecast:**
+      - **Min Temp:** {{ states('sensor.braybrook_temp_min_0') }}°C
+      - **Max Temp:** {{ states('sensor.braybrook_temp_max_0') }}°C
+
+      **System Status:**
       - **Working From Home:** {{ 'YES 💼' if is_state('binary_sensor.working_from_home', 'on') else 'No' }}
       - **Solar Excess Available:** {{ 'YES ☀️' if is_state('binary_sensor.solar_excess_available', 'on') else 'No' }}
 
@@ -57,6 +69,16 @@ cards:
       - entity: input_select.occupancy
         name: "Occupancy Mode"
         icon: mdi:home-account
+      - type: divider
+      - entity: input_boolean.super_cold_today
+        name: "Super Cold Day Flag (<5°C)"
+        icon: mdi:snowflake-alert
+      - entity: input_boolean.cold_today_flag
+        name: "Cold Day Flag (5-10°C)"
+        icon: mdi:snowflake
+      - entity: input_boolean.cool_today_flag
+        name: "Cool Day Flag (10-15°C)"
+        icon: mdi:weather-cloudy
       - type: divider
       - entity: input_boolean.super_hot_today
         name: "Super Hot Day Flag (>25°C)"
