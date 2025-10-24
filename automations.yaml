@@ -2145,6 +2145,108 @@
     data:
       hvac_mode: 'off'
   mode: single
+- id: frost_protection_bedrooms_cool_nights
+  alias: Bedrooms - Overnight Frost Protection (No Hot Days)
+  description: >
+    Applies frost preset (17°C minimum) to all bedrooms on cool nights
+    when no hot day flags are active. Ensures minimum temperature protection
+    during mild winter nights without heating trigger.
+  triggers:
+  - trigger: time
+    at: '18:00:00'
+    id: evening_protection
+  - trigger: homeassistant
+    event: start
+    id: startup
+  conditions:
+  - condition: time
+    after: '18:00:00'
+    before: '06:00:00'
+  - condition: state
+    entity_id: input_boolean.warm_today_flag
+    state: 'off'
+    alias: Not Warm Today
+  - condition: state
+    entity_id: input_boolean.hot_today_flag
+    state: 'off'
+    alias: Not Hot Today
+  - condition: state
+    entity_id: input_boolean.super_hot_today
+    state: 'off'
+    alias: Not Super Hot Today
+  actions:
+  - choose:
+    # Master Bedroom frost protection
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.hvac_master_bedroom_should_be_on
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.climate_manual_control_master
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.master_bedroom_door_sensor_opening
+        state: 'off'
+        alias: Master Bedroom Door Closed
+      sequence:
+      - service: climate.set_preset_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          preset_mode: frost
+        alias: Set Master Bedroom Frost (17°C minimum)
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          hvac_mode: heat
+        alias: Enable Master Bedroom Heat Mode
+
+    # Kids Room frost protection
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.hvac_kids_room_should_be_on
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.climate_manual_control_otto
+        state: 'off'
+      sequence:
+      - service: climate.set_preset_mode
+        target:
+          entity_id: climate.otto_s_room
+        data:
+          preset_mode: frost
+        alias: Set Otto's Room Frost (17°C minimum)
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.otto_s_room
+        data:
+          hvac_mode: heat
+        alias: Enable Otto's Room Heat Mode
+
+    # Study frost protection
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.hvac_study_should_be_on
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.climate_manual_control_study
+        state: 'off'
+      sequence:
+      - service: climate.set_preset_mode
+        target:
+          entity_id: climate.henry_s_room_versatile_thermostat
+        data:
+          preset_mode: frost
+        alias: Set Study Frost (17°C minimum)
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.henry_s_room_versatile_thermostat
+        data:
+          hvac_mode: heat
+        alias: Enable Study Heat Mode
+
+  mode: single
 - id: '1649108238334'
   alias: Notify Steph When Phil Leaves Work
   description: Sends Steph a notification when Phil exits the work zone.
