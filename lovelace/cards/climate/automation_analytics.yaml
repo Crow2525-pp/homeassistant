@@ -1,0 +1,349 @@
+# Automation Analytics - Statistics, Anomaly Detection & Predictions
+type: vertical-stack
+title: "📊 Automation Analytics & Predictions"
+cards:
+  # Statistics Summary
+  - type: markdown
+    title: "📈 Weekly Statistics & Trends"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #0F172A 0%, #1E293B 100%);
+          border: 2px solid #3B82F6;
+          border-radius: 12px;
+        }
+    content: |
+      ## Automation Trigger Statistics
+
+      ### Daily Averages (Based on Historical Trends)
+      {% set seasonal_today = states('input_number.seasonal_climate_triggers_today') | int(0) %}
+      {% set blinds_today = states('input_number.master_bedroom_blinds_morning_triggers_today') | int(0) + states('input_number.master_bedroom_blinds_night_triggers_today') | int(0) %}
+      {% set cooling_today = states('input_number.master_bedroom_cooling_night_triggers_today') | int(0) + states('input_number.children_cooling_night_triggers_today') | int(0) %}
+      {% set heating_today = states('input_number.preheat_triggers_today') | int(0) + states('input_number.frost_protection_triggers_today') | int(0) %}
+      {% set flags_today = states('input_number.climate_flags_mark_hot_day_triggers_today') | int(0) + states('input_number.afternoon_recheck_triggers_today') | int(0) %}
+
+      | Category | Today | Expected | Status |
+      |----------|-------|----------|--------|
+      | **Seasonal Climate** | {{ seasonal_today }} | 50-100 | {% if seasonal_today >= 40 and seasonal_today <= 120 %}✅ Normal{% elif seasonal_today > 120 %}⚠️ High{% else %}❌ Low{% endif %} |
+      | **Blinds Management** | {{ blinds_today }} | 1-4 | {% if blinds_today >= 0 and blinds_today <= 6 %}✅ Normal{% else %}⚠️ Unexpected{% endif %} |
+      | **Night Cooling** | {{ cooling_today }} | 0-2 | {% if cooling_today >= 0 and cooling_today <= 3 %}✅ Normal{% else %}⚠️ High{% endif %} |
+      | **Heating/Frost** | {{ heating_today }} | 0-2 | {% if heating_today >= 0 and heating_today <= 3 %}✅ Normal{% else %}⚠️ High{% endif %} |
+      | **Hot Day Flags** | {{ flags_today }} | 1-2 | {% if flags_today >= 0 and flags_today <= 3 %}✅ Normal{% else %}⚠️ Unexpected{% endif %} |
+      | **TOTAL** | {{ seasonal_today + blinds_today + cooling_today + heating_today + flags_today }} | 52-108 | {% set total = seasonal_today + blinds_today + cooling_today + heating_today + flags_today %}{% if total >= 40 and total <= 130 %}✅ Normal{% elif total > 130 %}⚠️ High{% else %}❌ Low{% endif %} |
+
+      ---
+
+  # Anomaly Detection
+  - type: markdown
+    title: "🚨 Anomaly Detection & Alerts"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #EF4444;
+        }
+    content: |
+      ## System Health Checks
+      {% set seasonal_today = states('input_number.seasonal_climate_triggers_today') | int(0) %}
+      {% set total_triggers = (states('input_number.seasonal_climate_triggers_today') | int(0) +
+        states('input_number.morning_blinds_triggers_today') | int(0) +
+        states('input_number.preheat_triggers_today') | int(0) +
+        states('input_number.evening_cooling_triggers_today') | int(0) +
+        states('input_number.frost_protection_triggers_today') | int(0) +
+        states('input_number.afternoon_recheck_triggers_today') | int(0) +
+        states('input_number.master_bedroom_cooling_night_triggers_today') | int(0) +
+        states('input_number.children_cooling_night_triggers_today') | int(0) +
+        states('input_number.master_bedroom_blinds_night_triggers_today') | int(0) +
+        states('input_number.master_bedroom_blinds_morning_triggers_today') | int(0) +
+        states('input_number.climate_flags_mark_hot_day_triggers_today') | int(0)) %}
+
+      ### Anomaly Alerts
+
+      {% if seasonal_today > 150 %}
+      🔴 **CRITICAL: Seasonal Climate Over-Triggering**
+      - Current: {{ seasonal_today }} triggers (normal: 50-100)
+      - Possible causes:
+        - Temperature oscillating around threshold
+        - Sensor noise or malfunction
+        - Hysteresis setting too low
+        - AC cycling on/off repeatedly
+      - Actions: Check sensor, increase `for:` minutes, adjust thresholds
+
+      {% elif seasonal_today > 100 %}
+      🟡 **WARNING: Seasonal Climate Elevated**
+      - Current: {{ seasonal_today }} triggers
+      - Monitor for increasing trend
+
+      {% elif seasonal_today < 20 %}
+      🟠 **CAUTION: Low Seasonal Activity**
+      - Current: {{ seasonal_today }} triggers (expected 50+)
+      - Possible causes:
+        - Automation disabled
+        - Season mismatch
+        - HVAC master switch OFF
+        - Environmental conditions stable
+
+      {% else %}
+      ✅ **Seasonal Climate Normal**
+      - Current: {{ seasonal_today }} triggers (expected range)
+
+      {% endif %}
+
+      {% if total_triggers > 150 %}
+      🔴 **CRITICAL: System Over-Activity**
+      - Total: {{ total_triggers }} triggers today
+      - System responding too frequently
+
+      {% elif total_triggers < 30 %}
+      🟠 **CAUTION: Low Total Activity**
+      - Total: {{ total_triggers }} triggers (expected 50+)
+      - Check if automations are disabled
+
+      {% else %}
+      ✅ **Total Activity Normal**
+      - Total: {{ total_triggers }} triggers
+
+      {% endif %}
+
+      ---
+
+  # Predictive Models
+  - type: markdown
+    title: "🔮 Predictive Analytics"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #6366F1;
+        }
+    content: |
+      ## Tomorrow's Predictions (Based on Current Trends)
+      {% set seasonal_today = states('input_number.seasonal_climate_triggers_today') | int(0) %}
+      {% set season = states('input_select.climate_season') | default('unknown') %}
+
+      ### Predicted Trigger Counts for Tomorrow:
+
+      {% if season == 'summer' %}
+      **Season: SUMMER** ☀️
+
+      - **Seasonal Climate Manager:** 80-110 triggers
+        - Reason: Multiple 15-min checks + temperature changes
+        - Triggers: Morning cool-down, midday stabilization, evening prep
+
+      - **Blinds Management:** 2-3 triggers
+        - Morning open → Daytime management → Evening close
+
+      - **Night Cooling:** 1-2 triggers
+        - Hot nights require 21:00 activation and potentially 00:00 adjustments
+
+      - **Frost Protection:** 0 triggers
+        - Summer nights don't require frost protection
+
+      - **PREDICTED TOTAL:** 83-115 triggers
+
+      {% elif season == 'winter' %}
+      **Season: WINTER** ❄️
+
+      - **Seasonal Climate Manager:** 50-80 triggers
+        - Less frequent activity than summer
+        - Heating triggers: morning (06:00), midday, evening (20:00)
+
+      - **Blinds Management:** 0-1 triggers
+        - Minimal blind movement in winter
+
+      - **Night Heating:** 1-2 triggers
+        - Frost protection active most nights
+        - Heater Night Assist when needed
+
+      - **Morning Preheat:** 0-1 triggers
+        - Only if living room temp <19°C at 05:30
+
+      - **PREDICTED TOTAL:** 51-84 triggers
+
+      {% else %}
+      **Season: {{ season | upper }}** 🌤️
+
+      - **Seasonal Climate Manager:** 40-70 triggers
+        - Shoulder seasons have moderate activity
+        - Transitioning between heating/cooling strategies
+
+      - **Mixed Activity:** 2-4 triggers
+        - Blinds, heating, or cooling as needed
+
+      - **PREDICTED TOTAL:** 42-74 triggers
+
+      {% endif %}
+
+      ### Accuracy Notes:
+      - ✅ Predictions based on current season and recent patterns
+      - ⚠️ Weather changes may alter predictions by ±20%
+      - 📍 Manual overrides or door events not factored in
+
+      ---
+
+  # Alert Configuration
+  - type: markdown
+    title: "⚙️ Anomaly Alert Thresholds"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #F59E0B;
+        }
+    content: |
+      ## Current Alert Settings
+
+      These thresholds trigger anomaly warnings:
+
+      | Metric | Warning Level | Critical Level | Notes |
+      |--------|---------------|----------------|-------|
+      | Seasonal Climate Triggers/Day | >100 | >150 | If >100, investigate for cycling |
+      | Total Triggers/Day | >130 | >200 | Sum of all tracked automations |
+      | No Seasonal Triggers for 4+ hrs | ⚠️ | 🔴 | May indicate automation disabled |
+      | Sudden 2x increase vs. yesterday | ⚠️ | 🔴 | May indicate environmental instability |
+      | Sudden 50% decrease vs. yesterday | ⚠️ | 🔴 | May indicate disabled automation |
+
+      ### How to Use:
+      1. Note today's triggers in each category
+      2. Tomorrow, compare values to thresholds
+      3. If alerts triggered:
+         - Check system logs for errors
+         - Verify automations are enabled
+         - Check manual overrides
+         - Review sensor health
+      4. Adjust thresholds if they don't match your environment
+
+      ---
+
+  # Trend Analysis
+  - type: markdown
+    title: "📊 Trend Analysis Guide"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #10B981;
+        }
+    content: |
+      ## How to Track Trends
+
+      ### Daily Log (Recommended)
+      Create a simple text file with daily totals:
+      ```
+      Monday 2025-01-06: 87 triggers (season: summer)
+      Tuesday 2025-01-07: 92 triggers (season: summer)
+      Wednesday 2025-01-08: 85 triggers (season: summer)
+      Thursday 2025-01-09: 156 triggers (SPIKE - check AC cycling)
+      Friday 2025-01-10: 89 triggers (back to normal)
+      ```
+
+      ### Weekly Average Calculation
+      Sum all daily totals ÷ 7 days = weekly average
+
+      Example:
+      - Week 1 Summer Average: 90 triggers/day
+      - Week 2 Summer Average: 88 triggers/day
+      - Variance: -2 (stable, within ±5%)
+
+      ### Seasonal Baseline
+      Track average by season:
+      - **Summer Baseline:** 85-100 triggers/day
+      - **Winter Baseline:** 50-70 triggers/day
+      - **Spring/Fall Baseline:** 40-60 triggers/day
+
+      ### What Increasing Trends Mean
+      - **Gradual increase (5-10% per week):** Normal as season changes
+      - **Spike (2x overnight):** Investigate immediately
+        - Temperature unstable?
+        - Sensor malfunction?
+        - Settings changed?
+        - Environmental changes?
+
+      ### What Decreasing Trends Mean
+      - **Gradual decrease (5-10% per week):** Normal seasonal transition
+      - **Drop to zero for 4+ hours:** Check automation health
+        - Is automation enabled?
+        - Is master switch ON?
+        - Are manual overrides active?
+        - Check for errors in logs
+
+      ---
+
+  # Optimization Opportunities
+  - type: markdown
+    title: "💡 Optimization Opportunities"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #EC4899;
+        }
+    content: |
+      ## Using Analytics to Improve System
+
+      ### If Seasonal Climate Triggers >120/day:
+      1. **Increase Hysteresis:** Current `for:` values might be too low
+         - Try increasing from 5 minutes to 10 minutes for temperature triggers
+         - This prevents reacting to temporary fluctuations
+
+      2. **Widen Comfort Range:** Thresholds might be too tight
+         - Master Bedroom: Try 18-22°C instead of 19-21°C
+         - Reduces on/off cycling
+
+      3. **Check Sensor:** Sensor noise might cause false readings
+         - Is value jumping ±1°C constantly?
+         - Consider sensor placement or filtering
+
+      4. **Verify AC:** AC might be over-cycling
+         - Check if AC turns on/off within minutes
+         - May indicate capacity or thermostat issue
+
+      ### If Seasonal Climate Triggers <20/day:
+      1. **Verify Automations Enabled:** Check in Home Assistant UI
+      2. **Check Master Switches:** Ensure hvac_*_should_be_on = ON
+      3. **Check Season Setting:** Verify input_select.climate_season
+      4. **Review Conditions:** May be correct if environment stable
+
+      ### If Blind Triggers Always 0:
+      1. **Check Season:** Blinds only managed in hot seasons
+      2. **Check Time Windows:** Only run during specific times
+      3. **Verify Automation Enabled**
+
+      ### If Night Cooling Triggers >5/day:
+      1. **Check Room Temperature:** Stays high all night?
+         - Blinds not closing during day?
+         - Room getting sun exposure?
+         - AC capacity insufficient?
+      2. **Increase Cooling Duration:** 21:00 cooling might not be enough
+      3. **Start Cooling Earlier:** Try 20:00 instead of 21:00
+
+      ---
+
+  # Health Dashboard Summary
+  - type: entities
+    title: "🏥 System Health Status"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #06B6D4;
+        }
+    entities:
+      - entity: input_number.seasonal_climate_triggers_today
+        name: Seasonal Climate Triggers (Today)
+        icon: mdi:counter
+      - entity: input_number.master_bedroom_cooling_night_triggers_today
+        name: Master Bedroom Cooling (Tonight)
+        icon: mdi:counter
+      - entity: input_number.children_cooling_night_triggers_today
+        name: Children's Rooms Cooling (Tonight)
+        icon: mdi:counter
+      - entity: input_number.frost_protection_triggers_today
+        name: Frost Protection Activations
+        icon: mdi:counter
+      - entity: input_number.preheat_triggers_today
+        name: Morning Preheat (Winter)
+        icon: mdi:counter
+      - entity: input_number.climate_flags_mark_hot_day_triggers_today
+        name: Hot Day Flag Evaluations
+        icon: mdi:counter

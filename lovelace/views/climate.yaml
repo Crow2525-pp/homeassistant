@@ -8,6 +8,7 @@ cards:
   - !include ../cards/climate/debug_status.yaml
   - !include ../cards/climate/principles_status.yaml
   - !include ../cards/climate/automation_trigger_history.yaml
+  - !include ../cards/climate/automation_analytics.yaml
   - !include ../cards/climate/simple_weather.yaml
   - !include ../cards/climate/room_climate_monitor.yaml
   - !include ../cards/climate/temperature.yaml

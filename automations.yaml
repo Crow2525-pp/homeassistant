@@ -1295,6 +1295,134 @@
         alias: Clear all hot flags (cool afternoon)
 
   mode: single
+- id: '1747620000010'
+  alias: Automation Analytics - Anomaly Detection (Daily)
+  description: >-
+    Daily anomaly detection for automation trigger patterns. Identifies
+    over-triggering, under-triggering, and system health issues. Runs at 23:30
+    to analyze the day's data before daily reset at midnight.
+  triggers:
+  - trigger: time
+    at: '23:30:00'
+  conditions: []
+  actions:
+  - choose:
+    # Check for over-triggering (Seasonal Climate >150)
+    - conditions:
+      - condition: numeric_state
+        entity_id: input_number.seasonal_climate_triggers_today
+        above: 150
+      sequence:
+      - action: persistent_notification.create
+        data:
+          title: "⚠️ HVAC Anomaly: Over-Triggering Detected"
+          message: >-
+            Seasonal Climate Manager triggered {{ states('input_number.seasonal_climate_triggers_today') }} times today (normal: 50-100).
+
+            **Likely Causes:**
+            - Temperature oscillating around threshold (hysteresis issue)
+            - Sensor noise causing false triggers
+            - AC over-cycling (on/off rapidly)
+            - Comfort range too tight
+
+            **Recommended Actions:**
+            1. Check sensor readings for noise (±1°C jumps)
+            2. Increase `for:` minutes in temperature triggers
+            3. Widen comfort range (±1°C)
+            4. Verify AC is functioning correctly
+
+            **Next Steps:**
+            - Monitor tomorrow's count
+            - Adjust hysteresis if needed
+            - Check sensor placement
+          notification_id: "hvac_overactivity_alert"
+    # Check for under-triggering (Seasonal Climate <20)
+    - conditions:
+      - condition: numeric_state
+        entity_id: input_number.seasonal_climate_triggers_today
+        below: 20
+      - condition: state
+        entity_id: input_select.climate_season
+        state: summer
+      sequence:
+      - action: persistent_notification.create
+        data:
+          title: "🔴 HVAC Anomaly: Under-Activity Detected"
+          message: >-
+            Seasonal Climate Manager only triggered {{ states('input_number.seasonal_climate_triggers_today') }} times today (expected: 50+).
+
+            **Possible Issues:**
+            - Automation disabled or not triggering
+            - HVAC master switch (hvac_*_should_be_on) is OFF
+            - Manual override preventing automations
+            - Environmental conditions stable (unusual)
+
+            **Diagnostic Steps:**
+            1. Verify automation is enabled in Home Assistant
+            2. Check HVAC master switch status (should be ON)
+            3. Check manual override booleans (should be OFF)
+            4. Review Home Assistant logs for errors
+
+            **Expected vs Actual:**
+            - Expected: 50-100 triggers/day in summer
+            - Actual: {{ states('input_number.seasonal_climate_triggers_today') }} triggers
+          notification_id: "hvac_low_activity_alert"
+    # Check for extreme over-activity (All triggers >200)
+    - conditions:
+      - condition: template
+        value_template: >-
+          {% set total = (states('input_number.seasonal_climate_triggers_today') | int(0) +
+            states('input_number.morning_blinds_triggers_today') | int(0) +
+            states('input_number.preheat_triggers_today') | int(0) +
+            states('input_number.evening_cooling_triggers_today') | int(0) +
+            states('input_number.frost_protection_triggers_today') | int(0) +
+            states('input_number.afternoon_recheck_triggers_today') | int(0) +
+            states('input_number.master_bedroom_cooling_night_triggers_today') | int(0) +
+            states('input_number.children_cooling_night_triggers_today') | int(0) +
+            states('input_number.master_bedroom_blinds_night_triggers_today') | int(0) +
+            states('input_number.master_bedroom_blinds_morning_triggers_today') | int(0) +
+            states('input_number.climate_flags_mark_hot_day_triggers_today') | int(0)) %}
+          {{ total > 200 }}
+      sequence:
+      - action: persistent_notification.create
+        data:
+          title: "🔴 SYSTEM ALERT: Excessive Automation Activity"
+          message: >-
+            Total automation triggers today: {{ (states('input_number.seasonal_climate_triggers_today') | int(0) +
+              states('input_number.morning_blinds_triggers_today') | int(0) +
+              states('input_number.preheat_triggers_today') | int(0) +
+              states('input_number.evening_cooling_triggers_today') | int(0) +
+              states('input_number.frost_protection_triggers_today') | int(0) +
+              states('input_number.afternoon_recheck_triggers_today') | int(0) +
+              states('input_number.master_bedroom_cooling_night_triggers_today') | int(0) +
+              states('input_number.children_cooling_night_triggers_today') | int(0) +
+              states('input_number.master_bedroom_blinds_night_triggers_today') | int(0) +
+              states('input_number.master_bedroom_blinds_morning_triggers_today') | int(0) +
+              states('input_number.climate_flags_mark_hot_day_triggers_today') | int(0)) }} (expected: 50-130)
+
+            **This indicates system instability!**
+
+            **Immediate Actions:**
+            1. Check climate debug dashboard for current state
+            2. Verify all sensors are working normally
+            3. Review Home Assistant logs
+            4. Consider disabling automations temporarily to stabilize
+
+            **Investigation Priorities:**
+            - Seasonal Climate triggers: {{ states('input_number.seasonal_climate_triggers_today') }}
+            - Temperature sensor status
+            - AC cycling pattern
+            - Door/window sensor activity
+          notification_id: "hvac_critical_alert"
+    # Else: Normal activity
+    - sequence:
+      - action: persistent_notification.dismiss
+        data:
+          notification_id:
+          - "hvac_overactivity_alert"
+          - "hvac_low_activity_alert"
+          - "hvac_critical_alert"
+  mode: single
 - id: '1727826100000'
   alias: Smart Climate Notification - Living Room
   description: Suggests climate control when solar excess available and room uncomfortable
