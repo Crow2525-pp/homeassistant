@@ -6,6 +6,7 @@ cards:
   - !include ../cards/navbar.yaml
   - !include ../cards/climate/hvac.yaml
   - !include ../cards/climate/debug_status.yaml
+  - !include ../cards/climate/principles_status.yaml
   - !include ../cards/climate/simple_weather.yaml
   - !include ../cards/climate/room_climate_monitor.yaml
   - !include ../cards/climate/temperature.yaml

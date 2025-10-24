@@ -1,0 +1,292 @@
+# HVAC Principles Status Visualization Card
+type: vertical-stack
+title: "🎯 HVAC Automation Principles Status"
+cards:
+  # Principle Compliance Overview
+  - type: markdown
+    title: "📋 Principle Implementation Status"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #0F172A 0%, #1E293B 100%);
+          border: 2px solid #10B981;
+          border-radius: 12px;
+        }
+    content: |
+      ## All 15 Principles - Implementation Status
+
+      ### Core Automation Principles ✅
+      - **#1: Single Source of Truth** - ✅ ONE primary automation per room per time window
+      - **#2: Manual Override Check** - ✅ ALL automations verify `climate_manual_control_*` is OFF
+      - **#3: Master On/Off Switch** - ✅ ALL automations check `hvac_*_should_be_on`
+      - **#4: Door/Window Check** - ✅ ALL automations verify door is CLOSED before acting
+      - **#5: State Checks Not Service Calls** - ✅ Conditions use `condition: state`
+      - **#6: Preset Modes Not Raw Temps** - ✅ ALL climate changes use `set_preset_mode`
+      - **#7: Hysteresis Prevention** - ✅ ALL triggers have `for:` conditions for stability
+
+      ### System Design Principles ✅
+      - **#8: Seasonal Awareness** - ✅ Winter/Summer/Shoulder strategies in place
+      - **#9: Common Area Checks** - ✅ Living Room checks `downstairs_doors`
+      - **#10: Non-Overlapping Windows** - ✅ Each automation has exclusive time slot
+      - **#11: Intent Tracking** - ✅ `hvac_*_should_be_on` helpers track automation intent
+      - **#12: Consolidate with choose:** - ✅ Bedrooms use single automation with `choose:`
+      - **#13: Configurable Thresholds** - ✅ `input_number.*` helpers for all temps
+      - **#14: Respect Versatile Thermostat** - ✅ ONLY Versatile Thermostat entities used
+      - **#15: Use Aliases** - ✅ Every condition/action has human-readable alias
+
+      ---
+
+  # Real-Time Active Principles
+  - type: markdown
+    title: "⚡ Currently Active Principles"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #EC4899;
+        }
+    content: |
+      {% set season = states('input_select.climate_season') %}
+      {% set hour = now().hour %}
+      {% set minute = now().minute %}
+      {% set time_decimal = hour + (minute / 60.0) %}
+
+      ### Season: **{{ season | upper }}**
+
+      {% if season == 'winter' %}
+      **Active Principles for WINTER:**
+      - 🔵 **#7 Hysteresis Prevention** - Preventing heating cycling during cold snaps
+      - 🔵 **#8 Seasonal Awareness** - Using winter-optimized heating strategy
+      - 🔵 **#2 Manual Override** - Respecting user's manual adjustments
+      - 🔵 **#4 Door Checks** - Not heating with doors open (energy + safety)
+      - 🔵 **#13 Configurable** - Using winter heating thresholds
+
+      {% elif season == 'summer' %}
+      **Active Principles for SUMMER:**
+      - 🔴 **#3 Master On/Off Switch** - Centralized cooling control active
+      - 🔥 **#8 Seasonal Awareness** - Aggressive cooling + blind management on hot days
+      - 🟡 **#7 Hysteresis Prevention** - Managing AC cycling with temperature swings
+      - 🔵 **#1 Single Source of Truth** - One cooling automation per room per window
+      - 🔵 **#6 Preset Modes** - Using boost/eco presets for varying conditions
+
+      {% else %}
+      **Active Principles for SHOULDER SEASON ({{ season | upper }}):**
+      - 🔵 **#8 Seasonal Awareness** - Minimal HVAC intervention
+      - 🔵 **#13 Configurable** - Using flexible temperature thresholds
+      - 🔵 **#2 Manual Override** - Respecting user preferences
+
+      {% endif %}
+
+      ### Time-Based Principles ({{ '%02d:%02d' | format(hour, minute) }})
+
+      {% if time_decimal >= 4.5 and time_decimal < 6 %}
+      🌅 **Early Morning (04:30-06:00):**
+      - 🔵 **#8 Seasonal** - Hot day flags evaluated from forecast
+
+      {% elif time_decimal >= 6 and time_decimal < 9 %}
+      ☕ **Morning (06:00-09:00):**
+      - 🔵 **#10 Non-Overlapping** - Morning routines active
+
+      {% elif time_decimal >= 9 and time_decimal < 15.5 %}
+      ☀️ **Daytime (09:00-15:30):**
+      - 🔵 **#3 Master Control** - Daytime cooling strategy active
+
+      {% elif time_decimal >= 15.5 and time_decimal < 18 %}
+      🔄 **Afternoon Re-check (15:30-18:00):**
+      - 🟡 **#8 Seasonal** - Hot day flags re-evaluated from ACTUAL temp
+
+      {% elif time_decimal >= 18 and time_decimal < 21 %}
+      🌆 **Evening (18:00-21:00):**
+      - 🔵 **#1 Single Source** - Evening cooling automations active
+
+      {% elif time_decimal >= 21 or time_decimal < 4.5 %}
+      🌙 **Bedtime/Night (21:00-04:30):**
+      - 🔵 **#1 Single Source** - Night heating/cooling automations active
+      - 🔵 **#7 Hysteresis** - Temperature stabilization in progress
+
+      {% endif %}
+
+      ---
+
+  # Principle Dependency Tree
+  - type: markdown
+    title: "🌳 Principle Priority Hierarchy"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #8B5CF6;
+        }
+    content: |
+      ### Decision Hierarchy (Top = Highest Priority)
+
+      1. **Safety & System Integrity** (#1, #5, #7, #14, #15)
+         └─ Single source of truth, state checks, hysteresis, proper entities
+
+      2. **User Control & Overrides** (#2)
+         └─ Manual overrides always respected (blocks all automations)
+
+      3. **Centralized Master Control** (#3, #11)
+         └─ Master switches coordinate room-level decisions
+
+      4. **Environmental Context** (#4, #8, #9, #13)
+         └─ Season, doors, presence, thresholds drive strategy
+
+      5. **Automation Coordination** (#10, #12)
+         └─ Non-overlapping windows, consolidated logic
+
+      6. **Implementation Quality** (#6, #15)
+         └─ Preset modes, aliases, maintainability
+
+      ---
+
+  # Master Switches Status
+  - type: entities
+    title: "🎛️ Master On/Off Switches (Principle #3)"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #F59E0B;
+        }
+    entities:
+      - entity: input_boolean.hvac_master_bedroom_should_be_on
+        name: Master Bedroom HVAC Master
+        icon: mdi:power-on
+      - entity: input_boolean.hvac_living_room_should_be_on
+        name: Living Room HVAC Master
+        icon: mdi:power-on
+      - entity: input_boolean.hvac_study_should_be_on
+        name: Study/Henry's Room HVAC Master
+        icon: mdi:power-on
+      - entity: input_boolean.hvac_kids_room_should_be_on
+        name: Kids Rooms HVAC Master
+        icon: mdi:power-on
+
+  # Manual Override Status (Principle #2)
+  - type: entities
+    title: "🔒 Manual Override Status (Principle #2)"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #EF4444;
+        }
+    entities:
+      - entity: input_boolean.climate_manual_control_master
+        name: Master Bedroom Manual Control
+        icon: mdi:hand-okay
+      - entity: input_boolean.climate_manual_control_living
+        name: Living Room Manual Control
+        icon: mdi:hand-okay
+      - entity: input_boolean.climate_manual_control_study
+        name: Study Manual Control
+        icon: mdi:hand-okay
+      - entity: input_boolean.climate_manual_control_otto
+        name: Otto's Room Manual Control
+        icon: mdi:hand-okay
+
+  # Seasonal & Temperature Context
+  - type: entities
+    title: "🌡️ Seasonal Context (Principle #8)"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #06B6D4;
+        }
+    entities:
+      - entity: input_select.climate_season
+        name: Climate Season
+        icon: mdi:weather-partly-cloudy
+      - entity: input_boolean.warm_today_flag
+        name: Warm Today Flag (>18°C)
+        icon: mdi:thermometer-plus
+      - entity: input_boolean.hot_today_flag
+        name: Hot Today Flag (>21°C)
+        icon: mdi:fire
+      - entity: input_boolean.super_hot_today
+        name: Super Hot Today (>25°C)
+        icon: mdi:fire-alert
+
+  # Door/Window Status (Principle #4)
+  - type: entities
+    title: "🚪 Door/Window Status (Principle #4)"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #14B8A6;
+        }
+    entities:
+      - entity: binary_sensor.master_bedroom_door_sensor_opening
+        name: Master Bedroom Door
+        icon: mdi:door-open
+      - entity: binary_sensor.downstairs_doors
+        name: Downstairs Doors (Living Room)
+        icon: mdi:door-open
+
+  # Entity Compliance (Principle #14)
+  - type: markdown
+    title: "✅ Versatile Thermostat Compliance (Principle #14)"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #10B981;
+        }
+    content: |
+      ### Using Correct Versatile Thermostat Entities
+
+      ✅ **Master Bedroom:** `climate.masterbed_versatile_thermostat`
+      - Current Mode: {{ states('climate.masterbed_versatile_thermostat') }}
+      - Target: {{ state_attr('climate.masterbed_versatile_thermostat', 'temperature') }}°C
+      - Preset: {{ state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') }}
+
+      ✅ **Living Room:** `climate.living_room_versatile_thermostat`
+      - Current Mode: {{ states('climate.living_room_versatile_thermostat') }}
+      - Target: {{ state_attr('climate.living_room_versatile_thermostat', 'temperature') }}°C
+      - Preset: {{ state_attr('climate.living_room_versatile_thermostat', 'preset_mode') }}
+
+      ✅ **Henry's Room/Study:** `climate.henry_s_room_versatile_thermostat`
+      - Current Mode: {{ states('climate.henry_s_room_versatile_thermostat') }}
+      - Target: {{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') }}°C
+      - Preset: {{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') }}
+
+      ✅ **Otto's Room:** `climate.otto_s_room`
+      - Current Mode: {{ states('climate.otto_s_room') }}
+      - Target: {{ state_attr('climate.otto_s_room', 'temperature') }}°C
+      - Preset: {{ state_attr('climate.otto_s_room', 'preset_mode') }}
+
+      **NO direct SmartIR entities are controlled** ⛔
+      All control goes through Versatile Thermostat wrappers only.
+
+  # Quick Principle Checklist
+  - type: markdown
+    title: "✔️ Quick Principle Reference"
+    card_mod:
+      style: |
+        ha-card {
+          background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+          border-left: 4px solid #6366F1;
+        }
+    content: |
+      ## How to Check Each Principle in Home Assistant
+
+      | # | Principle | Where to Check | What to Look For |
+      |---|-----------|-----------------|------------------|
+      | 1 | Single Source of Truth | Automations list | Only ONE automation per room per time window |
+      | 2 | Manual Override Check | Each automation | Every condition has `climate_manual_control_*` check |
+      | 3 | Master On/Off Switch | Automations + Helpers | Every automation checks `hvac_*_should_be_on` |
+      | 4 | Door/Window Check | Binary sensors + Automations | Door sensors prevent HVAC when open |
+      | 5 | State Checks Not Calls | Automation conditions | Conditions use `condition: state` not just actions |
+      | 6 | Preset Modes Not Temps | Climate actions | Actions use `set_preset_mode` (eco/comfort/boost/frost) |
+      | 7 | Hysteresis Prevention | Trigger definitions | All numeric triggers have `for:` conditions |
+      | 8 | Seasonal Awareness | Climate automations | Different logic for winter vs summer vs spring/fall |
+      | 9 | Common Area Checks | Living room automations | Living room uses shared `downstairs_doors` sensor |
+      | 10 | Non-Overlapping Windows | Automation times | No two automations active in same time slot |
+      | 11 | Intent Tracking | Helpers list | `input_boolean.hvac_*_should_be_on` updated by automations |
+      | 12 | Consolidate with choose: | Bedrooms automations | Children's rooms use single automation with `choose:` |
+      | 13 | Configurable Thresholds | Helpers > input_number | Temperature thresholds adjustable without editing YAML |
+      | 14 | Versatile Thermostat | Climate entities | Entity IDs end with `_versatile_thermostat` or `_s_room` |
+      | 15 | Use Aliases | Every condition/action | All conditions and actions have `alias:` labels |
