@@ -271,6 +271,180 @@ ELSE
 
 ---
 
+## 📋 QUICK REFERENCE: Check Active Principles Now
+
+**Open Home Assistant and check these values to see which principles are active:**
+
+### Check Season (Principle #8)
+```
+Settings > Devices & Services > Helpers > input_select.climate_season
+Current: winter / summer / autumn / spring
+This determines: Heating vs Cooling vs Minimal strategy
+```
+
+### Check Current Time (Principle #10)
+```
+Your system time right now
+This determines: Which time window automations should be running
+Examples:
+  05:30-09:00 → Living Room preheat active
+  18:00-06:00 → Night heating active
+  09:00-20:00 → Daytime cooling window
+```
+
+### Check Current Temperature (Principle #7)
+```
+Master Bedroom:
+  Developer Tools > States > sensor.ble_temperature_masterbed_temp_humidity_sensor
+  If 16-17.2°C → Hysteresis zone (heating paused but may resume)
+  If <16°C → Heating active (Principle #7 preventing cycling)
+
+Living Room:
+  Developer Tools > States > sensor.living_room_temperature_offset
+  If <19°C → May trigger preheat (morning window)
+  If 17.5-19°C → Hysteresis zone
+```
+
+### Check Door Sensors (Principle #4)
+```
+Master Bedroom Door:
+  Developer Tools > States > binary_sensor.master_bedroom_door_sensor_opening
+  If "on" → ALL automations blocked (Principle #4 takes priority)
+  If "off" → Automations can run
+
+Living Room Doors (Principle #9):
+  Developer Tools > States > binary_sensor.downstairs_doors
+  If "on" → No cooling in living room
+  If "off" → Cooling available
+```
+
+### Check Manual Overrides (Principle #2)
+```
+Master Bedroom Override:
+  Settings > Devices & Services > Helpers > input_boolean.climate_manual_control_master
+  If "on" 🔴 → Automations paused (4 hour timer)
+  If "off" ✅ → Automations running
+
+Living Room Override:
+  Settings > Devices & Services > Helpers > input_boolean.climate_manual_control_living
+  If "on" 🔴 → Automations paused
+  If "off" ✅ → Automations running
+```
+
+### Check Master On/Off Switches (Principle #3)
+```
+Master Bedroom Switch:
+  Settings > Devices & Services > Helpers > input_boolean.hvac_master_bedroom_should_be_on
+  If "on" ✅ → Master bedroom automations CAN run
+  If "off" 🔴 → ALL master bedroom automations blocked
+
+Living Room Switch:
+  Settings > Devices & Services > Helpers > input_boolean.hvac_living_room_should_be_on
+  If "on" ✅ → Living room automations CAN run
+  If "off" 🔴 → ALL living room automations blocked
+```
+
+### Check Hot Day Flags (Principle #8)
+```
+Summer hot day detection:
+  Settings > Devices & Services > Helpers > input_boolean.hot_today_flag
+  If "on" 🔥 → Aggressive cooling + blinds management active
+
+  Settings > Devices & Services > Helpers > input_boolean.super_hot_today
+  If "on" 🔥🔥 → MAX cooling + blinds closed all day
+
+These are set at 04:30 AM daily based on forecast
+```
+
+### Check Climate Entity State (Principle #14)
+```
+Which entity is being used:
+  Developer Tools > States > climate.masterbed_versatile_thermostat
+  Should show: hvac_mode, preset_mode, temperature, fan_mode
+
+  ✅ climate.masterbed_versatile_thermostat (Versatile TH)
+  ✅ climate.masterbed_ac (exists but NOT used in automations)
+
+Verify automations use ONLY Versatile Thermostat entities
+```
+
+### Check Last Automation Run (Principle #15 - Aliases help here)
+```
+Automation traces (show which automation triggered last):
+  Settings > Automations & Scenes > Select automation
+  Click "Trace" tab at bottom
+
+  Look for: Condition that passed = which principles active
+  Look for: Alias names show clear intent
+
+  Example:
+  ✅ "Living Room HVAC Master On" passed
+  ✅ "Manual Control Off" passed
+  ❌ "Door Closed" FAILED (door was open)
+  → This tells you Principle #4 blocked the automation
+```
+
+---
+
+## 🎯 PRINCIPLE PRIORITY HIERARCHY
+
+**When multiple principles conflict, THIS is the order (highest to lowest):**
+
+```
+1️⃣  PRINCIPLE #4 - DOOR CHECKS (SAFETY)
+    └─ If ANY door open → ALL automations STOP
+    └─ Non-negotiable (safety + signals)
+
+2️⃣  PRINCIPLE #2 - MANUAL OVERRIDES (USER CHOICE)
+    └─ If user manually adjusted → Automations pause 4h
+    └─ Respects user intent
+
+3️⃣  PRINCIPLE #3 - MASTER ON/OFF SWITCH (MASTER CONTROL)
+    └─ If hvac_*_should_be_on = off → Room disabled
+    └─ Centralized control override
+
+4️⃣  PRINCIPLE #8 - SEASONAL AWARENESS (STRATEGY)
+    └─ If winter → Use heating strategy
+    └─ If summer → Use cooling strategy
+    └─ Different automations active per season
+
+5️⃣  PRINCIPLE #1 - SINGLE SOURCE OF TRUTH (OWNERSHIP)
+    └─ Only primary automation runs in time window
+    └─ Prevents conflicts
+
+6️⃣  PRINCIPLE #10 - NON-OVERLAPPING TIME WINDOWS (CLARITY)
+    └─ Each room has exclusive time slots
+    └─ Clear when each automation should run
+
+7️⃣  PRINCIPLE #7 - HYSTERESIS (STABILITY)
+    └─ Prevents rapid cycling
+    └─ Requires sustained condition before acting
+
+8️⃣  PRINCIPLE #9 - COMMON AREA DOORS (EFFICIENCY)
+    └─ Don't cool whole house if doors open
+    └─ Energy optimization
+
+9️⃣  PRINCIPLE #13 - CONFIGURABLE THRESHOLDS (TUNING)
+    └─ Temperature triggers (configurable)
+    └─ Can be adjusted without code changes
+
+🔟 ALL OTHER PRINCIPLES
+    └─ Principles #5, #6, #11, #12, #14, #15
+    └─ Enable/support the above principles
+```
+
+**Use this to understand why an automation did/didn't run!**
+
+If something unexpected happened:
+1. Check if door open → Principle #4 blocked it
+2. Check if manual override active → Principle #2 paused it
+3. Check if master switch off → Principle #3 disabled it
+4. Check if wrong season → Principle #8 using different logic
+5. Check if outside time window → Principle #10 not active
+... and so on
+
+---
+
 ## HEATING SYSTEM DIAGNOSIS
 
 ### Winter Strategy (June-August in Melbourne)
