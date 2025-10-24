@@ -41,6 +41,11 @@
       - input_number.evening_cooling_triggers_today
       - input_number.frost_protection_triggers_today
       - input_number.afternoon_recheck_triggers_today
+      - input_number.master_bedroom_cooling_night_triggers_today
+      - input_number.children_cooling_night_triggers_today
+      - input_number.master_bedroom_blinds_night_triggers_today
+      - input_number.master_bedroom_blinds_morning_triggers_today
+      - input_number.climate_flags_mark_hot_day_triggers_today
     data:
       value: 0
   mode: single
@@ -797,6 +802,16 @@
     state: 'on'
     alias: Master Bedroom HVAC Master On
   actions:
+  # Track automation trigger
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.last_trigger_master_bedroom_cooling_night
+    data:
+      datetime: "{{ now().isoformat() }}"
+  - action: input_number.increment
+    target:
+      entity_id: input_number.master_bedroom_cooling_night_triggers_today
+  # End tracking
   - metadata: {}
     data:
       preset_mode: boost
@@ -1110,6 +1125,16 @@
     trigger: time
   conditions: []
   actions:
+  # Track automation trigger
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.last_trigger_climate_flags_mark_hot_day
+    data:
+      datetime: "{{ now().isoformat() }}"
+  - action: input_number.increment
+    target:
+      entity_id: input_number.climate_flags_mark_hot_day_triggers_today
+  # End tracking
   - choose:
     - conditions:
       - condition: numeric_state
