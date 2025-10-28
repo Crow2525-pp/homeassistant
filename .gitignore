@@ -17,6 +17,7 @@
 !templates.yaml
 !media_player.yaml
 !mqtt.yaml
+!automations/*.yaml
 
 # Dashboard
 !.storage/lovelace
@@ -34,3 +35,7 @@
 !esphome/
 !esphome/**
 esphome/secrets.yaml
+!config/
+!config/**
+!docs/
+!docs/**

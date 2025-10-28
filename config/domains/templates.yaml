@@ -1,0 +1,1483 @@
+- binary_sensor:
+    - name: Garage Door Alert Active
+      state: "{{ is_state('cover.smart_garage_door_garage', 'open')}}"
+
+- binary_sensor:
+    ## Down alerts have 250 second delay built in before activating
+    - name: Network Device Down Alert Active
+      state: "{{ (is_state('group.network_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.network_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.network_device_down_notify', 'on') }}"
+    - name: WAN Down Alert Active
+      state: "{{ (is_state('group.wan_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.wan_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.wan_down_notify', 'on') }}"
+
+- binary_sensor:
+    ## Internet Connection Status based on TX and RX
+    - name: Internet Connection
+      state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float > 0) or (states('sensor.ucg_ultra_port_5_rx') | float > 0)) }}"
+
+    ## WAN Down Alert Active with 250-second delay
+    - name: WAN Down Alert Active
+      state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float == 0) and (states('sensor.ucg_ultra_port_5_rx') | float == 0) and ((as_timestamp(now()) - as_timestamp(states.sensor.ucg_ultra_port_5_tx.last_changed)) | int(0) > 250)) }}"
+
+- binary_sensor:
+    - name: "Holiday Season"
+      unique_id: holiday_season
+      state: "{{ now().month == 11 or now().month == 12 }}"
+
+    - name: "Someone Home"
+      unique_id: someone_home
+      state: "{{ states('input_select.occupancy') in ['Home', 'Sleeping', 'Guest'] }}"
+      icon: "mdi:home-account"
+
+    - name: "External Door Open at Night"
+      unique_id: external_door_open_at_night
+      state: >
+        {% set is_night = states('sun.sun') == 'below_horizon' %}
+        {% set doors_open = is_state('binary_sensor.front_door_sensor_opening', 'on')
+          or is_state('binary_sensor.side_garage_door_sensor_magnet_opening', 'on')
+          or is_state('binary_sensor.balcony_door_sensor_magnet_opening_2', 'on')
+          or is_state('binary_sensor.living_room_door_sensor_opening', 'on')
+          or is_state('binary_sensor.interior_garage_door_sensor_magnet_opening', 'on') %}
+        {{ is_night and doors_open }}
+      icon: "mdi:door-open"
+
+- sensor:
+    - name: "Relevant Weather Warnings Count"
+      unique_id: relevant_weather_warnings_count
+      state: >
+        {% set warnings = state_attr('sensor.braybrook_warnings', 'warnings') %}
+        {% if warnings %}
+          {% set relevant = warnings | selectattr('title', 'defined') | rejectattr('title', 'search', 'sheep|marine|coastal|grazier', ignorecase=True) | list %}
+          {{ relevant | length }}
+        {% else %}
+          0
+        {% endif %}
+      icon: "mdi:weather-lightning"
+
+    - name: "Maintenance Dates Summary"
+      state: >
+        {% set items = states.input_datetime
+          | selectattr('attributes.label', 'defined')
+          | selectattr('attributes.label', 'equalto', 'Maintenance')
+          | map(attribute='entity_id')
+          | list %}
+        {% for e in items %}
+        - {{ state_attr(e, 'friendly_name') }}: {{ states(e) }}
+        {% endfor %}
+
+- sensor:
+    - name: "Washing Machine Estimated Remaining"
+      unique_id: washing_machine_estimated_remaining
+      state: >
+        {% set cycle_time = 55 %}
+        {% if is_state('input_boolean.washing_machine_on', 'on') and states.input_boolean.washing_machine_on.last_changed %}
+          {% set last_changed = as_timestamp(states.input_boolean.washing_machine_on.last_changed) %}
+          {% if last_changed is not none %}
+            {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
+            {% set remaining = cycle_time - elapsed %}
+            {{ [remaining | round(0), 0] | max }} 
+          {% else %}
+            0
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+      attributes:
+        friendly_name: "Washing Machine Estimated Remaining"
+        unit_of_measurement: "min"
+      icon: mdi:timer
+
+    - name: "Dryer Estimated Remaining"
+      unique_id: dryer_estimated_remaining
+      state: >
+        {% set cycle_time = 120 %}
+        {% if is_state('input_boolean.dryer_on', 'on') and states.input_boolean.dryer_on.last_changed %}
+          {% set last_changed = as_timestamp(states.input_boolean.dryer_on.last_changed) %}
+          {% if last_changed is not none %}
+            {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
+            {% set remaining = cycle_time - elapsed %}
+            {{ [remaining | round(0), 0] | max }}
+          {% else %}
+            0
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+      attributes:
+        friendly_name: "Dryer Estimated Remaining"
+        unit_of_measurement: "min"
+      icon: mdi:timer
+
+    - name: "Dishwasher Estimated Remaining"
+      unique_id: dishwasher_estimated_remaining
+      state: >
+        {% set cycle_time = 150 %}
+        {% if is_state('input_boolean.dishwasher_on', 'on') and states.input_boolean.dishwasher_on.last_changed %}
+          {% set last_changed = as_timestamp(states.input_boolean.dishwasher_on.last_changed) %}
+          {% if last_changed is not none %}
+            {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
+            {% set remaining = cycle_time - elapsed %}
+            {{ [remaining | round(0), 0] | max }}
+          {% else %}
+            0
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+      attributes:
+        friendly_name: "Dishwasher Estimated Remaining"
+        unit_of_measurement: "min"
+      icon: mdi:timer
+
+    - name: "Living Room Temperature (Offset)"
+      unique_id: livingroom_irblaster_temperature_offset
+      unit_of_measurement: "°C"
+      state: "{{ (states('sensor.livingroom_irblaster_temperature') | float + 1.7) | round(1) }}"
+
+- trigger:
+    - trigger: time_pattern
+      hours: /1
+  action:
+    - action: weather.get_forecasts
+      data:
+        type: hourly
+      target:
+        entity_id: weather.home
+      response_variable: hourly
+
+- trigger:
+    - platform: state
+      entity_id:
+        - sensor.ble_temperature_masterbed_temp_humidity_sensor
+        - sensor.ble_humidity_masterbed_temp_humidity_sensor
+        - sensor.ble_battery_masterbed_temp_humidity_sensor
+  sensor:
+    - name: "Masterbed Temp/Humidity Sensor Last Seen"
+      state: "{{ now().isoformat() }}"
+
+- trigger:
+    - platform: state
+      entity_id:
+        - sensor.ble_temperature_kitchen_temp_humidity_sensor
+        - sensor.ble_humidity_kitchen_temp_humidity_sensor
+        - sensor.ble_voltage_kitchen_temp_humidity_sensor
+        - sensor.ble_rssi_kitchen_temp_humidity_sensor
+  sensor:
+    - name: "Kitchen Temp/Humidity Sensor Last Seen"
+      state: "{{ now().isoformat() }}"
+
+- binary_sensor:
+    # Solar excess - when exporting more than 1kW to grid
+    - name: "Solar Excess Available"
+      unique_id: solar_excess_available
+      state: >
+        {% set net_grid = states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) %}
+        {{ net_grid < -1 }}
+      icon: "mdi:solar-power-variant"
+      attributes:
+        excess_power: >
+          {% set net_grid = states('sensor.gosungrow_virtual_1205796_7_1_1_p8018') | float(0) %}
+          {{ (net_grid * -1) | round(2) if net_grid < 0 else 0 }}
+
+- sensor:
+    # Smart appliance recommendation based on solar, season, and conditions
+    - name: "Appliance Recommendation"
+      unique_id: appliance_recommendation
+      state: >
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+        {% set month = now().month %}
+        {% set is_winter = month in [5, 6, 7, 8, 9, 10] %}
+        {% set is_summer = month in [11, 12, 1, 2, 3] %}
+
+        {% if solar_excess %}
+          {% if is_winter %}
+            heating
+          {% elif is_summer %}
+            cooling
+          {% else %}
+            laundry
+          {% endif %}
+        {% else %}
+          none
+        {% endif %}
+      icon: >
+        {% if is_state('sensor.appliance_recommendation', 'heating') %}
+          mdi:fire
+        {% elif is_state('sensor.appliance_recommendation', 'cooling') %}
+          mdi:snowflake
+        {% elif is_state('sensor.appliance_recommendation', 'laundry') %}
+          mdi:washing-machine
+        {% else %}
+          mdi:lightbulb-off
+        {% endif %}
+      attributes:
+        reason: >
+          {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+          {% set excess = state_attr('binary_sensor.solar_excess_available', 'excess_power') | float(0) %}
+          {% if solar_excess %}
+            Excess solar: {{ excess }}kW available
+          {% else %}
+            No excess solar power
+          {% endif %}
+
+- sensor:
+    # Room climate recommendations
+    - name: "Living Room Climate Suggestion"
+      unique_id: living_room_climate_suggestion
+      state: >
+        {% set temp = states('sensor.living_room_temperature_offset') | float(0) %}
+        {% set outside_temp = state_attr('weather.braybrook', 'temperature') | float(20) %}
+        {% set month = now().month %}
+        {% set is_winter = month in [5, 6, 7, 8, 9, 10] %}
+        {% set is_summer = month in [11, 12, 1, 2, 3] %}
+        {% set is_shoulder = month in [4] %}
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+
+        {% if is_winter and temp < 18 and solar_excess %}
+          heat_now
+        {% elif is_summer and temp > 26 and solar_excess %}
+          cool_now
+        {% elif is_shoulder and temp < 19 and solar_excess %}
+          heat_now
+        {% elif is_shoulder and temp > 25 and solar_excess %}
+          cool_now
+        {% elif is_winter and temp < 16 %}
+          heat_needed
+        {% elif is_summer and temp > 28 %}
+          cool_needed
+        {% elif is_shoulder and temp < 17 %}
+          heat_needed
+        {% elif is_shoulder and temp > 27 %}
+          cool_needed
+        {% else %}
+          comfortable
+        {% endif %}
+      icon: "mdi:home-thermometer"
+      attributes:
+        current_temp: "{{ states('sensor.living_room_temperature_offset') }}"
+        outside_temp: "{{ state_attr('weather.braybrook', 'temperature') }}"
+        message: >
+          {% set temp = states('sensor.living_room_temperature_offset') | float(0) %}
+          {% set state = states('sensor.living_room_climate_suggestion') %}
+          {% if state == 'heat_now' %}
+            🔥 Good time to heat! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'cool_now' %}
+            ❄️ Good time to cool! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'heat_needed' %}
+            Room is cold ({{ temp }}°C) but no excess solar
+          {% elif state == 'cool_needed' %}
+            Room is warm ({{ temp }}°C) but no excess solar
+          {% else %}
+            Room temperature is comfortable ({{ temp }}°C)
+          {% endif %}
+
+    - name: "Master Bedroom Climate Suggestion"
+      unique_id: master_bedroom_climate_suggestion
+      state: >
+        {% set temp = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+        {% set month = now().month %}
+        {% set is_winter = month in [5, 6, 7, 8, 9, 10] %}
+        {% set is_summer = month in [11, 12, 1, 2, 3] %}
+        {% set is_shoulder = month in [4] %}
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+
+        {% if is_winter and temp < 18 and solar_excess %}
+          heat_now
+        {% elif is_summer and temp > 26 and solar_excess %}
+          cool_now
+        {% elif is_shoulder and temp < 19 and solar_excess %}
+          heat_now
+        {% elif is_shoulder and temp > 25 and solar_excess %}
+          cool_now
+        {% elif is_winter and temp < 16 %}
+          heat_needed
+        {% elif is_summer and temp > 28 %}
+          cool_needed
+        {% elif is_shoulder and temp < 17 %}
+          heat_needed
+        {% elif is_shoulder and temp > 27 %}
+          cool_needed
+        {% else %}
+          comfortable
+        {% endif %}
+      icon: "mdi:bed-thermometer"
+      attributes:
+        current_temp: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        message: >
+          {% set temp = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+          {% set state = states('sensor.master_bedroom_climate_suggestion') %}
+          {% if state == 'heat_now' %}
+            🔥 Good time to heat! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'cool_now' %}
+            ❄️ Good time to cool! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'heat_needed' %}
+            Room is cold ({{ temp }}°C) but no excess solar
+          {% elif state == 'cool_needed' %}
+            Room is warm ({{ temp }}°C) but no excess solar
+          {% else %}
+            Room temperature is comfortable ({{ temp }}°C)
+          {% endif %}
+
+    - name: "Henry's Room Climate Suggestion"
+      unique_id: henrys_room_climate_suggestion
+      state: >
+        {% set temp = states('sensor.study_esp32_henrysroom_temperature') | float(0) %}
+        {% set month = now().month %}
+        {% set is_winter = month in [5, 6, 7, 8, 9, 10] %}
+        {% set is_summer = month in [11, 12, 1, 2, 3] %}
+        {% set is_shoulder = month in [4] %}
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+
+        {% if is_winter and temp < 18 and solar_excess %}
+          heat_now
+        {% elif is_summer and temp > 26 and solar_excess %}
+          cool_now
+        {% elif is_shoulder and temp < 19 and solar_excess %}
+          heat_now
+        {% elif is_shoulder and temp > 25 and solar_excess %}
+          cool_now
+        {% elif is_winter and temp < 16 %}
+          heat_needed
+        {% elif is_summer and temp > 28 %}
+          cool_needed
+        {% elif is_shoulder and temp < 17 %}
+          heat_needed
+        {% elif is_shoulder and temp > 27 %}
+          cool_needed
+        {% else %}
+          comfortable
+        {% endif %}
+      icon: "mdi:thermometer"
+      attributes:
+        current_temp: "{{ states('sensor.study_esp32_henrysroom_temperature') }}"
+        message: >
+          {% set temp = states('sensor.study_esp32_henrysroom_temperature') | float(0) %}
+          {% set state = states('sensor.henrys_room_climate_suggestion') %}
+          {% if state == 'heat_now' %}
+            🔥 Good time to heat! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'cool_now' %}
+            ❄️ Good time to cool! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'heat_needed' %}
+            Room is cold ({{ temp }}°C) but no excess solar
+          {% elif state == 'cool_needed' %}
+            Room is warm ({{ temp }}°C) but no excess solar
+          {% else %}
+            Room temperature is comfortable ({{ temp }}°C)
+          {% endif %}
+
+    - name: "Otto's Room Climate Suggestion"
+      unique_id: ottos_room_climate_suggestion
+      state: >
+        {% set temp = states('sensor.study_esp32_ottosroom_temperature') | float(0) %}
+        {% set month = now().month %}
+        {% set is_winter = month in [5, 6, 7, 8, 9, 10] %}
+        {% set is_summer = month in [11, 12, 1, 2, 3] %}
+        {% set is_shoulder = month in [4] %}
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+
+        {% if is_winter and temp < 18 and solar_excess %}
+          heat_now
+        {% elif is_summer and temp > 26 and solar_excess %}
+          cool_now
+        {% elif is_shoulder and temp < 19 and solar_excess %}
+          heat_now
+        {% elif is_shoulder and temp > 25 and solar_excess %}
+          cool_now
+        {% elif is_winter and temp < 16 %}
+          heat_needed
+        {% elif is_summer and temp > 28 %}
+          cool_needed
+        {% elif is_shoulder and temp < 17 %}
+          heat_needed
+        {% elif is_shoulder and temp > 27 %}
+          cool_needed
+        {% else %}
+          comfortable
+        {% endif %}
+      icon: "mdi:thermometer"
+      attributes:
+        current_temp: "{{ states('sensor.study_esp32_ottosroom_temperature') }}"
+        message: >
+          {% set temp = states('sensor.study_esp32_ottosroom_temperature') | float(0) %}
+          {% set state = states('sensor.ottos_room_climate_suggestion') %}
+          {% if state == 'heat_now' %}
+            🔥 Good time to heat! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'cool_now' %}
+            ❄️ Good time to cool! Excess solar available and room is {{ temp }}°C
+          {% elif state == 'heat_needed' %}
+            Room is cold ({{ temp }}°C) but no excess solar
+          {% elif state == 'cool_needed' %}
+            Room is warm ({{ temp }}°C) but no excess solar
+          {% else %}
+            Room temperature is comfortable ({{ temp }}°C)
+          {% endif %}
+
+- binary_sensor:
+    # Appliance suggestions based on solar excess
+    - name: "Dishwasher Suggestion"
+      unique_id: dishwasher_suggestion
+      state: >
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+        {% set dishwasher_on = is_state('input_boolean.dishwasher_on', 'on') %}
+        {{ solar_excess and not dishwasher_on }}
+      icon: "mdi:dishwasher"
+      attributes:
+        message: >
+          {% if is_state('binary_sensor.dishwasher_suggestion', 'on') %}
+            Good time to run dishwasher with excess solar power!
+          {% else %}
+            {% if is_state('input_boolean.dishwasher_on', 'on') %}
+              Dishwasher already running
+            {% else %}
+              Waiting for excess solar power
+            {% endif %}
+          {% endif %}
+
+    - name: "Dryer Suggestion"
+      unique_id: dryer_suggestion
+      state: >
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+        {% set dryer_on = is_state('input_boolean.dryer_on', 'on') %}
+        {{ solar_excess and not dryer_on }}
+      icon: "mdi:tumble-dryer"
+      attributes:
+        message: >
+          {% if is_state('binary_sensor.dryer_suggestion', 'on') %}
+            Good time to run dryer with excess solar power!
+          {% else %}
+            {% if is_state('input_boolean.dryer_on', 'on') %}
+              Dryer already running
+            {% else %}
+              Waiting for excess solar power
+            {% endif %}
+          {% endif %}
+
+    - name: "Washing Machine Suggestion"
+      unique_id: washing_machine_suggestion
+      state: >
+        {% set solar_excess = is_state('binary_sensor.solar_excess_available', 'on') %}
+        {% set washing_machine_on = is_state('input_boolean.washing_machine_on', 'on') %}
+        {{ solar_excess and not washing_machine_on }}
+      icon: "mdi:washing-machine"
+      attributes:
+        message: >
+          {% if is_state('binary_sensor.washing_machine_suggestion', 'on') %}
+            Good time to run washing machine with excess solar power!
+          {% else %}
+            {% if is_state('input_boolean.washing_machine_on', 'on') %}
+              Washing machine already running
+            {% else %}
+              Waiting for excess solar power
+            {% endif %}
+          {% endif %}
+
+- sensor:
+    # Room climate monitoring - compare to master bedroom baseline
+    - name: "Living Room Temp Diff from Master"
+      unique_id: living_room_temp_diff_from_master
+      unit_of_measurement: "°C"
+      state: >
+        {% set master = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+        {% set living = states('sensor.living_room_temperature_offset') | float(0) %}
+        {{ (living - master) | round(1) }}
+      icon: "mdi:thermometer-chevron-up"
+      attributes:
+        master_temp: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        room_temp: "{{ states('sensor.living_room_temperature_offset') }}"
+        status: >
+          {% set diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% if diff > 3 %}
+            significant
+          {% elif diff > 2 %}
+            moderate
+          {% else %}
+            normal
+          {% endif %}
+
+    - name: "Lucas Room Temp Diff from Master"
+      unique_id: lucas_room_temp_diff_from_master
+      unit_of_measurement: "°C"
+      state: >
+        {% set master = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+        {% set lucas = states('sensor.study_esp32_henrysroom_temperature') | float(0) %}
+        {{ (lucas - master) | round(1) }}
+      icon: "mdi:thermometer-chevron-up"
+      attributes:
+        master_temp: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        room_temp: "{{ states('sensor.study_esp32_henrysroom_temperature') }}"
+        status: >
+          {% set diff = (states('sensor.study_esp32_henrysroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% if diff > 3 %}
+            significant
+          {% elif diff > 2 %}
+            moderate
+          {% else %}
+            normal
+          {% endif %}
+
+    - name: "Otto Room Temp Diff from Master"
+      unique_id: otto_room_temp_diff_from_master
+      unit_of_measurement: "°C"
+      state: >
+        {% set master = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+        {% set otto = states('sensor.study_esp32_ottosroom_temperature') | float(0) %}
+        {{ (otto - master) | round(1) }}
+      icon: "mdi:thermometer-chevron-up"
+      attributes:
+        master_temp: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        room_temp: "{{ states('sensor.study_esp32_ottosroom_temperature') }}"
+        status: >
+          {% set diff = (states('sensor.study_esp32_ottosroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% if diff > 3 %}
+            significant
+          {% elif diff > 2 %}
+            moderate
+          {% else %}
+            normal
+          {% endif %}
+
+    - name: "Living Room Humidity Diff from Master"
+      unique_id: living_room_humidity_diff_from_master
+      unit_of_measurement: "%"
+      state: >
+        {% set master = states('sensor.humiditysensor_humidity') | float(0) %}
+        {% set living = states('sensor.livingroom_irblaster_humidity') | float(0) %}
+        {{ (living - master) | round(1) }}
+      icon: "mdi:water-percent"
+      attributes:
+        master_humidity: "{{ states('sensor.humiditysensor_humidity') }}"
+        room_humidity: "{{ states('sensor.livingroom_irblaster_humidity') }}"
+        status: >
+          {% set diff = (states('sensor.livingroom_irblaster_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% if diff > 15 %}
+            significant
+          {% elif diff > 10 %}
+            moderate
+          {% else %}
+            normal
+          {% endif %}
+
+    - name: "Lucas Room Humidity Diff from Master"
+      unique_id: lucas_room_humidity_diff_from_master
+      unit_of_measurement: "%"
+      state: >
+        {% set master = states('sensor.humiditysensor_humidity') | float(0) %}
+        {% set lucas = states('sensor.study_esp32_henrysroom_humidity') | float(0) %}
+        {{ (lucas - master) | round(1) }}
+      icon: "mdi:water-percent"
+      attributes:
+        master_humidity: "{{ states('sensor.humiditysensor_humidity') }}"
+        room_humidity: "{{ states('sensor.study_esp32_henrysroom_humidity') }}"
+        status: >
+          {% set diff = (states('sensor.study_esp32_henrysroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% if diff > 15 %}
+            significant
+          {% elif diff > 10 %}
+            moderate
+          {% else %}
+            normal
+          {% endif %}
+
+    - name: "Otto Room Humidity Diff from Master"
+      unique_id: otto_room_humidity_diff_from_master
+      unit_of_measurement: "%"
+      state: >
+        {% set master = states('sensor.humiditysensor_humidity') | float(0) %}
+        {% set otto = states('sensor.study_esp32_ottosroom_humidity') | float(0) %}
+        {{ (otto - master) | round(1) }}
+      icon: "mdi:water-percent"
+      attributes:
+        master_humidity: "{{ states('sensor.humiditysensor_humidity') }}"
+        room_humidity: "{{ states('sensor.study_esp32_ottosroom_humidity') }}"
+        status: >
+          {% set diff = (states('sensor.study_esp32_ottosroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% if diff > 15 %}
+            significant
+          {% elif diff > 10 %}
+            moderate
+          {% else %}
+            normal
+          {% endif %}
+
+- binary_sensor:
+    # Quick action button helpers
+    - name: "Show Good Morning Button"
+      unique_id: show_good_morning_button
+      state: >
+        {{ now().hour >= 6 and now().hour < 11 }}
+      icon: mdi:weather-sunny
+
+    - name: "Show Good Night Button"
+      unique_id: show_good_night_button
+      state: >
+        {{ now().hour >= 20 or now().hour < 6 }}
+      icon: mdi:weather-night
+
+    - name: "Show Water Plants Button"
+      unique_id: show_water_plants_button
+      state: >
+        {{ states('sensor.essendon_airport_max_temp') | float(0) > 20 }}
+      icon: mdi:watering-can
+      attributes:
+        forecast_day: >
+          {% set temp_time = state_attr('sensor.essendon_airport_max_temp', 'forecast_time') %}
+          {% if temp_time %}
+            {% set forecast_date = as_timestamp(temp_time) | timestamp_custom('%Y-%m-%d') %}
+            {% set today = now().strftime('%Y-%m-%d') %}
+            {% set tomorrow = (now() + timedelta(days=1)).strftime('%Y-%m-%d') %}
+            {% if forecast_date == today %}
+              today
+            {% elif forecast_date == tomorrow %}
+              tomorrow
+            {% else %}
+              {{ forecast_date }}
+            {% endif %}
+          {% else %}
+            today
+          {% endif %}
+
+    - name: "Show Arriving Home Button"
+      unique_id: show_arriving_home_button
+      state: >
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% set last_changed = as_timestamp(states.zone.home.last_changed) %}
+        {% set now = as_timestamp(now()) %}
+        {% set minutes_since_change = (now - last_changed) / 60 %}
+        {{ zone_state > 0 and minutes_since_change <= 30 }}
+      icon: mdi:home-import-outline
+
+    - name: "Show Leaving Home Button"
+      unique_id: show_leaving_home_button
+      state: >
+        {% set zone_state = states('zone.home') | int(0) %}
+        {{ zone_state == 0 }}
+      icon: mdi:home-export-outline
+
+    - name: "Show Naptime Button"
+      unique_id: show_naptime_button
+      state: >
+        {% set current_hour = now().hour %}
+        {% set current_minute = now().minute %}
+        {% set current_time_minutes = (current_hour * 60) + current_minute %}
+        {% set naptime_start = (12 * 60) + 30 %}
+        {% set naptime_end = 16 * 60 %}
+        {{ current_time_minutes >= naptime_start and current_time_minutes < naptime_end }}
+      icon: mdi:sleep
+
+    # Room climate alert - triggers when any room is significantly different from master
+    - name: "Room Climate Alert"
+      unique_id: room_climate_alert
+      state: >
+        {% set living_temp_diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+        {% set lucas_temp_diff = (states('sensor.study_esp32_henrysroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+        {% set otto_temp_diff = (states('sensor.study_esp32_ottosroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+        {% set living_humid_diff = (states('sensor.livingroom_irblaster_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+        {% set lucas_humid_diff = (states('sensor.study_esp32_henrysroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+        {% set otto_humid_diff = (states('sensor.study_esp32_ottosroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+        {{ living_temp_diff > 3 or lucas_temp_diff > 3 or otto_temp_diff > 3 or living_humid_diff > 15 or lucas_humid_diff > 15 or otto_humid_diff > 15 }}
+      icon: >
+        {% if is_state('binary_sensor.room_climate_alert', 'on') %}
+          mdi:alert-circle
+        {% else %}
+          mdi:check-circle
+        {% endif %}
+      attributes:
+        rooms_with_issues: >
+          {% set issues = namespace(rooms=[]) %}
+          {% set living_temp_diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% set lucas_temp_diff = (states('sensor.study_esp32_henrysroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% set otto_temp_diff = (states('sensor.study_esp32_ottosroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% set living_humid_diff = (states('sensor.livingroom_irblaster_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% set lucas_humid_diff = (states('sensor.study_esp32_henrysroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% set otto_humid_diff = (states('sensor.study_esp32_ottosroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% if living_temp_diff > 3 %}{% set issues.rooms = issues.rooms + ['Living Room (Temp)'] %}{% endif %}
+          {% if lucas_temp_diff > 3 %}{% set issues.rooms = issues.rooms + ['Lucas Room (Temp)'] %}{% endif %}
+          {% if otto_temp_diff > 3 %}{% set issues.rooms = issues.rooms + ['Otto Room (Temp)'] %}{% endif %}
+          {% if living_humid_diff > 15 %}{% set issues.rooms = issues.rooms + ['Living Room (Humidity)'] %}{% endif %}
+          {% if lucas_humid_diff > 15 %}{% set issues.rooms = issues.rooms + ['Lucas Room (Humidity)'] %}{% endif %}
+          {% if otto_humid_diff > 15 %}{% set issues.rooms = issues.rooms + ['Otto Room (Humidity)'] %}{% endif %}
+          {{ issues.rooms | join(', ') if issues.rooms | length > 0 else 'None' }}
+
+- sensor:
+    - name: "Hot Weather Alert"
+      unique_id: hot_weather_alert
+      state: >
+        {% set max_temp = states('sensor.essendon_airport_max_temp') | float(0) %}
+        {% if max_temp >= 35 %}
+          superhot
+        {% elif max_temp >= 28 %}
+          hot
+        {% elif max_temp >= 24 %}
+          mild
+        {% else %}
+          normal
+        {% endif %}
+      icon: >
+        {% set max_temp = states('sensor.essendon_airport_max_temp') | float(0) %}
+        {% if max_temp >= 35 %}
+          mdi:weather-sunny-alert
+        {% elif max_temp >= 28 %}
+          mdi:weather-sunny
+        {% elif max_temp >= 24 %}
+          mdi:white-balance-sunny
+        {% else %}
+          mdi:thermometer
+        {% endif %}
+      attributes:
+        temperature: "{{ states('sensor.essendon_airport_max_temp') }}"
+        suggestion: >
+          {% set max_temp = states('sensor.essendon_airport_max_temp') | float(0) %}
+          {% if max_temp >= 35 %}
+            Close blinds, run AC early
+          {% elif max_temp >= 28 %}
+            Consider closing blinds during peak sun
+          {% elif max_temp >= 24 %}
+            Pleasant day, open windows
+          {% else %}
+            Enjoy the mild weather
+          {% endif %}
+
+    - name: "Cold Weather Alert"
+      unique_id: cold_weather_alert
+      state: >
+        {% set min_temp = states('sensor.essendon_airport_min_temp') | float(20) %}
+        {% if min_temp <= 0 %}
+          freezing
+        {% elif min_temp <= 5 %}
+          supercold
+        {% elif min_temp <= 10 %}
+          cold
+        {% else %}
+          normal
+        {% endif %}
+      icon: >
+        {% set min_temp = states('sensor.essendon_airport_min_temp') | float(20) %}
+        {% if min_temp <= 0 %}
+          mdi:snowflake-alert
+        {% elif min_temp <= 5 %}
+          mdi:snowflake
+        {% elif min_temp <= 10 %}
+          mdi:thermometer-low
+        {% else %}
+          mdi:thermometer
+        {% endif %}
+      attributes:
+        temperature: "{{ states('sensor.essendon_airport_min_temp') }}"
+        suggestion: >
+          {% set min_temp = states('sensor.essendon_airport_min_temp') | float(20) %}
+          {% if min_temp <= 0 %}
+            Protect pipes, run heating
+          {% elif min_temp <= 5 %}
+            Very cold morning, dress warmly
+          {% elif min_temp <= 10 %}
+            Cool morning, layer up
+          {% else %}
+            Mild temperatures expected
+          {% endif %}
+
+    - name: "Rain Alert"
+      unique_id: rain_alert
+      state: >
+        {% set weather_condition = states('weather.braybrook') %}
+        {% set forecast = state_attr('weather.braybrook', 'forecast') %}
+        {% set is_rainy = weather_condition in ['rainy', 'pouring', 'lightning-rainy'] %}
+        {% if is_rainy %}
+          {% if weather_condition == 'pouring' %}
+            heavy
+          {% else %}
+            rainy
+          {% endif %}
+        {% elif forecast and forecast|length > 0 %}
+          {% set next_condition = forecast[0].condition %}
+          {% if next_condition in ['rainy', 'pouring', 'lightning-rainy'] %}
+            soon
+          {% else %}
+            normal
+          {% endif %}
+        {% else %}
+          normal
+        {% endif %}
+      icon: >
+        {% set weather_condition = states('weather.braybrook') %}
+        {% set forecast = state_attr('weather.braybrook', 'forecast') %}
+        {% set next_condition = forecast[0].condition if forecast and forecast|length > 0 else None %}
+        {% if weather_condition in ['rainy', 'pouring', 'lightning-rainy'] %}
+          {% set state_val = 'heavy' if weather_condition == 'pouring' else 'rainy' %}
+        {% elif next_condition in ['rainy', 'pouring', 'lightning-rainy'] %}
+          {% set state_val = 'soon' %}
+        {% else %}
+          {% set state_val = 'normal' %}
+        {% endif %}
+        {% if state_val == 'heavy' %}
+          mdi:weather-pouring
+        {% elif state_val == 'rainy' %}
+          mdi:weather-rainy
+        {% elif state_val == 'soon' %}
+          mdi:weather-partly-rainy
+        {% else %}
+          mdi:weather-cloudy
+        {% endif %}
+      attributes:
+        condition: "{{ states('weather.braybrook') }}"
+        suggestion: >
+          {% set weather_condition = states('weather.braybrook') %}
+          {% set forecast = state_attr('weather.braybrook', 'forecast') %}
+          {% set next_condition = forecast[0].condition if forecast and forecast|length > 0 else None %}
+          {% if weather_condition == 'pouring' %}
+            Heavy rain, stay indoors
+          {% elif weather_condition in ['rainy', 'lightning-rainy'] %}
+            Raining, bring an umbrella
+          {% elif next_condition in ['rainy', 'pouring', 'lightning-rainy'] %}
+            Rain expected soon
+          {% else %}
+            No rain expected
+          {% endif %}
+
+- sensor:
+    # Random appliance completion messages
+    - name: "Washing Machine Random Message"
+      unique_id: washing_machine_random_message
+      state: >
+        {% set messages = [
+          "Washing is done! Henry, time to put the washing in the dryer (and maybe recruit Otto as your assistant)!",
+          "Your clothes are squeaky clean! Don't leave them to get wrinkly!",
+          "Ding ding! The washing machine has finished its spin class!",
+          "Fresh and clean! Now don't forget them in there for three days...",
+          "The washing machine says: I've done my job, now you do yours, Phil!",
+          "Clean clothes ready! They won't fold themselves... unfortunately.",
+          "Washing complete! Your socks have survived another round!",
+          "The great wash is complete! Time to transfer before they get that smell.",
+          "Your laundry adventure continues! Next stop: the dryer!",
+          "Congratulations! You've unlocked Achievement: Clean Clothes. Now claim your reward!",
+          "The washing machine is done showing off. Your turn to shine, Henry—and maybe keep Otto and Lucas from diving into the basket.",
+          "Breaking news: Clothes are clean! In other news, they need to be moved.",
+          "Wash cycle complete! The clothes are having a pool party in there.",
+          "Fresh laundry alert! Move fast before they develop their own ecosystem!",
+          "The washing machine has spoken: Thy garments art cleansed!"
+        ] %}
+        {{ messages | random }}
+      icon: "mdi:washing-machine"
+
+    - name: "Dryer Random Message"
+      unique_id: dryer_random_message
+      state: >
+        {% set messages = [
+          "Dryer is done! Phil, please don't leave it there for ages again.",
+          "Toasty warm clothes ready! While they're still warm would be nice...",
+          "The dryer has completed its tumble routine! Don't let them wrinkle!",
+          "Ding! Your clothes are now officially less wet than before!",
+          "Dryer finished! Phil, time to reunite socks with their long-lost partners before Lucas adopts them.",
+          "Hot and fresh! Like pizza, but laundry. And less delicious.",
+          "The great tumble is over! Fold now or face the wrinkle monster!",
+          "Dryer says: I gave you warm fluffy clothes, Steph. Fold them before Otto steals a sock and Lucas climbs inside.",
+          "Congratulations! Your clothes have completed their spa treatment! Henry, tell Lucas to stop dragging them around.",
+          "Breaking: Clothes are dry! Experts recommend actually putting them away this time, Phil.",
+          "The dryer has finished its interpretive dance with your clothes! Otto reviewed it with five stars.",
+          "Attention! Your previously wet items are now significantly less wet!",
+          "Dryer complete! Warning: Clothes may still be capable of wrinkling.",
+          "Fresh from the dryer! Get them while they're hot... literally!",
+          "The circle of laundry continues! Now featuring: the folding chapter!"
+        ] %}
+        {{ messages | random }}
+      icon: "mdi:tumble-dryer"
+
+    - name: "Dishwasher Random Message"
+      unique_id: dishwasher_random_message
+      state: >
+        {% set messages = [
+          "Dishwasher done! Your dishes are cleaner than your browser history!",
+          "Ding! The dish spa treatment is complete!",
+          "Dishwasher finished! Now featuring: clean dishes that need putting away!",
+          "Breaking news: Plates are clean! Still require manual relocation though.",
+          "The great dish wash is complete! Empty me before I get sad.",
+          "Dishwasher says: I cleaned them, you put them away. Deal?",
+          "Your dishes have been sanitized! Unlike your phone screen...",
+          "Wash cycle complete! Your forks are now fork-tastic!",
+          "The dishwasher has finished its mission! Your turn to complete yours!",
+          "Clean dishes ready! They're not going to put themselves away... yet.",
+          "Attention: Dishes are sparkling! Act now while they're still impressive!",
+          "Dishwasher complete! Achievement unlocked: Functional adult!",
+          "Fresh clean dishes! Warning: May cause urge to actually cook something.",
+          "The dish cleaning ceremony is complete! Now for the sacred unloading ritual!",
+          "Congratulations! Your dishes no longer have things growing on them!"
+        ] %}
+        {{ messages | random }}
+      icon: "mdi:dishwasher"
+- sensor:
+    - name: HVAC Door Open Summary
+      unique_id: hvac_door_open_summary
+      state: >-
+        {% set alerts = namespace(items=[]) %}
+        {% set living_doors = [
+          ('Living Room Door', 'binary_sensor.living_room_door_sensor_opening'),
+          ('Front Door', 'binary_sensor.front_door_sensor_opening'),
+          ('Interior Garage Door', 'binary_sensor.interior_garage_door_sensor_magnet_opening')
+        ] %}
+        {% set living = namespace(open=[]) %}
+        {% for name, entity in living_doors %}
+          {% if is_state(entity, 'on') %}
+            {% set living.open = living.open + [name] %}
+          {% endif %}
+        {% endfor %}
+        {% set living_climate = states('climate.living_room_ac') %}
+        {% if living_climate not in ['off', 'unavailable', 'unknown'] and living.open %}
+          {% set mode = state_attr('climate.living_room_ac', 'hvac_action') or 'running' %}
+          {% if mode == 'cooling' %}
+            {% set alerts.items = alerts.items + ['- Living Room AC: ' ~ (living.open | join(', '))] %}
+          {% elif mode == 'heating' %}
+            {% set alerts.items = alerts.items + ['- Living Room Heater: ' ~ (living.open | join(', '))] %}
+          {% else %}
+            {% set alerts.items = alerts.items + ['- Living Room HVAC: ' ~ (living.open | join(', '))] %}
+          {% endif %}
+        {% endif %}
+        {% set master_doors = [
+          ('Master Bedroom Door', 'binary_sensor.master_bedroom_door_sensor_opening'),
+          ('Balcony Door', 'binary_sensor.balcony_door_sensor_magnet_opening_2')
+        ] %}
+        {% set master = namespace(open=[]) %}
+        {% for name, entity in master_doors %}
+          {% if is_state(entity, 'on') %}
+            {% set master.open = master.open + [name] %}
+          {% endif %}
+        {% endfor %}
+        {% set master_climate = states('climate.masterbed_versatile_thermostat') %}
+        {% if master_climate not in ['off', 'unavailable', 'unknown'] and master.open %}
+          {% set mode = state_attr('climate.masterbed_ac', 'hvac_action') or 'running' %}
+          {% if mode == 'cooling' %}
+            {% set alerts.items = alerts.items + ['- Master Bedroom AC: ' ~ (master.open | join(', '))] %}
+          {% elif mode == 'heating' %}
+            {% set alerts.items = alerts.items + ['- Master Bedroom Heater: ' ~ (master.open | join(', '))] %}
+          {% else %}
+            {% set alerts.items = alerts.items + ['- Master Bedroom HVAC: ' ~ (master.open | join(', '))] %}
+          {% endif %}
+        {% endif %}
+        {% set otto_doors = [
+          ("Otto's Room Door", 'binary_sensor.otto_room_door_sensor_opening')
+        ] %}
+        {% set otto = namespace(open=[]) %}
+        {% for name, entity in otto_doors %}
+          {% if is_state(entity, 'on') %}
+            {% set otto.open = otto.open + [name] %}
+          {% endif %}
+        {% endfor %}
+        {% set otto_climate = states('climate.otto_s_room') %}
+        {% if otto_climate not in ['off', 'unavailable', 'unknown'] and otto.open %}
+          {% set mode = state_attr('climate.otto_s_ac', 'hvac_action') or 'running' %}
+          {% if mode == 'cooling' %}
+            {% set alerts.items = alerts.items + ["- Otto's Room AC: " ~ (otto.open | join(', '))] %}
+          {% elif mode == 'heating' %}
+            {% set alerts.items = alerts.items + ["- Otto's Room Heater: " ~ (otto.open | join(', '))] %}
+          {% else %}
+            {% set alerts.items = alerts.items + ["- Otto's Room HVAC: " ~ (otto.open | join(', '))] %}
+          {% endif %}
+        {% endif %}
+        {% set study_doors = [
+          ("Henry's Room Door", 'binary_sensor.henry_door_sensor_magnet_opening')
+        ] %}
+        {% set study = namespace(open=[]) %}
+        {% for name, entity in study_doors %}
+          {% if is_state(entity, 'on') %}
+            {% set study.open = study.open + [name] %}
+          {% endif %}
+        {% endfor %}
+        {% set study_climate = states('climate.henry_s_room_versatile_thermostat') %}
+        {% if study_climate not in ['off', 'unavailable', 'unknown'] and study.open %}
+          {% set mode = state_attr('climate.study_ac', 'hvac_action') or 'running' %}
+          {% if mode == 'cooling' %}
+            {% set alerts.items = alerts.items + ["- Henry's Room AC: " ~ (study.open | join(', '))] %}
+          {% elif mode == 'heating' %}
+            {% set alerts.items = alerts.items + ["- Henry's Room Heater: " ~ (study.open | join(', '))] %}
+          {% else %}
+            {% set alerts.items = alerts.items + ["- Henry's Room HVAC: " ~ (study.open | join(', '))] %}
+          {% endif %}
+        {% endif %}
+        {% if alerts.items %}
+          {{ alerts.items | join('\n') }}
+        {% else %}
+          None
+        {% endif %}
+
+- binary_sensor:
+    - name: HVAC Door Open Alert
+      unique_id: hvac_door_open_alert
+      state: >-
+        {% set summary = states('sensor.hvac_door_open_summary') %}
+        {{ summary not in ['None', 'unknown', 'unavailable'] }}
+      attributes:
+        summary: "{{ states('sensor.hvac_door_open_summary') }}"
+
+    # Quick Action Priority Filters - Only show top 4 by priority
+    - name: "Show Good Morning Button Filtered"
+      unique_id: show_good_morning_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'good_morning' in top_4 | map(attribute='name') | list }}
+
+    - name: "Show Naptime Button Filtered"
+      unique_id: show_naptime_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'naptime' in top_4 | map(attribute='name') | list }}
+
+    - name: "Show Water Plants Button Filtered"
+      unique_id: show_water_plants_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'water_plants' in top_4 | map(attribute='name') | list }}
+
+    - name: "Show Good Night Button Filtered"
+      unique_id: show_good_night_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'good_night' in top_4 | map(attribute='name') | list }}
+
+    - name: "Show Arriving Home Button Filtered"
+      unique_id: show_arriving_home_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'arriving_home' in top_4 | map(attribute='name') | list }}
+
+    - name: "Show Leaving Home Button Filtered"
+      unique_id: show_leaving_home_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'leaving_home' in top_4 | map(attribute='name') | list }}
+
+    - name: "Show Play Music Button Filtered"
+      unique_id: show_play_music_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'play_music' in top_4 | map(attribute='name') | list }}
+
+    - name: "Show Read News Button Filtered"
+      unique_id: show_read_news_button_filtered
+      state: >
+        {% set button_priorities = namespace(items=[]) %}
+        {% if is_state('binary_sensor.show_good_morning_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_morning', 'priority': 1}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_naptime_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'naptime', 'priority': 2}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_arriving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'arriving_home', 'priority': 3}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_water_plants_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'water_plants', 'priority': 4}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_good_night_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'good_night', 'priority': 5}] %}
+        {% endif %}
+        {% if is_state('binary_sensor.show_leaving_home_button', 'on') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'leaving_home', 'priority': 6}] %}
+        {% endif %}
+        {% set zone_state = states('zone.home') | int(0) %}
+        {% if zone_state < 1 %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'holiday_mode', 'priority': 7}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'open') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'close_garage', 'priority': 8}] %}
+        {% endif %}
+        {% if is_state('cover.smart_garage_door_garage', 'closed') %}
+          {% set button_priorities.items = button_priorities.items + [{'name': 'open_garage', 'priority': 9}] %}
+        {% endif %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'play_music', 'priority': 10}] %}
+        {% set button_priorities.items = button_priorities.items + [{'name': 'read_news', 'priority': 11}] %}
+        {% set sorted_items = button_priorities.items | sort(attribute='priority') %}
+        {% set top_4 = sorted_items[:4] %}
+        {{ 'read_news' in top_4 | map(attribute='name') | list }}
+
+- binary_sensor:
+    - name: "Working From Home"
+      state: >
+        {% set is_weekday = now().weekday() in [0, 1, 2, 3, 4] %}
+        {% set is_work_hours = now().hour >= 8 and now().hour < 17 %}
+        {% set desk_on = is_state('switch.computer_plug_switch', 'on') %}
+        {% set computer_online = is_state('device_tracker.aolt002068_3', 'home') %}
+        {{ is_weekday and is_work_hours and desk_on and computer_online }}
+      icon: >
+        {% if is_state('binary_sensor.working_from_home', 'on') %}
+          mdi:home-account
+        {% else %}
+          mdi:office-building
+        {% endif %}
+      attributes:
+        is_weekday: "{{ now().weekday() in [0, 1, 2, 3, 4] }}"
+        is_work_hours: "{{ now().hour >= 8 and now().hour < 17 }}"
+        desk_switch_on: "{{ is_state('switch.computer_plug_switch', 'on') }}"
+        computer_online: "{{ is_state('device_tracker.aolt002068_3', 'home') }}"
+
+    - name: "Working at Office"
+      state: >
+        {% set is_weekday = now().weekday() in [0, 1, 2, 3, 4] %}
+        {% set is_work_hours = now().hour >= 8 and now().hour < 17 %}
+        {% set at_work = states('zone.work') | int(0) == 1 %}
+        {{ is_weekday and is_work_hours and at_work }}
+      icon: >
+        {% if is_state('binary_sensor.working_at_office', 'on') %}
+          mdi:office-building
+        {% else %}
+          mdi:home-account
+        {% endif %}
+      attributes:
+        is_weekday: "{{ now().weekday() in [0, 1, 2, 3, 4] }}"
+        is_work_hours: "{{ now().hour >= 8 and now().hour < 17 }}"
+        zone_occupancy: "{{ states('zone.work') }}"
+        zone_occupied: "{{ states('zone.work') | int(0) == 1 }}"
+        current_time: "{{ now().strftime('%A, %H:%M:%S') }}"
+        time_window_reason: "{% set at_work = states('zone.work') | int(0) == 1 %}{% if not at_work %}Zone.work is '{{ states('zone.work') }}' (expecting 1){% elif not (now().weekday() in [0, 1, 2, 3, 4]) %}Weekend{% elif not (now().hour >= 8 and now().hour < 17) %}Outside work hours (8am-5pm), currently {{ now().hour }}:{{ now().minute | string | default('00', true) }}{% else %}All conditions met{% endif %}"
+
+- sensor:
+    # Last 4 weeks counts
+    - name: "WFH Days Count"
+      state: "{{ (states('sensor.wfh_days_last_4_weeks') | float(0) / 9) | round(1) }}"
+      unit_of_measurement: "days"
+      icon: mdi:home-account
+
+    - name: "Office Days Count"
+      state: "{{ (states('sensor.office_days_last_4_weeks') | float(0) / 9) | round(1) }}"
+      unit_of_measurement: "days"
+      icon: mdi:office-building
+
+    - name: "Office Zone Debug"
+      unique_id: office_zone_debug
+      state: "{{ states('zone.work') }}"
+      icon: mdi:map-marker-check
+      attributes:
+        zone_name: "zone.work"
+        zone_latitude: "{{ state_attr('zone.work', 'latitude') }}"
+        zone_longitude: "{{ state_attr('zone.work', 'longitude') }}"
+        zone_radius_m: "{{ state_attr('zone.work', 'radius') }}"
+        person_current_state: "{{ states('person.phil_patterson') }}"
+        person_friendly_name: "{{ state_attr('person.phil_patterson', 'friendly_name') }}"
+        primary_device_tracker: "{{ state_attr('person.phil_patterson', 'device_trackers') | join(', ') if state_attr('person.phil_patterson', 'device_trackers') else 'None' }}"
+        sm_s908e_state: "{{ states('device_tracker.sm_s908e') }}"
+        sm_s908e_lat: "{{ state_attr('device_tracker.sm_s908e', 'latitude') }}"
+        sm_s908e_lon: "{{ state_attr('device_tracker.sm_s908e', 'longitude') }}"
+        sm_s908e_gps_accuracy: "{{ state_attr('device_tracker.sm_s908e', 'gps_accuracy') }}"
+        sm_s908e_source: "{{ state_attr('device_tracker.sm_s908e', 'source') }}"
+
+    - name: "Total Work Days Count"
+      state: "{{ ((states('sensor.wfh_days_last_4_weeks') | float(0) + states('sensor.office_days_last_4_weeks') | float(0)) / 9) | round(1) }}"
+      unit_of_measurement: "days"
+      icon: mdi:calendar-check
+
+    # This year counts (for tax)
+    - name: "WFH Days This Year Count"
+      state: "{{ (states('sensor.wfh_days_this_year') | float(0) / 9) | round(0) }}"
+      unit_of_measurement: "days"
+      icon: mdi:home-account
+
+    - name: "Office Days This Year Count"
+      state: "{{ (states('sensor.office_days_this_year') | float(0) / 9) | round(0) }}"
+      unit_of_measurement: "days"
+      icon: mdi:office-building
+
+    # Financial year counts (July 1 - June 30, for Australian tax)
+    - name: "WFH Days Financial Year Count"
+      state: "{{ (states('sensor.wfh_days_this_financial_year') | float(0) / 9) | round(0) }}"
+      unit_of_measurement: "days"
+      icon: mdi:home-account
+
+    - name: "Office Days Financial Year Count"
+      state: "{{ (states('sensor.office_days_this_financial_year') | float(0) / 9) | round(0) }}"
+      unit_of_measurement: "days"
+      icon: mdi:office-building
+
+    # Work location calendar display
+    - name: "Work Calendar This Week"
+      unique_id: work_calendar_this_week
+      state: "{{ 'Tracking' if states('binary_sensor.working_from_home') != 'unavailable' else 'Unavailable' }}"
+      icon: mdi:calendar
+      attributes:
+        today: "{{ now().strftime('%A, %Y-%m-%d') }}"
+        this_week_status: >
+          {% set wfh_days = [] %}
+          {% set wfo_days = [] %}
+          {% set other_days = [] %}
+          {# Loop through last 7 days #}
+          {% for i in range(7) %}
+            {% set date = (now() - timedelta(days=6-i)).strftime('%a %m/%d') %}
+            {% set wfh = 'WFH' %}
+            {% set wfo = 'WFO' %}
+            {% set other = '—' %}
+            {% if i == 6 %}
+              {% if is_state('binary_sensor.working_from_home', 'on') %}
+                {% set wfh_days = wfh_days + [date] %}
+              {% elif is_state('binary_sensor.working_at_office', 'on') %}
+                {% set wfo_days = wfo_days + [date] %}
+              {% else %}
+                {% set other_days = other_days + [date] %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          Week view: Check history graph below for detailed view
+        week_summary: >
+          WFH Last 4 weeks: {{ states('sensor.wfh_days_count') | default('—') }} days |
+          WFO Last 4 weeks: {{ states('sensor.office_days_count') | default('—') }} days |
+          Total: {{ states('sensor.total_work_days_count') | default('—') }} days
+
+    # Maintenance date sensors (date only, no time)
+    - name: "Master Toilet Last Cleaned Date"
+      unique_id: master_toilet_last_cleaned_date
+      state: "{{ states('input_datetime.masterbed_toilet_last_cleaned') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.masterbed_toilet_last_cleaned') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:toilet
+
+    - name: "Downstairs Toilet Last Cleaned Date"
+      unique_id: downstairs_toilet_last_cleaned_date
+      state: "{{ states('input_datetime.downstairs_toilet_last_cleaned') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.downstairs_toilet_last_cleaned') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:toilet
+
+    - name: "Oma's Toilet Last Cleaned Date"
+      unique_id: omas_toilet_last_cleaned_date
+      state: "{{ states('input_datetime.omas_toilet_last_cleaned') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.omas_toilet_last_cleaned') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:toilet
+
+    - name: "Kids Toilet Last Cleaned Date"
+      unique_id: kids_toilet_last_cleaned_date
+      state: "{{ states('input_datetime.kids_toilet_last_cleaned') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.kids_toilet_last_cleaned') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:toilet
+
+    - name: "Living Room AC Filter Last Changed Date"
+      unique_id: living_room_ac_filter_last_changed_date
+      state: "{{ states('input_datetime.ac_filter_living_room') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.ac_filter_living_room') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:air-filter
+
+    - name: "Master Bedroom AC Filter Last Changed Date"
+      unique_id: master_bedroom_ac_filter_last_changed_date
+      state: "{{ states('input_datetime.ac_filter_master_bedroom') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.ac_filter_master_bedroom') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:air-filter
+
+    - name: "Otto's Room AC Filter Last Changed Date"
+      unique_id: ottos_room_ac_filter_last_changed_date
+      state: "{{ states('input_datetime.ac_filter_otto_room') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.ac_filter_otto_room') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:air-filter
+
+    - name: "Study/Henry's Room AC Filter Last Changed Date"
+      unique_id: study_henry_ac_filter_last_changed_date
+      state: "{{ states('input_datetime.ac_filter_study_henry') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.ac_filter_study_henry') not in ['unknown', 'unavailable'] else 'Never' }}"
+      icon: mdi:air-filter
+

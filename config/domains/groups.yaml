@@ -1,0 +1,11 @@
+  network_devices:
+    name: Network Devices
+    all: true #Only on when all devices are on
+    entities:
+      - binary_sensor.ping_firewalla
+  wan_devices:
+    name: WAN Devices
+    all: false #If one is still available, then WAN isn't down
+    entities:
+      - binary_sensor.pingext_opendns
+      - binary_sensor.pingext_google_dns

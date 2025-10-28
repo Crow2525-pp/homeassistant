@@ -1,0 +1,54 @@
+- platform: universal
+  name: Sony Bravia
+  unique_id: sony_bravia
+  children:
+    - media_player.living_room_tv
+    - media_player.sony_kd_55x8500c
+  active_child_template: >
+    {% if not is_state("media_player.sony_kd_55x8500c", 'off') and not is_state("media_player.living_room_tv", "off") and is_state_attr('media_player.sony_kd_55x8500c', 'media_title', "Smart TV") and not is_state_attr('media_player.living_room_tv', 'app_name', "Netflix") %}
+      media_player.living_room_tv
+    {% else %}
+      media_player.sony_kd_55x8500c
+    {% endif %}
+  browse_media_entity: media_player.sony_kd_55x8500c
+  commands:
+    turn_on:
+      service: media_player.turn_on
+      target:
+        entity_id: media_player.sony_kd_55x8500c
+    turn_off:
+      service: media_player.turn_off
+      target:
+        entity_id: media_player.sony_kd_55x8500c
+    volume_up:
+      service: media_player.volume_up
+      target:
+        entity_id: media_player.sony_kd_55x8500c
+    volume_down:
+      service: media_player.volume_down
+      target:
+        entity_id: media_player.sony_kd_55x8500c
+    volume_set:
+      service: media_player.volume_set
+      target:
+        entity_id: media_player.sony_kd_55x8500c
+      data:
+        volume_level: "{{ volume_level }}"
+    volume_mute:
+      service: media_player.volume_mute
+      target:
+        entity_id: media_player.sony_kd_55x8500c
+    select_source:
+      service: media_player.select_source
+      target:
+        entity_id: media_player.sony_kd_55x8500c
+      data:
+        source: "{{ source }}"
+
+  attributes:
+    is_volume_muted: media_player.sony_kd_55x8500c|is_volume_muted
+    volume_level: media_player.sony_kd_55x8500c|volume_level
+    source_list: media_player.sony_kd_55x8500c|source_list
+# - platform: wiim_custom
+#   host: 192.168.1.170
+#   name: Living Room Wiimamp

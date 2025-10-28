@@ -1,0 +1,286 @@
+# Centralized entity customization
+# Labels and room assignments for automatic organization
+
+# Master Bedroom
+sensor.ble_temperature_masterbed_temp_humidity_sensor:
+  friendly_name: "Master Bedroom Temperature"
+  device_class: temperature
+  room: master_bedroom
+  category: climate
+
+sensor.ble_humidity_masterbed_temp_humidity_sensor:
+  friendly_name: "Master Bedroom Humidity"
+  device_class: humidity
+  room: master_bedroom
+  category: climate
+
+climate.master_bedroom_ac:
+  friendly_name: "Master Bedroom AC"
+  room: master_bedroom
+  category: climate
+
+input_boolean.climate_manual_control_master:
+  friendly_name: "Master Bedroom Climate Override"
+  room: master_bedroom
+  category: automation_control
+  label: override
+
+# Otto's Room
+sensor.study_esp32_ottosroom_temperature:
+  friendly_name: "Otto's Room Temperature"
+  device_class: temperature
+  room: ottos_room
+  category: climate
+
+climate.ottos_room_ac:
+  friendly_name: "Otto's Room AC"
+  room: ottos_room
+  category: climate
+
+input_boolean.climate_manual_control_otto:
+  friendly_name: "Otto's Room Climate Override"
+  room: ottos_room
+  category: automation_control
+  label: override
+
+input_boolean.ottos_door_open:
+  friendly_name: "Otto's Door"
+  room: ottos_room
+  category: security
+
+# Henry's Room (Study)
+sensor.study_esp32_henrysroom_temperature:
+  friendly_name: "Henry's Room Temperature"
+  device_class: temperature
+  room: henrys_room
+  category: climate
+
+input_boolean.climate_manual_control_study:
+  friendly_name: "Henry's Room Climate Override"
+  room: henrys_room
+  category: automation_control
+  label: override
+
+# Living Room
+sensor.living_room_temperature_offset:
+  friendly_name: "Living Room Temperature"
+  device_class: temperature
+  room: living_room
+  category: climate
+
+climate.living_room_ac:
+  friendly_name: "Living Room AC"
+  room: living_room
+  category: climate
+
+climate.living_room_versatile_thermastat:
+  friendly_name: "Living Room Versatile Thermostat"
+  room: living_room
+  category: climate
+
+input_boolean.climate_manual_control_living:
+  friendly_name: "Living Room Climate Override"
+  room: living_room
+  category: automation_control
+  label: override
+
+light.lounge:
+  friendly_name: "Lounge Light"
+  room: living_room
+  category: lighting
+
+# Kitchen
+sensor.ble_temperature_kitchen_temp_humidity_sensor:
+  friendly_name: "Kitchen Temperature"
+  device_class: temperature
+  room: kitchen
+  category: climate
+
+sensor.ble_humidity_kitchen_temp_humidity_sensor:
+  friendly_name: "Kitchen Humidity"
+  device_class: humidity
+  room: kitchen
+  category: climate
+
+media_player.kitchen:
+  friendly_name: "Kitchen Speaker"
+  room: kitchen
+  category: media
+
+# Laundry
+input_boolean.washing_machine_on:
+  friendly_name: "Washing Machine"
+  room: laundry
+  category: appliance
+  label: "Manual Automations"
+
+sensor.washing_machine_power_plug_power:
+  friendly_name: "Washing Machine Power"
+  device_class: power
+  room: laundry
+  category: appliance
+
+sensor.washing_machine_estimated_remaining:
+  friendly_name: "Washer Time Remaining"
+  device_class: duration
+  room: laundry
+  category: appliance
+
+input_boolean.dryer_on:
+  friendly_name: "Dryer"
+  room: laundry
+  category: appliance
+  label: "Manual Automations"
+
+sensor.dryer_estimated_remaining:
+  friendly_name: "Dryer Time Remaining"
+  device_class: duration
+  room: laundry
+  category: appliance
+
+input_boolean.dishwasher_on:
+  friendly_name: "Dishwasher"
+  room: kitchen
+  category: appliance
+  label: "Manual Automations"
+
+sensor.dishwasher_smart_plug_consumption:
+  friendly_name: "Dishwasher Power"
+  device_class: energy
+  room: kitchen
+  category: appliance
+
+light.dishwasher_smart_plug_dndmode:
+  hidden: true
+
+switch.dishwasher_smart_plug_config_overtemp_enable:
+  hidden: true
+
+# Security & Doors
+cover.smart_garage_door_garage:
+  friendly_name: "Garage Door"
+  room: garage
+  category: security
+
+alarm_control_panel.alarmo:
+  friendly_name: "Alarm System"
+  category: security
+
+binary_sensor.driveway_cam_motion:
+  friendly_name: "Driveway Motion"
+  room: driveway
+  category: security
+
+binary_sensor.bi_door_camera_motion:
+  friendly_name: "Door Motion"
+  category: security
+
+# Blinds & Covers
+cover.roller_blinds_chan1:
+  friendly_name: "Master Bedroom Blinds"
+  room: master_bedroom
+  category: covers
+
+cover.windowcovering_cover:
+  friendly_name: "Window Covering"
+  category: covers
+
+input_boolean.blind_manual_control:
+  friendly_name: "Blind Automation Override"
+  category: automation_control
+  label: override
+
+# Solar & Energy
+sensor.gosungrow_virtual_1205796_1_1_1_p24:
+  friendly_name: "Solar Production"
+  device_class: power
+  category: energy
+
+sensor.gosungrow_virtual_1205796_7_1_1_p8018:
+  friendly_name: "Home Consumption"
+  device_class: power
+  category: energy
+
+binary_sensor.solar_excess_available:
+  friendly_name: "Solar Excess Available"
+  category: energy
+
+# Network
+binary_sensor.ping_firewalla:
+  friendly_name: "Firewalla Network"
+  category: network
+
+binary_sensor.pingext_opendns:
+  friendly_name: "OpenDNS Connectivity"
+  category: network
+
+binary_sensor.pingext_google_dns:
+  friendly_name: "Google DNS Connectivity"
+  category: network
+
+input_boolean.network_device_down_notify:
+  friendly_name: "Network Alerts"
+  category: notifications
+  label: Killswitch
+
+input_boolean.wan_down_notify:
+  friendly_name: "WAN Down Alerts"
+  category: notifications
+  label: Killswitch
+
+# Media
+remote.sony_kd_55x8500c:
+  friendly_name: "Sony TV"
+  room: living_room
+  category: media
+
+light.tv_backlight:
+  friendly_name: "TV Backlight"
+  room: living_room
+  category: lighting
+
+# Weather
+sensor.essendon_airport_temp:
+  friendly_name: "Outside Temperature"
+  device_class: temperature
+  category: weather
+
+sensor.essendon_airport_max_temp:
+  friendly_name: "Today's Max Temperature"
+  device_class: temperature
+  category: weather
+
+sensor.essendon_airport_min_temp:
+  friendly_name: "Today's Min Temperature"
+  device_class: temperature
+  category: weather
+
+sensor.braybrook_warnings:
+  friendly_name: "Weather Warnings"
+  category: weather
+
+# Occupancy & Presence
+input_select.occupancy:
+  friendly_name: "Home Occupancy"
+  category: presence
+
+binary_sensor.someone_home:
+  friendly_name: "Someone Home"
+  category: presence
+
+person.phil_patterson:
+  friendly_name: "Phil"
+  category: presence
+
+# Sleep & Schedules
+schedule.awake_hours:
+  friendly_name: "Awake Hours"
+  category: schedule
+
+calendar.early_to_bed:
+  friendly_name: "Early to Bed"
+  category: schedule
+
+sensor.samsung_galaxy_s22_ultra_sleep_confidence:
+  friendly_name: "Phil Sleep Status"
+  category: presence

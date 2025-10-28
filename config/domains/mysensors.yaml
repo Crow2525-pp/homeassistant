@@ -1,0 +1,95 @@
+# ESPresence One entry for each beacon you want to track
+- platform: mqtt_room
+  device_id: "known:6afe09508f42"
+  state_topic: "espresense/devices/known:6afe09508f42"
+  timeout: 10
+  away_timeout: 120 # number of seconds after which the enitity will get status not_ho
+
+- platform: scrape
+  resource: https://feeds.feedburner.com/BbcHourlyNewsBulletin
+  name: bbc_hourly_bulletin
+  select: 'enclosure:nth-of-type(1)'
+  attribute: url
+  scan_interval: 1800
+
+- platform: scrape
+  resource: https://rss.introcast.io/1471715443/feeds.megaphone.fm/fiveminutenews
+  name: fiveminutenews
+  select: 'enclosure:nth-of-type(1)'
+  attribute: url
+  scan_interval: 1800
+
+- platform: scrape
+  resource: https://feeds.acast.com/public/shows/30ae66f3-cf9b-4b0b-8f96-9f360b545ece
+  name: daily_tech_headlines
+  select: 'enclosure:nth-of-type(1)'
+  attribute: url
+  scan_interval: 1800
+
+- platform: scrape
+  resource: https://www.scientificamerican.com/sciam/xml/iTunes.cfm?id=science-quickly
+  name: 60_second_sci
+  select: 'enclosure:nth-of-type(1)'
+  attribute: url
+  scan_interval: 1800
+
+# Work location statistics - 4 weeks
+- platform: history_stats
+  name: WFH Days Last 4 Weeks
+  entity_id: binary_sensor.working_from_home
+  state: 'on'
+  type: time
+  duration:
+    days: 28
+  end: "{{ now() }}"
+- platform: history_stats
+  name: Office Days Last 4 Weeks
+  entity_id: binary_sensor.working_at_office
+  state: 'on'
+  type: time
+  duration:
+    days: 28
+  end: "{{ now() }}"
+
+# Work location statistics - This year (for tax)
+- platform: history_stats
+  name: WFH Days This Year
+  entity_id: binary_sensor.working_from_home
+  state: 'on'
+  type: time
+  start: "{{ now().replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0) }}"
+  end: "{{ now() }}"
+- platform: history_stats
+  name: Office Days This Year
+  entity_id: binary_sensor.working_at_office
+  state: 'on'
+  type: time
+  start: "{{ now().replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0) }}"
+  end: "{{ now() }}"
+
+# Work location statistics - This financial year (July 1 - June 30)
+- platform: history_stats
+  name: WFH Days This Financial Year
+  entity_id: binary_sensor.working_from_home
+  state: 'on'
+  type: time
+  start: >
+    {% if now().month >= 7 %}
+      {{ now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) }}
+    {% else %}
+      {{ (now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=365)) }}
+    {% endif %}
+  end: "{{ now() }}"
+- platform: history_stats
+  name: Office Days This Financial Year
+  entity_id: binary_sensor.working_at_office
+  state: 'on'
+  type: time
+  start: >
+    {% if now().month >= 7 %}
+      {{ now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) }}
+    {% else %}
+      {{ (now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=365)) }}
+    {% endif %}
+  end: "{{ now() }}"
+

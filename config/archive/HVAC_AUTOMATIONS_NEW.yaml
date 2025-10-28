@@ -1,0 +1,2781 @@
+################################################################################
+# NEW HVAC AUTOMATION ARCHITECTURE
+################################################################################
+#
+# PERFORMANCE OPTIMIZATION (2025-01-XX):
+# - Removed time_pattern polling (was checking every 15 min) for all 4 automations
+# - Replaced with state-based triggers that fire only when relevant entities change
+# - Added state checks before service calls to prevent unnecessary thermostat beeps
+# - Result: Fewer automation runs, fewer service calls, better user experience
+#
+# ARCHITECTURE PRINCIPLES
+#
+# 1. Versatile thermostats hold temperature targets while automations choose
+#    hvac_mode and preset_mode, keeping setpoints consistent across devices.
+# 2. Manual override booleans (climate_manual_control_*) immediately halt
+#    automations so hand-set temperatures remain untouched.
+# 3. Humidity above 75% is checked, but dry mode only applies rarely when temp
+#    is highish (not extreme hot/cold). Cooling/heating takes priority over dry
+#    mode when temperature conditions warrant climate action.
+# 4. Daytime comfort runs only when solar excess is available and the relevant
+#    interior door is closed. Bedroom doors: master_bedroom_door_sensor_opening,
+#    henry_door_sensor_magnet_opening, otto_room_door_sensor_opening. Living
+#    room doors: living_room_door_sensor_opening, interior_garage_door_sensor_
+#    magnet_opening, and front_door_sensor_opening (ALL must be closed).
+#    EXCEPTION: Naptime windows (12:15-16:00) for Study/Kids rooms do NOT require
+#    solar for cooling - only door closed is required.
+# 5. Door sensors are ALWAYS evaluated for ALL room automations at ALL times -
+#    including overnight/bedtime routines. Doors must be closed for any HVAC
+#    action. Living room requires ALL door sensors closed (3 total). Only manual
+#    override bypasses door checks. Overnight/naptime routines ignore SOLAR
+#    requirements but NOT door requirements.
+# 6. Seasonal bias limits the available actions (winter = heat, summer = cool,
+#    spring = cool bias, autumn = heat bias).
+# 7. Warm/hot/super-hot flags and the working-from-home binary sensor supply
+#    weather and occupancy context. hot_today_flag enables reactive cooling
+#    when temps rise. super_hot_today enables preemptive cooling to get ahead
+#    of extreme heat. Preemptive cooling windows: Master bedroom 09:00-20:00,
+#    Study/Kids rooms 09:00-18:00. Working-from-home is a special occupancy
+#    context that bypasses solar requirements for daytime comfort heating/cooling.
+# 8. The input_select.occupancy gate keeps HVAC limited to Home/Away states,
+#    while Holiday forces a full shutdown. Away mode uses eco PRESET but applies
+#    the same temperature thresholds as Home mode for heating/cooling decisions.
+#    Hot/super-hot flags provide additional context but don't solely gate Away mode.
+# 9. Minimize thermostat service calls to reduce annoying beeps. ALWAYS check
+#    current state before sending commands - only call set_hvac_mode or
+#    set_preset_mode if the value needs to change. Each service call triggers
+#    an audible beep, so unnecessary calls degrade user experience.
+#    PATTERN: Use choose with condition checking current state before service call:
+#      - choose:
+#          - conditions:
+#              - condition: not
+#                conditions:
+#                  - condition: state
+#                    entity_id: climate.xxx
+#                    state: desired_mode  # or attribute: preset_mode
+#            sequence:
+#              - service: climate.set_hvac_mode  # or set_preset_mode
+#    This pattern is demonstrated in Holiday/Away mode sections and should be
+#    applied throughout where multiple service calls occur in sequence.
+# 10. Use STATE-BASED and TIME-SPECIFIC triggers, NOT time_pattern polling.
+#     Triggers should fire on entity state changes (temperature, doors, solar,
+#     flags, occupancy, season) and specific time events (bedtime, wake-up).
+#     Avoid polling every N minutes - it's inefficient and causes unnecessary
+#     automation runs when nothing has changed.
+#
+# OPERATING WINDOWS & GUARDRAILS
+#
+# - Solar excess is expected between 04:00 and 17:00; outside that window the
+#   daytime routines naturally idle.
+# - Preemptive cooling (super_hot_today): Master 09:00-20:00, Study/Kids 09:00-18:00.
+# - Bedtime blocks: adults 21:00, kids/study 18:45, naptime 12:15-16:00.
+# - Time-based windows (naptime, pre-bedtime, bedtime) take precedence over
+#   flag-based preemptive cooling when they overlap.
+# - Climate flag automations remain responsible for resetting warm/hot state.
+#
+# TEMPERATURE & SENSOR SOURCES
+#
+# - Master: sensor.ble_temperature_masterbed_temp_humidity_sensor
+# - Study: sensor.study_esp32_henrysroom_temperature
+# - Kids: sensor.study_esp32_ottosroom_temperature
+# - Living: sensor.living_room_temperature_offset and
+#   sensor.ble_temperature_kitchen_temp_humidity_sensor
+#
+# DOOR & COMFORT GUARDRAILS
+#
+# - Master uses binary_sensor.master_bedroom_door_sensor_opening (always checked).
+# - Study uses binary_sensor.henry_door_sensor_magnet_opening (always checked).
+# - Kids room uses binary_sensor.otto_room_door_sensor_opening (always checked).
+# - Living room uses THREE door sensors (ALL must be closed):
+#   * binary_sensor.living_room_door_sensor_opening
+#   * binary_sensor.interior_garage_door_sensor_magnet_opening
+#   * binary_sensor.front_door_sensor_opening
+#
+# HUMIDITY & FAN NOTES
+#
+# - Humidity above 75% drives hvac_mode dry and disables ceiling fans.
+# - Master cooling also runs fan.masterbedroom_fan at 33% for circulation.
+#
+# EXAMPLE SCENARIOS - ARCHITECTURE VALIDATION
+#
+# Example 1: Humidity Takes Priority
+#   Room: Master Bedroom | Time: 14:00 (daytime)
+#   Season: Summer | Door: Closed | Solar: Available
+#   Conditions: Temp 23°C, humidity 78%
+#   Expected: System activates dry mode (not cooling), ignoring temperature
+#   Principle: #3 - Humidity evaluated before temperature
+#  CORRECT
+
+# Example 2: Manual Override Blocks Everything
+#   Room: Living Room | Time: 10:00
+#   Season: Winter | Conditions: Manual control boolean ON, temp 15°C, occupancy Home
+#   Expected: No automation runs, system stays in whatever state user set manually
+#   Principle: #2 - Manual override booleans immediately halt automations
+#  CORRECT
+
+# Example 3: Daytime Cooling Needs Solar AND Closed Door
+#   Room: Study | Time: 11:00
+#   Season: Summer | Conditions: Temp 26°C, solar excess available, door OPEN, warm_today_flag ON
+#   Expected: No cooling - door is open so daytime comfort logic should idle
+#   Principle: #4 - Daytime comfort runs only when door is closed
+#  CORRECT
+
+# Example 4: Bedtime Requires Closed Door
+#   Room: Study (Lucas's room) | Time: 19:30 (after 18:45 bedtime)
+#   Conditions: Door OPEN, hot_today_flag ON
+#   Expected: NO cooling - door must be closed even during bedtime
+#   Principle: #5 - Door sensors are ALWAYS evaluated, even overnight
+#  CORRECTED
+
+# Example 5: Seasonal Bias - Autumn Heat Preference
+#   Room: Living Room | Time: 13:00
+#   Season: Autumn | Conditions: Temp 18°C, solar excess available, super_hot_today OFF
+#   Expected: System should heat (autumn bias favours heating)
+#   Principle: #6 - Seasonal bias limits available actions (autumn = heat bias)
+#  CORRECT
+
+# Example 6: Holiday Mode Override
+#   Room: Any room | Conditions: Occupancy set to "Holiday"
+#   Expected: All HVAC turns off completely regardless of temperature or other conditions
+#   Principle: #8 - Holiday forces a full shutdown
+#  CORRECT
+
+# Example 7: Away Mode with Hot Day
+#   Room: Master Bedroom | Conditions: Occupancy "Away", super_hot_today ON
+#   Expected: Eco preset cooling (minimal cooling to protect the house, not full shutdown)
+#   Principle: #8 - Occupancy gate keeps HVAC limited to Home/Away states
+# CORRECT - Away mode should limit to ECO preset though
+
+# Example 8: Working From Home Trigger
+#   Room: Master Bedroom | Time: 10:00 (weekday)
+#   Season: Winter | Conditions: working_from_home ON, door closed, temp 20°C, solar excess available
+#   Expected: Comfort preset heating (WFH context enables daytime comfort)
+#   Principle: #7 - Working-from-home binary sensor supplies occupancy context
+# CORRECT 
+
+# Example 9: Spring Cool Bias with Low Temp Exception
+#   Room: Living Room | Time: 14:00
+#   Season: Spring | Conditions: Temp 14°C, no hot flags
+#   Expected: System should heat (very cold exception, below 15°C threshold)
+#   Principle: #6 - Seasonal bias (spring = cool bias, but extreme cold overrides)
+# CORRECT
+
+# Example 10: Hot Day Flag Enables Cooling
+#   Room: Master Bedroom | Time: 10:00
+#   Season: Summer | Conditions: hot_today_flag ON (not super_hot), temp 24°C, door closed, solar excess
+#   Expected: Should cool - hot_today_flag enables reactive cooling when temps are rising
+#   Principle: #7 - hot_today_flag enables reactive cooling, super_hot_today enables preemptive cooling
+#  CORRECTED
+#
+# ADDITIONAL CLARIFYING EXAMPLES
+#
+# Example 11: Bedtime Cooling with Closed Door
+#   Room: Study (Lucas's room) | Time: 19:30 (after 18:45 bedtime)
+#   Conditions: Door CLOSED, hot_today_flag ON
+#   Expected: Boost preset cooling activates (door is closed, meeting requirement)
+#   Principle: #5 - Door must be closed, but solar is NOT required for overnight routines
+#  CORRECT
+
+# Example 12: Preemptive vs Reactive Cooling
+#   Room: Master Bedroom | Time: 10:00
+#   Season: Summer | Conditions: super_hot_today ON, temp 22°C, door closed, solar excess
+#   Expected: Preemptive cooling activates even though temp is only 22°C (getting ahead of heat)
+#   Principle: #7 - super_hot_today enables preemptive action before temps climb
+# CORRECT
+
+# Example 13: Bedtime Heating Without Solar
+#   Room: Master Bedroom | Time: 23:00 (after 21:00 bedtime)
+#   Season: Winter | Conditions: Door closed, temp 19°C, NO solar excess (night time)
+#   Expected: Frost preset heating activates (solar NOT required for overnight heating)
+#   Principle: #5 - Overnight routines ignore solar requirements but still need door closed
+#  CORRECT
+
+# Example 14: Living Room Door Sensors Should Be Checked
+#   Room: Living Room | Time: 14:00
+#   Season: Summer | Conditions: Doors OPEN, temp 22°C, solar excess available, occupancy Home
+#   Expected: System should NOT activate when doors are open (living room/garage doors)
+#   Principle: #4 - Living room has door sensors (living_room_door, interior_garage_door) that should be checked
+#  CORRECTED
+
+
+# Example 15: Manual Override Bypasses Door Check
+#   Room: Study | Time: 14:00
+#   Conditions: Door OPEN, manual override ON, user manually set to cooling
+#   Expected: System stays in user's cooling mode despite open door
+#   Principle: #2 - Manual override halts automation; user control takes precedence
+#  CORRECT
+#
+# ============================================================================
+# ROUND 3 - Additional Clarifying Examples (Please review 11-13, 15 above)
+# ============================================================================
+#
+# Example 16: Living Room Requires All Doors Closed
+#   Room: Living Room | Time: 14:00
+#   Season: Winter | Conditions: living_room_door CLOSED, interior_garage_door OPEN, temp 16°C
+#   Expected: No heating - ALL doors must be closed (living room door, interior garage door, front door)
+#   Principle: #5 - Living room requires ALL door sensors closed for HVAC activation
+#  CORRECTED
+#
+# Example 17: Naptime Cooling Without Solar Requirement
+#   Room: Study (Lucas's room) | Time: 13:00 (naptime 12:15-16:00)
+#   Conditions: Door closed, temp 25°C, NO solar excess, warm_today_flag ON
+#   Expected: Comfort preset cooling activates (naptime has special rules, door closed sufficient)
+#   Principle: Naptime windows (12:15-16:00) for Study/Kids rooms do NOT require solar for cooling
+#  CORRECTED - New principle needed for naptime exceptions
+
+# Example 18: Emergency Cooling Without Solar
+#   Room: Living Room | Time: 19:00 (no solar at this time)
+#   Season: Summer | Conditions: Temp 25°C, no solar excess, occupancy Home
+#   Expected: Cooling activates despite no solar (emergency threshold >24°C)
+#   Principle: #4 - Dual threshold: solar + 21°C OR no solar + 24°C for cooling
+#  CORRECT
+
+# Example 19: Away Mode Uses Eco Preset with Same Thresholds
+#   Room: Master Bedroom | Time: 14:00
+#   Season: Summer | Conditions: Occupancy "Away", temp 30°C, hot_today_flag OFF, super_hot_today OFF
+#   Expected: Eco preset with cooling activates (Away uses eco preset but same temp thresholds as Home)
+#   Principle: #8 - Away mode uses eco PRESET but applies heating/cooling based on same temperature thresholds
+#  CORRECTED 
+
+# Example 20: Pre-Bedtime Preparation Window
+#   Room: Master Bedroom | Time: 20:45 (pre-bedtime 20:30-21:00)
+#   Season: Summer | Conditions: Door closed, temp 24°C, warm_today_flag ON
+#   Expected: Comfort preset cooling activates (preparing room before bedtime)
+#   Principle: #5 - Pre-bedtime windows check doors but not solar (preparation mode)
+#  CORRECT
+#
+# ============================================================================
+# ROUND 4 - Testing Updated Principles (Please review 11-13, 15 if not yet done)
+# ============================================================================
+#
+# Example 21: Naptime Heating Without Solar (Study)
+#   Room: Study (Lucas's room) | Time: 13:30 (naptime 12:15-16:00)
+#   Season: Autumn | Conditions: Door closed, temp 19°C, NO solar excess
+#   Expected: Comfort preset heating activates (naptime exception, no solar needed)
+#   Principle: #4 - Naptime windows for Study/Kids don't require solar for heating/cooling
+# CORRECT
+
+# Example 22: Living Room with Two Doors Closed, One Open
+#   Room: Living Room | Time: 14:00
+#   Season: Winter | Conditions: living_room_door CLOSED, interior_garage CLOSED, front door OPEN, temp 16°C
+#   Expected: No heating - ALL THREE doors must be closed for HVAC activation
+#   Principle: #5 - Living room requires all 3 door sensors closed
+# CORRECT
+
+# Example 23: Away Mode Heating in Winter
+#   Room: Living Room | Time: 10:00
+#   Season: Winter | Conditions: Occupancy "Away", temp 15°C, no hot flags
+#   Expected: Eco preset heating activates (Away uses eco preset, same temp thresholds as Home)
+#   Principle: #8 - Away mode uses eco preset but applies same temperature thresholds for heating
+# CORRECT 
+
+# Example 24: Working From Home in Summer Without Door Closed
+#   Room: Master Bedroom | Time: 11:00
+#   Season: Summer | Conditions: working_from_home ON, door OPEN, temp 26°C, solar excess available
+#   Expected: No cooling - door must be closed even with WFH active
+#   Principle: #5 - Door sensors ALWAYS evaluated, even for WFH scenarios
+#  CORRECT
+
+
+# Example 25: Frost Mode Overnight Living Room Requires Doors Closed
+#   Room: Living Room | Time: 23:00 (frost mode 22:15-05:30)
+#   Season: Winter | Conditions: Occupancy Home, ALL 3 doors closed, temp 14°C
+#   Expected: Frost preset heating activates (overnight winter protection, doors still required, solar not required)
+#   Principle: #5 - Living room frost mode STILL requires all 3 doors closed (same as bedrooms)
+#  CORRECTED
+#
+# ============================================================================
+# ROUND 5 - Final Edge Case Testing
+# ============================================================================
+#
+# Example 26: Cooling Priority Over Humidity During Bedtime
+#   Room: Master Bedroom | Time: 22:00 (after 21:00 bedtime)
+#   Season: Summer | Conditions: Door closed, temp 26°C, humidity 78%, hot_today_flag ON
+#   Expected: Boost preset cooling activates (temperature and hot flag take priority over humidity)
+#   Principle: #3 - Cooling/heating takes priority over dry mode when temps are extreme
+#  CORRECTED
+
+# Example 27: Living Room Fan-Only Mode Range
+#   Room: Living Room | Time: 14:00
+#   Season: Summer | Conditions: All 3 doors closed, temp 21.5°C, solar excess available, occupancy Home
+#   Expected: Eco preset with fan_only mode (comfortable range 21-22°C)
+#   Principle: Living room has special fan_only mode for 21-22°C range in summer
+#  CORRECT
+#
+# Example 28: Preheat Window Morning Timing
+#   Room: Living Room | Time: 06:00 (preheat 05:30-08:00)
+#   Season: Winter | Conditions: All 3 doors closed, temp 18°C, occupancy Home
+#   Expected: No heating (temp above 17°C threshold, preheat only triggers below 17°C)
+#   Principle: Preheat window has specific temperature thresholds (below 17°C)
+#  CORRECT
+
+# Example 29: Multiple Hot Flags Active
+#   Room: Kids Room (Otto) | Time: 10:00
+#   Season: Summer | Conditions: Door closed, temp 23°C, warm_today_flag ON, hot_today_flag ON, super_hot_today ON, solar excess
+#   Expected: Preemptive comfort cooling (super_hot takes precedence, starts cooling even at 23°C)
+#   Principle: #7 - When multiple flags active, super_hot_today enables most aggressive preemptive action
+#  CORRECT
+
+# Example 30: Pre-Bedtime Kids Room Heating Without Solar
+#   Room: Kids Room (Otto) | Time: 18:35 (pre-bedtime 18:30-18:45)
+#   Season: Winter | Conditions: Door closed, temp 19°C, NO solar excess, no hot flags
+#   Expected: Comfort preset heating (pre-bedtime prep, solar NOT required, door closed sufficient)
+#   Principle: #5 - Pre-bedtime windows ignore solar requirements, only door checks apply
+#  CORRECTED
+#
+# ============================================================================
+# ROUND 6 - Clarifying Humidity Logic (Final Round)
+# ============================================================================
+#
+# Example 31: Dry Mode Applies in Moderate Temp with High Humidity
+#   Room: Study (Lucas's room) | Time: 13:00 (naptime)
+#   Season: Spring | Conditions: Door closed, temp 21°C, humidity 78%, no hot flags
+#   Expected: Comfort preset dry mode (temp moderate, humidity high, no urgent cooling needed)
+#   Principle: #3 - Dry mode applies when temp is "highish" but not urgent for cooling/heating
+#  CORRECT
+
+# Example 32: Extreme Cold Overrides Humidity
+#   Room: Living Room | Time: 07:00
+#   Season: Winter | Conditions: All 3 doors closed, temp 15°C, humidity 78%, occupancy Home
+#   Expected: Comfort preset heating (extreme cold takes priority over high humidity)
+#   Principle: #3 - Heating takes priority over dry mode when temperature is critically low
+#  CORRECT
+
+# Example 33: Master Bedroom Fan Coordination with Heating
+#   Room: Master Bedroom | Time: 23:00 (bedtime)
+#   Season: Winter | Conditions: Door closed, temp 19°C, frost preset heating activates
+#   Expected: Frost preset heating + fan turns OFF (fan disabled during heating)
+#   Principle: Master bedroom fan only runs during cooling, not heating
+#  CORRECT
+
+# Example 34: Study Room Preemptive Cooling After 09:00
+#   Room: Study (Lucas's room) | Time: 10:00
+#   Season: Summer | Conditions: Door closed, temp 22°C, super_hot_today ON, solar excess
+#   Expected: Preemptive cooling activates (within 09:00-18:00 window, super_hot enables early cooling)
+#   Principle: #7 - super_hot_today enables preemptive cooling within time windows (09:00-18:00 for Study/Kids)
+#  CORRECTED
+
+
+# Example 35: Away Mode During Naptime
+#   Room: Kids Room (Otto) | Time: 13:00 (naptime 12:15-16:00)
+#   Season: Summer | Conditions: Occupancy "Away", temp 26°C, warm_today_flag ON
+#   Expected: Eco preset cooling (Away overrides naptime, uses eco preset with same temp thresholds)
+#   Principle: #8 - Occupancy gates override time-based routines; Away uses eco preset
+#  CORRECT
+#
+# ============================================================================
+# ROUND 7 - Final Timing & Edge Cases
+# ============================================================================
+#
+# Example 36: Preemptive Cooling Before Window Opens
+#   Room: Master Bedroom | Time: 08:30
+#   Season: Summer | Conditions: Door closed, temp 22°C, super_hot_today ON, solar excess
+#   Expected: No preemptive cooling (before 09:00 window, must wait for time window)
+#   Principle: #7 - Preemptive cooling only operates within defined time windows
+#   CORRECT
+
+# Example 37: Preemptive Cooling After Kids Window Closes
+#   Room: Kids Room (Otto) | Time: 18:30
+#   Season: Summer | Conditions: Door closed, temp 23°C, super_hot_today ON, no solar
+#   Expected: No preemptive cooling (after 18:00 window closes for Kids room)
+#   Principle: #7 - Study/Kids preemptive window ends at 18:00, but pre-bedtime logic takes over
+#  CORRECT
+
+# Example 38: Master Bedroom Working From Home Without Solar
+#   Room: Master Bedroom | Time: 13:00
+#   Season: Winter | Conditions: working_from_home ON, door closed, temp 19°C, NO solar excess
+#   Expected: Comfort preset heating activates (WFH comfort does NOT require solar)
+#   Principle: #4 & #7 - Working from home is special occupancy context that bypasses solar requirement
+#  CORRECTED 
+
+# Example 39: Living Room Safety Shutoff After 30 Min Heating
+#   Room: Living Room | Time: 08:00
+#   Season: Winter | Conditions: All doors closed, heating for 30+ min, temp now 20.5°C
+#   Expected: System shuts off (safety shutoff after target reached)
+#   Principle: Living room has special 30-minute heating safety shutoff at 20°C threshold
+#  CORRECT
+
+# Example 40: Pre-Bedtime Master Bedroom in Winter Without Flags
+#   Room: Master Bedroom | Time: 20:40 (pre-bedtime 20:30-21:00)
+#   Season: Winter | Conditions: Door closed, temp 20°C, no hot flags, no solar
+#   Expected: Comfort preset heating (pre-bedtime prep in winter, temp below 21°C threshold)
+#   Principle: #5 - Pre-bedtime windows prepare room based on season/temp, no solar required
+#  CORRECT
+#
+# ============================================================================
+# ROUND 8 - WFH, Seasonal Bias, and Emergency Thresholds
+# ============================================================================
+#
+# Example 41: Working From Home Summer Cooling Without Solar
+#   Room: Master Bedroom | Time: 14:00
+#   Season: Summer | Conditions: working_from_home ON, door closed, temp 25°C, NO solar excess
+#   Expected: Comfort preset cooling activates (WFH bypasses solar for cooling too, emergency threshold)
+#   Principle: #7 - WFH bypasses solar requirements for both heating and cooling
+#  CORRECT
+
+
+# Example 42: Spring Cool Bias with Cold Temperature
+#   Room: Living Room | Time: 14:00
+#   Season: Spring | Conditions: All 3 doors closed, temp 22°C, solar excess available, occupancy Home
+#   Expected: Cooling activates (spring favors cooling, solar + >21°C triggers cooling)
+#   Principle: #6 - Spring cool bias enables cooling at lower thresholds with solar
+#  CORRECT
+
+
+# Example 43: Autumn Heat Bias Overridden by Super Hot
+#   Room: Living Room | Time: 14:00
+#   Season: Autumn | Conditions: All 3 doors closed, temp 22°C, super_hot_today ON, solar excess
+#   Expected: Cooling activates (super_hot overrides autumn heat bias)
+#   Principle: #6 & #7 - Super hot flag overrides seasonal bias when necessary
+#  CORRECT
+
+# Example 44: Master Bedroom Emergency Cooling Without Solar
+#   Room: Master Bedroom | Time: 14:00
+#   Season: Summer | Conditions: Door closed, temp 26°C, NO solar excess, NO hot flags
+#   Expected: Comfort preset cooling activates (emergency threshold >25°C without solar)
+#   Principle: #4 - Emergency cooling threshold >25°C operates without solar requirement
+#  CORRECT
+
+# Example 45: Living Room Frost Mode Only in Winter
+#   Room: Living Room | Time: 23:30 (frost window 22:15-05:30)
+#   Season: Autumn | Conditions: All 3 doors closed, temp 14°C, occupancy Home
+#   Expected: No heating (frost mode only applies in winter season)
+#   Principle: Living room frost mode is winter-only, other seasons require different logic
+#  CORRECT
+#
+# ============================================================================
+# ROUND 9 - Boundary Conditions and Interaction Edge Cases
+# ============================================================================
+#
+# Example 46: Master Bedroom Fan During Dry Mode
+#   Room: Master Bedroom | Time: 14:00
+#   Season: Summer | Conditions: Door closed, temp 21°C, humidity 78%, dry mode activates
+#   Expected: Dry mode activates + fan turns OFF (fan disabled during dry mode like heating)
+#   Principle: Master bedroom fan only runs during cooling mode, not during dry or heat modes
+#  CORRECT
+# Example 47: Naptime Overrides Preemptive Cooling
+#   Room: Kids Room (Otto) | Time: 13:00 (naptime 12:15-16:00)
+#   Season: Summer | Conditions: Door closed, temp 22°C, super_hot_today ON, solar excess
+#   Expected: Naptime comfort cooling applies (naptime window takes precedence over preemptive)
+#   Principle: Time-based windows (naptime, bedtime, pre-bedtime) override flag-based preemptive logic
+#  CORRECTED
+
+# Example 48: Living Room Exactly at Fan-Only Threshold
+#   Room: Living Room | Time: 14:00
+#   Season: Summer | Conditions: All 3 doors closed, temp 21.0°C exactly, solar excess, occupancy Home
+#   Expected: Eco preset fan_only mode (21-22°C range includes boundary at 21°C)
+#   Principle: Temperature thresholds are inclusive at lower bound (21°C triggers fan_only)
+# CORRECT
+
+# Example 49: Pre-Bedtime to Bedtime Transition
+#   Room: Master Bedroom | Time: 21:00 exactly (transition from pre-bedtime to bedtime)
+#   Season: Summer | Conditions: Door closed, temp 24°C, warm_today_flag ON
+#   Expected: Boost preset cooling activates (bedtime logic takes over, boost replaces comfort)
+#   Principle: Bedtime uses boost preset for stronger cooling, pre-bedtime uses comfort preset
+# CORRECT 
+
+# Example 50: Away Mode Eco Preset in Different Seasons
+#   Room: Living Room | Time: 14:00
+#   Season: Winter | Conditions: Occupancy "Away", all 3 doors closed, temp 16°C, no hot flags
+#   Expected: Eco preset heating activates (Away eco preset applies same temp thresholds across seasons)
+#   Principle: #8 - Away mode eco preset behavior is consistent across seasons, only temp thresholds differ
+#  CORRECT
+#
+# ============================================================================
+# ROUND 10 - Window Precedence and Complex Interactions
+# ============================================================================
+#
+# Example 51: Preemptive Cooling Outside Naptime Window
+#   Room: Study (Lucas's room) | Time: 10:00 (outside naptime)
+#   Season: Summer | Conditions: Door closed, temp 22°C, super_hot_today ON, solar excess
+#   Expected: Preemptive cooling activates (naptime not active, preemptive logic applies)
+#   Principle: Preemptive cooling operates normally outside time-based window conflicts
+# CORRECT 
+
+# Example 52: Living Room Emergency Cooling Threshold with One Door Open
+#   Room: Living Room | Time: 19:00
+#   Season: Summer | Conditions: Living room door CLOSED, garage door CLOSED, front door OPEN, temp 26°C
+#   Expected: No cooling (all 3 doors must be closed, even at emergency temp)
+#   Principle: #5 - Door requirements NEVER bypassed, even at emergency temperatures
+# CORRECT
+
+# Example 53: Master Bedroom at Exactly 24°C with Solar
+#   Room: Master Bedroom | Time: 14:00
+#   Season: Summer | Conditions: Door closed, temp 24.0°C exactly, solar excess, no hot flags
+#   Expected: Comfort preset cooling activates (summer threshold is >24°C, boundary is exclusive)
+#   Principle: Temperature threshold >24°C means 24.0°C does NOT trigger, 24.1°C does
+# CORRECT
+
+# Example 54: Kids Room Pre-Bedtime Overriding Preemptive Window
+#   Room: Kids Room (Otto) | Time: 18:35 (pre-bedtime 18:30-18:45)
+#   Season: Summer | Conditions: Door closed, temp 22°C, super_hot_today ON, no solar
+#   Expected: Pre-bedtime comfort cooling (pre-bedtime window overrides preemptive, no solar required)
+#   Principle: Pre-bedtime windows override preemptive cooling and bypass solar requirements
+# CORRECT
+
+# Example 55: Study Room at Exactly 18:00 - Window Boundary
+#   Room: Study (Lucas's room) | Time: 18:00 exactly (preemptive window ends)
+#   Season: Summer | Conditions: Door closed, temp 22°C, super_hot_today ON, solar excess
+#   Expected: No preemptive cooling (window closed at 18:00, transitions to pre-bedtime at 18:30)
+#   Principle: Time windows are exclusive at upper bound (18:00 means preemptive ended)
+# CORRECT
+
+# BEDTIMES:
+# - Kids (Otto & Study occupant): 18:45
+# - Adults (Phil & Steph): 21:00
+# - Naptime window: 12:30 - 16:00
+#
+# ROOM NAMING:
+# - Master Bedroom: Phil & Steph
+# - Living Room: Downstairs living area
+# - Study (Lucas's Room): Previously Henrys Room
+# - Kids Room (Otto's Room): Otto
+#
+################################################################################
+################################################################################
+# MASTER BEDROOM VERSATILE CLIMATE CONTROL
+################################################################################
+
+- id: master_bedroom_versatile_climate_manager
+  alias: HVAC - Master Bedroom Versatile Climate Manager
+  description: >
+    Makes intelligent decisions about WHEN and WHICH MODE (heat/cool/dry/fan_only/off)
+    for master bedroom climate. Assesses humidity, temperature, season, solar, sleep
+    status. Versatile thermostat handles temperature setpoints via presets.
+  triggers:
+    # State-based triggers - fire when conditions change
+    - platform: state
+      entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+      id: temperature_change
+    - platform: state
+      entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+      id: humidity_change
+    - platform: state
+      entity_id: binary_sensor.master_bedroom_door_sensor_opening
+      id: door_change
+    - platform: state
+      entity_id: binary_sensor.solar_excess_available
+      id: solar_change
+    - platform: state
+      entity_id: input_select.climate_season
+      id: season_change
+    - platform: state
+      entity_id: input_select.occupancy
+      id: occupancy_change
+    - platform: state
+      entity_id: binary_sensor.working_from_home
+      id: wfh_change
+    - platform: state
+      entity_id: input_boolean.warm_today_flag
+      id: warm_flag_change
+    - platform: state
+      entity_id: input_boolean.hot_today_flag
+      id: hot_flag_change
+    - platform: state
+      entity_id: input_boolean.super_hot_today
+      id: superhot_flag_change
+    - platform: state
+      entity_id: input_boolean.climate_manual_control_master
+      to: 'off'
+      id: manual_override_off
+    # Time-based triggers - fire at specific times for time windows
+    - platform: time
+      at: "06:00:00"
+      id: morning_frost_end
+    - platform: time
+      at: "09:00:00"
+      id: preemptive_window_start
+    - platform: time
+      at: "20:00:00"
+      id: preemptive_window_end
+    - platform: time
+      at: "20:30:00"
+      id: pre_bedtime_start
+    - platform: time
+      at: "21:00:00"
+      id: bedtime_start
+    # System start
+    - platform: homeassistant
+      event: start
+  conditions: []
+  actions:
+    # STOP CONDITIONS
+    - choose:
+        # Manual override active - stop
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.climate_manual_control_master
+              state: 'on'
+          sequence:
+            - stop: "Master bedroom manual override active"
+
+        # Holiday mode - turn off climate completely
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Holiday
+          sequence:
+            # Only set hvac_mode if not already off (principle 9: minimize beeps)
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.masterbed_versatile_thermostat
+                          state: 'off'
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: 'off'
+            # Only turn off fan if currently on
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: fan.masterbedroom_fan
+                      state: 'on'
+                  sequence:
+                    - service: fan.turn_off
+                      target:
+                        entity_id: fan.masterbedroom_fan
+            - stop: "Holiday mode - climate disabled"
+
+        # Away mode with hot/superhot day - eco mode minimal cooling
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Away
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_boolean.hot_today_flag
+                  state: 'on'
+                - condition: state
+                  entity_id: input_boolean.super_hot_today
+                  state: 'on'
+          sequence:
+            # Only set preset if not already eco (principle 9: minimize beeps)
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.masterbed_versatile_thermostat
+                          attribute: preset_mode
+                          state: eco
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        preset_mode: eco
+            # Only set hvac_mode if not already cool
+            - choose:
+                - conditions:
+                    - condition: not
+                      conditions:
+                        - condition: state
+                          entity_id: climate.masterbed_versatile_thermostat
+                          state: cool
+                  sequence:
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: cool
+            # Only turn off fan if currently on
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: fan.masterbedroom_fan
+                      state: 'on'
+                  sequence:
+                    - service: fan.turn_off
+                      target:
+                        entity_id: fan.masterbedroom_fan
+            - stop: "Away with hot day - eco cooling active"
+
+        # Away mode (not hot day) - turn off climate
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Away
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+            - service: fan.turn_off
+              target:
+                entity_id: fan.masterbedroom_fan
+            - stop: "Away mode - climate disabled"
+
+    # MODE DECISION LOGIC
+    - choose:
+        # BEDTIME MODE (21:00-06:00) - Assess and choose mode
+        - conditions:
+            - condition: time
+              after: "21:00:00"
+              before: "06:00:00"
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
+          sequence:
+            - choose:
+                # Priority 1: High humidity - use dry mode
+                - conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+                      above: 75
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: dry
+
+                # Priority 2: Warm/hot/super hot day - cool with boost for sleep
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_boolean.warm_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.hot_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.super_hot_today
+                          state: 'on'
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        preset_mode: boost
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: cool
+                    - service: fan.set_percentage
+                      target:
+                        entity_id: fan.masterbedroom_fan
+                      data:
+                        percentage: 33
+
+                # Priority 3: Winter cold - heat with frost (nighttime minimum)
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.climate_season
+                      state: winter
+                    - condition: numeric_state
+                      entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                      below: 21
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        preset_mode: frost
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: heat
+                    - service: fan.turn_off
+                      target:
+                        entity_id: fan.masterbedroom_fan
+
+              # Default: Off
+              default:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    hvac_mode: 'off'
+                - service: fan.turn_off
+                  target:
+                    entity_id: fan.masterbedroom_fan
+
+        # PRE-BEDTIME (20:30-21:00) - Prepare room
+        - conditions:
+            - condition: time
+              after: "20:30:00"
+              before: "21:00:00"
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
+            - condition: state
+              entity_id: binary_sensor.master_bedroom_door_sensor_opening
+              state: 'off'
+          sequence:
+            - choose:
+                # High humidity
+                - conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+                      above: 75
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: dry
+
+                # Warm evening - cool
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_boolean.warm_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.hot_today_flag
+                          state: 'on'
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: cool
+
+                # Winter cold - heat
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.climate_season
+                      state: winter
+                    - condition: numeric_state
+                      entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                      below: 21
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: heat
+
+              default:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    hvac_mode: 'off'
+
+        # PREEMPTIVE COOLING - Super hot days (09:00-20:00), lower threshold at 22°C
+        - conditions:
+            - condition: time
+              after: "09:00:00"
+              before: "20:00:00"
+            - condition: state
+              entity_id: input_boolean.super_hot_today
+              state: 'on'
+            - condition: numeric_state
+              entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+              above: 22
+            - condition: state
+              entity_id: binary_sensor.master_bedroom_door_sensor_opening
+              state: 'off'
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: binary_sensor.solar_excess_available
+                      state: 'on'
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: cool
+                    - service: fan.set_percentage
+                      target:
+                        entity_id: fan.masterbedroom_fan
+                      data:
+                        percentage: 33
+              default:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    hvac_mode: 'off'
+
+        # WORKING FROM HOME (08:00-17:00)
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.working_from_home
+              state: 'on'
+            - condition: time
+              after: "08:00:00"
+              before: "17:00:00"
+            - condition: state
+              entity_id: binary_sensor.master_bedroom_door_sensor_opening
+              state: 'off'
+          sequence:
+            - choose:
+                # High humidity
+                - conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+                      above: 75
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: dry
+
+                # Summer cooling - WFH BYPASSES solar requirement
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.climate_season
+                      state: summer
+                    - condition: numeric_state
+                      entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                      above: 24
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: cool
+                    - service: fan.set_percentage
+                      target:
+                        entity_id: fan.masterbedroom_fan
+                      data:
+                        percentage: 33
+
+                # Winter heating - WFH BYPASSES solar requirement
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.climate_season
+                      state: winter
+                    - condition: numeric_state
+                      entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                      below: 21
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: heat
+                    - service: fan.turn_off
+                      target:
+                        entity_id: fan.masterbedroom_fan
+
+                # Spring - favour cooling, WFH bypasses solar
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.climate_season
+                      state: spring
+                    - condition: numeric_state
+                      entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                      above: 24
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: cool
+                    - service: fan.set_percentage
+                      target:
+                        entity_id: fan.masterbedroom_fan
+                      data:
+                        percentage: 33
+
+                # Autumn - favour heating, WFH bypasses solar
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.climate_season
+                      state: autumn
+                  sequence:
+                    - choose:
+                        # Cool-down on extreme heat
+                        - conditions:
+                            - condition: state
+                              entity_id: input_boolean.super_hot_today
+                              state: 'on'
+                            - condition: numeric_state
+                              entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                              above: 24
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                hvac_mode: cool
+                            - service: fan.set_percentage
+                              target:
+                                entity_id: fan.masterbedroom_fan
+                              data:
+                                percentage: 33
+                        # Default bias to heat when cool
+                        - conditions:
+                            - condition: numeric_state
+                              entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                              below: 21
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.masterbed_versatile_thermostat
+                              data:
+                                hvac_mode: heat
+                            - service: fan.turn_off
+                              target:
+                                entity_id: fan.masterbedroom_fan
+                      default:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.masterbed_versatile_thermostat
+                          data:
+                            hvac_mode: 'off'
+
+              default:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    hvac_mode: 'off'
+
+      # DEFAULT - Turn off climate
+      default:
+        - service: climate.set_hvac_mode
+          target:
+            entity_id: climate.masterbed_versatile_thermostat
+          data:
+            hvac_mode: 'off'
+        - service: fan.turn_off
+          target:
+            entity_id: fan.masterbedroom_fan
+  mode: single
+
+################################################################################
+# LIVING ROOM VERSATILE CLIMATE CONTROL
+################################################################################
+
+- id: living_room_versatile_climate_manager
+  alias: HVAC - Living Room Versatile Climate Manager
+  description: >
+    Makes intelligent decisions about WHEN and WHICH MODE (heat/cool/dry/fan_only/off)
+    for living room climate. Includes fan_only mode for 21-22°C in summer. Reactive
+    cooling only (no preemptive). Frost mode after 22:15. Seasonal bias applied.
+  triggers:
+    # State-based triggers - fire when conditions change
+    - platform: state
+      entity_id:
+        - sensor.ble_temperature_kitchen_temp_humidity_sensor
+        - sensor.living_room_temperature_offset
+      id: temperature_change
+    - platform: state
+      entity_id: sensor.ble_humidity_kitchen_temp_humidity_sensor
+      id: humidity_change
+    - platform: state
+      entity_id:
+        - binary_sensor.living_room_door_sensor_opening
+        - binary_sensor.interior_garage_door_sensor_magnet_opening
+        - binary_sensor.front_door_sensor_opening
+      id: door_change
+    - platform: state
+      entity_id: binary_sensor.solar_excess_available
+      id: solar_change
+    - platform: state
+      entity_id: input_select.climate_season
+      id: season_change
+    - platform: state
+      entity_id: input_select.occupancy
+      id: occupancy_change
+    - platform: state
+      entity_id: input_boolean.warm_today_flag
+      id: warm_flag_change
+    - platform: state
+      entity_id: input_boolean.hot_today_flag
+      id: hot_flag_change
+    - platform: state
+      entity_id: input_boolean.super_hot_today
+      id: superhot_flag_change
+    - platform: state
+      entity_id: input_boolean.climate_manual_control_living
+      to: 'off'
+      id: manual_override_off
+    # Time-based triggers - fire at specific times for time windows
+    - platform: time
+      at: "05:30:00"
+      id: preheat_start
+    - platform: time
+      at: "08:00:00"
+      id: preheat_end
+    - platform: time
+      at: "06:00:00"
+      id: daytime_start
+    - platform: time
+      at: "22:15:00"
+      id: frost_start
+    - platform: time
+      at: "05:30:00"
+      id: frost_end
+    # System start
+    - platform: homeassistant
+      event: start
+  conditions: []
+  actions:
+    # STOP CONDITIONS
+    - choose:
+        # Manual override active - stop
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.climate_manual_control_living
+              state: 'on'
+          sequence:
+            - stop: "Living room manual override active"
+
+        # Holiday mode - turn off climate completely
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Holiday
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+            - stop: "Holiday mode - climate disabled"
+
+        # Away mode with hot/superhot day - eco mode minimal cooling
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Away
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_boolean.hot_today_flag
+                  state: 'on'
+                - condition: state
+                  entity_id: input_boolean.super_hot_today
+                  state: 'on'
+          sequence:
+            - service: climate.set_preset_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                preset_mode: eco
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: cool
+            - stop: "Away with hot day - eco cooling active"
+
+        # Away mode (not hot day) - turn off climate
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Away
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+            - stop: "Away mode - climate disabled"
+
+        # SAFETY SHUTOFF - Turn off when target temp reached (after 30 min heating)
+        - conditions:
+            - condition: state
+              entity_id: climate.living_room_versatile_thermostat
+              state: heat
+              for:
+                minutes: 30
+            - condition: or
+              conditions:
+                - condition: numeric_state
+                  entity_id: sensor.living_room_temperature_offset
+                  above: 20
+                - condition: numeric_state
+                  entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                  above: 20
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+            - stop: "Target temperature reached - shutting off"
+
+    # MODE DECISION LOGIC
+    - choose:
+        # FROST MODE (22:15-05:30) - Winter only
+        - conditions:
+            - condition: time
+              after: "22:15:00"
+              before: "05:30:00"
+            - condition: state
+              entity_id: input_select.climate_season
+              state: winter
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
+            # ALL 3 DOORS MUST BE CLOSED
+            - condition: state
+              entity_id: binary_sensor.living_room_door_sensor_opening
+              state: 'off'
+            - condition: state
+              entity_id: binary_sensor.interior_garage_door_sensor_magnet_opening
+              state: 'off'
+            - condition: state
+              entity_id: binary_sensor.front_door_sensor_opening
+              state: 'off'
+          sequence:
+            - service: climate.set_preset_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                preset_mode: frost
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: heat
+
+        # PREHEAT (05:30-08:00) - Temperature-based, winter only
+        - conditions:
+            - condition: time
+              after: "05:30:00"
+              before: "08:00:00"
+            - condition: state
+              entity_id: input_select.climate_season
+              state: winter
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
+            # ALL 3 DOORS MUST BE CLOSED
+            - condition: state
+              entity_id: binary_sensor.living_room_door_sensor_opening
+              state: 'off'
+            - condition: state
+              entity_id: binary_sensor.interior_garage_door_sensor_magnet_opening
+              state: 'off'
+            - condition: state
+              entity_id: binary_sensor.front_door_sensor_opening
+              state: 'off'
+            - condition: or
+              conditions:
+                - condition: numeric_state
+                  entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                  below: 17
+                - condition: numeric_state
+                  entity_id: sensor.living_room_temperature_offset
+                  below: 17
+          sequence:
+            - service: climate.set_preset_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                preset_mode: comfort
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: heat
+
+        # DAYTIME (06:00-22:15) - Assess and choose mode
+        - conditions:
+            - condition: time
+              after: "06:00:00"
+              before: "22:15:00"
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
+            # ALL 3 DOORS MUST BE CLOSED
+            - condition: state
+              entity_id: binary_sensor.living_room_door_sensor_opening
+              state: 'off'
+            - condition: state
+              entity_id: binary_sensor.interior_garage_door_sensor_magnet_opening
+              state: 'off'
+            - condition: state
+              entity_id: binary_sensor.front_door_sensor_opening
+              state: 'off'
+          sequence:
+            - choose:
+                # Priority 1: High humidity
+                - conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.ble_humidity_kitchen_temp_humidity_sensor
+                      above: 75
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.living_room_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_versatile_thermostat
+                      data:
+                        hvac_mode: dry
+
+                # WINTER - Heat only
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.climate_season
+                      state: winter
+                  sequence:
+                    - choose:
+                        # Cold - heat
+                        - conditions:
+                            - condition: or
+                              conditions:
+                                - condition: numeric_state
+                                  entity_id: sensor.living_room_temperature_offset
+                                  below: 17
+                                - condition: numeric_state
+                                  entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                                  below: 17
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                hvac_mode: heat
+                      default:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.living_room_versatile_thermostat
+                          data:
+                            hvac_mode: 'off'
+
+                # SUMMER - Cool or fan only with dual threshold
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.climate_season
+                      state: summer
+                  sequence:
+                    - choose:
+                        # Hot - cool (solar > 21°C OR no solar > 24°C)
+                        - conditions:
+                            - condition: or
+                              conditions:
+                                # Cool with solar if > 21°C
+                                - condition: and
+                                  conditions:
+                                    - condition: state
+                                      entity_id: binary_sensor.solar_excess_available
+                                      state: 'on'
+                                    - condition: or
+                                      conditions:
+                                        - condition: numeric_state
+                                          entity_id: sensor.living_room_temperature_offset
+                                          above: 21
+                                        - condition: numeric_state
+                                          entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                                          above: 21
+                                # Emergency cool without solar if > 24°C
+                                - condition: or
+                                  conditions:
+                                    - condition: numeric_state
+                                      entity_id: sensor.living_room_temperature_offset
+                                      above: 24
+                                    - condition: numeric_state
+                                      entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                                      above: 24
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                hvac_mode: cool
+
+                        # Comfortable range (21-22°C) - fan only
+                        - conditions:
+                            - condition: numeric_state
+                              entity_id: sensor.living_room_temperature_offset
+                              above: 21
+                              below: 22
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                preset_mode: eco
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                hvac_mode: fan_only
+                      default:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.living_room_versatile_thermostat
+                          data:
+                            hvac_mode: 'off'
+
+                # AUTUMN - Favour heat, allow cool if super hot
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.climate_season
+                      state: autumn
+                  sequence:
+                    - choose:
+                        # Cold - heat
+                        - conditions:
+                            - condition: or
+                              conditions:
+                                - condition: numeric_state
+                                  entity_id: sensor.living_room_temperature_offset
+                                  below: 17
+                                - condition: numeric_state
+                                  entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                                  below: 17
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                hvac_mode: heat
+
+                        # Super hot + hot temp - cool with dual threshold
+                        - conditions:
+                            - condition: state
+                              entity_id: input_boolean.super_hot_today
+                              state: 'on'
+                            - condition: or
+                              conditions:
+                                # Cool with solar if > 21°C
+                                - condition: and
+                                  conditions:
+                                    - condition: state
+                                      entity_id: binary_sensor.solar_excess_available
+                                      state: 'on'
+                                    - condition: or
+                                      conditions:
+                                        - condition: numeric_state
+                                          entity_id: sensor.living_room_temperature_offset
+                                          above: 21
+                                        - condition: numeric_state
+                                          entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                                          above: 21
+                                # Emergency cool without solar if > 24°C
+                                - condition: or
+                                  conditions:
+                                    - condition: numeric_state
+                                      entity_id: sensor.living_room_temperature_offset
+                                      above: 24
+                                    - condition: numeric_state
+                                      entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                                      above: 24
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                hvac_mode: cool
+                      default:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.living_room_versatile_thermostat
+                          data:
+                            hvac_mode: 'off'
+
+                # SPRING - Favour cool with dual threshold, allow heat if very cold
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.climate_season
+                      state: spring
+                  sequence:
+                    - choose:
+                        # Hot - cool (solar > 21°C OR no solar > 24°C)
+                        - conditions:
+                            - condition: or
+                              conditions:
+                                # Cool with solar if > 21°C
+                                - condition: and
+                                  conditions:
+                                    - condition: state
+                                      entity_id: binary_sensor.solar_excess_available
+                                      state: 'on'
+                                    - condition: or
+                                      conditions:
+                                        - condition: numeric_state
+                                          entity_id: sensor.living_room_temperature_offset
+                                          above: 21
+                                        - condition: numeric_state
+                                          entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                                          above: 21
+                                # Emergency cool without solar if > 24°C
+                                - condition: or
+                                  conditions:
+                                    - condition: numeric_state
+                                      entity_id: sensor.living_room_temperature_offset
+                                      above: 24
+                                    - condition: numeric_state
+                                      entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                                      above: 24
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                hvac_mode: cool
+
+                        # Very cold - heat
+                        - conditions:
+                            - condition: or
+                              conditions:
+                                - condition: numeric_state
+                                  entity_id: sensor.living_room_temperature_offset
+                                  below: 15
+                                - condition: numeric_state
+                                  entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                                  below: 15
+                          sequence:
+                            - service: climate.set_preset_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                preset_mode: comfort
+                            - service: climate.set_hvac_mode
+                              target:
+                                entity_id: climate.living_room_versatile_thermostat
+                              data:
+                                hvac_mode: heat
+                      default:
+                        - service: climate.set_hvac_mode
+                          target:
+                            entity_id: climate.living_room_versatile_thermostat
+                          data:
+                            hvac_mode: 'off'
+
+              # Default - off
+              default:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.living_room_versatile_thermostat
+                  data:
+                    hvac_mode: 'off'
+
+      # DEFAULT - Turn off
+      default:
+        - service: climate.set_hvac_mode
+          target:
+            entity_id: climate.living_room_versatile_thermostat
+          data:
+            hvac_mode: 'off'
+  mode: single
+
+################################################################################
+# STUDY VERSATILE CLIMATE CONTROL
+################################################################################
+
+- id: study_versatile_climate_manager
+  alias: HVAC - Study Versatile Climate Manager
+  description: >
+    Makes intelligent decisions for the study climate. Includes preemptive cooling
+    on super hot days. Bedtime boost mode for sleep comfort. Naptime comfort cooling.
+  triggers:
+    # State-based triggers - fire when conditions change
+    - platform: state
+      entity_id: sensor.study_esp32_henrysroom_temperature
+      id: temperature_change
+    - platform: state
+      entity_id: sensor.study_esp32_henrysroom_humidity
+      id: humidity_change
+    - platform: state
+      entity_id: binary_sensor.henry_door_sensor_magnet_opening
+      id: door_change
+    - platform: state
+      entity_id: binary_sensor.solar_excess_available
+      id: solar_change
+    - platform: state
+      entity_id: input_select.climate_season
+      id: season_change
+    - platform: state
+      entity_id: input_select.occupancy
+      id: occupancy_change
+    - platform: state
+      entity_id: input_boolean.warm_today_flag
+      id: warm_flag_change
+    - platform: state
+      entity_id: input_boolean.hot_today_flag
+      id: hot_flag_change
+    - platform: state
+      entity_id: input_boolean.super_hot_today
+      id: superhot_flag_change
+    - platform: state
+      entity_id: input_boolean.climate_manual_control_study
+      to: 'off'
+      id: manual_override_off
+    # Time-based triggers - fire at specific times for time windows
+    - platform: time
+      at: "06:00:00"
+      id: morning_start
+    - platform: time
+      at: "09:00:00"
+      id: preemptive_window_start
+    - platform: time
+      at: "18:00:00"
+      id: preemptive_window_end
+    - platform: time
+      at: "12:15:00"
+      id: naptime_start
+    - platform: time
+      at: "16:00:00"
+      id: naptime_end
+    - platform: time
+      at: "18:30:00"
+      id: pre_bedtime_start
+    - platform: time
+      at: "18:45:00"
+      id: bedtime_start
+    # System start
+    - platform: homeassistant
+      event: start
+  conditions: []
+  actions:
+    # STOP CONDITIONS
+    - choose:
+        # Manual override active - stop
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.climate_manual_control_study
+              state: 'on'
+          sequence:
+            - stop: "Study manual override active"
+
+        # Holiday mode
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Holiday
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+            - stop: "Holiday mode - climate disabled"
+
+        # Away + hot/superhot - eco cooling
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Away
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_boolean.hot_today_flag
+                  state: 'on'
+                - condition: state
+                  entity_id: input_boolean.super_hot_today
+                  state: 'on'
+          sequence:
+            - service: climate.set_preset_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                preset_mode: eco
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: cool
+            - stop: "Away with hot day - eco cooling active"
+
+        # Away - turn off
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Away
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+            - stop: "Away mode - climate disabled"
+
+    # MODE DECISION LOGIC
+    - choose:
+        # BEDTIME (18:45-06:00) - Boost cooling only when hot
+        - conditions:
+            - condition: time
+              after: "18:45:00"
+              before: "06:00:00"
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_boolean.warm_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.hot_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.super_hot_today
+                          state: 'on'
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        preset_mode: boost
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: cool
+              default:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.henry_s_room_versatile_thermostat
+                  data:
+                    hvac_mode: 'off'
+
+        # PRE-BEDTIME (18:30-18:45) - Prepare room, NO SOLAR REQUIRED
+        - conditions:
+            - condition: time
+              after: "18:30:00"
+              before: "18:45:00"
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
+            - condition: state
+              entity_id: binary_sensor.henry_door_sensor_magnet_opening
+              state: 'off'
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.study_esp32_henrysroom_humidity
+                      above: 75
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: dry
+                # PRE-BEDTIME COOLING - NO solar requirement
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_boolean.warm_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.hot_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.super_hot_today
+                          state: 'on'
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: cool
+                # PRE-BEDTIME HEATING - NO solar requirement
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: winter
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: autumn
+                    - condition: numeric_state
+                      entity_id: sensor.study_esp32_henrysroom_temperature
+                      below: 21
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: heat
+              default:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.henry_s_room_versatile_thermostat
+                  data:
+                    hvac_mode: 'off'
+
+        # NAPTIME (12:15-16:00) - Maintain comfort, NO SOLAR REQUIRED
+        - conditions:
+            - condition: time
+              after: "12:15:00"
+              before: "16:00:00"
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
+            - condition: state
+              entity_id: binary_sensor.henry_door_sensor_magnet_opening
+              state: 'off'
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.study_esp32_henrysroom_humidity
+                      above: 75
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: dry
+                # NAPTIME COOLING - NO solar requirement
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_boolean.warm_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.hot_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.super_hot_today
+                          state: 'on'
+                        - condition: numeric_state
+                          entity_id: sensor.study_esp32_henrysroom_temperature
+                          above: 24
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: cool
+                # NAPTIME HEATING - NO solar requirement
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: autumn
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: winter
+                    - condition: numeric_state
+                      entity_id: sensor.study_esp32_henrysroom_temperature
+                      below: 21
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: heat
+              default:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.henry_s_room_versatile_thermostat
+                  data:
+                    hvac_mode: 'off'
+
+        # PREEMPTIVE COOLING - Super hot days (09:00-18:00), threshold at 22°C
+        - conditions:
+            - condition: time
+              after: "09:00:00"
+              before: "18:00:00"
+            - condition: state
+              entity_id: input_boolean.super_hot_today
+              state: 'on'
+            - condition: numeric_state
+              entity_id: sensor.study_esp32_henrysroom_temperature
+              above: 22
+            - condition: state
+              entity_id: binary_sensor.solar_excess_available
+              state: 'on'
+            - condition: state
+              entity_id: binary_sensor.henry_door_sensor_magnet_opening
+              state: 'off'
+          sequence:
+            - service: climate.set_preset_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                preset_mode: comfort
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: cool
+
+        # DAYTIME COMFORT CONTROL (06:00-18:30)
+        - conditions:
+            - condition: time
+              after: "06:00:00"
+              before: "18:30:00"
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
+            - condition: state
+              entity_id: binary_sensor.henry_door_sensor_magnet_opening
+              state: 'off'
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.study_esp32_henrysroom_humidity
+                      above: 75
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: dry
+                - conditions:
+                    - condition: state
+                      entity_id: binary_sensor.solar_excess_available
+                      state: 'on'
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_boolean.warm_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.hot_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.super_hot_today
+                          state: 'on'
+                        - condition: numeric_state
+                          entity_id: sensor.study_esp32_henrysroom_temperature
+                          above: 24
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: cool
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: autumn
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: winter
+                    - condition: numeric_state
+                      entity_id: sensor.study_esp32_henrysroom_temperature
+                      below: 21
+                    - condition: state
+                      entity_id: binary_sensor.solar_excess_available
+                      state: 'on'
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: heat
+              default:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.henry_s_room_versatile_thermostat
+                  data:
+                    hvac_mode: 'off'
+
+      # DEFAULT - Turn off
+      default:
+        - service: climate.set_hvac_mode
+          target:
+            entity_id: climate.henry_s_room_versatile_thermostat
+          data:
+            hvac_mode: 'off'
+  mode: single
+
+################################################################################
+# KIDS ROOM (OTTO'S ROOM) VERSATILE CLIMATE CONTROL
+################################################################################
+
+- id: kids_room_versatile_climate_manager
+  alias: HVAC - Kids Room (Otto) Versatile Climate Manager
+  description: >
+    Makes intelligent decisions for Otto's room climate. Includes preemptive cooling
+    on super hot days. Bedtime boost mode for sleep comfort. Naptime comfort cooling.
+  triggers:
+    # State-based triggers - fire when conditions change
+    - platform: state
+      entity_id: sensor.study_esp32_ottosroom_temperature
+      id: temperature_change
+    - platform: state
+      entity_id: sensor.study_esp32_ottosroom_humidity
+      id: humidity_change
+    - platform: state
+      entity_id: binary_sensor.otto_room_door_sensor_opening
+      id: door_change
+    - platform: state
+      entity_id: binary_sensor.solar_excess_available
+      id: solar_change
+    - platform: state
+      entity_id: input_select.climate_season
+      id: season_change
+    - platform: state
+      entity_id: input_select.occupancy
+      id: occupancy_change
+    - platform: state
+      entity_id: input_boolean.warm_today_flag
+      id: warm_flag_change
+    - platform: state
+      entity_id: input_boolean.hot_today_flag
+      id: hot_flag_change
+    - platform: state
+      entity_id: input_boolean.super_hot_today
+      id: superhot_flag_change
+    - platform: state
+      entity_id: input_boolean.climate_manual_control_otto
+      to: 'off'
+      id: manual_override_off
+    # Time-based triggers - fire at specific times for time windows
+    - platform: time
+      at: "06:00:00"
+      id: morning_start
+    - platform: time
+      at: "09:00:00"
+      id: preemptive_window_start
+    - platform: time
+      at: "18:00:00"
+      id: preemptive_window_end
+    - platform: time
+      at: "12:15:00"
+      id: naptime_start
+    - platform: time
+      at: "16:00:00"
+      id: naptime_end
+    - platform: time
+      at: "18:30:00"
+      id: pre_bedtime_start
+    - platform: time
+      at: "18:45:00"
+      id: bedtime_start
+    # System start
+    - platform: homeassistant
+      event: start
+  conditions: []
+  actions:
+    # STOP CONDITIONS
+    - choose:
+        # Manual override active - stop
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.climate_manual_control_otto
+              state: 'on'
+          sequence:
+            - stop: "Otto's room manual override active"
+
+        # Holiday mode
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Holiday
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: 'off'
+            - stop: "Holiday mode - climate disabled"
+
+        # Away + hot/superhot - eco cooling
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Away
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_boolean.hot_today_flag
+                  state: 'on'
+                - condition: state
+                  entity_id: input_boolean.super_hot_today
+                  state: 'on'
+          sequence:
+            - service: climate.set_preset_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                preset_mode: eco
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: cool
+            - stop: "Away with hot day - eco cooling active"
+
+        # Away - turn off
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Away
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: 'off'
+            - stop: "Away mode - climate disabled"
+
+    # MODE DECISION LOGIC
+    - choose:
+        # BEDTIME (18:45-06:00) - Boost cooling only when hot
+        - conditions:
+            - condition: time
+              after: "18:45:00"
+              before: "06:00:00"
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_boolean.warm_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.hot_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.super_hot_today
+                          state: 'on'
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        preset_mode: boost
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: cool
+
+        # PRE-BEDTIME (18:30-18:45) - Prepare room, NO SOLAR REQUIRED
+        - conditions:
+            - condition: time
+              after: "18:30:00"
+              before: "18:45:00"
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
+            - condition: state
+              entity_id: binary_sensor.otto_room_door_sensor_opening
+              state: 'off'
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.study_esp32_ottosroom_humidity
+                      above: 75
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: dry
+                # PRE-BEDTIME COOLING - NO solar requirement
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_boolean.warm_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.hot_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.super_hot_today
+                          state: 'on'
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: cool
+                # PRE-BEDTIME HEATING - NO solar requirement
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: winter
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: autumn
+                    - condition: numeric_state
+                      entity_id: sensor.study_esp32_ottosroom_temperature
+                      below: 21
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: heat
+              default:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.otto_s_room
+                  data:
+                    hvac_mode: 'off'
+
+        # NAPTIME (12:15-16:00) - Maintain comfort, NO SOLAR REQUIRED
+        - conditions:
+            - condition: time
+              after: "12:15:00"
+              before: "16:00:00"
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
+            - condition: state
+              entity_id: binary_sensor.otto_room_door_sensor_opening
+              state: 'off'
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.study_esp32_ottosroom_humidity
+                      above: 75
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: dry
+                # NAPTIME COOLING - NO solar requirement
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_boolean.warm_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.hot_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.super_hot_today
+                          state: 'on'
+                        - condition: numeric_state
+                          entity_id: sensor.study_esp32_ottosroom_temperature
+                          above: 24
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: cool
+                # NAPTIME HEATING - NO solar requirement
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: autumn
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: winter
+                    - condition: numeric_state
+                      entity_id: sensor.study_esp32_ottosroom_temperature
+                      below: 21
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: heat
+              default:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.otto_s_room
+                  data:
+                    hvac_mode: 'off'
+
+        # PREEMPTIVE COOLING - Super hot days (09:00-18:00), threshold at 22°C
+        - conditions:
+            - condition: time
+              after: "09:00:00"
+              before: "18:00:00"
+            - condition: state
+              entity_id: input_boolean.super_hot_today
+              state: 'on'
+            - condition: numeric_state
+              entity_id: sensor.study_esp32_ottosroom_temperature
+              above: 22
+            - condition: state
+              entity_id: binary_sensor.solar_excess_available
+              state: 'on'
+            - condition: state
+              entity_id: binary_sensor.otto_room_door_sensor_opening
+              state: 'off'
+         sequence:
+            - service: climate.set_preset_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                preset_mode: comfort
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: cool
+
+        # DAYTIME COMFORT CONTROL (06:00-18:30)
+        - conditions:
+            - condition: time
+              after: "06:00:00"
+              before: "18:30:00"
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
+            - condition: state
+              entity_id: binary_sensor.otto_room_door_sensor_opening
+              state: 'off'
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.study_esp32_ottosroom_humidity
+                      above: 75
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: dry
+                - conditions:
+                    - condition: state
+                      entity_id: binary_sensor.solar_excess_available
+                      state: 'on'
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_boolean.warm_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.hot_today_flag
+                          state: 'on'
+                        - condition: state
+                          entity_id: input_boolean.super_hot_today
+                          state: 'on'
+                        - condition: numeric_state
+                          entity_id: sensor.study_esp32_ottosroom_temperature
+                          above: 24
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: cool
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: autumn
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: winter
+                    - condition: state
+                      entity_id: binary_sensor.solar_excess_available
+                      state: 'on'
+                    - condition: numeric_state
+                      entity_id: sensor.study_esp32_ottosroom_temperature
+                      below: 21
+                  sequence:
+                    - service: climate.set_preset_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        preset_mode: comfort
+                    - service: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: heat
+              default:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.otto_s_room
+                  data:
+                    hvac_mode: 'off'
+
+      # DEFAULT - Turn off
+      default:
+        - service: climate.set_hvac_mode
+          target:
+            entity_id: climate.otto_s_room
+          data:
+            hvac_mode: 'off'
+  mode: single
+
+################################################################################
+# MASTER BEDROOM BLINDS CONTROL
+################################################################################
+
+- id: master_bedroom_blinds_climate_control
+  alias: HVAC - Master Bedroom Blinds Temperature Control
+  description: >
+    Controls master bedroom blinds for passive temperature management based on
+    season, time of day, and hot day flags. This is NON-versatile-climate control.
+  triggers:
+    - platform: time
+      at: "06:00:00"
+      id: morning
+    - platform: time
+      at: "15:00:00"
+      id: afternoon
+    - platform: time
+      at: "20:00:00"
+      id: evening
+    - platform: state
+      entity_id: input_boolean.hot_today_flag
+      to: 'on'
+      id: hot_day
+    - platform: state
+      entity_id: input_boolean.super_hot_today
+      to: 'on'
+      id: super_hot_day
+    - platform: homeassistant
+      event: start
+  conditions:
+    - condition: state
+      entity_id: input_boolean.blind_manual_control
+      state: 'off'
+  actions:
+    - choose:
+        # HOT DAY - Keep blinds closed during day
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_boolean.hot_today_flag
+                  state: 'on'
+                - condition: state
+                  entity_id: input_boolean.super_hot_today
+                  state: 'on'
+            - condition: time
+              after: "06:00:00"
+              before: "20:00:00"
+          sequence:
+            - service: cover.close_cover
+              target:
+                entity_id: cover.roller_blinds_chan1
+
+        # WINTER - Open blinds during day for passive solar heating
+        - conditions:
+            - condition: state
+              entity_id: input_select.climate_season
+              state: winter
+            - condition: time
+              after: "06:00:00"
+              before: "15:00:00"
+          sequence:
+            - service: cover.open_cover
+              target:
+                entity_id: cover.roller_blinds_chan1
+
+        # EVENING - Open blinds after hot afternoon
+        - conditions:
+            - condition: time
+              after: "20:00:00"
+              before: "06:00:00"
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_boolean.hot_today_flag
+                  state: 'on'
+                - condition: state
+                  entity_id: input_boolean.super_hot_today
+                  state: 'on'
+          sequence:
+            - service: cover.open_cover
+              target:
+                entity_id: cover.roller_blinds_chan1
+
+      # DEFAULT - Close blinds at night
+      default:
+        - condition: time
+          after: "20:00:00"
+          before: "06:00:00"
+        - service: cover.close_cover
+          target:
+            entity_id: cover.roller_blinds_chan1
+  mode: single
+
+################################################################################
+# MASTER BEDROOM FAN CONTROL
+################################################################################
+
+- id: master_bedroom_fan_climate_control
+  alias: HVAC - Master Bedroom Fan Sync with Climate
+  description: >
+    Synchronizes master bedroom fan with versatile thermostat state.
+    Fan turns off when heating, adjusts speed when cooling.
+  triggers:
+    - platform: state
+      entity_id: climate.masterbed_versatile_thermostat
+      to: cool
+      id: cooling_started
+    - platform: state
+      entity_id: climate.masterbed_versatile_thermostat
+      to: heat
+      id: heating_started
+    - platform: state
+      entity_id: climate.masterbed_versatile_thermostat
+      to: 'off'
+      id: climate_off
+  conditions: []
+  actions:
+    - choose:
+        # Cooling started - turn on fan at low speed if not already on
+        - conditions:
+            - condition: trigger
+              id: cooling_started
+            - condition: state
+              entity_id: fan.masterbedroom_fan
+              state: 'off'
+          sequence:
+            - service: fan.set_percentage
+              target:
+                entity_id: fan.masterbedroom_fan
+              data:
+                percentage: 33
+
+        # Heating started - turn off fan
+        - conditions:
+            - condition: trigger
+              id: heating_started
+          sequence:
+            - service: fan.turn_off
+              target:
+                entity_id: fan.masterbedroom_fan
+
+        # Climate turned off - turn off fan
+        - conditions:
+            - condition: trigger
+              id: climate_off
+          sequence:
+            - service: fan.turn_off
+              target:
+                entity_id: fan.masterbedroom_fan
+  mode: single
+
+################################################################################
+# SUPPLEMENTARY AUTOMATIONS TO KEEP
+################################################################################
+
+# These existing automations support the new system and should be KEPT:
+# - Climate Flags - Mark Hot Day (id: '1057')
+# - Climate - Auto Detect Season (id: '1729000000000')
+# - Climate - Track Downstairs Door State (id: '1710137210171')
+# - Smart Climate Notification - Living Room (id: '1128')
+# - Smart Climate Notification - Master Bedroom (id: '1167')
+# - Handle Climate Notification Action - Living Room (id: '1214')
+# - Handle Climate Notification Action - Master Bedroom (id: '1239')
+# - Automation Tracker - Manual Climate Control (Living Room) (id: '1304')
+# - Automation Tracker - Manual Climate Control (Master Bedroom) (id: '1325')
+# - Automation Tracker - Manual Climate Control (Otto's Room) (id: '1346')
+# - Automation Tracker - Manual Climate Control (Study (Henry's Room)) (id: '1367')
+
+################################################################################
+# OLD AUTOMATIONS TO REMOVE FROM automations.yaml
+################################################################################
+
+# These automations should be DELETED as they are replaced by the new system:
+# - id: '1665308479762' (Living Room - Preheat at 5 30 AM if Cold) - INCORPORATED
+# - id: '1746997822978' (Living Room - Turn Off Heater When Warm) - INCORPORATED
+# - id: '1752139587383' (Living Room - Heater Off Overnight)
+# - id: '1747862856741' (Living Room - Night Temperature Setback)
+# - id: '1714337117111' (Master Bedroom - Turn Off AC on Wake)
+# - id: '1699526539731' (Master Bedroom - Fan On When AC Starts) - REPLACED
+# - id: '1428...' line range (Master Bedroom - Seasonal Climate Manager)
+# - id: hot_night_bedroom_cooling (Bedrooms - Overnight AC on Hot Days)
+# - id: hot_night_bedroom_cooling_off (Bedrooms - Turn Off Overnight AC)
+
+################################################################################
+# END OF NEW HVAC AUTOMATIONS
+################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

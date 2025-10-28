@@ -3,23 +3,23 @@ default_config:
 
 # Customize entities
 homeassistant:
-  customize: !include customize.yaml
+  customize: !include config/support/customize.yaml
 
 # Text to speech
 tts:
   - platform: google_translate
 
-sensor: !include mysensors.yaml
-group: !include groups.yaml
-automation: !include automations.yaml
-script: !include scripts.yaml
-scene: !include scenes.yaml
-climate: !include climate.yaml
-fan: !include fan.yaml
-media_player: !include media_player.yaml
-template: !include templates.yaml
-mqtt: !include mqtt.yaml
-notify: !include notifications.yaml
+sensor: !include config/domains/mysensors.yaml
+group: !include config/domains/groups.yaml
+automation: !include config/domains/automations.yaml
+script: !include config/domains/scripts.yaml
+scene: !include config/domains/scenes.yaml
+climate: !include config/domains/climate.yaml
+fan: !include config/domains/fan.yaml
+media_player: !include config/domains/media_player.yaml
+template: !include config/domains/templates.yaml
+mqtt: !include config/domains/mqtt.yaml
+notify: !include config/domains/notifications.yaml
 
 lovelace:
   mode: yaml
