@@ -1,0 +1,36 @@
+esphome:
+  name: masterbedroom
+  friendly_name: MasterBedroom
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "ivMau3VcQdvM3sjXn53rXPms7jqnwgnd6VgKWV6H8Yk="
+
+ota:
+  - platform: esphome
+    password: "e29fbd2257cc4ef8a16077a3be033311"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Masterbedroom Fallback Hotspot"
+    password: "UMbGmSYjCw4d"
+
+captive_portal:
+
+
+bluetooth_proxy:
+
+esp32_ble_tracker:
