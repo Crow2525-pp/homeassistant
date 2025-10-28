@@ -1334,7 +1334,7 @@
       state: >
         {% set is_weekday = now().weekday() in [0, 1, 2, 3, 4] %}
         {% set is_work_hours = now().hour >= 8 and now().hour < 17 %}
-        {% set at_work = is_state('person.phil_patterson', 'work') %}
+        {% set at_work = states('zone.work') | int(0) == 1 %}
         {{ is_weekday and is_work_hours and at_work }}
       icon: >
         {% if is_state('binary_sensor.working_at_office', 'on') %}
@@ -1345,19 +1345,10 @@
       attributes:
         is_weekday: "{{ now().weekday() in [0, 1, 2, 3, 4] }}"
         is_work_hours: "{{ now().hour >= 8 and now().hour < 17 }}"
-        person_at_work: "{{ is_state('person.phil_patterson', 'work') }}"
-        person_location: "{{ states('person.phil_patterson') }}"
+        zone_occupancy: "{{ states('zone.work') }}"
+        zone_occupied: "{{ states('zone.work') | int(0) == 1 }}"
         current_time: "{{ now().strftime('%A, %H:%M:%S') }}"
-        time_window_reason: "{% set at_work = is_state('person.phil_patterson', 'work') %}{% if not at_work %}Not at work zone{% elif not (now().weekday() in [0, 1, 2, 3, 4]) %}Weekend{% elif not (now().hour >= 8 and now().hour < 17) %}Outside work hours (8am-5pm), currently {{ now().hour }}:{{ now().minute | string | default('00', true) }}{% else %}All conditions met{% endif %}"
-
-    - name: "At Work Zone Only"
-      unique_id: at_work_zone_only
-      state: "{{ is_state('person.phil_patterson', 'work') }}"
-      icon: "{% if is_state('person.phil_patterson', 'work') %}mdi:map-marker{% else %}mdi:map-marker-off{% endif %}"
-      attributes:
-        person_location: "{{ states('person.phil_patterson') }}"
-        timestamp: "{{ now().strftime('%A, %Y-%m-%d %H:%M:%S') }}"
-        description: "Tracks if person is at work zone, regardless of time (for debugging)"
+        time_window_reason: "{% set at_work = states('zone.work') | int(0) == 1 %}{% if not at_work %}Zone.work is '{{ states('zone.work') }}' (expecting 1){% elif not (now().weekday() in [0, 1, 2, 3, 4]) %}Weekend{% elif not (now().hour >= 8 and now().hour < 17) %}Outside work hours (8am-5pm), currently {{ now().hour }}:{{ now().minute | string | default('00', true) }}{% else %}All conditions met{% endif %}"
 
 - sensor:
     # Last 4 weeks counts
@@ -1370,6 +1361,24 @@
       state: "{{ (states('sensor.office_days_last_4_weeks') | float(0) / 9) | round(1) }}"
       unit_of_measurement: "days"
       icon: mdi:office-building
+
+    - name: "Office Zone Debug"
+      unique_id: office_zone_debug
+      state: "{{ states('zone.work') }}"
+      icon: mdi:map-marker-check
+      attributes:
+        zone_name: "zone.work"
+        zone_latitude: "{{ state_attr('zone.work', 'latitude') }}"
+        zone_longitude: "{{ state_attr('zone.work', 'longitude') }}"
+        zone_radius_m: "{{ state_attr('zone.work', 'radius') }}"
+        person_current_state: "{{ states('person.phil_patterson') }}"
+        person_friendly_name: "{{ state_attr('person.phil_patterson', 'friendly_name') }}"
+        primary_device_tracker: "{{ state_attr('person.phil_patterson', 'device_trackers') | join(', ') if state_attr('person.phil_patterson', 'device_trackers') else 'None' }}"
+        sm_s908e_state: "{{ states('device_tracker.sm_s908e') }}"
+        sm_s908e_lat: "{{ state_attr('device_tracker.sm_s908e', 'latitude') }}"
+        sm_s908e_lon: "{{ state_attr('device_tracker.sm_s908e', 'longitude') }}"
+        sm_s908e_gps_accuracy: "{{ state_attr('device_tracker.sm_s908e', 'gps_accuracy') }}"
+        sm_s908e_source: "{{ state_attr('device_tracker.sm_s908e', 'source') }}"
 
     - name: "Total Work Days Count"
       state: "{{ ((states('sensor.wfh_days_last_4_weeks') | float(0) + states('sensor.office_days_last_4_weeks') | float(0)) / 9) | round(1) }}"

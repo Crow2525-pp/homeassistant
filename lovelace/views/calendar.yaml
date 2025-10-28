@@ -93,8 +93,12 @@ cards:
       **Conditions:**
       - Weekday: {{ state_attr('binary_sensor.working_at_office', 'is_weekday') }}
       - Work Hours (8am-5pm): {{ state_attr('binary_sensor.working_at_office', 'is_work_hours') }}
-      - At Work Zone: {{ state_attr('binary_sensor.working_at_office', 'person_at_work') }}
-      - Location: {{ state_attr('binary_sensor.working_at_office', 'person_location') }}
+      - Zone Occupied: {{ state_attr('binary_sensor.working_at_office', 'zone_occupied') }}
+
+      **Zone Data:**
+      - Zone.work State: `{{ states('zone.work') }}`
+      - Zone Occupancy: {{ state_attr('binary_sensor.working_at_office', 'zone_occupancy') }}
+      - Expected Value: `1` (someone in zone)
 
       **Tracking Data:**
       - Hours Last 4 Weeks: {{ states('sensor.office_days_last_4_weeks') }}
