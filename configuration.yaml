@@ -337,10 +337,11 @@ input_select:
     icon: mdi:weather-partly-cloudy
   occupancy:
     name: Occupancy Mode
-    options:
-      - Home
-      - Away
-      - Holiday
+  options:
+    - Home
+    - Away
+    - Holiday
+    - Sleeping
     initial: Home
     icon: mdi:home-account
 
