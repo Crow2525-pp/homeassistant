@@ -39,3 +39,5 @@ esphome/secrets.yaml
 !config/**
 !docs/
 !docs/**
+!automations/
+!automations/**
