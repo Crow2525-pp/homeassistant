@@ -598,6 +598,135 @@
             normal
           {% endif %}
 
+- sensor:
+    - name: "Master Bedroom Comfort Delta"
+      unique_id: master_bedroom_comfort_delta
+      unit_of_measurement: "°C"
+      device_class: temperature
+      icon: mdi:thermometer-auto
+      state: >
+        {% set inside_state = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') %}
+        {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
+        {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
+          unknown
+        {% else %}
+          {{ (inside_state | float - outside_state | float) | round(1) }}
+        {% endif %}
+      attributes:
+        inside_temperature: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        outside_temperature: "{{ state_attr('weather.braybrook', 'temperature') }}"
+        bias: >
+          {% set inside_state = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') %}
+          {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
+          {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
+            unknown
+          {% else %}
+            {% set delta = (inside_state | float - outside_state | float) %}
+            {% if delta > 1.5 %}
+              cooling
+            {% elif delta < -1.5 %}
+              heating
+            {% else %}
+              balanced
+            {% endif %}
+          {% endif %}
+
+    - name: "Living Room Comfort Delta"
+      unique_id: living_room_comfort_delta
+      unit_of_measurement: "°C"
+      device_class: temperature
+      icon: mdi:thermometer-auto
+      state: >
+        {% set inside_state = states('sensor.living_room_temperature_offset') %}
+        {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
+        {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
+          unknown
+        {% else %}
+          {{ (inside_state | float - outside_state | float) | round(1) }}
+        {% endif %}
+      attributes:
+        inside_temperature: "{{ states('sensor.living_room_temperature_offset') }}"
+        outside_temperature: "{{ state_attr('weather.braybrook', 'temperature') }}"
+        bias: >
+          {% set inside_state = states('sensor.living_room_temperature_offset') %}
+          {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
+          {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
+            unknown
+          {% else %}
+            {% set delta = (inside_state | float - outside_state | float) %}
+            {% if delta > 1.5 %}
+              cooling
+            {% elif delta < -1.5 %}
+              heating
+            {% else %}
+              balanced
+            {% endif %}
+          {% endif %}
+
+    - name: "Lucas Room Comfort Delta"
+      unique_id: lucas_room_comfort_delta
+      unit_of_measurement: "°C"
+      device_class: temperature
+      icon: mdi:thermometer-auto
+      state: >
+        {% set inside_state = states('sensor.study_esp32_henrysroom_temperature') %}
+        {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
+        {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
+          unknown
+        {% else %}
+          {{ (inside_state | float - outside_state | float) | round(1) }}
+        {% endif %}
+      attributes:
+        inside_temperature: "{{ states('sensor.study_esp32_henrysroom_temperature') }}"
+        outside_temperature: "{{ state_attr('weather.braybrook', 'temperature') }}"
+        bias: >
+          {% set inside_state = states('sensor.study_esp32_henrysroom_temperature') %}
+          {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
+          {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
+            unknown
+          {% else %}
+            {% set delta = (inside_state | float - outside_state | float) %}
+            {% if delta > 1.5 %}
+              cooling
+            {% elif delta < -1.5 %}
+              heating
+            {% else %}
+              balanced
+            {% endif %}
+          {% endif %}
+
+    - name: "Otto Room Comfort Delta"
+      unique_id: otto_room_comfort_delta
+      unit_of_measurement: "°C"
+      device_class: temperature
+      icon: mdi:thermometer-auto
+      state: >
+        {% set inside_state = states('sensor.study_esp32_ottosroom_temperature') %}
+        {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
+        {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
+          unknown
+        {% else %}
+          {{ (inside_state | float - outside_state | float) | round(1) }}
+        {% endif %}
+      attributes:
+        inside_temperature: "{{ states('sensor.study_esp32_ottosroom_temperature') }}"
+        outside_temperature: "{{ state_attr('weather.braybrook', 'temperature') }}"
+        bias: >
+          {% set inside_state = states('sensor.study_esp32_ottosroom_temperature') %}
+          {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
+          {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
+            unknown
+          {% else %}
+            {% set delta = (inside_state | float - outside_state | float) %}
+            {% if delta > 1.5 %}
+              cooling
+            {% elif delta < -1.5 %}
+              heating
+            {% else %}
+              balanced
+            {% endif %}
+          {% endif %}
+
 - binary_sensor:
     # Quick action button helpers
     - name: "Show Good Morning Button"

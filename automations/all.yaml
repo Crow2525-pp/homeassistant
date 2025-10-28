@@ -340,9 +340,9 @@
         'open') %}{% set issues = issues + ['\U0001F697 Garage door open'] %}{% endif
         %}\n{% if is_state('binary_sensor.downstairs_doors', 'on') %}{% set issues
         = issues + ['\U0001F6AA Door open downstairs'] %}{% endif %}\n{% if states('climate.living_room_versatile_thermastat')
-        in ['cool', 'heat'] %}{% set issues = issues + ['Γ¥ä∩╕Å Living room AC still on']
+        in ['cool', 'heat'] %}{% set issues = issues + ['❄️ Living room AC still on']
         %}{% endif %}\n{% if issues | length > 0 %}{{ issues | join('\\n') }}{% else
-        %}Γ£à All secure - sleep well!{% endif %}\n"
+        %}✅ All secure - sleep well!{% endif %}\n"
   mode: single
 - id: front_door_camera_motion_detection
   alias: Front Door Camera - Motion Detection
@@ -1128,6 +1128,15 @@
   - action: input_number.increment
     target:
       entity_id: input_number.climate_flags_mark_hot_day_triggers_today
+  - action: input_boolean.turn_off
+    target:
+      entity_id:
+        - input_boolean.super_hot_today
+        - input_boolean.hot_today_flag
+        - input_boolean.warm_today_flag
+        - input_boolean.cool_today_flag
+        - input_boolean.cold_today_flag
+        - input_boolean.super_cold_today
   - choose:
     - conditions:
       - condition: numeric_state
@@ -1257,12 +1266,21 @@
     id: afternoon_check
   conditions: []
   actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id:
+        - input_boolean.super_hot_today
+        - input_boolean.hot_today_flag
+        - input_boolean.warm_today_flag
+        - input_boolean.cool_today_flag
+        - input_boolean.cold_today_flag
+        - input_boolean.super_cold_today
   - choose:
     - conditions:
       - condition: numeric_state
         entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
         above: 26
-        alias: Actual Temp >26┬░C (Super Hot)
+        alias: Actual Temp >26°C (Super Hot)
       sequence:
       - service: input_boolean.turn_on
         target:
@@ -1279,7 +1297,7 @@
         entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
         above: 24
         below: 26
-        alias: Actual Temp 24-26┬░C (Hot)
+        alias: Actual Temp 24-26°C (Hot)
       sequence:
       - service: input_boolean.turn_on
         target:
@@ -1296,7 +1314,7 @@
         entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
         above: 20
         below: 24
-        alias: Actual Temp 20-24┬░C (Warm)
+        alias: Actual Temp 20-24°C (Warm)
       sequence:
       - service: input_boolean.turn_on
         target:
@@ -1312,7 +1330,7 @@
       - condition: numeric_state
         entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
         below: 5
-        alias: Actual Temp <5┬░C (Super Cold)
+        alias: Actual Temp <5°C (Super Cold)
       sequence:
       - service: input_boolean.turn_on
         target:
@@ -1332,7 +1350,7 @@
         entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
         above: 5
         below: 10
-        alias: Actual Temp 5-10┬░C (Cold)
+        alias: Actual Temp 5-10°C (Cold)
       sequence:
       - service: input_boolean.turn_on
         target:
@@ -1352,7 +1370,7 @@
         entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
         above: 10
         below: 15
-        alias: Actual Temp 10-15┬░C (Cool)
+        alias: Actual Temp 10-15°C (Cool)
       sequence:
       - service: input_boolean.turn_on
         target:
@@ -1372,7 +1390,7 @@
         entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
         above: 15
         below: 20
-        alias: Actual Temp 15-20┬░C (Mild)
+        alias: Actual Temp 15-20°C (Mild)
       sequence:
       - service: input_boolean.turn_off
         target:
@@ -1403,7 +1421,7 @@
       sequence:
       - action: persistent_notification.create
         data:
-          title: 'ΓÜá∩╕Å HVAC Anomaly: Over-Triggering Detected'
+          title: '⚠️ HVAC Anomaly: Over-Triggering Detected'
           message: 'Seasonal Climate Manager triggered {{ states(''input_number.seasonal_climate_triggers_today'')
             }} times today (normal: 50-100).
 
@@ -1411,9 +1429,9 @@
             issue) - Sensor noise causing false triggers - AC over-cycling (on/off
             rapidly) - Comfort range too tight
 
-            **Recommended Actions:** 1. Check sensor readings for noise (┬▒1┬░C jumps)
+            **Recommended Actions:** 1. Check sensor readings for noise (±1°C jumps)
             2. Increase `for:` minutes in temperature triggers 3. Widen comfort range
-            (┬▒1┬░C) 4. Verify AC is functioning correctly
+            (±1°C) 4. Verify AC is functioning correctly
 
             **Next Steps:** - Monitor tomorrow''s count - Adjust hysteresis if needed
             - Check sensor placement'
@@ -1508,7 +1526,7 @@
   actions:
   - service: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
-      title: ΓÿÇ∩╕Å Climate Suggestion - Living Room
+      title: ☀️ Climate Suggestion - Living Room
       message: '{{ state_attr(''sensor.living_room_climate_suggestion'', ''message'')
         }}'
       data:
@@ -1555,7 +1573,7 @@
   actions:
   - service: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
-      title: ΓÿÇ∩╕Å Climate Suggestion - Master Bedroom
+      title: ☀️ Climate Suggestion - Master Bedroom
       message: '{{ state_attr(''sensor.master_bedroom_climate_suggestion'', ''message'')
         }}'
       data:
@@ -1892,7 +1910,7 @@
             before: '17:00:00'
           sequence:
           - choose:
-            - alias: Very Hot (>26.5┬░C) - Aggressive Cooling
+            - alias: Very Hot (>26.5°C) - Aggressive Cooling
               conditions:
               - condition: numeric_state
                 entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
@@ -1922,7 +1940,7 @@
                   entity_id: climate.masterbed_versatile_thermostat
                 data:
                   hvac_mode: cool
-            - alias: Hot (25.5-26.5┬░C) - Moderate Cooling
+            - alias: Hot (25.5-26.5°C) - Moderate Cooling
               conditions:
               - condition: numeric_state
                 entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
@@ -1952,7 +1970,7 @@
                   entity_id: climate.masterbed_versatile_thermostat
                 data:
                   hvac_mode: cool
-            - alias: Warm (24-25.5┬░C) - Light Cooling
+            - alias: Warm (24-25.5°C) - Light Cooling
               conditions:
               - condition: numeric_state
                 entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
@@ -2003,7 +2021,7 @@
             target:
               entity_id: cover.roller_blinds_chan1
           - choose:
-            - alias: Very Hot (>26┬░C) - Aggressive Cooling
+            - alias: Very Hot (>26°C) - Aggressive Cooling
               conditions:
               - condition: numeric_state
                 entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
@@ -2029,7 +2047,7 @@
                     entity_id: climate.masterbed_versatile_thermostat
                   data:
                     hvac_mode: cool
-            - alias: Hot (24-26┬░C) - Fan Only
+            - alias: Hot (24-26°C) - Fan Only
               conditions:
               - condition: numeric_state
                 entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
@@ -2056,7 +2074,7 @@
             before: '20:00:00'
           sequence:
           - choose:
-            - alias: Very Hot (>26┬░C) - Aggressive Cooling
+            - alias: Very Hot (>26°C) - Aggressive Cooling
               conditions:
               - condition: numeric_state
                 entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
@@ -2094,7 +2112,7 @@
                     entity_id: climate.masterbed_versatile_thermostat
                   data:
                     hvac_mode: cool
-            - alias: Hot (24-26┬░C) - Moderate Cooling
+            - alias: Hot (24-26°C) - Moderate Cooling
               conditions:
               - condition: numeric_state
                 entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
@@ -2167,7 +2185,7 @@
             before: 06:00:00
           sequence:
           - choose:
-            - alias: Very Hot Night (>26┬░C)
+            - alias: Very Hot Night (>26°C)
               conditions:
               - condition: numeric_state
                 entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
@@ -2201,7 +2219,7 @@
             before: '20:00:00'
           sequence:
           - choose:
-            - alias: Cold (<18∩┐╜C) - Heating
+            - alias: Cold (<18�C) - Heating
               conditions:
               - condition: numeric_state
                 entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
@@ -2255,7 +2273,7 @@
           state: spring
       sequence:
       - choose:
-        - alias: Very Hot (>26┬░C) - Cooling
+        - alias: Very Hot (>26°C) - Cooling
           conditions:
           - condition: numeric_state
             entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
@@ -2272,7 +2290,7 @@
               entity_id: fan.masterbedroom_fan
             data:
               percentage: 33
-        - alias: Cold (<16┬░C) - Heating
+        - alias: Cold (<16°C) - Heating
           conditions:
           - condition: numeric_state
             entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
@@ -2357,7 +2375,7 @@
 - id: hot_night_bedroom_cooling
   alias: Bedrooms - Overnight AC on Hot Days
   description: Turns on AC boost in bedrooms overnight when day temperature exceeded
-    18┬░C
+    18°C
   triggers:
   - at: '18:45:00'
     trigger: time
@@ -2467,7 +2485,7 @@
   mode: single
 - id: frost_protection_bedrooms_cool_nights
   alias: Bedrooms - Overnight Frost Protection (No Hot Days)
-  description: 'Applies frost preset (17┬░C minimum) to all bedrooms on cool nights
+  description: 'Applies frost preset (17°C minimum) to all bedrooms on cool nights
     when no hot day flags are active. Ensures minimum temperature protection during
     mild winter nights without heating trigger.
 
@@ -2514,7 +2532,7 @@
           entity_id: climate.masterbed_versatile_thermostat
         data:
           preset_mode: frost
-        alias: Set Master Bedroom Frost (17┬░C minimum)
+        alias: Set Master Bedroom Frost (17°C minimum)
       - service: climate.set_hvac_mode
         target:
           entity_id: climate.masterbed_versatile_thermostat
@@ -2534,7 +2552,7 @@
           entity_id: climate.otto_s_room
         data:
           preset_mode: frost
-        alias: Set Otto's Room Frost (17┬░C minimum)
+        alias: Set Otto's Room Frost (17°C minimum)
       - service: climate.set_hvac_mode
         target:
           entity_id: climate.otto_s_room
@@ -2554,7 +2572,7 @@
           entity_id: climate.henry_s_room_versatile_thermostat
         data:
           preset_mode: frost
-        alias: Set Study Frost (17┬░C minimum)
+        alias: Set Study Frost (17°C minimum)
       - service: climate.set_hvac_mode
         target:
           entity_id: climate.henry_s_room_versatile_thermostat
@@ -4982,7 +5000,7 @@
       datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
   - action: notify.std_information
     data:
-      title: Γ£à Living Room AC Filter Updated
+      title: ✅ Living Room AC Filter Updated
       message: Filter change date recorded successfully
   mode: single
 - id: ac_filter_master_bedroom_changed
@@ -4999,7 +5017,7 @@
       datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
   - action: notify.std_information
     data:
-      title: Γ£à Master Bedroom AC Filter Updated
+      title: ✅ Master Bedroom AC Filter Updated
       message: Filter change date recorded successfully
   mode: single
 - id: ac_filter_otto_room_changed
@@ -5016,7 +5034,7 @@
       datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
   - action: notify.std_information
     data:
-      title: Γ£à Otto's Room AC Filter Updated
+      title: ✅ Otto's Room AC Filter Updated
       message: Filter change date recorded successfully
   mode: single
 - id: ac_filter_study_henry_changed
@@ -5033,7 +5051,7 @@
       datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
   - action: notify.std_information
     data:
-      title: Γ£à Study/Henry's Room AC Filter Updated
+      title: ✅ Study/Henry's Room AC Filter Updated
       message: Filter change date recorded successfully
   mode: single
 - id: '1744580704061'
@@ -5174,10 +5192,10 @@
       value_template: '{{ overdue_items | length > 0 or due_items | length > 0 }}'
     then:
     - variables:
-        message_body: "{% if overdue_items | length > 0 %} ΓÜá∩╕Å OVERDUE: {% for item
-          in overdue_items %} ΓÇó {{ item }} {% endfor %} {% endif %} {% if due_items
+        message_body: "{% if overdue_items | length > 0 %} ⚠️ OVERDUE: {% for item
+          in overdue_items %} • {{ item }} {% endfor %} {% endif %} {% if due_items
           | length > 0 %} {% if overdue_items | length > 0 %}\n{% endif %} \U0001F4CB
-          DUE TODAY: {% for item in due_items %} ΓÇó {{ item }} {% endfor %} {% endif
+          DUE TODAY: {% for item in due_items %} • {{ item }} {% endfor %} {% endif
           %}\n"
     - service: notify.mobile_app_samsung_galaxy_s22_ultra
       data:
@@ -5399,11 +5417,11 @@
   actions:
   - action: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
-      title: ΓÿÇ∩╕Å Good Morning - Daily Summary
-      message: "\U0001F321∩╕Å Today's forecast: {{ states('sensor.braybrook_temp_max_0')
-        }}┬░C\nΓÿÇ∩╕Å Current solar: {{ states('sensor.gosungrow_virtual_1205796_1_1_1_p24')
+      title: ☀️ Good Morning - Daily Summary
+      message: "\U0001F321️ Today's forecast: {{ states('sensor.braybrook_temp_max_0')
+        }}°C\n☀️ Current solar: {{ states('sensor.gosungrow_virtual_1205796_1_1_1_p24')
         | round(1) }}kW\n\U0001F3E0 Home temp: {{ states('sensor.living_room_temperature_offset')
-        }}┬░C\n\n{% if is_state('input_boolean.super_hot_today', 'on') %}ΓÜá∩╕Å Super hot
+        }}°C\n\n{% if is_state('input_boolean.super_hot_today', 'on') %}⚠️ Super hot
         day - blinds will stay closed{% endif %}\n"
   mode: single
 - id: high_power_usage_warning
@@ -5422,7 +5440,7 @@
   actions:
   - action: notify.std_warning
     data:
-      title: ΓÜí High Grid Import
+      title: ⚡ High Grid Import
       message: Importing {{ (states('sensor.gosungrow_virtual_1205796_7_1_1_p8018')
         | float / 1000) | round(1) }}kW from grid with only {{ (states('sensor.gosungrow_virtual_1205796_1_1_1_p24')
         | float / 1000) | round(1) }}kW solar - check what's running
@@ -5534,7 +5552,7 @@
 - id: living_room_versatile_climate_manager
   alias: HVAC - Living Room Versatile Climate Manager
   description: 'Makes intelligent decisions about WHEN and WHICH MODE (heat/cool/dry/fan_only/off)
-    for living room climate. Includes fan_only mode for 21-22┬░C in summer. Reactive
+    for living room climate. Includes fan_only mode for 21-22°C in summer. Reactive
     cooling only (no preemptive). Frost mode after 22:15. Seasonal bias applied.
 
     '
@@ -5724,7 +5742,7 @@
         above: 16
         below: 26
       sequence:
-      - stop: HVAC off and temperature in comfort range (16-26┬░C) - let thermostat
+      - stop: HVAC off and temperature in comfort range (16-26°C) - let thermostat
           manage
   - choose:
     - conditions:

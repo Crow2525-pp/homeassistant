@@ -105,6 +105,33 @@ cards:
               color: white !important;
             }
 
+      - type: tile
+        entity: sensor.master_bedroom_comfort_delta
+        name: Indoor vs Outdoor Δ
+        icon: mdi:thermometer-auto
+        label: >
+          [[[ const v = parseFloat(entity.state); if (Number.isNaN(v)) { return 'Awaiting data'; }
+              return v > 0 ? 'Inside warmer' : v < 0 ? 'Inside cooler' : 'Balanced'; ]]]
+        card_mod:
+          style: |
+            {% set bias = state_attr('sensor.master_bedroom_comfort_delta', 'bias') %}
+            {% set gradient = 'linear-gradient(145deg, #0F766E 0%, #115E59 100%)' %}
+            {% if bias == 'cooling' %}
+              {% set gradient = 'linear-gradient(145deg, #F97316 0%, #EA580C 100%)' %}
+            {% elif bias == 'heating' %}
+              {% set gradient = 'linear-gradient(145deg, #38BDF8 0%, #0284C7 100%)' %}
+            {% endif %}
+            ha-card {
+              background: {{ gradient }};
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
   # Living Room
   - type: heading
     heading: "Living Room"
@@ -186,6 +213,33 @@ cards:
               color: white;
               border-radius: 12px;
               box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+      - type: tile
+        entity: sensor.living_room_comfort_delta
+        name: Indoor vs Outdoor Δ
+        icon: mdi:thermometer-auto
+        label: >
+          [[[ const v = parseFloat(entity.state); if (Number.isNaN(v)) { return 'Awaiting data'; }
+              return v > 0 ? 'Inside warmer' : v < 0 ? 'Inside cooler' : 'Balanced'; ]]]
+        card_mod:
+          style: |
+            {% set bias = state_attr('sensor.living_room_comfort_delta', 'bias') %}
+            {% set gradient = 'linear-gradient(145deg, #0F766E 0%, #115E59 100%)' %}
+            {% if bias == 'cooling' %}
+              {% set gradient = 'linear-gradient(145deg, #F97316 0%, #EA580C 100%)' %}
+            {% elif bias == 'heating' %}
+              {% set gradient = 'linear-gradient(145deg, #38BDF8 0%, #0284C7 100%)' %}
+            {% endif %}
+            ha-card {
+              background: {{ gradient }};
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
             }
             .name, .state, .label {
               color: white !important;
@@ -277,6 +331,33 @@ cards:
               color: white !important;
             }
 
+      - type: tile
+        entity: sensor.lucas_room_comfort_delta
+        name: Indoor vs Outdoor Δ
+        icon: mdi:thermometer-auto
+        label: >
+          [[[ const v = parseFloat(entity.state); if (Number.isNaN(v)) { return 'Awaiting data'; }
+              return v > 0 ? 'Inside warmer' : v < 0 ? 'Inside cooler' : 'Balanced'; ]]]
+        card_mod:
+          style: |
+            {% set bias = state_attr('sensor.lucas_room_comfort_delta', 'bias') %}
+            {% set gradient = 'linear-gradient(145deg, #0F766E 0%, #115E59 100%)' %}
+            {% if bias == 'cooling' %}
+              {% set gradient = 'linear-gradient(145deg, #F97316 0%, #EA580C 100%)' %}
+            {% elif bias == 'heating' %}
+              {% set gradient = 'linear-gradient(145deg, #38BDF8 0%, #0284C7 100%)' %}
+            {% endif %}
+            ha-card {
+              background: {{ gradient }};
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
   # Otto's Room
   - type: heading
     heading: "Otto's Room"
@@ -358,6 +439,33 @@ cards:
               color: white;
               border-radius: 12px;
               box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .name, .state, .label {
+              color: white !important;
+            }
+
+      - type: tile
+        entity: sensor.otto_room_comfort_delta
+        name: Indoor vs Outdoor Δ
+        icon: mdi:thermometer-auto
+        label: >
+          [[[ const v = parseFloat(entity.state); if (Number.isNaN(v)) { return 'Awaiting data'; }
+              return v > 0 ? 'Inside warmer' : v < 0 ? 'Inside cooler' : 'Balanced'; ]]]
+        card_mod:
+          style: |
+            {% set bias = state_attr('sensor.otto_room_comfort_delta', 'bias') %}
+            {% set gradient = 'linear-gradient(145deg, #0F766E 0%, #115E59 100%)' %}
+            {% if bias == 'cooling' %}
+              {% set gradient = 'linear-gradient(145deg, #F97316 0%, #EA580C 100%)' %}
+            {% elif bias == 'heating' %}
+              {% set gradient = 'linear-gradient(145deg, #38BDF8 0%, #0284C7 100%)' %}
+            {% endif %}
+            ha-card {
+              background: {{ gradient }};
+              color: white;
+              border-radius: 12px;
+              box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+              border: none;
             }
             .name, .state, .label {
               color: white !important;
