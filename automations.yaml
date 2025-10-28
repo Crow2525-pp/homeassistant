@@ -3366,11 +3366,11 @@
       - auto_brightness_enabled
       - auto_sun_enabled
       - auto_ventilate_enabled
-      cover_status_options: cover_helper_disabled
+      cover_status_options: cover_helper_enabled
       cover_status_helper: input_text.cover_status_helper_curtains
       workday_sensor: binary_sensor.workday_sensor
       default_brightness_sensor: sensor.hub_2_0be5_light_level
-      brightness_up: 4673
+      brightness_up: 10
       contact_window_opened: binary_sensor.balcony_door_sensor_magnet_opening_2
       resident_sensor: input_boolean.home_presence
       check_config: true
@@ -3379,9 +3379,16 @@
       shading_temperatur_sensor1: sensor.ble_temperature_masterbed_temp_humidity_sensor
       shading_temperatur_sensor2: sensor.essendon_airport_temp
       shading_forecast_sensor: sensor.essendon_airport_max_temp
+      drive_time: 18
+      time_control: time_control_input
+      brightness_down: 11940
 - id: '1749858009259'
   alias: Outdoor Blinds - Cover Control Automation
   description: Coordinates cover control automation behaviour for the outdoor blinds.
+  conditions:
+  - condition: state
+    entity_id: input_boolean.blind_manual_control
+    state: 'off'
   use_blueprint:
     path: hvorragend/cover_control_automation.yaml
     input:
@@ -3397,8 +3404,8 @@
       cover_drive_time: 90
       workday_sensor: binary_sensor.workday_sensor
       default_brightness_sensor: sensor.hub_2_0be5_illuminance
-      brightness_up: 4673
-      brightness_down: 3500
+      brightness_up: 1000
+      brightness_down: 11900
       contact_window_opened: binary_sensor.balcony_door_sensor_magnet_opening_2
       resident_sensor: input_boolean.home_presence
       resident_config:
@@ -3416,9 +3423,9 @@
       shading_temperatur_sensor2: sensor.essendon_airport_temp
       shading_forecast_sensor: sensor.essendon_airport_max_temp
       shading_sun_brightness_start: 20000
-      shading_sun_brightness_end: 10000
+      shading_sun_brightness_end: 12000
       shading_elevation_min: 30
-      shading_azimuth_start: 0
+      shading_azimuth_start: 45
       shading_azimuth_end: 360
       is_shading_end_immediate_by_sun_position: true
       auto_shading_start_condition: []
@@ -3427,10 +3434,9 @@
         after: sunset
       drive_delay_fix: 16
       drive_delay_random: 5
-  conditions:
-  - condition: state
-    entity_id: input_boolean.blind_manual_control
-    state: 'off'
+      sun_elevation_up: 12
+      sun_elevation_down: 5
+      sun_time_duration: 120
 - id: '1721641437270'
   alias: Covers - Refresh Roller Blind Positions
   description: Periodically polls the roller blinds to keep positions accurate in
