@@ -64,10 +64,20 @@ cards:
       type: vertical-stack
       cards:
         - type: markdown
-          content: >-
-            **Door open while AC running**  \n            {% set summary = state_attr('binary_sensor.hvac_door_open_alert', 'summary') %}
+          content: |-
+            **Door open while AC running**
+            {% set summary = state_attr('binary_sensor.hvac_door_open_alert', 'summary') %}
             {% if summary not in [None, '', 'None'] %}
-            {{ summary | replace('\n', '  \n') }}
+            {% for raw in summary.split('\n') %}
+            {% set line = raw | trim %}
+            {% if line and line | lower != 'door open while ac running' %}
+            {% if line.startswith('-') %}
+            - {{ line[1:] | trim }}
+            {% else %}
+            - {{ line }}
+            {% endif %}
+            {% endif %}
+            {% endfor %}
             {% else %}
             Close the door to keep the cool air in.
             {% endif %}
