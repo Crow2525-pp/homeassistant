@@ -31,7 +31,6 @@
 
 !broadlink_remote*
 
-custom_components/dwains_dashboard/*
-custom_components/ui_lovelace_minimalist/*
-custom_components/zha_toolkit/*
-esphome/*
+!esphome/
+!esphome/**
+esphome/secrets.yaml
