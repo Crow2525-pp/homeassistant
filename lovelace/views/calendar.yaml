@@ -18,6 +18,38 @@ cards:
   # Full width week planner
   - !include ../cards/calendar/week_planner.yaml
 
+  # Work location stats - Calendar view
+  - type: custom:button-card
+    entity: sensor.work_calendar_this_week
+    name: Work Schedule
+    icon: mdi:calendar-week
+    show_state: false
+    show_label: true
+    label: >
+      WFH: [[[ return states['sensor.wfh_days_count']; ]]] days (4w) |
+      WFO: [[[ return states['sensor.office_days_count']; ]]] days (4w)
+    state_display: >
+      [[[
+        return states['sensor.work_calendar_this_week']?.attributes?.week_summary || 'Loading...';
+      ]]]
+    custom_fields:
+      summary: >
+        [[[
+          return `<div style="text-align: center; padding: 10px; font-size: 12px;">
+            ${states['sensor.wfh_days_count'] || '0'} WFH |
+            ${states['sensor.office_days_count'] || '0'} WFO |
+            ${states['sensor.total_work_days_count'] || '0'} Total (Last 4 weeks)
+          </div>`;
+        ]]]
+    layout: icon_state
+    tap_action:
+      action: navigate
+      navigation_path: calendar
+    styles:
+      card:
+        - border-radius: 8px
+        - box-shadow: 0 2px 4px rgba(0,0,0,0.1)
+
   # Work location stats - Last 4 weeks
   - type: grid
     columns: 3
@@ -48,6 +80,71 @@ cards:
         name: Office Days (FY 2024-25)
         icon: mdi:office-building
 
+  # Work location status - Debug & Diagnostics
+  - type: entities
+    title: "🔍 Office Status Debug"
+    entities:
+      - entity: binary_sensor.working_at_office
+        name: "Working at Office (Current)"
+      - type: attribute
+        entity: binary_sensor.working_at_office
+        attribute: time_window_reason
+        name: "  ↳ Reason Off/On"
+      - type: attribute
+        entity: binary_sensor.working_at_office
+        attribute: current_time
+        name: "  ↳ Current Time"
+      - type: attribute
+        entity: binary_sensor.working_at_office
+        attribute: is_weekday
+        name: "  ↳ Is Weekday"
+      - type: attribute
+        entity: binary_sensor.working_at_office
+        attribute: is_work_hours
+        name: "  ↳ Is Work Hours (8am-5pm)"
+      - type: attribute
+        entity: binary_sensor.working_at_office
+        attribute: person_at_work
+        name: "  ↳ Person at Work"
+      - type: attribute
+        entity: binary_sensor.working_at_office
+        attribute: person_location
+        name: "  ↳ Person Location (Zone)"
+      - entity: sensor.at_work_zone_only
+        name: "At Work Zone (No Time Limit)"
+      - entity: person.phil_patterson
+        name: "Person Entity State"
+      - entity: sensor.office_days_last_4_weeks
+        name: "Hours Recorded (Last 4 weeks)"
+      - entity: sensor.office_days_count
+        name: "Days Calculated (Last 4 weeks)"
+
+  - type: entities
+    title: "🏠 WFH Status Debug"
+    entities:
+      - entity: binary_sensor.working_from_home
+        name: "Working From Home (Current)"
+      - type: attribute
+        entity: binary_sensor.working_from_home
+        attribute: is_weekday
+        name: "  ↳ Is Weekday"
+      - type: attribute
+        entity: binary_sensor.working_from_home
+        attribute: is_work_hours
+        name: "  ↳ Is Work Hours (8am-5pm)"
+      - type: attribute
+        entity: binary_sensor.working_from_home
+        attribute: desk_switch_on
+        name: "  ↳ Desk Switch On"
+      - type: attribute
+        entity: binary_sensor.working_from_home
+        attribute: computer_online
+        name: "  ↳ Computer Online"
+      - entity: switch.computer_plug_switch
+        name: "Desk Switch State"
+      - entity: device_tracker.aolt002068_3
+        name: "Computer Tracker State"
+
   # Work from home history
   - type: history-graph
     title: Phil's Work Location - Last 4 Weeks
@@ -57,30 +154,3 @@ cards:
         name: Working From Home
       - entity: binary_sensor.working_at_office
         name: Working at Office
-
-  # # Debug card for work from home sensor
-  # - type: entities
-  #   title: Work From Home Debug
-  #   entities:
-  #     - entity: binary_sensor.working_from_home_3
-  #       name: WFH Status
-  #     - type: attribute
-  #       entity: binary_sensor.working_from_home_3
-  #       attribute: is_weekday
-  #       name: Is Weekday
-  #     - type: attribute
-  #       entity: binary_sensor.working_from_home_3
-  #       attribute: is_work_hours
-  #       name: Is Work Hours (8am-5pm)
-  #     - type: attribute
-  #       entity: binary_sensor.working_from_home_3
-  #       attribute: desk_switch_on
-  #       name: Desk Switch On
-  #     - type: attribute
-  #       entity: binary_sensor.working_from_home_3
-  #       attribute: computer_online
-  #       name: Computer Online
-  #     - entity: switch.computer_plug_switch
-  #       name: Desk Switch
-  #     - entity: device_tracker.aolt002068_3
-  #       name: Computer Tracker

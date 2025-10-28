@@ -31,8 +31,8 @@ cards:
       - **Warm Today (>18°C):** {{ 'YES 🌤️' if is_state('input_boolean.warm_today_flag', 'on') else 'No' }}
 
       **Forecast:**
-      - **Min Temp:** {{ states('sensor.braybrook_temp_min_0') }}°C
-      - **Max Temp:** {{ states('sensor.braybrook_temp_max_0') }}°C
+      - **Today Max Temp:** {{ states('sensor.braybrook_temp_max_0') }}°C
+      - **Tomorrow Min Temp:** {{ states('sensor.braybrook_temp_min_1') }}°C (used for cold day detection)
 
       **System Status:**
       - **Working From Home:** {{ 'YES 💼' if is_state('binary_sensor.working_from_home', 'on') else 'No' }}
@@ -257,7 +257,6 @@ cards:
 
       ### Automation Status
       {% set manager_last = state_attr('automation.hvac_master_bedroom_versatile_climate_manager', 'last_triggered') %}
-      {% set blinds_last = state_attr('automation.hvac_master_bedroom_blinds_temperature_control', 'last_triggered') %}
       {% set fan_last = state_attr('automation.hvac_master_bedroom_fan_sync_with_climate', 'last_triggered') %}
       {% set hot_night_last = state_attr('automation.bedrooms_overnight_ac_on_hot_days', 'last_triggered') %}
       {% set hot_off_last = state_attr('automation.bedrooms_turn_off_overnight_ac_in_morning', 'last_triggered') %}
@@ -270,11 +269,17 @@ cards:
       - Triggers: State-based (temp, humidity, door, solar, season, occupancy, flags, WFH) + Time-specific (bedtime, wake-up)
       - Principle #10: No polling - fires only on state changes
 
-      **🪟 Blinds Temperature Control**
-      - Status: {{ '✅ ON' if is_state('automation.hvac_master_bedroom_blinds_temperature_control', 'on') else '🔴 OFF' }}
-      {% if blinds_last %}
-      - Last triggered: {{ relative_time(blinds_last) }} ago
-      {% endif %}
+      **🪟 Blinds Management**
+      {% set close_hot = state_attr('automation.master_bedroom_close_blinds_when_hot', 'last_triggered') %}
+      {% set close_night = state_attr('automation.master_bedroom_close_blinds_for_night_mode', 'last_triggered') %}
+      {% set open_morning = state_attr('automation.master_bedroom_open_blinds_for_morning_routine', 'last_triggered') %}
+
+      - **Close When Hot:** {{ '✅ ON' if is_state('automation.master_bedroom_close_blinds_when_hot', 'on') else '🔴 OFF' }}
+        {% if close_hot %}(last: {{ relative_time(close_hot) }} ago){% endif %}
+      - **Close for Night:** {{ '✅ ON' if is_state('automation.master_bedroom_close_blinds_for_night_mode', 'on') else '🔴 OFF' }}
+        {% if close_night %}(last: {{ relative_time(close_night) }} ago){% endif %}
+      - **Open for Morning:** {{ '✅ ON' if is_state('automation.master_bedroom_open_blinds_for_morning_routine', 'on') else '🔴 OFF' }}
+        {% if open_morning %}(last: {{ relative_time(open_morning) }} ago){% endif %}
 
       **🌀 Fan Sync with Climate**
       - Status: {{ '✅ ON' if is_state('automation.hvac_master_bedroom_fan_sync_with_climate', 'on') else '🔴 OFF' }}
@@ -309,10 +314,10 @@ cards:
         }
     content: |
       ### Climate State
-      **HVAC Mode:** {{ states('climate.living_room_versatile_thermastat') | upper }}
-      **Preset Mode:** {{ state_attr('climate.living_room_versatile_thermastat', 'preset_mode') | default('none') | title }}
-      - Available: {{ state_attr('climate.living_room_versatile_thermastat', 'preset_modes') | join(', ') }}
-      **Target Temp:** {{ state_attr('climate.living_room_versatile_thermastat', 'temperature') }}°C
+      **HVAC Mode:** {{ states('climate.living_room_versatile_thermostat') | upper }}
+      **Preset Mode:** {{ state_attr('climate.living_room_versatile_thermostat', 'preset_mode') | default('none') | title }}
+      - Available: {{ state_attr('climate.living_room_versatile_thermostat', 'preset_modes') | join(', ') }}
+      **Target Temp:** {{ state_attr('climate.living_room_versatile_thermostat', 'temperature') }}°C
       **Current Temp:** {{ states('sensor.living_room_temperature_offset') }}°C
       **Kitchen Temp:** {{ states('sensor.ble_temperature_kitchen_temp_humidity_sensor') }}°C
 
@@ -331,8 +336,8 @@ cards:
       {% set kitchen_temp = states('sensor.ble_temperature_kitchen_temp_humidity_sensor') | float %}
       {% set season = states('input_select.climate_season') %}
       {% set occupancy = states('input_select.occupancy') %}
-      {% set hvac = states('climate.living_room_versatile_thermastat') %}
-      {% set preset = state_attr('climate.living_room_versatile_thermastat', 'preset_mode') %}
+      {% set hvac = states('climate.living_room_versatile_thermostat') %}
+      {% set preset = state_attr('climate.living_room_versatile_thermostat', 'preset_mode') %}
       {% set manual = is_state('input_boolean.climate_manual_control_living', 'on') %}
       {% set any_door_open = is_state('binary_sensor.living_room_door_sensor_opening', 'on') or is_state('binary_sensor.interior_garage_door_sensor_magnet_opening', 'on') or is_state('binary_sensor.front_door_sensor_opening', 'on') %}
       {% set hot_day = is_state('input_boolean.hot_today_flag', 'on') %}
