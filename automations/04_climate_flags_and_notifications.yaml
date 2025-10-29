@@ -1,0 +1,1585 @@
+---
+- id: '1695509359232'
+  alias: Climate Flags - Mark Hot Day
+  description: Sets the hot-day helper booleans based on the early-morning forecast.
+    depending on the forecast
+  triggers:
+  - at: 04:30:00
+    trigger: time
+  conditions: []
+  actions:
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.last_trigger_climate_flags_mark_hot_day
+    data:
+      datetime: '{{ now().isoformat() }}'
+  - action: input_number.increment
+    target:
+      entity_id: input_number.climate_flags_mark_hot_day_triggers_today
+  - action: input_boolean.turn_off
+    target:
+      entity_id:
+        - input_boolean.super_hot_today
+        - input_boolean.hot_today_flag
+        - input_boolean.warm_today_flag
+        - input_boolean.cool_today_flag
+        - input_boolean.cold_today_flag
+        - input_boolean.super_cold_today
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.braybrook_temp_max_0
+        above: 25
+      sequence:
+      - data: {}
+        target:
+          entity_id: input_boolean.super_hot_today
+        action: input_boolean.turn_on
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - input_boolean.hot_today_flag
+          - input_boolean.warm_today_flag
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.braybrook_temp_max_0
+        above: 21
+      sequence:
+      - data: {}
+        target:
+          entity_id: input_boolean.hot_today_flag
+        action: input_boolean.turn_on
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.braybrook_temp_max_0
+        above: 18
+      sequence:
+      - data: {}
+        target:
+          entity_id: input_boolean.warm_today_flag
+        action: input_boolean.turn_on
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.braybrook_temp_min_1
+        below: 5
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.super_cold_today
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.cold_today_flag
+          - input_boolean.cool_today_flag
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.braybrook_temp_min_1
+        above: 5
+        below: 10
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.cold_today_flag
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.super_cold_today
+          - input_boolean.cool_today_flag
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.braybrook_temp_min_1
+        above: 10
+        below: 15
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.cool_today_flag
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.super_cold_today
+          - input_boolean.cold_today_flag
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.braybrook_temp_max_0
+        below: 19
+      sequence:
+      - data: {}
+        target:
+          entity_id:
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+          - input_boolean.cold_today_flag
+          - input_boolean.super_cold_today
+          - input_boolean.cool_today_flag
+        action: input_boolean.turn_off
+  mode: single
+- id: climate_flags_afternoon_recheck
+  alias: Climate Flags - Afternoon Re-check (3-4pm)
+  description: 'Re-evaluates hot/warm/cold day flags at 3-4pm (15:30) based on ACTUAL
+    current temperature (not forecast). Allows automations like overnight cooling
+    or heating to use real conditions instead of morning forecast. Runs year-round:
+    warm season check (summer/autumn/spring) and cold season check (winter).
+
+    '
+  triggers:
+  - trigger: time
+    at: '15:30:00'
+    id: afternoon_check
+  conditions: []
+  actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id:
+        - input_boolean.super_hot_today
+        - input_boolean.hot_today_flag
+        - input_boolean.warm_today_flag
+        - input_boolean.cool_today_flag
+        - input_boolean.cold_today_flag
+        - input_boolean.super_cold_today
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        above: 26
+        alias: Actual Temp >26°C (Super Hot)
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.super_hot_today
+        alias: Set Super Hot Today (actual condition)
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.hot_today_flag
+          - input_boolean.warm_today_flag
+        alias: Clear Hot and Warm (super hot takes priority)
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        above: 24
+        below: 26
+        alias: Actual Temp 24-26°C (Hot)
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.hot_today_flag
+        alias: Set Hot Today (actual condition)
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+        alias: Clear Super Hot and Warm (hot takes priority)
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        above: 20
+        below: 24
+        alias: Actual Temp 20-24°C (Warm)
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.warm_today_flag
+        alias: Set Warm Today (actual condition)
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+        alias: Clear Hot and Super Hot (warm takes priority)
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        below: 5
+        alias: Actual Temp <5°C (Super Cold)
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.super_cold_today
+        alias: Set Super Cold Today (actual condition)
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.cold_today_flag
+          - input_boolean.cool_today_flag
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+        alias: Clear all other flags (super cold takes priority)
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        above: 5
+        below: 10
+        alias: Actual Temp 5-10°C (Cold)
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.cold_today_flag
+        alias: Set Cold Today (actual condition)
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.super_cold_today
+          - input_boolean.cool_today_flag
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+        alias: Clear all other flags (cold takes priority)
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        above: 10
+        below: 15
+        alias: Actual Temp 10-15°C (Cool)
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.cool_today_flag
+        alias: Set Cool Today (actual condition)
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.super_cold_today
+          - input_boolean.cold_today_flag
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+        alias: Clear all other flags (cool takes priority)
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        above: 15
+        below: 20
+        alias: Actual Temp 15-20°C (Mild)
+      sequence:
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.hot_today_flag
+          - input_boolean.super_hot_today
+          - input_boolean.warm_today_flag
+          - input_boolean.cold_today_flag
+          - input_boolean.super_cold_today
+          - input_boolean.cool_today_flag
+        alias: Clear all temperature flags (mild conditions)
+  mode: single
+- id: '1747620000010'
+  alias: Automation Analytics - Anomaly Detection (Daily)
+  description: Daily anomaly detection for automation trigger patterns. Identifies
+    over-triggering, under-triggering, and system health issues. Runs at 23:30 to
+    analyze the day's data before daily reset at midnight.
+  triggers:
+  - trigger: time
+    at: '23:30:00'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: input_number.seasonal_climate_triggers_today
+        above: 150
+      sequence:
+      - action: persistent_notification.create
+        data:
+          title: '⚠️ HVAC Anomaly: Over-Triggering Detected'
+          message: 'Seasonal Climate Manager triggered {{ states(''input_number.seasonal_climate_triggers_today'')
+            }} times today (normal: 50-100).
+
+            **Likely Causes:** - Temperature oscillating around threshold (hysteresis
+            issue) - Sensor noise causing false triggers - AC over-cycling (on/off
+            rapidly) - Comfort range too tight
+
+            **Recommended Actions:** 1. Check sensor readings for noise (±1°C jumps)
+            2. Increase `for:` minutes in temperature triggers 3. Widen comfort range
+            (±1°C) 4. Verify AC is functioning correctly
+
+            **Next Steps:** - Monitor tomorrow''s count - Adjust hysteresis if needed
+            - Check sensor placement'
+          notification_id: hvac_overactivity_alert
+    - conditions:
+      - condition: numeric_state
+        entity_id: input_number.seasonal_climate_triggers_today
+        below: 20
+      - condition: state
+        entity_id: input_select.climate_season
+        state: summer
+      sequence:
+      - action: persistent_notification.create
+        data:
+          title: "\U0001F534 HVAC Anomaly: Under-Activity Detected"
+          message: 'Seasonal Climate Manager only triggered {{ states(''input_number.seasonal_climate_triggers_today'')
+            }} times today (expected: 50+).
+
+            **Possible Issues:** - Automation disabled or not triggering - HVAC master
+            switch (hvac_*_should_be_on) is OFF - Manual override preventing automations
+            - Environmental conditions stable (unusual)
+
+            **Diagnostic Steps:** 1. Verify automation is enabled in Home Assistant
+            2. Check HVAC master switch status (should be ON) 3. Check manual override
+            booleans (should be OFF) 4. Review Home Assistant logs for errors
+
+            **Expected vs Actual:** - Expected: 50-100 triggers/day in summer - Actual:
+            {{ states(''input_number.seasonal_climate_triggers_today'') }} triggers'
+          notification_id: hvac_low_activity_alert
+    - conditions:
+      - condition: template
+        value_template: "{% set total = (states('input_number.seasonal_climate_triggers_today')
+          | int(0) +\n  states('input_number.morning_blinds_triggers_today') | int(0)
+          +\n  states('input_number.preheat_triggers_today') | int(0) +\n  states('input_number.evening_cooling_triggers_today')
+          | int(0) +\n  states('input_number.frost_protection_triggers_today') | int(0)
+          +\n  states('input_number.afternoon_recheck_triggers_today') | int(0) +\n
+          \ states('input_number.master_bedroom_cooling_night_triggers_today') | int(0)
+          +\n  states('input_number.children_cooling_night_triggers_today') | int(0)
+          +\n  states('input_number.master_bedroom_blinds_night_triggers_today') |
+          int(0) +\n  states('input_number.master_bedroom_blinds_morning_triggers_today')
+          | int(0) +\n  states('input_number.climate_flags_mark_hot_day_triggers_today')
+          | int(0)) %}\n{{ total > 200 }}"
+      sequence:
+      - action: persistent_notification.create
+        data:
+          title: "\U0001F534 SYSTEM ALERT: Excessive Automation Activity"
+          message: "Total automation triggers today: {{ (states('input_number.seasonal_climate_triggers_today')
+            | int(0) +\n  states('input_number.morning_blinds_triggers_today') | int(0)
+            +\n  states('input_number.preheat_triggers_today') | int(0) +\n  states('input_number.evening_cooling_triggers_today')
+            | int(0) +\n  states('input_number.frost_protection_triggers_today') |
+            int(0) +\n  states('input_number.afternoon_recheck_triggers_today') |
+            int(0) +\n  states('input_number.master_bedroom_cooling_night_triggers_today')
+            | int(0) +\n  states('input_number.children_cooling_night_triggers_today')
+            | int(0) +\n  states('input_number.master_bedroom_blinds_night_triggers_today')
+            | int(0) +\n  states('input_number.master_bedroom_blinds_morning_triggers_today')
+            | int(0) +\n  states('input_number.climate_flags_mark_hot_day_triggers_today')
+            | int(0)) }} (expected: 50-130)\n\n**This indicates system instability!**\n**Immediate
+            Actions:** 1. Check climate debug dashboard for current state 2. Verify
+            all sensors are working normally 3. Review Home Assistant logs 4. Consider
+            disabling automations temporarily to stabilize\n**Investigation Priorities:**
+            - Seasonal Climate triggers: {{ states('input_number.seasonal_climate_triggers_today')
+            }} - Temperature sensor status - AC cycling pattern - Door/window sensor
+            activity"
+          notification_id: hvac_critical_alert
+    default:
+    - action: persistent_notification.dismiss
+      data:
+        notification_id:
+        - hvac_overactivity_alert
+        - hvac_low_activity_alert
+        - hvac_critical_alert
+  mode: single
+- id: '1727826100000'
+  alias: Smart Climate Notification - Living Room
+  description: Suggests climate control when solar excess available and room uncomfortable
+  triggers:
+  - trigger: state
+    entity_id: sensor.living_room_climate_suggestion
+    to:
+    - heat_now
+    - cool_now
+    for:
+      minutes: 30
+  conditions:
+  - condition: state
+    entity_id: climate.living_room_versatile_thermastat
+    state: 'off'
+  - condition: template
+    value_template: "{% set last = states('input_datetime.last_climate_notification_living')
+      %} {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n  {{
+      (as_timestamp(now()) - as_timestamp(last)) > 7200 }}\n{% endif %}\n"
+  actions:
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: ☀️ Climate Suggestion - Living Room
+      message: '{{ state_attr(''sensor.living_room_climate_suggestion'', ''message'')
+        }}'
+      data:
+        actions:
+        - action: CLIMATE_LIVING_ON
+          title: Turn On Climate
+        - action: CLIMATE_DISMISS
+          title: Dismiss
+        tag: climate_suggestion_living
+        importance: high
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.last_climate_notification_living
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  mode: single
+- id: '1727826100001'
+  alias: Smart Climate Notification - Master Bedroom
+  description: Suggests climate control when solar excess available and room uncomfortable
+  triggers:
+  - trigger: state
+    entity_id: sensor.master_bedroom_climate_suggestion
+    to:
+    - heat_now
+    - cool_now
+    - heat_needed
+    - cool_needed
+    for:
+      minutes: 30
+  conditions:
+  - condition: state
+    entity_id: climate.masterbed_versatile_thermostat
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.climate_manual_control_master
+    state: 'off'
+  - condition: state
+    entity_id: binary_sensor.master_bedroom_door_sensor_opening
+    state: 'off'
+  - condition: template
+    value_template: "{% set last = states('input_datetime.last_climate_notification_master')
+      %} {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n  {{
+      (as_timestamp(now()) - as_timestamp(last)) > 7200 }}\n{% endif %}\n"
+  actions:
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: ☀️ Climate Suggestion - Master Bedroom
+      message: '{{ state_attr(''sensor.master_bedroom_climate_suggestion'', ''message'')
+        }}'
+      data:
+        actions:
+        - action: CLIMATE_MASTER_ON
+          title: Turn On Climate
+        - action: CLIMATE_DISMISS
+          title: Dismiss
+        tag: climate_suggestion_master
+        importance: high
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.last_climate_notification_master
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  mode: single
+- id: '1727826100002'
+  alias: Handle Climate Notification Action - Living Room
+  description: Turn on living room climate when user taps notification
+  triggers:
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: CLIMATE_LIVING_ON
+  actions:
+  - action: climate.turn_on
+    target:
+      entity_id: climate.living_room_versatile_thermastat
+  - action: climate.set_temperature
+    target:
+      entity_id: climate.living_room_versatile_thermastat
+    data:
+      temperature: "{% if states('sensor.living_room_climate_suggestion') == 'heat_now'
+        %}\n  22\n{% else %}\n  24\n{% endif %}\n"
+  - action: climate.set_hvac_mode
+    target:
+      entity_id: climate.living_room_versatile_thermastat
+    data:
+      hvac_mode: "{% if states('sensor.living_room_climate_suggestion') == 'heat_now'
+        %}\n  heat\n{% else %}\n  cool\n{% endif %}\n"
+  mode: single
+- id: '1727826100003'
+  alias: Handle Climate Notification Action - Master Bedroom
+  description: Turns on master bedroom climate when the user approves a notification
+  triggers:
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: CLIMATE_MASTER_ON
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.master_bedroom_door_sensor_opening
+        state: 'on'
+      sequence:
+      - service: notify.mobile_app_samsung_galaxy_s22_ultra
+        data:
+          title: Door is open
+          message: Close the master bedroom door before starting the climate system.
+      - stop: true
+  - service: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.climate_manual_control_master
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ states(''sensor.master_bedroom_climate_suggestion'') in
+          [''heat_now'', ''heat_needed''] }}'
+      sequence:
+      - if:
+        - condition: time
+          after: 08:00:00
+        then:
+        - service: script.roller_blinds_up
+      - service: fan.turn_off
+        target:
+          entity_id: fan.masterbedroom_fan
+      - service: climate.set_preset_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          preset_mode: comfort
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          hvac_mode: heat
+    default:
+    - service: script.1693262268843
+    - service: fan.set_percentage
+      target:
+        entity_id: fan.masterbedroom_fan
+      data:
+        percentage: 33
+    - service: climate.set_preset_mode
+      target:
+        entity_id: climate.masterbed_versatile_thermostat
+      data:
+        preset_mode: comfort
+    - service: climate.set_hvac_mode
+      target:
+        entity_id: climate.masterbed_versatile_thermostat
+      data:
+        hvac_mode: cool
+  mode: single
+- id: '1727826000002'
+  alias: Automation Tracker - Manual Climate Control (Living Room)
+  description: Captures manual climate changes in the living room to pause conflicting
+    automations.
+  triggers:
+  - trigger: state
+    entity_id:
+    - climate.living_room_versatile_thermastat
+  conditions:
+  - condition: template
+    value_template: '{{ trigger.to_state.context.user_id is not none }}'
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.climate_manual_control_living
+  - delay:
+      hours: 4
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.climate_manual_control_living
+  mode: restart
+- id: '1727826000003'
+  alias: Automation Tracker - Manual Climate Control (Master Bedroom)
+  description: Logs manual climate adjustments in the master bedroom to prevent automation
+    interference.
+  triggers:
+  - trigger: state
+    entity_id:
+    - climate.masterbed_versatile_thermostat
+  conditions:
+  - condition: template
+    value_template: '{{ trigger.to_state.context.user_id is not none }}'
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.climate_manual_control_master
+  - delay:
+      hours: 4
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.climate_manual_control_master
+  mode: restart
+- id: '1727826000004'
+  alias: Automation Tracker - Manual Climate Control (Otto's Room)
+  description: Tracks manual thermostat tweaks in Otto's room and pauses automations
+    accordingly.
+  triggers:
+  - trigger: state
+    entity_id:
+    - climate.otto_s_room
+  conditions:
+  - condition: template
+    value_template: '{{ trigger.to_state.context.user_id is not none }}'
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.climate_manual_control_otto
+  - delay:
+      hours: 4
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.climate_manual_control_otto
+  mode: restart
+- id: '1727826000005'
+  alias: Automation Tracker - Manual Climate Control (Study / Henry's Room)
+  description: Monitors manual climate changes in the study/Henry's room to suspend
+    automation changes.
+  triggers:
+  - trigger: state
+    entity_id:
+    - climate.henry_s_room_versatile_thermostat
+  conditions:
+  - condition: template
+    value_template: '{{ trigger.to_state.context.user_id is not none }}'
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.climate_manual_control_study
+  - delay:
+      hours: 4
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.climate_manual_control_study
+  mode: restart
+- id: '1710137210171'
+  alias: Climate - Track Downstairs Door State
+  description: Maintains helper booleans based on the aggregated downstairs door contact
+    sensor.
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.downstairs_doors
+    to: 'on'
+    id: Open
+  - platform: state
+    entity_id:
+    - binary_sensor.downstairs_doors
+    to: 'off'
+    id: Close
+  condition: []
+  action:
+  - alias: Open
+    if:
+    - condition: trigger
+      id:
+      - Open
+    then:
+    - service: input_boolean.turn_on
+      target:
+        entity_id:
+        - input_boolean.downstairs_doors_open
+      data: {}
+  - alias: Close
+    if:
+    - condition: trigger
+      id:
+      - Close
+    then:
+    - service: input_boolean.turn_off
+      target:
+        entity_id:
+        - input_boolean.downstairs_doors_open
+      data: {}
+  mode: single
+- id: '1729000000001'
+  alias: Master Bedroom - Seasonal Climate Manager
+  description: Comprehensive season-aware climate control for master bedroom. Manages
+    temperature, humidity, blinds, fan, and AC with different strategies for summer/winter/shoulder
+    seasons. Respects manual overrides, door state, and working-from-home schedule.
+  triggers:
+  - platform: numeric_state
+    entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+    above: input_number.master_bedroom_temp_comfort_high
+    for:
+      minutes: 10
+    id: temp_high
+  - platform: numeric_state
+    entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+    below: input_number.master_bedroom_temp_comfort_low
+    for:
+      minutes: 10
+    id: temp_low
+  - platform: numeric_state
+    entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+    above: 20
+    for:
+      minutes: 5
+    id: humidity_high
+  - platform: state
+    entity_id: binary_sensor.master_bedroom_door_sensor_opening
+    id: door_change
+  - platform: state
+    entity_id: input_boolean.climate_manual_control_master
+    to: 'off'
+    id: manual_override_off
+  - platform: state
+    entity_id: binary_sensor.working_from_home
+    id: wfh_change
+  - platform: time
+    at: 06:00:00
+    id: morning
+  - platform: time
+    at: '12:00:00'
+    id: midday
+  - platform: time
+    at: '16:00:00'
+    id: afternoon
+  - platform: time
+    at: '20:00:00'
+    id: evening
+  - platform: homeassistant
+    event: start
+  conditions:
+  - condition: state
+    entity_id: input_boolean.hvac_master_bedroom_should_be_on
+    state: 'on'
+    alias: Master Bedroom HVAC Master On
+  actions:
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.last_trigger_seasonal_climate_manager
+    data:
+      datetime: '{{ now().isoformat() }}'
+  - action: input_number.increment
+    target:
+      entity_id: input_number.seasonal_climate_triggers_today
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_boolean.climate_manual_control_master
+          state: 'on'
+        - condition: state
+          entity_id: input_boolean.blind_manual_control
+          state: 'on'
+      sequence:
+      - stop: Master bedroom manual overrides active
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.master_bedroom_door_sensor_opening
+        state: 'on'
+      sequence:
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          hvac_mode: 'off'
+      - service: fan.turn_off
+        target:
+          entity_id: fan.masterbedroom_fan
+      - stop: Master bedroom door is open
+  - choose:
+    - alias: Summer Strategy
+      conditions:
+      - condition: state
+        entity_id: input_select.climate_season
+        state: summer
+      sequence:
+      - choose:
+        - alias: WFH Mode - Comfort First
+          conditions:
+          - condition: state
+            entity_id: binary_sensor.working_from_home
+            state: 'on'
+          - condition: time
+            after: 08:00:00
+            before: '17:00:00'
+          sequence:
+          - choose:
+            - alias: Very Hot (>26.5°C) - Aggressive Cooling
+              conditions:
+              - condition: numeric_state
+                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                above: 26.5
+              sequence:
+              - if:
+                - condition: time
+                  before: '15:00:00'
+                then:
+                - service: script.1693262268843
+                else:
+                - service: cover.open_cover
+                  target:
+                    entity_id: cover.roller_blinds_chan1
+              - service: fan.set_percentage
+                target:
+                  entity_id: fan.masterbedroom_fan
+                data:
+                  percentage: 66
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.masterbed_versatile_thermostat
+                data:
+                  preset_mode: boost
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.masterbed_versatile_thermostat
+                data:
+                  hvac_mode: cool
+            - alias: Hot (25.5-26.5°C) - Moderate Cooling
+              conditions:
+              - condition: numeric_state
+                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                above: 25.5
+              sequence:
+              - if:
+                - condition: time
+                  before: '15:00:00'
+                then:
+                - service: script.1693262268843
+                else:
+                - service: cover.open_cover
+                  target:
+                    entity_id: cover.roller_blinds_chan1
+              - service: fan.set_percentage
+                target:
+                  entity_id: fan.masterbedroom_fan
+                data:
+                  percentage: 66
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.masterbed_versatile_thermostat
+                data:
+                  preset_mode: comfort
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.masterbed_versatile_thermostat
+                data:
+                  hvac_mode: cool
+            - alias: Warm (24-25.5°C) - Light Cooling
+              conditions:
+              - condition: numeric_state
+                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                above: input_number.master_bedroom_temp_comfort_high
+              sequence:
+              - service: cover.close_cover
+                target:
+                  entity_id: cover.roller_blinds_chan1
+              - service: fan.set_percentage
+                target:
+                  entity_id: fan.masterbedroom_fan
+                data:
+                  percentage: 33
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.masterbed_versatile_thermostat
+                data:
+                  preset_mode: comfort
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.masterbed_versatile_thermostat
+                data:
+                  hvac_mode: cool
+            default:
+            - service: fan.turn_off
+              target:
+                entity_id: fan.masterbedroom_fan
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+        - alias: Hot Day - Keep Blinds Closed All Day (North-Facing)
+          conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: input_boolean.super_hot_today
+              state: 'on'
+            - condition: state
+              entity_id: input_boolean.hot_today_flag
+              state: 'on'
+          - condition: time
+            after: 06:00:00
+            before: '20:00:00'
+          sequence:
+          - service: cover.close_cover
+            target:
+              entity_id: cover.roller_blinds_chan1
+          - choose:
+            - alias: Very Hot (>26°C) - Aggressive Cooling
+              conditions:
+              - condition: numeric_state
+                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                above: 26
+              sequence:
+              - service: fan.set_percentage
+                target:
+                  entity_id: fan.masterbedroom_fan
+                data:
+                  percentage: 66
+              - if:
+                - condition: state
+                  entity_id: binary_sensor.solar_excess_available
+                  state: 'on'
+                then:
+                - service: climate.set_preset_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    preset_mode: comfort
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    hvac_mode: cool
+            - alias: Hot (24-26°C) - Fan Only
+              conditions:
+              - condition: numeric_state
+                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                above: input_number.master_bedroom_temp_comfort_high
+              sequence:
+              - service: fan.set_percentage
+                target:
+                  entity_id: fan.masterbedroom_fan
+                data:
+                  percentage: 33
+            default:
+            - service: fan.turn_off
+              target:
+                entity_id: fan.masterbedroom_fan
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+        - alias: Daytime 06:00-20:00 (Cool Day)
+          conditions:
+          - condition: time
+            after: 06:00:00
+            before: '20:00:00'
+          sequence:
+          - choose:
+            - alias: Very Hot (>26°C) - Aggressive Cooling
+              conditions:
+              - condition: numeric_state
+                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                above: 26
+              sequence:
+              - if:
+                - condition: state
+                  entity_id: binary_sensor.working_from_home
+                  state: 'on'
+                - condition: time
+                  before: '15:00:00'
+                then:
+                - service: script.1693262268843
+                else:
+                - service: cover.close_cover
+                  target:
+                    entity_id: cover.roller_blinds_chan1
+              - service: fan.set_percentage
+                target:
+                  entity_id: fan.masterbedroom_fan
+                data:
+                  percentage: 66
+              - if:
+                - condition: state
+                  entity_id: binary_sensor.solar_excess_available
+                  state: 'on'
+                then:
+                - service: climate.set_preset_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    preset_mode: comfort
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    hvac_mode: cool
+            - alias: Hot (24-26°C) - Moderate Cooling
+              conditions:
+              - condition: numeric_state
+                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                above: input_number.master_bedroom_temp_comfort_high
+              sequence:
+              - service: cover.close_cover
+                target:
+                  entity_id: cover.roller_blinds_chan1
+              - service: fan.set_percentage
+                target:
+                  entity_id: fan.masterbedroom_fan
+                data:
+                  percentage: 33
+              - if:
+                - condition: state
+                  entity_id: binary_sensor.solar_excess_available
+                  state: 'on'
+                then:
+                - service: climate.set_preset_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    preset_mode: comfort
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    hvac_mode: cool
+            - alias: High Humidity (>20%) - Ventilation
+              conditions:
+              - condition: numeric_state
+                entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+                above: 20
+              - condition: state
+                entity_id: binary_sensor.balcony_door_sensor_magnet_opening_2
+                state: 'off'
+              sequence:
+              - service: script.fan_speed_1
+              - service: cover.close_cover
+                target:
+                  entity_id: cover.roller_blinds_chan1
+              - if:
+                - condition: numeric_state
+                  entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+                  above: 24
+                then:
+                - service: climate.turn_on
+                  target:
+                    area_id: master_bedroom
+                - service: climate.set_hvac_mode
+                  data:
+                    hvac_mode: cool
+                  target:
+                    area_id: master_bedroom
+            - alias: Comfortable - Ventilation Only
+              conditions: []
+              sequence:
+              - service: fan.turn_off
+                target:
+                  entity_id: fan.masterbedroom_fan
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.masterbed_versatile_thermostat
+                data:
+                  hvac_mode: 'off'
+        - alias: Night 20:00-06:00
+          conditions:
+          - condition: time
+            after: '20:00:00'
+            before: 06:00:00
+          sequence:
+          - choose:
+            - alias: Very Hot Night (>26°C)
+              conditions:
+              - condition: numeric_state
+                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                above: 26
+              sequence:
+              - service: fan.set_percentage
+                target:
+                  entity_id: fan.masterbedroom_fan
+                data:
+                  percentage: 33
+            default:
+            - service: fan.turn_off
+              target:
+                entity_id: fan.masterbedroom_fan
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+    - alias: Winter Strategy
+      conditions:
+      - condition: state
+        entity_id: input_select.climate_season
+        state: winter
+      sequence:
+      - choose:
+        - alias: Daytime 08:00-20:00
+          conditions:
+          - condition: time
+            after: 08:00:00
+            before: '20:00:00'
+          sequence:
+          - choose:
+            - alias: Cold (<18�C) - Heating
+              conditions:
+              - condition: numeric_state
+                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                below: input_number.master_bedroom_temp_comfort_low
+              - condition: or
+                conditions:
+                - condition: state
+                  entity_id: binary_sensor.working_from_home
+                  state: 'on'
+                - condition: time
+                  after: '17:00:00'
+              sequence:
+              - service: cover.open_cover
+                target:
+                  entity_id:
+                  - cover.roller_blinds_chan1
+              - service: fan.turn_off
+                target:
+                  entity_id: fan.masterbedroom_fan
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.masterbed_versatile_thermostat
+                data:
+                  preset_mode: comfort
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.masterbed_versatile_thermostat
+                data:
+                  hvac_mode: heat
+            default:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+        default:
+        - service: climate.set_hvac_mode
+          target:
+            entity_id: climate.masterbed_versatile_thermostat
+          data:
+            hvac_mode: 'off'
+    - alias: Shoulder Season Strategy (Autumn/Spring)
+      conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: autumn
+        - condition: state
+          entity_id: input_select.climate_season
+          state: spring
+      sequence:
+      - choose:
+        - alias: Very Hot (>26°C) - Cooling
+          conditions:
+          - condition: numeric_state
+            entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+            above: 26
+          - condition: time
+            after: 09:00:00
+            before: '20:00:00'
+          sequence:
+          - service: cover.close_cover
+            target:
+              entity_id: cover.roller_blinds_chan1
+          - service: fan.set_percentage
+            target:
+              entity_id: fan.masterbedroom_fan
+            data:
+              percentage: 33
+        - alias: Cold (<16°C) - Heating
+          conditions:
+          - condition: numeric_state
+            entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+            below: 16
+          - condition: time
+            after: '18:00:00'
+            before: 06:00:00
+          sequence:
+          - service: climate.set_preset_mode
+            target:
+              entity_id: climate.masterbed_versatile_thermostat
+            data:
+              preset_mode: boost
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.masterbed_versatile_thermostat
+            data:
+              hvac_mode: heat
+        default:
+        - service: fan.turn_off
+          target:
+            entity_id: fan.masterbedroom_fan
+        - service: climate.set_hvac_mode
+          target:
+            entity_id: climate.masterbed_versatile_thermostat
+          data:
+            hvac_mode: 'off'
+  mode: single
+- id: '1729000000000'
+  alias: Climate - Auto Detect Season
+  description: Automatically sets the climate season based on the current month for
+    Melbourne climate patterns (Summer Dec-Feb, Autumn Mar-May, Winter Jun-Aug, Spring
+    Sep-Nov)
+  triggers:
+  - platform: time
+    at: 04:30:00
+  - platform: homeassistant
+    event: start
+  - platform: time
+    at: 00:01:00
+    id: month_change
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ now().month in [12, 1, 2] }}'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.climate_season
+        data:
+          option: summer
+    - conditions:
+      - condition: template
+        value_template: '{{ now().month in [3, 4, 5] }}'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.climate_season
+        data:
+          option: autumn
+    - conditions:
+      - condition: template
+        value_template: '{{ now().month in [6, 7, 8] }}'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.climate_season
+        data:
+          option: winter
+    - conditions:
+      - condition: template
+        value_template: '{{ now().month in [9, 10, 11] }}'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.climate_season
+        data:
+          option: spring
+  mode: single
+- id: hot_night_bedroom_cooling
+  alias: Bedrooms - Overnight AC on Hot Days
+  description: Turns on AC boost in bedrooms overnight when day temperature exceeded
+    18°C
+  triggers:
+  - at: '18:45:00'
+    trigger: time
+    id: kids_bedtime
+  - at: '21:00:00'
+    trigger: time
+    id: master_bedtime
+  conditions:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_boolean.warm_today_flag
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.hot_today_flag
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.super_hot_today
+      state: 'on'
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: kids_bedtime
+      - condition: and
+        conditions:
+        - condition: state
+          entity_id: input_boolean.hvac_kids_room_should_be_on
+          state: 'on'
+      sequence:
+      - service: climate.set_hvac_mode
+        target:
+          entity_id:
+          - climate.otto_s_room
+          - climate.henry_s_room_versatile_thermostat
+        data:
+          hvac_mode: cool
+      - service: climate.set_preset_mode
+        target:
+          entity_id:
+          - climate.otto_s_room
+          - climate.henry_s_room_versatile_thermostat
+        data:
+          preset_mode: boost
+    - conditions:
+      - condition: trigger
+        id: master_bedtime
+      - condition: and
+        conditions:
+        - condition: state
+          entity_id: input_boolean.hvac_master_bedroom_should_be_on
+          state: 'on'
+      sequence:
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          hvac_mode: cool
+      - service: climate.set_preset_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          preset_mode: boost
+  mode: single
+- id: hot_night_bedroom_cooling_off
+  alias: Bedrooms - Turn Off Overnight AC in Morning
+  description: Turns off overnight hot-night AC cooling in the morning
+  triggers:
+  - at: 06:00:00
+    trigger: time
+  conditions:
+  - condition: or
+    conditions:
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: climate.otto_s_room
+        state: cool
+      - condition: state
+        entity_id: input_boolean.hvac_kids_room_should_be_on
+        state: 'on'
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: climate.henry_s_room_versatile_thermostat
+        state: cool
+      - condition: state
+        entity_id: input_boolean.hvac_study_should_be_on
+        state: 'on'
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: climate.masterbed_versatile_thermostat
+        state: cool
+      - condition: state
+        entity_id: input_boolean.hvac_master_bedroom_should_be_on
+        state: 'on'
+  actions:
+  - service: climate.set_hvac_mode
+    target:
+      entity_id:
+      - climate.otto_s_room
+      - climate.henry_s_room_versatile_thermostat
+      - climate.masterbed_versatile_thermostat
+    data:
+      hvac_mode: 'off'
+  mode: single
+- id: frost_protection_bedrooms_cool_nights
+  alias: Bedrooms - Overnight Frost Protection (No Hot Days)
+  description: 'Applies frost preset (17°C minimum) to all bedrooms on cool nights
+    when no hot day flags are active. Ensures minimum temperature protection during
+    mild winter nights without heating trigger.
+
+    '
+  triggers:
+  - trigger: time
+    at: '18:00:00'
+    id: evening_protection
+  - trigger: homeassistant
+    event: start
+    id: startup
+  conditions:
+  - condition: time
+    after: '18:00:00'
+    before: 06:00:00
+  - condition: state
+    entity_id: input_boolean.warm_today_flag
+    state: 'off'
+    alias: Not Warm Today
+  - condition: state
+    entity_id: input_boolean.hot_today_flag
+    state: 'off'
+    alias: Not Hot Today
+  - condition: state
+    entity_id: input_boolean.super_hot_today
+    state: 'off'
+    alias: Not Super Hot Today
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.hvac_master_bedroom_should_be_on
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.climate_manual_control_master
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.master_bedroom_door_sensor_opening
+        state: 'off'
+        alias: Master Bedroom Door Closed
+      sequence:
+      - service: climate.set_preset_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          preset_mode: frost
+        alias: Set Master Bedroom Frost (17°C minimum)
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          hvac_mode: heat
+        alias: Enable Master Bedroom Heat Mode
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.hvac_kids_room_should_be_on
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.climate_manual_control_otto
+        state: 'off'
+      sequence:
+      - service: climate.set_preset_mode
+        target:
+          entity_id: climate.otto_s_room
+        data:
+          preset_mode: frost
+        alias: Set Otto's Room Frost (17°C minimum)
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.otto_s_room
+        data:
+          hvac_mode: heat
+        alias: Enable Otto's Room Heat Mode
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.hvac_study_should_be_on
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.climate_manual_control_study
+        state: 'off'
+      sequence:
+      - service: climate.set_preset_mode
+        target:
+          entity_id: climate.henry_s_room_versatile_thermostat
+        data:
+          preset_mode: frost
+        alias: Set Study Frost (17°C minimum)
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.henry_s_room_versatile_thermostat
+        data:
+          hvac_mode: heat
+        alias: Enable Study Heat Mode
+  mode: single
+- id: '1649108238334'
+  alias: Notify Steph When Phil Leaves Work
+  description: Sends Steph a notification when Phil exits the work zone.
+  trigger:
+  - platform: zone
+    entity_id: person.phil_patterson
+    zone: zone.work
+    event: leave
+  condition: []
+  action:
+  - service: notify.mobile_app_slvdh
+    data:
+      message: Phil is leaving work area now
+      title: Phil leaves work
+  mode: single
+- id: '1682493497365'
+  alias: Phil Leaves Work Alert
+  description: Notifies the household when Phil leaves the work zone.
+  trigger:
+  - platform: device
+    device_id: c054264b79e6739a057236f3a3c512b4
+    domain: device_tracker
+    entity_id: device_tracker.sm_s908e
+    type: leaves
+    zone: zone.work
+  condition: []
+  action:
+  - service: notify.mobile_app_slvdh
+    metadata: {}
+    data:
+      message: Phil has left work
+  mode: single
+- id: '1685791154995'
+  alias: Sync People Home Helper
+  description: Keeps the people_home helper aligned with the household occupancy state.
+  triggers:
+  - entity_id: input_select.occupancy
+    trigger: state
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: zone.home
+        state: not_home
+      sequence:
+      - target:
+          entity_id: input_boolean.people_home
+        action: input_boolean.turn_off
+        data: {}
+    default:
+    - target:
+        entity_id: input_boolean.people_home
+      action: input_boolean.turn_on
+      data: {}
+  mode: single
+- id: '1710134062501'
+  alias: Occupancy - Sync Presence Helper
+  description: Mirrors the occupancy select state into the home presence helper booleans.
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.occupancy
+    to: Home
+    id: Home
+    from: Away
+  - platform: state
+    entity_id:
+    - input_select.occupancy
+    to: Sleeping
+    id: Home
+    from: Away
+  - platform: state
+    entity_id:
+    - input_select.occupancy
+    id: Away
+    from: Home
+    to: Away
+  - platform: state
+    entity_id:
+    - input_select.occupancy
+    id: Away
+    from: Sleeping
+    to: Away
+  - platform: state
+    entity_id:
+    - input_select.occupancy
+    id: Away
+    to: Holiday
+  - platform: state
+    entity_id:
+    - input_select.occupancy
+    id: Home
+    from: Holiday
+  condition: []
+  action:
+  - if:
+    - condition: trigger
+      id:
+      - Home
+    then:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.home_presence
+      data: {}
+  - if:
+    - condition: trigger
+      id:
+      - Away
+    then:
+    - service: input_boolean.turn_off
+      target:
+        entity_id:
+        - input_boolean.home_presence
+      data: {}
+  mode: single

@@ -1,0 +1,1869 @@
+---
+- id: '1649147714100'
+  alias: Open Garage When Phil or Steph Arrive Home
+  description: Opens the garage door and disarms Alarmo when Phil or Steph arrive
+    home and the car is connected.
+  triggers:
+  - device_id: c054264b79e6739a057236f3a3c512b4
+    domain: device_tracker
+    entity_id: device_tracker.sm_s908e
+    type: enters
+    zone: zone.home
+    trigger: device
+  - device_id: 58e2eb1fec0eb5ec9ce450433d074fcf
+    domain: device_tracker
+    entity_id: device_tracker.slvdh_2
+    type: enters
+    zone: zone.home
+    trigger: device
+  conditions:
+  - type: is_connected
+    condition: device
+    device_id: c054264b79e6739a057236f3a3c512b4
+    entity_id: 39a721a1e67ec5758cce90959b3d8a25
+    domain: binary_sensor
+  actions:
+  - device_id: 7edad8ef01a718694f8a423cbfdca0c0
+    domain: cover
+    entity_id: cover.smart_garage_door_garage
+    type: open
+  - device_id: d0246dd7b63468505017ec29f63e3d86
+    domain: alarm_control_panel
+    entity_id: alarm_control_panel.alarmo
+    type: disarm
+  mode: single
+- id: '1713092115962'
+  alias: Nightly Garage Door Check
+  description: Nightly Garage Door Check
+  triggers:
+  - entity_id:
+    - cover.smart_garage_door_garage
+    to: open
+    trigger: state
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
+  - trigger: time
+    at: '21:00:00'
+  conditions:
+  - condition: state
+    entity_id: cover.smart_garage_door_garage
+    state: open
+  actions:
+  - data:
+      message: 'Garage Door open for {{ relative_time(states.binary_sensor.garage_door_alert_active.last_changed)
+        }} \   Alerts on: Alerts on: {{ states.cover | selectattr(''entity_id'', ''eq'',
+        ''cover.smart_garage_door_garage'') | selectattr(''state'', ''eq'', ''on'')
+        | map(attribute=''attributes.friendly_name'') | list | join('', '') }} \  Triggered:
+        {{ as_timestamp(states.binary_sensor.garage_door_alert_active.last_changed)
+        | timestamp_custom(''%A %I:%M%p (%d-%b-%Y)'') }}
+
+        '
+      title: 7580 Info - Garage Door Open
+    service: notify.STD_Information
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      message: Garage door left open
+      data:
+        actions:
+        - action: CLOSE_GARAGE
+          title: Close Garage Door
+  - service: notify.mobile_app_slvdh
+    data:
+      message: Garage door left open
+      data:
+        actions:
+        - action: CLOSE_GARAGE
+          title: Close Garage Door
+  mode: single
+- id: '1727826000000'
+  alias: Garage - Handle Close Notification Action
+  description: Executes the garage close action when the mobile notification button
+    is pressed.
+  triggers:
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: CLOSE_GARAGE
+  actions:
+  - action: cover.close_cover
+    target:
+      entity_id: cover.smart_garage_door_garage
+  mode: single
+- id: garage_door_open_display_cameras
+  alias: Garage Door - Cast Front Door Camera on Open
+  description: Casts the front door camera to the kitchen display when the garage
+    door opens
+  triggers:
+  - trigger: state
+    entity_id: cover.smart_garage_door_garage
+    to: open
+  conditions: []
+  actions:
+  - service: camera.play_stream
+    data:
+      media_player: media_player.kitchen
+      format: hls
+    target:
+      entity_id: camera.bi_front_door_camera
+  mode: single
+- id: garage_door_close_stop_kitchen
+  alias: Garage Door - Stop Kitchen Stream on Close
+  description: Stops any kitchen playback once the garage door closes
+  triggers:
+  - trigger: state
+    entity_id: cover.smart_garage_door_garage
+    to: closed
+    from: open
+  conditions: []
+  actions:
+  - service: media_player.media_stop
+    target:
+      entity_id: media_player.kitchen
+  mode: single
+- id: '1732435588125'
+  alias: Laundry - Washing Machine Notifications & Actions
+  description: Uses the appliance blueprint to notify and automate around the washing
+    machine cycle.
+  use_blueprint:
+    path: Blackshome/appliance-notifications.yaml
+    input:
+      running_dead_zone: 0
+      start_notify_device:
+      - c054264b79e6739a057236f3a3c512b4
+      - 58e2eb1fec0eb5ec9ce450433d074fcf
+      include_end_notify: enable_end_notify_options
+      end_notify_device:
+      - 58e2eb1fec0eb5ec9ce450433d074fcf
+      - c054264b79e6739a057236f3a3c512b4
+      end_reminder_notification: disable_reminder_notification
+      include_power_tracking: enable_power_tracking
+      include_duration_tracking: enable_duration_tracking
+      start_notify_data:
+      - channel
+      start_notify_channel: Laundry
+      end_notify_data:
+      - channel
+      end_notify_channel: Laundry
+      power_consumption_sensor: sensor.washing_machine_power_plug_summation_delivered
+      include_custom_actions:
+      - enable_end_custom_actions
+      - enable_start_custom_actions
+      start_custom_actions:
+      - action: input_boolean.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.washing_machine_on
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.kitchen
+        data:
+          media:
+            media_content_id: media-source://media_source/local/audioclips/makemyclothesniceandclean.aac
+            media_content_type: audio/x-aac
+            metadata:
+              title: makemyclothesniceandclean.aac
+              thumbnail:
+              media_class: music
+              children_media_class:
+              navigateIds:
+              - {}
+              - media_content_type: app
+                media_content_id: media-source://media_source
+              - media_content_type: ''
+                media_content_id: media-source://media_source/local/audioclips
+              browse_entity_id: media_player.kitchen
+      end_custom_actions:
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.washing_machine_on
+      - action: tts.google_translate_say
+        metadata: {}
+        data:
+          cache: false
+          entity_id: media_player.kitchen
+          message: '{{ states(''sensor.washing_machine_random_message'') }}'
+      - action: tts.google_translate_say
+        metadata: {}
+        data:
+          cache: false
+          entity_id: media_player.study_speaker
+          message: '{{ states(''sensor.washing_machine_random_message'') }}'
+      - choose:
+        - conditions:
+          - condition: time
+            after: 08:00:00
+            before: '20:00:00'
+          - condition: template
+            value_template: '{{ expand(area_entities(''master_bedroom'')) | selectattr(''domain'',
+              ''eq'', ''light'') | selectattr(''state'', ''eq'', ''on'') | list |
+              count > 0 }}'
+          sequence:
+          - action: tts.google_translate_say
+            metadata: {}
+            data:
+              cache: false
+              entity_id: media_player.master_bedroom_speaker
+              message: '{{ states(''sensor.washing_machine_random_message'') }}'
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 10
+          milliseconds: 0
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.kitchen
+        data:
+          media:
+            media_content_id: media-source://media_source/local/Memes/image1.jpg
+            media_content_type: image/jpeg
+            metadata:
+              title: image1.jpg
+              thumbnail:
+              media_class: image
+              children_media_class:
+              navigateIds:
+              - {}
+              - media_content_type: app
+                media_content_id: media-source://media_source
+              - media_content_type: ''
+                media_content_id: media-source://media_source/local/Memes
+      - delay:
+          hours: 0
+          minutes: 15
+          seconds: 0
+          milliseconds: 0
+      - action: media_player.turn_off
+        metadata: {}
+        data: {}
+        target:
+          device_id: 38066f3083671e091a033c27c46cc53c
+      start_appliance_power: 10
+      include_start_notify: enable_start_notify_options
+      end_appliance_power: 10
+      end_time_delay: 1
+      start_time_delay: 1
+      end_repeat_count: 1
+      start_message: YES! Another load of washing is ON :)
+      start_power_consumption: input_number.washing_power_tracker_kwh
+      end_power_consumption: input_number.washing_power_tracker_end_kwh
+      start_notify_interruption_level: passive
+      end_notify_interruption_level: passive
+      global_conditions:
+      - condition: state
+        entity_id: input_boolean.master_automation_killswitch
+        state: 'off'
+      power_sensor: sensor.washing_machine_power_plug_power
+- id: '1735955632537'
+  alias: Laundry - Dryer Notifications & Actions
+  description: Uses the appliance blueprint to notify and automate around the dryer
+    cycle.
+  use_blueprint:
+    path: Blackshome/appliance-notifications.yaml
+    input:
+      power_sensor: sensor.dryer_power_plug_power
+      start_notify_device:
+      - c054264b79e6739a057236f3a3c512b4
+      - 58e2eb1fec0eb5ec9ce450433d074fcf
+      include_start_notify: enable_start_notify_options
+      start_notify_data:
+      - channel
+      start_notify_channel: Washing
+      include_end_notify: enable_end_notify_options
+      end_notify_device:
+      - c054264b79e6739a057236f3a3c512b4
+      - 58e2eb1fec0eb5ec9ce450433d074fcf
+      end_notify_interruption_level: passive
+      end_notify_data:
+      - channel
+      end_notify_channel: Washing
+      end_message: Dryer is finished!
+      start_message: YES! Another dryer load is ON :)
+      include_power_tracking: enable_power_tracking
+      power_consumption_sensor: sensor.dryer_power_plug_summation_delivered
+      include_duration_tracking: enable_duration_tracking
+      include_custom_actions:
+      - enable_end_custom_actions
+      - enable_start_custom_actions
+      end_custom_actions:
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.dryer_on
+      - action: tts.google_translate_say
+        metadata: {}
+        data:
+          cache: false
+          entity_id: media_player.kitchen
+          message: '{{ states(''sensor.dryer_random_message'') }}'
+      - action: tts.google_translate_say
+        metadata: {}
+        data:
+          cache: false
+          entity_id: media_player.study_speaker
+          message: '{{ states(''sensor.dryer_random_message'') }}'
+      - choose:
+        - conditions:
+          - condition: time
+            after: 08:00:00
+            before: '20:00:00'
+          - condition: template
+            value_template: '{{ expand(area_entities(''master_bedroom'')) | selectattr(''domain'',
+              ''eq'', ''light'') | selectattr(''state'', ''eq'', ''on'') | list |
+              count > 0 }}'
+          sequence:
+          - action: tts.google_translate_say
+            metadata: {}
+            data:
+              cache: false
+              entity_id: media_player.master_bedroom_speaker
+              message: '{{ states(''sensor.dryer_random_message'') }}'
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 10
+          milliseconds: 0
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.kitchen
+        data:
+          media:
+            media_content_id: media-source://media_source/local/Memes/images.jpg
+            media_content_type: image/jpeg
+            metadata:
+              title: images.jpg
+              thumbnail:
+              media_class: image
+              children_media_class:
+              navigateIds:
+              - {}
+              - media_content_type: app
+                media_content_id: media-source://media_source
+              - media_content_type: ''
+                media_content_id: media-source://media_source/local/Memes
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.kitchen
+        data:
+          media:
+            media_content_id: media-source://media_source/local/audioclips/the washing
+              is done.aac
+            media_content_type: audio/x-aac
+            metadata:
+              title: the washing is done.aac
+              thumbnail:
+              media_class: music
+              children_media_class:
+              navigateIds:
+              - {}
+              - media_content_type: app
+                media_content_id: media-source://media_source
+              - media_content_type: ''
+                media_content_id: media-source://media_source/local/audioclips
+              browse_entity_id: media_player.kitchen
+      - delay:
+          hours: 0
+          minutes: 15
+          seconds: 0
+          milliseconds: 0
+      - action: media_player.turn_off
+        metadata: {}
+        data: {}
+        target:
+          device_id: 38066f3083671e091a033c27c46cc53c
+      end_appliance_power: 14
+      start_custom_actions:
+      - action: input_boolean.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.dryer_on
+      watchdog_custom_actions: []
+      end_time_delay: 0.5
+      start_title: Dryer
+      end_message_title: Dryer
+      start_appliance_power: 10
+      start_power_consumption: input_number.start_dryer_power_tracker
+      end_power_consumption: input_number.end_dryer_power_tracker_kwh
+      start_notify_interruption_level: passive
+      end_reminder_notification_max_count: 1
+      start_time_delay: 0.5
+      include_watchdog: enable_watchdog
+      watchdog_timeframe:
+        hours: 5
+        minutes: 0
+        seconds: 0
+      watchdog_message: Uh-oh! Time to check the dry
+      watchdog_notify_data:
+      - channel
+      watchdog_notify_channel: Washing
+      global_conditions:
+      - condition: state
+        entity_id: input_boolean.master_automation_killswitch
+        state: 'off'
+      running_dead_zone: 1
+- id: '1740132306652'
+  alias: Laundry - Dishwasher Notifications & Actions
+  description: Sends start and finish notifications for the dishwasher based on power
+    usage. run
+  use_blueprint:
+    path: Blackshome/appliance-notifications.yaml
+    input:
+      end_power_consumption: input_number.dishwasher_power_tracker_end
+      start_appliance_power: 15
+      include_start_notify: enable_start_notify_options
+      start_notify_device:
+      - 58e2eb1fec0eb5ec9ce450433d074fcf
+      - c054264b79e6739a057236f3a3c512b4
+      start_title: Dishwasher
+      start_message: YES! The dishwasher is on
+      start_notify_interruption_level: passive
+      start_notify_data: []
+      include_end_notify: enable_end_notify_options
+      end_notify_device:
+      - 58e2eb1fec0eb5ec9ce450433d074fcf
+      - c054264b79e6739a057236f3a3c512b4
+      end_message_title: Dishwasher
+      end_message: Unpack the dishwasher - it's done!
+      include_power_tracking: enable_power_tracking
+      power_consumption_sensor: sensor.dishwasher_smart_plug_consumption
+      start_power_consumption: input_number.dishwasher_power_tracker_start
+      include_duration_tracking: enable_duration_tracking
+      include_custom_actions:
+      - enable_start_custom_actions
+      - enable_end_custom_actions
+      start_custom_actions:
+      - action: input_boolean.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.dishwasher_on
+      end_custom_actions:
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.dishwasher_on
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.kitchen
+        data:
+          media:
+            media_content_id: media-source://media_source/local/audioclips/clean the
+              dishes ya filthy animal.aac
+            media_content_type: audio/x-aac
+            metadata:
+              title: clean the dishes ya filthy animal.aac
+              thumbnail:
+              media_class: music
+              children_media_class:
+              navigateIds:
+              - {}
+              - media_content_type: app
+                media_content_id: media-source://media_source
+              - media_content_type: ''
+                media_content_id: media-source://media_source/local/audioclips
+              browse_entity_id: media_player.kitchen
+      global_conditions:
+      - condition: state
+        entity_id: input_boolean.master_automation_killswitch
+        state: 'off'
+      end_appliance_power: 13
+      include_watchdog: disable_watchdog
+      running_dead_zone: 3
+      power_sensor: sensor.smart_plug_power
+      end_notify_data:
+      - channel
+      end_notify_channel: Dishwasher
+      end_reminder_notification_message: Hey! Your dishes are ready, don't leave it
+        to get mouldy!
+      end_time_delay: 15
+      start_time_delay: 0.5
+      include_cycle_counter: enable_cycle_counter_and_notify
+      cycle_counter_helper: counter.dishwasher_counter
+      include_service_reminder: enable_service_reminder
+      service_reminder_counter_helper: counter.dishwasher_counter
+- id: appliance_timeout_failsafe
+  alias: Appliances - Timeout Failsafe
+  description: Automatically turns off appliance trackers after timeout to prevent
+    stuck states
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_boolean.dishwasher_on
+    - input_boolean.washing_machine_on
+    - input_boolean.dryer_on
+    to: 'on'
+    for:
+      hours: 1
+  actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: '{{ trigger.entity_id }}'
+  - action: notify.std_information
+    data:
+      title: Appliance Timeout
+      message: '{{ state_attr(trigger.entity_id, "friendly_name") }} was automatically
+        marked as done after timeout'
+  mode: parallel
+- id: '1718513507860'
+  alias: Media - Toggle Amp and Backlight
+  description: Synchronises the media amplifier outlet and TV backlight with remote
+    power events. TV backlights if it is after sundown
+  triggers:
+  - entity_id: remote.sony_kd_55x8500c
+    from: 'off'
+    to: 'on'
+    id: tv_on
+    trigger: state
+  - entity_id: remote.sony_kd_55x8500c
+    from: 'on'
+    to: 'off'
+    id: tv_off
+    trigger: state
+  - event: sunset
+    offset: 0
+    trigger: sun
+  - entity_id: remote.sony_kd_55x8500c
+    to: unavailable
+    id: tv_unavailable
+    trigger: state
+  conditions: []
+  actions:
+  - alias: Amp and backlight on/off
+    choose:
+    - conditions:
+      - condition: trigger
+        id: tv_on
+      sequence:
+      - condition: sun
+        after: sunset
+        before: sunrise
+      - action: light.turn_on
+        target:
+          entity_id: light.tv_backlight
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: tv_off
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id: light.tv_backlight
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: tv_unavailable
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id: light.tv_backlight
+        data: {}
+  mode: single
+- id: '1749730336110'
+  alias: Living Room Audio - Control WiiM Amp Volume
+  description: Sets and tracks the WiiM Amp volume based on scripted adjustments.
+  triggers:
+  - trigger: time
+    at: 06:30:00
+  conditions: []
+  actions:
+  - action: media_player.volume_set
+    metadata: {}
+    data:
+      volume_level: 0.08
+    target:
+      device_id: 460e7ce205c826c208cee3efb7193105
+  mode: single
+- id: '1752525370218'
+  alias: Morning - Start Music Routine
+  description: Starts the morning music playlist at the scheduled time.
+  triggers:
+  - trigger: time
+    at: 06:30:00
+  conditions:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Sleeping
+  actions:
+  - action: media_player.volume_set
+    metadata: {}
+    data:
+      volume_level: 0.2
+    target:
+      entity_id: media_player.wiim_amp_pro_ebe4
+  - action: media_player.play_media
+    metadata: {}
+    data: {}
+    target:
+      entity_id: media_player.wiim_amp_pro_ebe4
+  mode: single
+- id: '1705440129170'
+  alias: Living Room Remote - Mijia Switch Actions
+  description: Maps the Mijia wireless remote events to lighting and scene shortcuts.
+  triggers:
+  - event_type: zha_event
+    event_data:
+      device_id: 5858e6f215e4bc4f5876cb1e82be3dd5
+    trigger: event
+  actions:
+  - variables:
+      click_type: '{{ trigger.event.data.args.click_type }}'
+      attrname: '{{ trigger.event.data.args.attribute_name }}'
+      value: '{{ trigger.event.data.args.attribute_value }}'
+      command: '{{ trigger.event.data.command }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ attrname == ''on_off'' }}'
+      - condition: template
+        value_template: '{{ value == true }}'
+      sequence:
+      - wait_for_trigger:
+        - event_type: zha_event
+          event_data:
+            device_id: 5858e6f215e4bc4f5876cb1e82be3dd5
+            command: attribute_updated
+            args:
+              attribute_id: 0
+              attribute_name: on_off
+              value: false
+          trigger: event
+        continue_on_timeout: true
+        timeout: 0.6
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ not wait.trigger }}'
+          sequence:
+          - device_id: 1237768e2dd98b4fd8a60455b374908d
+            domain: light
+            entity_id: 7341353cf94f589e859b6d7a8d463077
+            type: brightness_increase
+        default:
+        - type: toggle
+          device_id: 1237768e2dd98b4fd8a60455b374908d
+          entity_id: 7341353cf94f589e859b6d7a8d463077
+          domain: light
+        - action: light.toggle
+          metadata: {}
+          data: {}
+          enabled: false
+    - conditions:
+      - condition: template
+        value_template: '{{ command == ''click'' }}'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ click_type == ''double'' }}'
+          sequence:
+          - device_id: 1237768e2dd98b4fd8a60455b374908d
+            domain: light
+            entity_id: 7341353cf94f589e859b6d7a8d463077
+            type: brightness_decrease
+        - conditions:
+          - condition: template
+            value_template: '{{ click_type == ''triple'' }}'
+          sequence: []
+        - conditions:
+          - condition: template
+            value_template: '{{ click_type == ''quadruple'' }}'
+          sequence: []
+        - conditions:
+          - condition: template
+            value_template: '{{ click_type == ''furious'' }}'
+          sequence: []
+  mode: parallel
+  max_exceeded: silent
+- id: '1738224719290'
+  alias: Master Bedroom Remote - Control Reading Light
+  description: Maps bedside remote presses to toggling and dimming the reading light.
+  triggers:
+  - device_id: f085406cb09d1a8a9f10f0b500c48ebe
+    domain: zha
+    type: remote_button_short_press
+    subtype: button_1
+    trigger: device
+    id: Once
+  - device_id: f085406cb09d1a8a9f10f0b500c48ebe
+    domain: zha
+    type: remote_button_long_press
+    subtype: button_1
+    trigger: device
+    id: Held
+  - device_id: f085406cb09d1a8a9f10f0b500c48ebe
+    domain: zha
+    type: remote_button_double_press
+    subtype: button_1
+    trigger: device
+    id: Double
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Once
+      sequence:
+      - action: light.toggle
+        metadata: {}
+        data: {}
+        target:
+          device_id: 18551c9b3c72efc901c3e35633c1e3c7
+    - conditions:
+      - condition: trigger
+        id:
+        - Double
+      sequence:
+      - choose:
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: light.computer_desk_light_socket_1
+              state: 'on'
+            - condition: state
+              entity_id: light.reading_light
+              state: 'on'
+            - condition: state
+              entity_id: light.sleeping_light_2
+              state: 'on'
+          sequence:
+          - action: light.turn_off
+            metadata: {}
+            data: {}
+            target:
+              area_id: master_bedroom
+        default:
+        - action: light.turn_on
+          metadata: {}
+          data: {}
+          target:
+            area_id: master_bedroom
+  mode: single
+- id: '1738226362136'
+  alias: Master Bedroom Remote - Control Sleeping Light
+  description: Maps bedside remote presses to control the sleeping light brightness
+    and power.
+  triggers:
+  - device_id: 8c730c300afc8f900acf8e9782eb6d62
+    domain: zha
+    type: remote_button_short_press
+    subtype: button_1
+    trigger: device
+    id: Once
+  - device_id: 8c730c300afc8f900acf8e9782eb6d62
+    domain: zha
+    type: remote_button_double_press
+    subtype: button_1
+    trigger: device
+    id: Double
+  - device_id: 8c730c300afc8f900acf8e9782eb6d62
+    domain: zha
+    type: remote_button_short_press
+    subtype: button
+    trigger: device
+    id: Once
+    enabled: false
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Once
+      sequence:
+      - action: light.toggle
+        metadata: {}
+        data: {}
+        target:
+          device_id:
+          - 3cf9c8bc5367cd26edc9b128e7303916
+    - conditions:
+      - condition: trigger
+        id:
+        - Double
+      sequence:
+      - choose:
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: light.computer_desk_light_socket_1
+              state: 'on'
+            - condition: state
+              entity_id: light.reading_light
+              state: 'on'
+            - condition: state
+              entity_id: light.sleeping_light_2
+              state: 'on'
+          sequence:
+          - action: light.turn_off
+            metadata: {}
+            data: {}
+            target:
+              area_id: master_bedroom
+        default:
+        - action: light.turn_on
+          metadata: {}
+          data: {}
+          target:
+            area_id: master_bedroom
+  mode: single
+- id: '1738720805420'
+  alias: Master Bedroom Remote - Toggle Room Lighting
+  description: Uses the bedside remote to toggle the master bedroom lighting group.
+  triggers:
+  - device_id: f085406cb09d1a8a9f10f0b500c48ebe
+    domain: zha
+    type: remote_button_short_press
+    subtype: button
+    trigger: device
+    enabled: false
+  - device_id: 8cb8be820d24cc85cc448e17a28fb15d
+    domain: zha
+    type: remote_button_short_press
+    subtype: button
+    trigger: device
+    id: Once
+  - device_id: 8cb8be820d24cc85cc448e17a28fb15d
+    domain: zha
+    type: remote_button_short_press
+    subtype: button_1
+    trigger: device
+    id: Held
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: light.reading_light
+          state: 'on'
+        - condition: state
+          entity_id: light.sleeping_light_2
+          state: 'on'
+        - condition: state
+          entity_id: switch.computer_desk_light_child_lock
+          state: 'on'
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          area_id: master_bedroom
+    default:
+    - action: light.turn_on
+      metadata: {}
+      data: {}
+      target:
+        area_id: master_bedroom
+  mode: single
+- id: '1738899778775'
+  alias: Study Remote - Toggle Computer Desk
+  description: Lets the spare remote toggle the study computer desk smart switch.
+    having to pull out a phone
+  triggers:
+  - device_id: a957c4c649b876f99732f7bd44193c43
+    domain: zha
+    type: remote_button_short_press
+    subtype: button_1
+    trigger: device
+  - device_id: a957c4c649b876f99732f7bd44193c43
+    domain: zha
+    type: remote_button_short_press
+    subtype: button
+    trigger: device
+  conditions: []
+  actions:
+  - action: switch.toggle
+    metadata: {}
+    data: {}
+    target:
+      device_id: ac27c1acd87d567603e54ed90f046a50
+  mode: single
+- id: '1685157513874'
+  alias: Study Desk NFC - Toggle Desk Switch
+  description: Toggles the study desk switch when its NFC tag is scanned.
+  triggers:
+  - tag_id: c99ee431-d1d8-497c-9f0f-214994610aa6
+    trigger: tag
+  conditions: []
+  actions:
+  - type: toggle
+    device_id: ac27c1acd87d567603e54ed90f046a50
+    entity_id: 41d147d319aab7615baeff5015237de7
+    domain: switch
+  mode: single
+- id: '1724225427107'
+  alias: Master Bedroom - Update Sleeping Status
+  description: Updates the master sleeping helper using sleep confidence metrics.
+    false
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.samsung_galaxy_s22_ultra_sleep_confidence
+    above: 85
+    for:
+      minutes: 15
+    id: Phil Sleeping
+  - platform: numeric_state
+    entity_id:
+    - sensor.samsung_galaxy_s22_ultra_sleep_confidence
+    below: 85
+    id: Phil Not Sleeping
+  - platform: numeric_state
+    entity_id:
+    - sensor.slvdh_battery_level
+    for:
+      minutes: 15
+    above: 80
+    id: Steph Sleeping
+  - platform: numeric_state
+    entity_id:
+    - sensor.slvdh_floors_ascended
+    above: 1
+    enabled: false
+  - platform: state
+    entity_id:
+    - sensor.slvdh_battery_state
+    to: Charging
+    enabled: false
+  - platform: numeric_state
+    entity_id:
+    - sensor.slvdh_battery_level
+    below: 90
+    for:
+      minutes: 15
+    id: Steph Not Sleeping
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
+        above: 85
+      - condition: numeric_state
+        entity_id: sensor.slvdh_battery_level
+        above: 80
+      sequence:
+      - target:
+          entity_id: input_boolean.masterbed_sleeping
+        action: input_boolean.turn_on
+        data: {}
+    - conditions: []
+      sequence:
+      - target:
+          entity_id: input_boolean.masterbed_sleeping
+        action: input_boolean.turn_off
+        data: {}
+  mode: single
+- id: '1707562883987'
+  alias: Study - Start Workday Desk Routine
+  description: Turns on the study desk switch and preps climate when the workday toggle
+    activates.
+  triggers:
+  - type: turned_on
+    device_id: dc326b28df2064ab9f7d9e983e6824e6
+    entity_id: 63cfcb8c97058003e378eefffdaa028b
+    domain: switch
+    id: 'On'
+    trigger: device
+  - type: turned_off
+    device_id: dc326b28df2064ab9f7d9e983e6824e6
+    entity_id: 63cfcb8c97058003e378eefffdaa028b
+    domain: switch
+    id: 'Off'
+    trigger: device
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 'On'
+      sequence:
+      - type: turn_on
+        device_id: ac27c1acd87d567603e54ed90f046a50
+        entity_id: 41d147d319aab7615baeff5015237de7
+        domain: switch
+      - data:
+          preset_mode: comfort
+        action: climate.set_preset_mode
+        target:
+          entity_id: climate.henry_s_room_versatile_thermostat
+      - data:
+          hvac_mode: cool
+        action: climate.set_hvac_mode
+        target:
+          entity_id: climate.henry_s_room_versatile_thermostat
+    - conditions:
+      - condition: trigger
+        id:
+        - 'Off'
+      sequence:
+      - type: turn_off
+        device_id: ac27c1acd87d567603e54ed90f046a50
+        entity_id: 41d147d319aab7615baeff5015237de7
+        domain: switch
+      - data:
+          hvac_mode: 'off'
+        action: climate.set_hvac_mode
+        target:
+          entity_id: climate.henry_s_room_versatile_thermostat
+  mode: single
+- id: '1684410637520'
+  alias: Workday Desk Power Prompt
+  description: Sends an actionable notification asking to power the computer desk
+    at the start of a workday.
+  use_blueprint:
+    path: vorion/actionable-notifications-for-android.yaml
+    input:
+      notify_device: c054264b79e6739a057236f3a3c512b4
+      trigger_entity: input_boolean.computer_switch
+      notification_title: Workday Today
+      notification_message: Want the computer desk on?
+      persistent_notification: false
+      action_1_title: 'On'
+      first_action:
+      - type: turn_on
+        device_id: 399b754fdf1cb07ed6c2bfcf22f86dce
+        entity_id: switch.computer_desk_light_socket_1
+        domain: switch
+      - service: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.computer_switch
+        data: {}
+      action_2_title: 'Off'
+      second_action:
+      - type: turn_off
+        device_id: 399b754fdf1cb07ed6c2bfcf22f86dce
+        entity_id: switch.computer_desk_light_socket_1
+        domain: switch
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.computer_switch
+      action_3_title: Delay 5 min
+      third_action:
+      - delay:
+          hours: 0
+          minutes: 5
+          seconds: 0
+          milliseconds: 0
+- id: '1711621732424'
+  alias: Maintenance - Clean Master Toilets
+  description: Tracks master ensuite cleaning via weekly schedule or NFC tag scans.
+  triggers:
+  - alias: On schedule
+    id: schedule
+    at: 08:00:00
+    trigger: time
+  - alias: When associated NFC tag is scanned
+    id: tag_scan
+    tag_id: 14544260-abc9-4e84-be5b-20b3df57978d
+    trigger: tag
+  conditions:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Sleeping
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: tag_scan
+      sequence:
+      - service: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.masterbed_toilet_last_cleaned
+        data:
+          timestamp: '{{ now().timestamp() }}'
+      - service: notify.mobile_app_samsung_galaxy_s22_ultra
+        data:
+          title: Master ensuite cleaned
+          message: Toilets marked as done
+      - service: notify.mobile_app_slvdh
+        data:
+          title: Master ensuite cleaned
+          message: Toilets marked as done
+  mode: single
+  max_exceeded: silent
+  variables:
+    tracker: input_datetime.masterbed_toilet_last_cleaned
+    interval_days: 7
+    days_since_last_cleaned: "{% set value = states(tracker) %} {% if value in ['unknown',
+      'unavailable', ''] %}\n  {{ interval_days + 1 }}\n{% else %}\n  {% set last
+      = value | as_datetime %}\n  {{ (now().date() - last.date()).days }}\n{% endif
+      %}"
+    overdue_days: '{% set diff = (days_since_last_cleaned | int) - interval_days %}
+      {{ diff if diff > 0 else 0 }}'
+    overdue: '{{ (days_since_last_cleaned | int) > interval_days }}'
+- id: '1742615433146'
+  alias: Maintenance - Update Cleaning Timestamp via NFC
+  description: Records the last-cleaned timestamps when toilet maintenance NFC tags
+    are scanned.
+  triggers:
+  - tag_id: 859e3818-e623-47aa-9062-d89afd44489b
+    id: downstairs_toilet
+    trigger: tag
+  - tag_id: 14544260-abc9-4e84-be5b-20b3df57978d
+    id: masterbed_toilet
+    trigger: tag
+  - tag_id: 0dba78a1-9dd0-439b-9d5b-386fa0f5df85
+    id: omas_toilet
+    trigger: tag
+  - tag_id: 69410df3-68be-4aec-9721-f933de3c73de
+    id: kids_toilet
+    trigger: tag
+  actions:
+  - data:
+      name: RFID Debug
+      message: 'Trigger ID: {{ trigger.id }}'
+    service: logbook.log
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''downstairs_toilet'' }}'
+      sequence:
+      - target:
+          entity_id: input_datetime.downstairs_toilet_last_cleaned
+        data:
+          timestamp: '{{ now().timestamp() }}'
+        service: input_datetime.set_datetime
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''masterbed_toilet'' }}'
+      sequence:
+      - target:
+          entity_id: input_datetime.masterbed_toilet_last_cleaned
+        data:
+          timestamp: '{{ now().timestamp() }}'
+        service: input_datetime.set_datetime
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''omas_toilet'' }}'
+      sequence:
+      - target:
+          entity_id: input_datetime.omas_toilet_last_cleaned
+        data:
+          timestamp: '{{ now().timestamp() }}'
+        service: input_datetime.set_datetime
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''kids_toilet'' }}'
+      sequence:
+      - target:
+          entity_id: input_datetime.kids_toilet_last_cleaned
+        data:
+          timestamp: '{{ now().timestamp() }}'
+        service: input_datetime.set_datetime
+  mode: single
+- id: ac_filter_living_room_reminder
+  alias: Maintenance - Living Room AC Filter Reminder
+  description: Reminds to change Living Room AC filter every 90 days
+  triggers:
+  - trigger: time
+    at: 09:00:00
+  conditions:
+  - condition: template
+    value_template: "{% set last = states('input_datetime.ac_filter_living_room')
+      %} {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n  {{
+      (as_timestamp(now()) - as_timestamp(last)) / 86400 > 90 }}\n{% endif %}\n"
+  actions:
+  - action: notify.std_information
+    data:
+      title: "\U0001F527 Living Room AC Filter Due"
+      message: 'Living Room AC filter needs replacement
+
+        {% set last = states(''input_datetime.ac_filter_living_room'') %}
+
+        {% if last not in [''unknown'', ''unavailable'', ''''] %}
+
+        Last changed {{ relative_time(states(''input_datetime.ac_filter_living_room''))
+        }} ago
+
+        {% else %}
+
+        No change date recorded
+
+        {% endif %}
+
+        '
+  mode: single
+- id: ac_filter_master_bedroom_reminder
+  alias: Maintenance - Master Bedroom AC Filter Reminder
+  description: Reminds to change Master Bedroom AC filter every 90 days
+  triggers:
+  - trigger: time
+    at: 09:00:00
+  conditions:
+  - condition: template
+    value_template: "{% set last = states('input_datetime.ac_filter_master_bedroom')
+      %} {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n  {{
+      (as_timestamp(now()) - as_timestamp(last)) / 86400 > 90 }}\n{% endif %}\n"
+  actions:
+  - action: notify.std_information
+    data:
+      title: "\U0001F527 Master Bedroom AC Filter Due"
+      message: 'Master Bedroom AC filter needs replacement
+
+        {% set last = states(''input_datetime.ac_filter_master_bedroom'') %}
+
+        {% if last not in [''unknown'', ''unavailable'', ''''] %}
+
+        Last changed {{ relative_time(states(''input_datetime.ac_filter_master_bedroom''))
+        }} ago
+
+        {% else %}
+
+        No change date recorded
+
+        {% endif %}
+
+        '
+  mode: single
+- id: ac_filter_otto_room_reminder
+  alias: Maintenance - Otto's Room AC Filter Reminder
+  description: Reminds to change Otto's Room AC filter every 90 days
+  triggers:
+  - trigger: time
+    at: 09:00:00
+  conditions:
+  - condition: template
+    value_template: "{% set last = states('input_datetime.ac_filter_otto_room') %}
+      {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n  {{ (as_timestamp(now())
+      - as_timestamp(last)) / 86400 > 90 }}\n{% endif %}\n"
+  actions:
+  - action: notify.std_information
+    data:
+      title: "\U0001F527 Otto's Room AC Filter Due"
+      message: 'Otto''s Room AC filter needs replacement
+
+        {% set last = states(''input_datetime.ac_filter_otto_room'') %}
+
+        {% if last not in [''unknown'', ''unavailable'', ''''] %}
+
+        Last changed {{ relative_time(states(''input_datetime.ac_filter_otto_room''))
+        }} ago
+
+        {% else %}
+
+        No change date recorded
+
+        {% endif %}
+
+        '
+  mode: single
+- id: ac_filter_study_henry_reminder
+  alias: Maintenance - Study/Henry's Room AC Filter Reminder
+  description: Reminds to change Study/Henry's Room AC filter every 90 days
+  triggers:
+  - trigger: time
+    at: 09:00:00
+  conditions:
+  - condition: template
+    value_template: "{% set last = states('input_datetime.ac_filter_study_henry')
+      %} {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n  {{
+      (as_timestamp(now()) - as_timestamp(last)) / 86400 > 90 }}\n{% endif %}\n"
+  actions:
+  - action: notify.std_information
+    data:
+      title: "\U0001F527 Study/Henry's Room AC Filter Due"
+      message: 'Study/Henry''s Room AC filter needs replacement
+
+        {% set last = states(''input_datetime.ac_filter_study_henry'') %}
+
+        {% if last not in [''unknown'', ''unavailable'', ''''] %}
+
+        Last changed {{ relative_time(states(''input_datetime.ac_filter_study_henry''))
+        }} ago
+
+        {% else %}
+
+        No change date recorded
+
+        {% endif %}
+
+        '
+  mode: single
+- id: ac_filter_living_room_changed
+  alias: Maintenance - Living Room AC Filter Changed (NFC)
+  description: Updates the filter change date when NFC tag is scanned
+  triggers:
+  - trigger: tag
+    tag_id: REPLACE_WITH_YOUR_NFC_TAG_ID
+  actions:
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.ac_filter_living_room
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  - action: notify.std_information
+    data:
+      title: ✅ Living Room AC Filter Updated
+      message: Filter change date recorded successfully
+  mode: single
+- id: ac_filter_master_bedroom_changed
+  alias: Maintenance - Master Bedroom AC Filter Changed (NFC)
+  description: Updates the filter change date when NFC tag is scanned
+  triggers:
+  - trigger: tag
+    tag_id: REPLACE_WITH_YOUR_NFC_TAG_ID
+  actions:
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.ac_filter_master_bedroom
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  - action: notify.std_information
+    data:
+      title: ✅ Master Bedroom AC Filter Updated
+      message: Filter change date recorded successfully
+  mode: single
+- id: ac_filter_otto_room_changed
+  alias: Maintenance - Otto's Room AC Filter Changed (NFC)
+  description: Updates the filter change date when NFC tag is scanned
+  triggers:
+  - trigger: tag
+    tag_id: REPLACE_WITH_YOUR_NFC_TAG_ID
+  actions:
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.ac_filter_otto_room
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  - action: notify.std_information
+    data:
+      title: ✅ Otto's Room AC Filter Updated
+      message: Filter change date recorded successfully
+  mode: single
+- id: ac_filter_study_henry_changed
+  alias: Maintenance - Study/Henry's Room AC Filter Changed (NFC)
+  description: Updates the filter change date when NFC tag is scanned
+  triggers:
+  - trigger: tag
+    tag_id: REPLACE_WITH_YOUR_NFC_TAG_ID
+  actions:
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.ac_filter_study_henry
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  - action: notify.std_information
+    data:
+      title: ✅ Study/Henry's Room AC Filter Updated
+      message: Filter change date recorded successfully
+  mode: single
+- id: '1744580704061'
+  alias: Aquarium NFC - Log Feeding Time
+  description: Updates the fish feeding timestamp when the aquarium NFC tag is scanned.
+  triggers:
+  - tag_id: 8bc95efa-4e0c-410c-93a1-dea4085761ee
+    trigger: tag
+  actions:
+  - target:
+      entity_id: input_datetime.fish_last_fed
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+    action: input_datetime.set_datetime
+  mode: single
+- id: '1744580844831'
+  alias: Aquarium - Morning Feed Reminder
+  description: Reminds the household at 8am if the fish haven't been fed.
+  triggers:
+  - at: 08:00:00
+    trigger: time
+  conditions:
+  - condition: or
+    conditions:
+    - condition: template
+      value_template: '{% set fed = states(''input_datetime.fish_last_fed'') %} {%
+        set now_date = now().date() %} {% set fed_time = as_datetime(fed) %} {{ fed_time.date()
+        != now_date or fed_time.hour < 6 or fed_time.hour >= 8 }}
+
+        '
+  actions:
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      message: Fish aren't fed - morning
+  - service: notify.mobile_app_slvdh
+    data:
+      message: Fish aren't fed - morning
+  mode: single
+- id: '1744580871551'
+  alias: Aquarium - Dinner Feed Reminder
+  description: Reminds the household at 9pm if the fish haven't been fed.
+  triggers:
+  - at: '21:00:00'
+    trigger: time
+  conditions:
+  - condition: template
+    value_template: '{% set fed = states(''input_datetime.fish_last_fed'') %} {% set
+      now_date = now().date() %} {% set fed_time = as_datetime(fed) %} {{ fed_time.date()
+      != now_date or fed_time.hour < 16 or fed_time.hour >= 21 }}
+
+      '
+  actions:
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      message: Fish aren't fed - dinner
+  - service: notify.mobile_app_slvdh
+    data:
+      message: Fish aren't fed - dinner
+  mode: single
+- id: '1747000000001'
+  alias: Maintenance - Consolidated Daily Check
+  description: Checks all maintenance items daily and sends a single consolidated
+    notification
+  triggers:
+  - at: 08:00:00
+    trigger: time
+  conditions:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Sleeping
+  actions:
+  - variables:
+      toilets:
+      - name: Master Toilet
+        entity: input_datetime.masterbed_toilet_last_cleaned
+        interval: 7
+      - name: Downstairs Toilet
+        entity: input_datetime.downstairs_toilet_last_cleaned
+        interval: 7
+      - name: Oma's Toilet
+        entity: input_datetime.omas_toilet_last_cleaned
+        interval: 30
+      - name: Kids Toilet
+        entity: input_datetime.kids_toilet_last_cleaned
+        interval: 14
+      filters:
+      - name: Living Room AC Filter
+        entity: input_datetime.ac_filter_living_room
+        interval: 90
+      - name: Master Bedroom AC Filter
+        entity: input_datetime.ac_filter_master_bedroom
+        interval: 90
+      - name: Otto's Room AC Filter
+        entity: input_datetime.ac_filter_otto_room
+        interval: 90
+      - name: Study/Henry's Room AC Filter
+        entity: input_datetime.ac_filter_study_henry
+        interval: 90
+      overdue_items: []
+      due_items: []
+  - repeat:
+      for_each: '{{ toilets + filters }}'
+      sequence:
+      - variables:
+          days_since: "{% set value = states(repeat.item.entity) %} {% if value in
+            ['unknown', 'unavailable', ''] %}\n  {{ repeat.item.interval + 1 }}\n{%
+            else %}\n  {% set last = value | as_datetime %}\n  {{ (now().date() -
+            last.date()).days }}\n{% endif %}\n"
+          overdue_days: '{% set diff = (days_since | int) - repeat.item.interval %}
+            {{ diff if diff > 0 else 0 }}
+
+            '
+      - if:
+        - condition: template
+          value_template: '{{ (days_since | int) > repeat.item.interval }}'
+        then:
+        - variables:
+            overdue_items: '{{ overdue_items + [repeat.item.name ~ '' ('' ~ overdue_days
+              ~ '' day(s) overdue)''] }}
+
+              '
+        else:
+        - if:
+          - condition: template
+            value_template: '{{ (days_since | int) >= repeat.item.interval }}'
+          then:
+          - variables:
+              due_items: '{{ due_items + [repeat.item.name] }}
+
+                '
+  - if:
+    - condition: template
+      value_template: '{{ overdue_items | length > 0 or due_items | length > 0 }}'
+    then:
+    - variables:
+        message_body: "{% if overdue_items | length > 0 %} ⚠️ OVERDUE: {% for item
+          in overdue_items %} • {{ item }} {% endfor %} {% endif %} {% if due_items
+          | length > 0 %} {% if overdue_items | length > 0 %}\n{% endif %} \U0001F4CB
+          DUE TODAY: {% for item in due_items %} • {{ item }} {% endfor %} {% endif
+          %}\n"
+    - service: notify.mobile_app_samsung_galaxy_s22_ultra
+      data:
+        title: "\U0001F527 Maintenance Reminder"
+        message: '{{ message_body }}'
+    - service: notify.mobile_app_slvdh
+      data:
+        title: "\U0001F527 Maintenance Reminder"
+        message: '{{ message_body }}'
+  mode: single
+- id: '1732614031949'
+  alias: Garden - Run Sprinklers at Sunrise if Hot
+  description: Runs the sprinkler zone for hot days at sunrise when extreme heat is
+    forecast.
+  triggers:
+  - trigger: sun
+    event: sunrise
+    offset: 0
+  conditions:
+  - condition: state
+    entity_id: input_boolean.super_hot_today
+    state: 'on'
+  actions:
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      device_id: 7f15e0de838d7d32254c9598ce75aa10
+  - delay:
+      hours: 0
+      minutes: 20
+      seconds: 0
+      milliseconds: 0
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      device_id: 7f15e0de838d7d32254c9598ce75aa10
+  mode: single
+- id: '1735867240188'
+  alias: Irrigation - Limit Watering to 10 Minutes
+  description: Stops the irrigation run after ten minutes to prevent over-watering.
+  triggers:
+  - type: turned_on
+    device_id: 7f15e0de838d7d32254c9598ce75aa10
+    entity_id: 9b99b8ca53b6982903c65cd267091adf
+    domain: switch
+    trigger: device
+  conditions: []
+  actions:
+  - delay:
+      hours: 0
+      minutes: 10
+      seconds: 0
+      milliseconds: 0
+  - type: turn_off
+    device_id: 7f15e0de838d7d32254c9598ce75aa10
+    entity_id: 9b99b8ca53b6982903c65cd267091adf
+    domain: switch
+  mode: single
+- id: '1706063916168'
+  alias: Leak Sensors - Notify on Water Detection
+  description: Sends mobile notifications when the monitored leak sensors report water.
+  trigger:
+  - type: moist
+    platform: device
+    device_id: 31301cc533660d63d02b479ee7edfeb6
+    entity_id: 3d7056108abc259f11cb5f9d88bce3bd
+    domain: binary_sensor
+  - type: moist
+    platform: device
+    device_id: 8ff9a6d91d82ddd9e30bcb8f76356d9e
+    entity_id: d5af43c0f1114b2e0d4f85f7f2602981
+    domain: binary_sensor
+  condition: []
+  action:
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: Water leak detected
+      message: Water leak detected at front door or laundry
+  - service: notify.mobile_app_slvdh
+    data:
+      title: Water leak detected
+      message: Water leak detected at front door or laundry
+  mode: single
+- id: '1677490997108'
+  alias: Battery Alerts - All Sensors
+  description: Uses the community blueprint to notify both phones when any monitored
+    battery falls below 25 percent.
+  use_blueprint:
+    path: sbyx/low-battery-level-detection-notification-for-all-battery-sensors.yaml
+    input:
+      actions:
+      - device_id: c054264b79e6739a057236f3a3c512b4
+        domain: mobile_app
+        type: notify
+        message: '{{sensors}}'
+        title: Low battery warning
+      - device_id: 58e2eb1fec0eb5ec9ce450433d074fcf
+        domain: mobile_app
+        type: notify
+        message: '{{sensors}}'
+        title: Low battery warning
+      threshold: 25
+      exclude:
+        entity_id: []
+        device_id:
+        - 58e2eb1fec0eb5ec9ce450433d074fcf
+        - c054264b79e6739a057236f3a3c512b4
+- id: '1740211475857'
+  alias: Otto's Room - Night Door Alert
+  description: Announces when Otto's door opens during quiet hours or while the door
+    alarm is active.
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.otto_room_door_sensor_opening
+    to: 'on'
+    from: 'off'
+    for:
+      seconds: 2
+  conditions:
+  - condition: state
+    entity_id: input_boolean.otto_automation_killswitch
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.master_automation_killswitch
+    state: 'off'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_boolean.otto_door_alarm_active
+      state: 'on'
+    - condition: time
+      after: '19:00:00'
+      before: '22:30:00'
+  actions:
+  - action: tts.cloud_say
+    metadata: {}
+    data:
+      cache: false
+      entity_id: media_player.kitchen
+      message: Otto's doors open
+  - action: tts.cloud_say
+    metadata: {}
+    data:
+      cache: false
+      entity_id: media_player.study_speaker
+      message: Otto's doors open
+  - choose:
+    - conditions:
+      - condition: time
+        after: 08:00:00
+        before: '20:00:00'
+      - condition: template
+        value_template: '{{ expand(area_entities(''master_bedroom'')) | selectattr(''domain'',
+          ''eq'', ''light'') | selectattr(''state'', ''eq'', ''on'') | list | count
+          > 0 }}'
+      sequence:
+      - action: tts.cloud_say
+        metadata: {}
+        data:
+          cache: false
+          entity_id: media_player.master_bedroom_speaker
+          message: Otto's doors open
+  - action: light.toggle
+    metadata: {}
+    data: {}
+    target:
+      area_id:
+      - master_bedroom
+      - living_room
+      - front_entrance
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - action: light.toggle
+    metadata: {}
+    data: {}
+    target:
+      area_id:
+      - master_bedroom
+      - living_room
+      - front_entrance
+  - action: input_boolean.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.ottos_door_open
+  - delay:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - wait_for_trigger:
+    - trigger: state
+      entity_id:
+      - binary_sensor.otto_room_door_sensor_opening
+      to: 'off'
+    continue_on_timeout: true
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.ottos_door_open
+  mode: single
+- id: morning_energy_climate_summary
+  alias: Morning - Energy & Climate Summary
+  description: Sends a morning summary of weather, solar production, and temperature
+  triggers:
+  - trigger: time
+    at: '10:00:00'
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.someone_home
+    state: 'on'
+  actions:
+  - action: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: ☀️ Good Morning - Daily Summary
+      message: "\U0001F321️ Today's forecast: {{ states('sensor.braybrook_temp_max_0')
+        }}°C\n☀️ Current solar: {{ states('sensor.gosungrow_virtual_1205796_1_1_1_p24')
+        | round(1) }}kW\n\U0001F3E0 Home temp: {{ states('sensor.living_room_temperature_offset')
+        }}°C\n\n{% if is_state('input_boolean.super_hot_today', 'on') %}⚠️ Super hot
+        day - blinds will stay closed{% endif %}\n"
+  mode: single
+- id: high_power_usage_warning
+  alias: Energy - High Power Usage Warning
+  description: Alerts when power consumption is high with minimal solar production
+  triggers:
+  - trigger: numeric_state
+    entity_id: sensor.gosungrow_virtual_1205796_7_1_1_p8018
+    above: 5000
+    for:
+      minutes: 15
+  conditions:
+  - condition: numeric_state
+    entity_id: sensor.gosungrow_virtual_1205796_1_1_1_p24
+    below: 2000
+  actions:
+  - action: notify.std_warning
+    data:
+      title: ⚡ High Grid Import
+      message: Importing {{ (states('sensor.gosungrow_virtual_1205796_7_1_1_p8018')
+        | float / 1000) | round(1) }}kW from grid with only {{ (states('sensor.gosungrow_virtual_1205796_1_1_1_p24')
+        | float / 1000) | round(1) }}kW solar - check what's running
+  mode: single
+- id: '1684973809451'
+  alias: iOS Action Button Dispatcher
+  description: Triggers the iOS notification blueprint when the dedicated button is
+    pressed.
+  use_blueprint:
+    path: Hypercookie/ios_notification_blueprint.yaml
+    input:
+      trigger_source: input_button.iphone_notification
+      message_content: Test
+      message_text: Let Phil know you received
+      badge_type: -1
+      interruption_level: active
+      message_attachment: Disabled
+      camera_camera_entity: camera.bi_door_camera
+      dummy_4: true
+      action_1_action_enabled: true
+      action_2_action_enabled: false
+      action_1_title: Front door Cam
+      camera_hide_thumbnail: false
+      target_for_notifications: mobile_app_slvdh
+      action_1_action_authentication_required: false
+- id: '1681617191471'
+  alias: Theme - Apply Waves on Startup
+  description: Sets the Lovelace theme to Waves whenever Home Assistant starts.
+  trigger:
+  - platform: homeassistant
+    event: start
+  condition: []
+  action:
+  - service: frontend.set_theme
+    data:
+      name: waves
+  mode: single
+- id: '1730921531314'
+  alias: Living Room - Keep IR Controller Powered
+  description: Ensures the living room IR controller USB power outlets stay on. on
+    - converted to state trigger from polling
+  triggers:
+  - trigger: state
+    entity_id:
+    - 5988af91837e47236db524998627e65e
+    - 4e12ee54d94d1ad1c2db1176f6da428d
+    to: 'off'
+    for:
+      seconds: 30
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: device
+        type: is_off
+        device_id: 232fc839ce53ebd06b58a471c2412ad2
+        entity_id: 5988af91837e47236db524998627e65e
+        domain: switch
+      sequence:
+      - type: turn_on
+        device_id: 232fc839ce53ebd06b58a471c2412ad2
+        entity_id: 5988af91837e47236db524998627e65e
+        domain: switch
+    - conditions:
+      - condition: device
+        type: is_off
+        device_id: 399b754fdf1cb07ed6c2bfcf22f86dce
+        entity_id: 4e12ee54d94d1ad1c2db1176f6da428d
+        domain: switch
+      sequence:
+      - type: turn_on
+        device_id: 232fc839ce53ebd06b58a471c2412ad2
+        entity_id: 5988af91837e47236db524998627e65e
+        domain: switch
+  mode: single
+- id: keep_computer_desk_light_socket_2_on
+  alias: Keep Computer Desk Light Socket 2 Always On
+  description: Ensures switch.computer_desk_light_socket_2 is always turned on
+  trigger:
+  - platform: state
+    entity_id: switch.computer_desk_light_socket_2
+    to: 'off'
+  actions:
+  - action: switch.turn_on
+    target:
+      entity_id: switch.computer_desk_light_socket_2
+  mode: single
+- id: solar_kitchen_chime
+  alias: Solar Available - Kitchen Chime
+  description: Plays a subtle chime on kitchen speaker when excess solar is available
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.solar_excess_available
+    to: 'on'
+    for:
+      minutes: 5
+  conditions:
+  - condition: time
+    after: 08:00:00
+    before: '20:00:00'
+  actions:
+  - action: media_player.play_media
+    target:
+      entity_id: media_player.kitchen
+    data:
+      media_content_id: https://www.soundjay.com/misc/sounds/magic-chime-02.mp3
+      media_content_type: audio/mp3
+  mode: single

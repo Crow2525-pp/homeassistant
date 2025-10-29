@@ -1,0 +1,216 @@
+---
+- id: '1681557115756'
+  alias: Alarmo - Follow Occupancy Modes
+  description: Arms or disarms Alarmo to mirror the current occupancy setting.
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.occupancy
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Away
+      sequence:
+      - device_id: d0246dd7b63468505017ec29f63e3d86
+        domain: alarm_control_panel
+        entity_id: alarm_control_panel.alarmo
+        type: arm_away
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Home
+      sequence:
+      - device_id: d0246dd7b63468505017ec29f63e3d86
+        domain: alarm_control_panel
+        entity_id: alarm_control_panel.alarmo
+        type: disarm
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Sleeping
+      sequence:
+      - device_id: d0246dd7b63468505017ec29f63e3d86
+        domain: alarm_control_panel
+        entity_id: alarm_control_panel.alarmo
+        type: arm_night
+  mode: single
+- id: '1681731859692'
+  alias: Alarmo - Arm Night Routine
+  description: Arms Alarmo in night mode during bedtime hours based on occupancy or
+    manual triggers.
+  triggers:
+  - at: '21:00:00'
+    enabled: false
+    trigger: time
+  - entity_id:
+    - input_select.occupancy
+    from: Home
+    to: Sleeping
+    trigger: state
+  - at: input_datetime.bedtime_phil_steph
+    trigger: time
+  - type: value
+    device_id: c054264b79e6739a057236f3a3c512b4
+    entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
+    domain: sensor
+    trigger: device
+    above: 95
+  conditions:
+  - condition: time
+    before: 06:00:00
+    weekday:
+    - mon
+    - sun
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    after: '19:00:00'
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Away
+      sequence:
+      - wait_for_trigger:
+        - entity_id:
+          - input_select.occupancy
+          from: Away
+          to: Home
+          for:
+            hours: 4
+            minutes: 0
+            seconds: 0
+          trigger: state
+        continue_on_timeout: false
+      - device_id: d0246dd7b63468505017ec29f63e3d86
+        domain: alarm_control_panel
+        entity_id: alarm_control_panel.alarmo
+        type: arm_night
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Home
+      sequence:
+      - device_id: d0246dd7b63468505017ec29f63e3d86
+        domain: alarm_control_panel
+        entity_id: alarm_control_panel.alarmo
+        type: arm_night
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Holiday
+      sequence:
+      - stop: Not required. Alarm already set.
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Sleeping
+      sequence:
+      - device_id: d0246dd7b63468505017ec29f63e3d86
+        domain: alarm_control_panel
+        entity_id: alarm_control_panel.alarmo
+        type: arm_night
+    default:
+    - device_id: d0246dd7b63468505017ec29f63e3d86
+      domain: alarm_control_panel
+      entity_id: alarm_control_panel.alarmo
+      type: arm_night
+  - device_id: c054264b79e6739a057236f3a3c512b4
+    domain: mobile_app
+    type: notify
+    message: Alarmo Armed
+    enabled: true
+  - data:
+      message: Home has detected youre not at home. Are you coming home?
+      title: 'Action: are you coming home tonight?'
+    enabled: false
+    service: notify.mobile_app_samsung_galaxy_s22_ultra
+  mode: single
+- id: '1716152338300'
+  alias: Alarmo - Disarm When Household Awake
+  description: Disarms Alarmo when someone wakes up during the early-morning routine.
+  trigger:
+  - type: value
+    platform: device
+    device_id: c054264b79e6739a057236f3a3c512b4
+    entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
+    domain: sensor
+    below: 80
+  - type: value
+    platform: device
+    device_id: 58e2eb1fec0eb5ec9ce450433d074fcf
+    entity_id: sensor.slvdh_floors_descended
+    domain: sensor
+    above: 1
+  - platform: time
+    at: 07:00:00
+  condition:
+  - condition: state
+    entity_id: binary_sensor.someone_home
+    state: 'on'
+    alias: Someone Home
+  - condition: state
+    entity_id: alarm_control_panel.alarmo
+    state: armed_night
+  action:
+  - service: alarmo.disarm
+    metadata: {}
+    data:
+      entity_id: alarm_control_panel.alarmo
+  mode: single
+- id: '1684787591500'
+  alias: Alarmo Arming Prompt
+  description: Sends an actionable notification to choose an Alarmo arming mode when
+    prompted.
+  use_blueprint:
+    path: vorion/actionable-notifications-for-android.yaml
+    input:
+      notify_device: c054264b79e6739a057236f3a3c512b4
+      trigger_entity: input_boolean.alarmo_actionable_notification
+      notification_title: Alarm Setup
+      action_1_title: Away
+      first_action:
+      - device_id: d0246dd7b63468505017ec29f63e3d86
+        domain: alarm_control_panel
+        entity_id: alarm_control_panel.alarmo
+        type: arm_away
+      action_2_title: Night
+      second_action:
+      - device_id: d0246dd7b63468505017ec29f63e3d86
+        domain: alarm_control_panel
+        entity_id: alarm_control_panel.alarmo
+        type: arm_night
+      action_3_title: Disarm
+      third_action:
+      - device_id: d0246dd7b63468505017ec29f63e3d86
+        domain: alarm_control_panel
+        entity_id: alarm_control_panel.alarmo
+        type: disarm
+- id: bedtime_security_checklist
+  alias: Night - Bedtime Security Checklist
+  description: Provides a security checklist notification when switching to sleeping
+    mode
+  triggers:
+  - trigger: state
+    entity_id: input_select.occupancy
+    to: Sleeping
+  actions:
+  - delay:
+      minutes: 2
+  - action: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: "\U0001F319 Bedtime Checklist"
+      message: "{% set issues = [] %}\n{% if is_state('cover.smart_garage_door_garage',
+        'open') %}{% set issues = issues + ['\U0001F697 Garage door open'] %}{% endif
+        %}\n{% if is_state('binary_sensor.downstairs_doors', 'on') %}{% set issues
+        = issues + ['\U0001F6AA Door open downstairs'] %}{% endif %}\n{% if states('climate.living_room_versatile_thermastat')
+        in ['cool', 'heat'] %}{% set issues = issues + ['❄️ Living room AC still on']
+        %}{% endif %}\n{% if issues | length > 0 %}{{ issues | join('\\n') }}{% else
+        %}✅ All secure - sleep well!{% endif %}\n"
+  mode: single

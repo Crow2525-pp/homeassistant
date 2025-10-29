@@ -1,0 +1,703 @@
+---
+- id: study_versatile_climate_manager
+  alias: HVAC - Study Versatile Climate Manager
+  description: 'Makes intelligent decisions for the study climate. Includes preemptive
+    cooling on super hot days. Bedtime boost mode for sleep comfort. Naptime comfort
+    cooling.
+
+    '
+  triggers:
+  - platform: state
+    entity_id: sensor.study_esp32_henrysroom_temperature
+    id: temperature_change
+  - platform: state
+    entity_id: sensor.study_esp32_henrysroom_humidity
+    id: humidity_change
+  - platform: state
+    entity_id: binary_sensor.henry_door_sensor_magnet_opening
+    id: door_change
+  - platform: state
+    entity_id: binary_sensor.solar_excess_available
+    id: solar_change
+  - platform: state
+    entity_id: input_select.climate_season
+    id: season_change
+  - platform: state
+    entity_id: input_select.occupancy
+    id: occupancy_change
+  - platform: state
+    entity_id: input_boolean.warm_today_flag
+    id: warm_flag_change
+  - platform: state
+    entity_id: input_boolean.hot_today_flag
+    id: hot_flag_change
+  - platform: state
+    entity_id: input_boolean.super_hot_today
+    id: superhot_flag_change
+  - platform: state
+    entity_id: input_boolean.climate_manual_control_study
+    to: 'off'
+    id: manual_override_off
+  - platform: time
+    at: 06:00:00
+    id: morning_start
+  - platform: time
+    at: 09:00:00
+    id: preemptive_window_start
+  - platform: time
+    at: '18:00:00'
+    id: preemptive_window_end
+  - platform: time
+    at: '12:15:00'
+    id: naptime_start
+  - platform: time
+    at: '16:00:00'
+    id: naptime_end
+  - platform: time
+    at: '18:30:00'
+    id: pre_bedtime_start
+  - platform: time
+    at: '18:45:00'
+    id: bedtime_start
+  - platform: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.henry_door_sensor_magnet_opening
+        state: 'on'
+      sequence:
+      - stop: 'Study door open - HVAC disabled (Principle #5)'
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.climate_manual_control_study
+        state: 'on'
+      sequence:
+      - stop: Study manual override active
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Holiday
+      sequence:
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.henry_s_room_versatile_thermostat
+              state: 'off'
+          sequence:
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.henry_s_room_versatile_thermostat
+            data:
+              hvac_mode: 'off'
+      - stop: Holiday mode - climate disabled
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Away
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_boolean.hot_today_flag
+          state: 'on'
+        - condition: state
+          entity_id: input_boolean.super_hot_today
+          state: 'on'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.henry_s_room_versatile_thermostat
+              attribute: preset_mode
+              state: eco
+          sequence:
+          - service: climate.set_preset_mode
+            target:
+              entity_id: climate.henry_s_room_versatile_thermostat
+            data:
+              preset_mode: eco
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.henry_s_room_versatile_thermostat
+              state: cool
+          sequence:
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.henry_s_room_versatile_thermostat
+            data:
+              hvac_mode: cool
+      - stop: Away with hot day - eco cooling active
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Away
+      sequence:
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.henry_s_room_versatile_thermostat
+              state: 'off'
+          sequence:
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.henry_s_room_versatile_thermostat
+            data:
+              hvac_mode: 'off'
+      - stop: Away mode - climate disabled
+  - choose:
+    - conditions:
+      - condition: time
+        after: '18:45:00'
+        before: 06:00:00
+      sequence:
+      - choose:
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: input_boolean.warm_today_flag
+              state: 'on'
+            - condition: state
+              entity_id: input_boolean.hot_today_flag
+              state: 'on'
+            - condition: state
+              entity_id: input_boolean.super_hot_today
+              state: 'on'
+          sequence:
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  attribute: preset_mode
+                  state: boost
+              sequence:
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  preset_mode: boost
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  state: cool
+              sequence:
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  hvac_mode: cool
+        default:
+        - choose:
+          - conditions:
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: climate.henry_s_room_versatile_thermostat
+                state: 'off'
+            sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+    - conditions:
+      - condition: time
+        after: '18:30:00'
+        before: '18:45:00'
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Home
+      - condition: state
+        entity_id: binary_sensor.henry_door_sensor_magnet_opening
+        state: 'off'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: numeric_state
+            entity_id: sensor.study_esp32_henrysroom_humidity
+            above: 75
+          sequence:
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  attribute: preset_mode
+                  state: comfort
+              sequence:
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  preset_mode: comfort
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  state: dry
+              sequence:
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  hvac_mode: dry
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: input_boolean.warm_today_flag
+              state: 'on'
+            - condition: state
+              entity_id: input_boolean.hot_today_flag
+              state: 'on'
+            - condition: state
+              entity_id: input_boolean.super_hot_today
+              state: 'on'
+          sequence:
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  attribute: preset_mode
+                  state: comfort
+              sequence:
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  preset_mode: comfort
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  state: cool
+              sequence:
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  hvac_mode: cool
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: input_select.climate_season
+              state: winter
+            - condition: state
+              entity_id: input_select.climate_season
+              state: autumn
+          - condition: numeric_state
+            entity_id: sensor.study_esp32_henrysroom_temperature
+            below: 21
+          sequence:
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  attribute: preset_mode
+                  state: comfort
+              sequence:
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  preset_mode: comfort
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  state: heat
+              sequence:
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  hvac_mode: heat
+        default:
+        - choose:
+          - conditions:
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: climate.henry_s_room_versatile_thermostat
+                state: 'off'
+            sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+    - conditions:
+      - condition: time
+        after: '12:15:00'
+        before: '16:00:00'
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Home
+      - condition: state
+        entity_id: binary_sensor.henry_door_sensor_magnet_opening
+        state: 'off'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: numeric_state
+            entity_id: sensor.study_esp32_henrysroom_humidity
+            above: 75
+          sequence:
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  attribute: preset_mode
+                  state: comfort
+              sequence:
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  preset_mode: comfort
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  state: dry
+              sequence:
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  hvac_mode: dry
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: input_boolean.warm_today_flag
+              state: 'on'
+            - condition: state
+              entity_id: input_boolean.hot_today_flag
+              state: 'on'
+            - condition: state
+              entity_id: input_boolean.super_hot_today
+              state: 'on'
+            - condition: numeric_state
+              entity_id: sensor.study_esp32_henrysroom_temperature
+              above: 24
+          sequence:
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  attribute: preset_mode
+                  state: comfort
+              sequence:
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  preset_mode: comfort
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  state: cool
+              sequence:
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  hvac_mode: cool
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: input_select.climate_season
+              state: autumn
+            - condition: state
+              entity_id: input_select.climate_season
+              state: winter
+          - condition: numeric_state
+            entity_id: sensor.study_esp32_henrysroom_temperature
+            below: 21
+          sequence:
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  attribute: preset_mode
+                  state: comfort
+              sequence:
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  preset_mode: comfort
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  state: heat
+              sequence:
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  hvac_mode: heat
+        default:
+        - choose:
+          - conditions:
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: climate.henry_s_room_versatile_thermostat
+                state: 'off'
+            sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+    - conditions:
+      - condition: time
+        after: 09:00:00
+        before: '18:00:00'
+      - condition: state
+        entity_id: input_boolean.super_hot_today
+        state: 'on'
+      - condition: numeric_state
+        entity_id: sensor.study_esp32_henrysroom_temperature
+        above: 22
+      - condition: state
+        entity_id: binary_sensor.solar_excess_available
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.henry_door_sensor_magnet_opening
+        state: 'off'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.henry_s_room_versatile_thermostat
+              attribute: preset_mode
+              state: comfort
+          sequence:
+          - service: climate.set_preset_mode
+            target:
+              entity_id: climate.henry_s_room_versatile_thermostat
+            data:
+              preset_mode: comfort
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.henry_s_room_versatile_thermostat
+              state: cool
+          sequence:
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.henry_s_room_versatile_thermostat
+            data:
+              hvac_mode: cool
+    - conditions:
+      - condition: time
+        after: 06:00:00
+        before: '18:30:00'
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Home
+      - condition: state
+        entity_id: binary_sensor.henry_door_sensor_magnet_opening
+        state: 'off'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: numeric_state
+            entity_id: sensor.study_esp32_henrysroom_humidity
+            above: 75
+          sequence:
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  attribute: preset_mode
+                  state: comfort
+              sequence:
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  preset_mode: comfort
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  state: dry
+              sequence:
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  hvac_mode: dry
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.solar_excess_available
+            state: 'on'
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: input_boolean.warm_today_flag
+              state: 'on'
+            - condition: state
+              entity_id: input_boolean.hot_today_flag
+              state: 'on'
+            - condition: state
+              entity_id: input_boolean.super_hot_today
+              state: 'on'
+            - condition: numeric_state
+              entity_id: sensor.study_esp32_henrysroom_temperature
+              above: 24
+          sequence:
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  attribute: preset_mode
+                  state: comfort
+              sequence:
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  preset_mode: comfort
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  state: cool
+              sequence:
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  hvac_mode: cool
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: input_select.climate_season
+              state: autumn
+            - condition: state
+              entity_id: input_select.climate_season
+              state: winter
+          - condition: numeric_state
+            entity_id: sensor.study_esp32_henrysroom_temperature
+            below: 21
+          - condition: state
+            entity_id: binary_sensor.solar_excess_available
+            state: 'on'
+          sequence:
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  attribute: preset_mode
+                  state: comfort
+              sequence:
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  preset_mode: comfort
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                  state: heat
+              sequence:
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.henry_s_room_versatile_thermostat
+                data:
+                  hvac_mode: heat
+        default:
+        - choose:
+          - conditions:
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: climate.henry_s_room_versatile_thermostat
+                state: 'off'
+            sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: 'off'
+    default:
+    - choose:
+      - conditions:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: climate.henry_s_room_versatile_thermostat
+            state: 'off'
+        sequence:
+        - service: climate.set_hvac_mode
+          target:
+            entity_id: climate.henry_s_room_versatile_thermostat
+          data:
+            hvac_mode: 'off'
+  mode: single

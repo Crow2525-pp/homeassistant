@@ -1,0 +1,761 @@
+---
+- id: living_room_versatile_climate_manager
+  alias: HVAC - Living Room Versatile Climate Manager
+  description: 'Makes intelligent decisions about WHEN and WHICH MODE (heat/cool/dry/fan_only/off)
+    for living room climate. Includes fan_only mode for 21-22°C in summer. Reactive
+    cooling only (no preemptive). Frost mode after 22:15. Seasonal bias applied.
+
+    '
+  triggers:
+  - platform: state
+    entity_id:
+    - sensor.ble_temperature_kitchen_temp_humidity_sensor
+    - sensor.living_room_temperature_offset
+    id: temperature_change
+  - platform: state
+    entity_id: sensor.ble_humidity_kitchen_temp_humidity_sensor
+    id: humidity_change
+  - platform: state
+    entity_id:
+    - binary_sensor.living_room_door_sensor_opening
+    - binary_sensor.interior_garage_door_sensor_magnet_opening
+    - binary_sensor.front_door_sensor_opening
+    id: door_change
+  - platform: state
+    entity_id: binary_sensor.solar_excess_available
+    id: solar_change
+  - platform: state
+    entity_id: input_select.climate_season
+    id: season_change
+  - platform: state
+    entity_id: input_select.occupancy
+    id: occupancy_change
+  - platform: state
+    entity_id: input_boolean.warm_today_flag
+    id: warm_flag_change
+  - platform: state
+    entity_id: input_boolean.hot_today_flag
+    id: hot_flag_change
+  - platform: state
+    entity_id: input_boolean.super_hot_today
+    id: superhot_flag_change
+  - platform: state
+    entity_id: input_boolean.climate_manual_control_living
+    to: 'off'
+    id: manual_override_off
+  - platform: time
+    at: 05:30:00
+    id: preheat_start
+  - platform: time
+    at: 08:00:00
+    id: preheat_end
+  - platform: time
+    at: 06:00:00
+    id: daytime_start
+  - platform: time
+    at: '22:15:00'
+    id: frost_start
+  - platform: time
+    at: 05:30:00
+    id: frost_end
+  - platform: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.living_room_door_sensor_opening
+        state: 'on'
+      sequence:
+      - stop: 'Living room door open - HVAC disabled (Principle #5)'
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.climate_manual_control_living
+        state: 'on'
+      sequence:
+      - stop: Living room manual override active
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Holiday
+      sequence:
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.living_room_versatile_thermastat
+              state: 'off'
+          sequence:
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.living_room_versatile_thermastat
+            data:
+              hvac_mode: 'off'
+      - stop: Holiday mode - climate disabled
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Away
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_boolean.hot_today_flag
+          state: 'on'
+        - condition: state
+          entity_id: input_boolean.super_hot_today
+          state: 'on'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.living_room_versatile_thermastat
+              attribute: preset_mode
+              state: eco
+          sequence:
+          - service: climate.set_preset_mode
+            target:
+              entity_id: climate.living_room_versatile_thermastat
+            data:
+              preset_mode: eco
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.living_room_versatile_thermastat
+              state: cool
+          sequence:
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.living_room_versatile_thermastat
+            data:
+              hvac_mode: cool
+      - stop: Away with hot day - eco cooling active
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Away
+      sequence:
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.living_room_versatile_thermastat
+              state: 'off'
+          sequence:
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.living_room_versatile_thermastat
+            data:
+              hvac_mode: 'off'
+      - stop: Away mode - climate disabled
+    - conditions:
+      - condition: state
+        entity_id: climate.living_room_versatile_thermastat
+        state: heat
+        for:
+          minutes: 30
+      - condition: or
+        conditions:
+        - condition: numeric_state
+          entity_id: sensor.living_room_temperature_offset
+          above: 20
+        - condition: numeric_state
+          entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+          above: 20
+      sequence:
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.living_room_versatile_thermastat
+              state: 'off'
+          sequence:
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.living_room_versatile_thermastat
+            data:
+              hvac_mode: 'off'
+      - stop: Target temperature reached - shutting off
+    - conditions:
+      - condition: state
+        entity_id: climate.living_room_versatile_thermastat
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.living_room_temperature_offset
+        above: 16
+        below: 26
+      sequence:
+      - stop: HVAC off and temperature in comfort range (16-26°C) - let thermostat
+          manage
+  - choose:
+    - conditions:
+      - condition: time
+        after: '22:15:00'
+        before: 05:30:00
+      - condition: state
+        entity_id: input_select.climate_season
+        state: winter
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Home
+      - condition: state
+        entity_id: binary_sensor.living_room_door_sensor_opening
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.interior_garage_door_sensor_magnet_opening
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.front_door_sensor_opening
+        state: 'off'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.living_room_versatile_thermastat
+              attribute: preset_mode
+              state: frost
+          sequence:
+          - service: climate.set_preset_mode
+            target:
+              entity_id: climate.living_room_versatile_thermastat
+            data:
+              preset_mode: frost
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.living_room_versatile_thermastat
+              state: heat
+          sequence:
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.living_room_versatile_thermastat
+            data:
+              hvac_mode: heat
+    - conditions:
+      - condition: time
+        after: 05:30:00
+        before: 08:00:00
+      - condition: state
+        entity_id: input_select.climate_season
+        state: winter
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Home
+      - condition: state
+        entity_id: binary_sensor.living_room_door_sensor_opening
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.interior_garage_door_sensor_magnet_opening
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.front_door_sensor_opening
+        state: 'off'
+      - condition: or
+        conditions:
+        - condition: numeric_state
+          entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+          below: 17
+        - condition: numeric_state
+          entity_id: sensor.living_room_temperature_offset
+          below: 17
+      sequence:
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.living_room_versatile_thermastat
+              attribute: preset_mode
+              state: comfort
+          sequence:
+          - service: climate.set_preset_mode
+            target:
+              entity_id: climate.living_room_versatile_thermastat
+            data:
+              preset_mode: comfort
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: climate.living_room_versatile_thermastat
+              state: heat
+          sequence:
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.living_room_versatile_thermastat
+            data:
+              hvac_mode: heat
+    - conditions:
+      - condition: time
+        after: 06:00:00
+        before: '22:15:00'
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Home
+      - condition: state
+        entity_id: binary_sensor.living_room_door_sensor_opening
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.interior_garage_door_sensor_magnet_opening
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.front_door_sensor_opening
+        state: 'off'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: numeric_state
+            entity_id: sensor.ble_humidity_kitchen_temp_humidity_sensor
+            above: 75
+          sequence:
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.living_room_versatile_thermastat
+                  attribute: preset_mode
+                  state: comfort
+              sequence:
+              - service: climate.set_preset_mode
+                target:
+                  entity_id: climate.living_room_versatile_thermastat
+                data:
+                  preset_mode: comfort
+          - choose:
+            - conditions:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: climate.living_room_versatile_thermastat
+                  state: dry
+              sequence:
+              - service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.living_room_versatile_thermastat
+                data:
+                  hvac_mode: dry
+        - conditions:
+          - condition: state
+            entity_id: input_select.climate_season
+            state: winter
+          sequence:
+          - choose:
+            - conditions:
+              - condition: or
+                conditions:
+                - condition: numeric_state
+                  entity_id: sensor.living_room_temperature_offset
+                  below: 17
+                - condition: numeric_state
+                  entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                  below: 17
+              sequence:
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      attribute: preset_mode
+                      state: comfort
+                  sequence:
+                  - service: climate.set_preset_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      preset_mode: comfort
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      state: heat
+                  sequence:
+                  - service: climate.set_hvac_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      hvac_mode: heat
+            default:
+            - choose:
+              - conditions:
+                - condition: not
+                  conditions:
+                  - condition: state
+                    entity_id: climate.living_room_versatile_thermastat
+                    state: 'off'
+                sequence:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.living_room_versatile_thermastat
+                  data:
+                    hvac_mode: 'off'
+        - conditions:
+          - condition: state
+            entity_id: input_select.climate_season
+            state: summer
+          sequence:
+          - choose:
+            - conditions:
+              - condition: or
+                conditions:
+                - condition: and
+                  conditions:
+                  - condition: state
+                    entity_id: binary_sensor.solar_excess_available
+                    state: 'on'
+                  - condition: or
+                    conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.living_room_temperature_offset
+                      above: 21
+                    - condition: numeric_state
+                      entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                      above: 21
+                - condition: or
+                  conditions:
+                  - condition: numeric_state
+                    entity_id: sensor.living_room_temperature_offset
+                    above: 24
+                  - condition: numeric_state
+                    entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                    above: 24
+              sequence:
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      attribute: preset_mode
+                      state: comfort
+                  sequence:
+                  - service: climate.set_preset_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      preset_mode: comfort
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      state: cool
+                  sequence:
+                  - service: climate.set_hvac_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      hvac_mode: cool
+            - conditions:
+              - condition: numeric_state
+                entity_id: sensor.living_room_temperature_offset
+                above: 21
+                below: 22
+              sequence:
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      attribute: preset_mode
+                      state: eco
+                  sequence:
+                  - service: climate.set_preset_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      preset_mode: eco
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      state: fan_only
+                  sequence:
+                  - service: climate.set_hvac_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      hvac_mode: fan_only
+            default:
+            - choose:
+              - conditions:
+                - condition: not
+                  conditions:
+                  - condition: state
+                    entity_id: climate.living_room_versatile_thermastat
+                    state: 'off'
+                sequence:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.living_room_versatile_thermastat
+                  data:
+                    hvac_mode: 'off'
+        - conditions:
+          - condition: state
+            entity_id: input_select.climate_season
+            state: autumn
+          sequence:
+          - choose:
+            - conditions:
+              - condition: or
+                conditions:
+                - condition: numeric_state
+                  entity_id: sensor.living_room_temperature_offset
+                  below: 17
+                - condition: numeric_state
+                  entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                  below: 17
+              sequence:
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      attribute: preset_mode
+                      state: comfort
+                  sequence:
+                  - service: climate.set_preset_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      preset_mode: comfort
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      state: heat
+                  sequence:
+                  - service: climate.set_hvac_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      hvac_mode: heat
+            - conditions:
+              - condition: state
+                entity_id: input_boolean.super_hot_today
+                state: 'on'
+              - condition: or
+                conditions:
+                - condition: and
+                  conditions:
+                  - condition: state
+                    entity_id: binary_sensor.solar_excess_available
+                    state: 'on'
+                  - condition: or
+                    conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.living_room_temperature_offset
+                      above: 21
+                    - condition: numeric_state
+                      entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                      above: 21
+                - condition: or
+                  conditions:
+                  - condition: numeric_state
+                    entity_id: sensor.living_room_temperature_offset
+                    above: 24
+                  - condition: numeric_state
+                    entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                    above: 24
+              sequence:
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      attribute: preset_mode
+                      state: comfort
+                  sequence:
+                  - service: climate.set_preset_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      preset_mode: comfort
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      state: cool
+                  sequence:
+                  - service: climate.set_hvac_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      hvac_mode: cool
+            default:
+            - choose:
+              - conditions:
+                - condition: not
+                  conditions:
+                  - condition: state
+                    entity_id: climate.living_room_versatile_thermastat
+                    state: 'off'
+                sequence:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.living_room_versatile_thermastat
+                  data:
+                    hvac_mode: 'off'
+        - conditions:
+          - condition: state
+            entity_id: input_select.climate_season
+            state: spring
+          sequence:
+          - choose:
+            - conditions:
+              - condition: or
+                conditions:
+                - condition: and
+                  conditions:
+                  - condition: state
+                    entity_id: binary_sensor.solar_excess_available
+                    state: 'on'
+                  - condition: or
+                    conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.living_room_temperature_offset
+                      above: 21
+                    - condition: numeric_state
+                      entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                      above: 21
+                - condition: or
+                  conditions:
+                  - condition: numeric_state
+                    entity_id: sensor.living_room_temperature_offset
+                    above: 24
+                  - condition: numeric_state
+                    entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                    above: 24
+              sequence:
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      attribute: preset_mode
+                      state: comfort
+                  sequence:
+                  - service: climate.set_preset_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      preset_mode: comfort
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      state: cool
+                  sequence:
+                  - service: climate.set_hvac_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      hvac_mode: cool
+            - conditions:
+              - condition: or
+                conditions:
+                - condition: numeric_state
+                  entity_id: sensor.living_room_temperature_offset
+                  below: 15
+                - condition: numeric_state
+                  entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+                  below: 15
+              sequence:
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      attribute: preset_mode
+                      state: comfort
+                  sequence:
+                  - service: climate.set_preset_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      preset_mode: comfort
+              - choose:
+                - conditions:
+                  - condition: not
+                    conditions:
+                    - condition: state
+                      entity_id: climate.living_room_versatile_thermastat
+                      state: heat
+                  sequence:
+                  - service: climate.set_hvac_mode
+                    target:
+                      entity_id: climate.living_room_versatile_thermastat
+                    data:
+                      hvac_mode: heat
+            default:
+            - choose:
+              - conditions:
+                - condition: not
+                  conditions:
+                  - condition: state
+                    entity_id: climate.living_room_versatile_thermastat
+                    state: 'off'
+                sequence:
+                - service: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.living_room_versatile_thermastat
+                  data:
+                    hvac_mode: 'off'
+        default:
+        - choose:
+          - conditions:
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: climate.living_room_versatile_thermastat
+                state: 'off'
+            sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermastat
+              data:
+                hvac_mode: 'off'
+    default:
+    - choose:
+      - conditions:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: climate.living_room_versatile_thermastat
+            state: 'off'
+        sequence:
+        - service: climate.set_hvac_mode
+          target:
+            entity_id: climate.living_room_versatile_thermastat
+          data:
+            hvac_mode: 'off'
+  mode: single

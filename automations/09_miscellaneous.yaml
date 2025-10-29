@@ -1,0 +1,54 @@
+---
+- id: master_bedroom_fan_climate_control
+  alias: HVAC - Master Bedroom Fan Sync with Climate
+  description: 'Synchronizes master bedroom fan with versatile thermostat state. Fan
+    turns off when heating, adjusts speed when cooling.
+
+    '
+  triggers:
+  - platform: state
+    entity_id: climate.masterbed_versatile_thermostat
+    to: cool
+    id: cooling_started
+  - platform: state
+    entity_id: climate.masterbed_versatile_thermostat
+    to: heat
+    id: heating_started
+  - platform: state
+    entity_id: climate.masterbed_versatile_thermostat
+    to: 'off'
+    id: climate_off
+  conditions:
+  - condition: state
+    entity_id: input_boolean.hvac_master_bedroom_should_be_on
+    state: 'on'
+    alias: Master Bedroom HVAC Master On
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: cooling_started
+      - condition: state
+        entity_id: fan.masterbedroom_fan
+        state: 'off'
+      sequence:
+      - service: fan.set_percentage
+        target:
+          entity_id: fan.masterbedroom_fan
+        data:
+          percentage: 33
+    - conditions:
+      - condition: trigger
+        id: heating_started
+      sequence:
+      - service: fan.turn_off
+        target:
+          entity_id: fan.masterbedroom_fan
+    - conditions:
+      - condition: trigger
+        id: climate_off
+      sequence:
+      - service: fan.turn_off
+        target:
+          entity_id: fan.masterbedroom_fan
+  mode: single

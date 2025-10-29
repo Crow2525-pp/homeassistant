@@ -1,0 +1,132 @@
+---
+- id: '1681337163617'
+  alias: Set Occupancy to Away
+  description: Switches the occupancy selector to Away after 10 minutes with no one
+    in the home zone.
+  triggers:
+  - entity_id:
+    - zone.home
+    to: '0'
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    trigger: state
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Away
+  actions:
+  - data:
+      option: Away
+    target:
+      entity_id: input_select.occupancy
+    action: input_select.select_option
+  mode: single
+- id: '1747620000001'
+  alias: Reset Daily Automation Trigger Counters (Midnight)
+  description: Resets all daily trigger counters at midnight. Used to track how many
+    times each climate automation has triggered throughout the day.
+  triggers:
+  - at: 00:00:00
+    trigger: time
+  conditions: []
+  actions:
+  - action: input_number.set_value
+    target:
+      entity_id:
+      - input_number.seasonal_climate_triggers_today
+      - input_number.morning_blinds_triggers_today
+      - input_number.preheat_triggers_today
+      - input_number.evening_cooling_triggers_today
+      - input_number.frost_protection_triggers_today
+      - input_number.afternoon_recheck_triggers_today
+      - input_number.master_bedroom_cooling_night_triggers_today
+      - input_number.children_cooling_night_triggers_today
+      - input_number.master_bedroom_blinds_night_triggers_today
+      - input_number.master_bedroom_blinds_morning_triggers_today
+      - input_number.climate_flags_mark_hot_day_triggers_today
+    data:
+      value: 0
+  mode: single
+- id: '1681548980319'
+  alias: Set Occupancy to Home
+  description: Returns the occupancy selector to Home as soon as either resident arrives.
+  trigger:
+  - platform: zone
+    entity_id: person.stephanie_patterson
+    zone: zone.home
+    event: enter
+  - platform: zone
+    entity_id: device_tracker.sm_s908e
+    zone: zone.home
+    event: enter
+  - platform: state
+    entity_id:
+    - zone.home
+    from: '0'
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+  action:
+  - service: input_select.select_option
+    data:
+      option: Home
+    target:
+      entity_id: input_select.occupancy
+  mode: single
+- id: '1735426056624'
+  alias: Occupancy - Set Holiday Mode from Alarmo
+  description: Sets the occupancy selector to Holiday whenever Alarmo enters the holiday
+    state.
+  triggers:
+  - trigger: state
+    entity_id:
+    - alarm_control_panel.alarmo
+    to: armed_vacation
+  conditions: []
+  actions:
+  - action: input_select.select_option
+    metadata: {}
+    data:
+      option: Holiday
+    target:
+      entity_id: input_select.occupancy
+  mode: single
+- id: '1662761539613'
+  alias: Reset Occupancy to Home After Wake-Up
+  description: Sets the household occupancy back to Home at the configured wake-up
+    time while the state is Sleeping.
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: 0
+    enabled: false
+  - type: value
+    platform: device
+    device_id: c054264b79e6739a057236f3a3c512b4
+    entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
+    domain: sensor
+    above: 99
+    enabled: false
+  - platform: time
+    at: input_datetime.wakeup_time_phil_steph
+  - platform: state
+    entity_id:
+    - input_button.wake_up_start
+  condition:
+  - condition: state
+    entity_id: input_select.occupancy
+    state: Sleeping
+  action:
+  - service: input_select.select_option
+    data:
+      option: Home
+    target:
+      entity_id: input_select.occupancy
+  mode: single

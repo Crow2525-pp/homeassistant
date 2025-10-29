@@ -218,9 +218,8 @@ light:
         turn_off:
           action: script.tv_lights_off
 
-adaptive_lighting:
-
-battery_notes:
+# adaptive_lighting:  # Disabled - not installed or not configured
+# battery_notes:  # Disabled - not installed or not configured
 
 recorder:
   purge_keep_days: 730
@@ -337,14 +336,13 @@ input_select:
     icon: mdi:weather-partly-cloudy
   occupancy:
     name: Occupancy Mode
-  options:
-    - Home
-    - Away
-    - Holiday
-    - Sleeping
+    options:
+      - Home
+      - Away
+      - Holiday
+      - Sleeping
     initial: Home
     icon: mdi:home-account
-
 input_number:
   # Roller Blind Position Tracking
   roller_blind_target_position:
@@ -703,8 +701,8 @@ alert:
     skip_first: true
     title: "7580 Info - Garage Door Open"
     message: >
-      Garage Door open for {{ relative_time(states.binary_sensor.garage_door_alert_active.last_changed) }} \  
-      Alerts on: {{ cover.smart_garage_door_garage | selectattr('state', 'eq', 'on') | map(attribute='attributes.friendly_name') | list | join(', ') }} \ 
+      Garage Door open for {{ relative_time(states.binary_sensor.garage_door_alert_active.last_changed) }}.
+      Alerts on: {{ expand('entity_id.cover.smart_garage_door_garage') | selectattr('state', 'eq', 'open') | map(attribute='attributes.friendly_name') | list | join(', ') }}.
       Triggered: {{ as_timestamp(states.binary_sensor.garage_door_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}
     done_message: "Garage Door Alert RESOLVED at {{ as_timestamp(states.binary_sensor.garage_door_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}"
     notifiers:
@@ -723,8 +721,8 @@ alert:
     skip_first: false
     title: "7580 Warning - Network Device Down"
     message: >
-      Network device down for {{ relative_time(states.binary_sensor.network_device_down_alert_active.last_changed) }} \  
-      Alerts on: {{ expand('group.network_devices') | selectattr('state', 'eq', 'off') | map(attribute='attributes.friendly_name') | list | join(', ') }} \ 
+      Network device down for {{ relative_time(states.binary_sensor.network_device_down_alert_active.last_changed) }}.
+      Alerts on: {{ expand('group.network_devices') | selectattr('state', 'eq', 'off') | map(attribute='attributes.friendly_name') | list | join(', ') }}.
       Triggered: {{ as_timestamp(states.binary_sensor.network_device_down_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}
     done_message: "Network Device Down Alert RESOLVED at {{ as_timestamp(states.binary_sensor.network_device_down_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}"
     notifiers:
