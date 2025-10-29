@@ -3,20 +3,20 @@ cards:
   - type: custom:auto-entities
     card:
       type: entities
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+          }
     filter:
       include:
         - domain: Sensor
           label: Maintenance
     sort:
       method: friendly_name
-    card_mod:
-      style: |
-        ha-card {
-          border-radius: 12px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          transition: all 0.3s ease;
-        }
-        ha-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }

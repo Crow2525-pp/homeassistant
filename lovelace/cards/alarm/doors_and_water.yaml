@@ -12,6 +12,17 @@ cards:
   card:
     type: entities
     state_color: true
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
   filter:
     include:
       - domain: binary_sensor
@@ -20,19 +31,8 @@ cards:
           secondary_info: last-changed
   sort:
     method: friendly_name
-  card_mod:
-    style: |
-      ha-card {
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-      }
-      ha-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-      }
 
-    # --- 🌊 WATER & FIRE SENSORS ---
+# --- 🌊 WATER & FIRE SENSORS ---
 - type: heading
   heading_style: title
   heading: Water & Fire Detection
@@ -42,6 +42,17 @@ cards:
     type: entities
     state_color: true
     title: Water & Fire Sensors
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
   filter:
     include:
       - label: "Water*"
@@ -61,16 +72,5 @@ cards:
       }
       {% if not loop.last %},{% endif %}
     {% endfor %}
-  card_mod:
-    style: |
-      ha-card {
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-      }
-      ha-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-      }
 
 
