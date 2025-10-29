@@ -70,8 +70,6 @@ logger:
 
 frontend:
   themes: !include_dir_merge_named themes
-  extra_module_url:
-    - /local/card-mod.js
 
 http:
   use_x_forwarded_for: true
