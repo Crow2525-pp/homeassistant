@@ -37,8 +37,8 @@ cards:
     card_param: cards
     filter:
       include:
-      - domain: switch and
-      - label: Switch
+      - domain: switch
+        label: Switch
         options:
           type: tile
           secondary_info: last-changed

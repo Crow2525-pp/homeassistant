@@ -228,8 +228,8 @@ cards:
     filter:
       include:
         # Manual Automations
-        - integration: input_boolean and
-        - label: "Manual Automations"
+        - integration: input_boolean
+          label: "Manual Automations"
           options:
             type: tile
             card_mod:
@@ -250,8 +250,8 @@ cards:
                   color: white !important;
                 }
         # Killswitches
-        - integration: input_boolean and
-        - label: Killswitch
+        - integration: input_boolean
+          label: Killswitch
           options:
             type: tile
             card_mod:

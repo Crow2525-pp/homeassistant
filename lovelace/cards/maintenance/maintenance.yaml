@@ -5,8 +5,8 @@ cards:
       type: entities
     filter:
       include:
-        - domain: Sensor and
-        - label: Maintenance
+        - domain: Sensor
+          label: Maintenance
     sort:
       method: friendly_name
     card_mod:

@@ -34,7 +34,7 @@ cards:
     card_param: cards
     filter:
       include:
-        - integration: input_boolean and
-        - label: "Manual Automations"
-          options:
-            type: tile
+        - integration: input_boolean
+          label: "Manual Automations"
+      options:
+        type: tile

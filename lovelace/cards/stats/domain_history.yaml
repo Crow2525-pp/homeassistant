@@ -5,8 +5,8 @@ cards:
     type: history-graph
   filter:
     include:
-      - domain: light and
-      - label: lights
+      - domain: light
+        label: lights
         options:
           secondary_info: last-changed
           hours_to_show: 24
@@ -32,8 +32,8 @@ cards:
     type: history-graph
   filter:
     include:
-      - domain: switch and
-      - label: switch
+      - domain: switch
+        label: switch
         options:
           secondary_info: last-changed
           hours_to_show: 24
@@ -59,8 +59,8 @@ cards:
     type: history-graph
   filter:
     include:
-      - domain: binary_sensor and
-      - label: Doors
+      - domain: binary_sensor
+        label: Doors
         options:
           secondary_info: last-changed
   sort:

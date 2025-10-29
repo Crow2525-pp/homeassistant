@@ -14,8 +14,8 @@ cards:
     state_color: true
   filter:
     include:
-      - domain: binary_sensor and
-      - label: Doors
+      - domain: binary_sensor
+        label: Doors
         options:
           secondary_info: last-changed
   sort:
