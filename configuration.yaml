@@ -225,8 +225,10 @@ light:
         turn_off:
           action: script.tv_lights_off
 
-# adaptive_lighting:  # Disabled - not installed or not configured
-# battery_notes:  # Disabled - not installed or not configured
+# Disabled integrations (commented out - not in use):
+# adaptive_lighting - requires specific light entities and brightness control
+# battery_notes - requires compatible battery-powered devices
+# These can be re-enabled if needed for future battery monitoring
 
 recorder:
   purge_keep_days: 730
