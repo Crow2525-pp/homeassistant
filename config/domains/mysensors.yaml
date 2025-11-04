@@ -5,33 +5,6 @@
   timeout: 10
   away_timeout: 120 # number of seconds after which the enitity will get status not_ho
 
-- platform: scrape
-  resource: https://feeds.feedburner.com/BbcHourlyNewsBulletin
-  name: bbc_hourly_bulletin
-  select: 'enclosure:nth-of-type(1)'
-  attribute: url
-  scan_interval: 1800
-
-- platform: scrape
-  resource: https://rss.introcast.io/1471715443/feeds.megaphone.fm/fiveminutenews
-  name: fiveminutenews
-  select: 'enclosure:nth-of-type(1)'
-  attribute: url
-  scan_interval: 1800
-
-- platform: scrape
-  resource: https://feeds.acast.com/public/shows/30ae66f3-cf9b-4b0b-8f96-9f360b545ece
-  name: daily_tech_headlines
-  select: 'enclosure:nth-of-type(1)'
-  attribute: url
-  scan_interval: 1800
-
-- platform: scrape
-  resource: https://www.scientificamerican.com/sciam/xml/iTunes.cfm?id=science-quickly
-  name: 60_second_sci
-  select: 'enclosure:nth-of-type(1)'
-  attribute: url
-  scan_interval: 1800
 
 # Work location statistics - 4 weeks
 - platform: history_stats
