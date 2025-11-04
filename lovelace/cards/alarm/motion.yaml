@@ -1,34 +1,34 @@
 type: vertical-stack
 cards:
-- type: custom:auto-entities
-  card:
-    type: history-graph
-  filter:
-    include:
-      - entity_id: "binary_sensor.*motion*"
-        options:
-          secondary_info: last-changed
-      - entity_id: "binary_sensor.*occupancy*"
-        options:
-          secondary_info: last-changed
-    exclude:
-      - entity_id: "*battery*"
-  sort:
-    method: friendly_name
-  card_mod:
-    style: |
-      ha-card {
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-      }
-      ha-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-      }
-      .card-header {
-        color: white;
-      }
-      .entity-name, .entity-state {
-        color: white !important;
-      }
+  - type: custom:auto-entities
+    card:
+      type: history-graph
+    filter:
+      include:
+        - entity_id: "binary_sensor.*motion*"
+          options:
+            secondary_info: last-changed
+        - entity_id: "binary_sensor.*occupancy*"
+          options:
+            secondary_info: last-changed
+      exclude:
+        - entity_id: "*battery*"
+    sort:
+      method: friendly_name
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        ha-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .card-header {
+          color: white;
+        }
+        .entity-name, .entity-state {
+          color: white !important;
+        }

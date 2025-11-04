@@ -37,31 +37,31 @@ cards:
     card_param: cards
     filter:
       include:
-      - domain: switch
-        label: Switch
-        options:
-          type: tile
-          secondary_info: last-changed
-          card_mod:
-            style: |
-              ha-card {
-                background: linear-gradient(145deg, rgba(51, 65, 85, 0.92), rgba(30, 41, 59, 0.88));
-                border-radius: 14px;
-                box-shadow: 0 6px 18px rgba(15, 23, 42, 0.35);
-                border: 1px solid rgba(148, 163, 184, 0.2);
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
-                overflow: hidden;
-              }
-              ha-card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 12px 24px rgba(15, 23, 42, 0.4);
-              }
-              ha-tile-icon {
-                color: rgba(255, 255, 255, 0.95) !important;
-                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
-              }
-              .primary, .secondary {
-                color: rgba(255, 255, 255, 0.95) !important;
-              }
+        - domain: switch
+          label: Switch
+          options:
+            type: tile
+            secondary_info: last-changed
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, rgba(51, 65, 85, 0.92), rgba(30, 41, 59, 0.88));
+                  border-radius: 14px;
+                  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.35);
+                  border: 1px solid rgba(148, 163, 184, 0.2);
+                  transition: transform 0.2s ease, box-shadow 0.2s ease;
+                  overflow: hidden;
+                }
+                ha-card:hover {
+                  transform: translateY(-2px);
+                  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.4);
+                }
+                ha-tile-icon {
+                  color: rgba(255, 255, 255, 0.95) !important;
+                  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+                }
+                .primary, .secondary {
+                  color: rgba(255, 255, 255, 0.95) !important;
+                }
     sort:
       method: friendly_name

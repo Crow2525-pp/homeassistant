@@ -123,12 +123,13 @@ cards:
     heading: "Other Covers"
     heading_style: subtitle
     icon: mdi:window-shutter
-  - features:
-      - type: cover-open-close
-      - type: cover-position
-    type: tile
+
+  - type: tile
     entity: cover.curtain_3_b3bb
     name: Curtains
+    features:
+      - type: cover-open-close
+      - type: cover-position
     layout_options:
       grid_columns: full
     card_mod:
@@ -157,12 +158,13 @@ cards:
         * {
           color: white !important;
         }
-  - features:
-      - type: cover-open-close
-      - type: cover-position
-    type: tile
+
+  - type: tile
     entity: cover.smart_garage_door_garage
     name: Garage
+    features:
+      - type: cover-open-close
+      - type: cover-position
     layout_options:
       grid_columns: full
     card_mod:
