@@ -63,8 +63,8 @@ jobs:
       - name: Home Assistant Configuration Check
         uses: frenck/action-home-assistant@v1.4
         with:
-          # Use the in-container mount point for the repo
-          path: "/github/workspace"
+          # Use workspace-relative path so the action can mount it correctly
+          path: "."
           version: "stable"
 
       - name: Print summary
