@@ -69,10 +69,14 @@ jobs:
       - name: Home Assistant Configuration Check (docker)
         run: |
           docker run --rm \
-            -v "${GITHUB_WORKSPACE}:/root/.homeassistant" \
-            --workdir /root/.homeassistant \
+            -e HOME=/root \
+            -e HASS_CONFIG=/config \
+            -e PYTHONPATH=/config/custom_components \
+            -v "${GITHUB_WORKSPACE}:/config" \
+            --workdir /config \
             ghcr.io/home-assistant/home-assistant:stable \
               python -m homeassistant \
+                --config /config \
                 --script check_config
 
       - name: Print summary
