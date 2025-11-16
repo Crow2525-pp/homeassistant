@@ -81,10 +81,10 @@ rules:
   # Trailing spaces - relax enforcement while normalising files
   trailing-spaces: disable
 
-  # New lines - accept any platform newlines and ignore final newline check
+  # New lines - allow platform default (tolerate CRLF/LF)
   new-line-at-end-of-file: disable
   new-lines:
-    type: any
+    type: platform
 
   # Quoted strings - Allow both single and double quotes
   quoted-strings:
