@@ -1481,8 +1481,7 @@
       - variables:
           days_since: "{% set value = states(repeat.item.entity) %} {% if value in
             ['unknown', 'unavailable', ''] %}\n  {{ repeat.item.interval + 1 }}\n{%
-            else %}\n  {% set last = value | as_datetime %}\n  {{ (now().date() -
-            last.date()).days }}\n{% endif %}\n"
+            else %}\n  {% set last = value | as_datetime %}\n  {% set hours_elapsed = ((now() - last).total_seconds() / 3600) | int %}\n  {{ (hours_elapsed / 24) | round(1) | int(0) }}\n{% endif %}\n"
           overdue_days: '{% set diff = (days_since | int) - repeat.item.interval %}
             {{ diff if diff > 0 else 0 }}
 
