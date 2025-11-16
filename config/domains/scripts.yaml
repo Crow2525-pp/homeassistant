@@ -1054,3 +1054,43 @@ record_climate_trigger:
       data:
         datetime: "{{ now().isoformat() }}"
   mode: single
+
+# ============================================================================
+# COMPUTER DESK CONTROL SCRIPTS
+# ============================================================================
+# Control computer power via smart outlet (switch.computer_plug_switch)
+# See: docs/COMPUTER_DESK_CONTROL_DECISION_GUIDE.md for setup details
+
+computer_power_on:
+  alias: "Computer - Power On"
+  description: "Turn on computer via smart outlet plug"
+  sequence:
+    - action: switch.turn_on
+      target:
+        entity_id: switch.computer_plug_switch
+    - action: notify.persistent_notification
+      data:
+        title: "🖥️ Computer Power"
+        message: "Computer powered on via outlet. Waiting for system to boot..."
+  mode: single
+  icon: mdi:power-on
+
+computer_power_off:
+  alias: "Computer - Power Off"
+  description: "Turn off computer via smart outlet (CAUTION: Force shutdown - ensure work is saved!)"
+  sequence:
+    - action: notify.persistent_notification
+      data:
+        title: "⚠️ Computer Shutdown"
+        message: "Force powering off computer in 5 seconds - ensure all work is saved!"
+    - delay:
+        seconds: 5
+    - action: switch.turn_off
+      target:
+        entity_id: switch.computer_plug_switch
+    - action: notify.persistent_notification
+      data:
+        title: "🖥️ Computer Power"
+        message: "Computer powered off via outlet"
+  mode: single
+  icon: mdi:power-off
