@@ -1487,12 +1487,10 @@
   alias: Phil Leaves Work Alert
   description: Notifies the household when Phil leaves the work zone.
   trigger:
-  - platform: device
-    device_id: c054264b79e6739a057236f3a3c512b4
-    domain: device_tracker
+  - platform: zone
     entity_id: device_tracker.sm_s908e
-    type: leaves
     zone: zone.work
+    event: leave
   condition: []
   action:
   - service: notify.mobile_app_slvdh

@@ -52,10 +52,9 @@
       entity_id: input_select.occupancy
       state: Home
   actions:
-  - type: turn_off
-    device_id: a4c9fa6c4205ff2778142853b379e0c5
-    entity_id: remote.sony_kd_55x8500c
-    domain: remote
+  - action: remote.turn_off
+    target:
+      entity_id: remote.sony_kd_55x8500c
   - delay:
       hours: 0
       minutes: 2
@@ -92,18 +91,12 @@
   description: Turns on selected lights near sunrise, when movement is detected, or
     at 05:00 while someone is home.
   triggers:
-  - type: value
-    device_id: c054264b79e6739a057236f3a3c512b4
+  - trigger: numeric_state
     entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
-    domain: sensor
     below: 80
-    trigger: device
-  - type: value
-    device_id: 58e2eb1fec0eb5ec9ce450433d074fcf
+  - trigger: numeric_state
     entity_id: sensor.slvdh_floors_descended
-    domain: sensor
     above: 1
-    trigger: device
   - at: 05:00:00
     trigger: time
   conditions:
@@ -114,14 +107,14 @@
     state: 'on'
     alias: Someone Home
   actions:
-  - metadata: {}
+  - action: light.turn_on
+    metadata: {}
     data: {}
     target:
-      device_id:
-      - 232fc839ce53ebd06b58a471c2412ad2
-      - fee3e1405cfa62d116d3f31ec12a9618
-      - cb1af1280403c9c6679a6535afb27939
-    action: light.turn_on
+      entity_id:
+      - light.computer_desk_light_socket_1
+      - light.floor_lamp_socket_1
+      - light.floor_lamp_socket_2
   mode: single
 - id: '1684789400363'
   alias: Morning Shutdown for Stray Lights
@@ -153,16 +146,12 @@
   condition:
   - condition: or
     conditions:
-    - condition: device
-      type: is_off
-      device_id: 1d56affa255e58f16de182a278c4965f
-      entity_id: fda71f9209c97e761f7d018643b4d0b8
-      domain: light
-    - condition: device
-      type: is_off
-      device_id: 85033fd25fd770cd2ec0ffc76e107d3d
-      entity_id: 78dfba29350243dbccf4dfcc7cc8492a
-      domain: light
+    - condition: state
+      entity_id: light.reading_light
+      state: 'off'
+    - condition: state
+      entity_id: light.sleeping_light_2
+      state: 'off'
   action:
   - service: scene.turn_on
     target:
@@ -174,16 +163,10 @@
   description: Reapplies the dimmed lighting scene after sunrise when either bedside
     light changes state.
   trigger:
-  - platform: device
-    type: changed_states
-    device_id: 18551c9b3c72efc901c3e35633c1e3c7
+  - platform: state
     entity_id: light.reading_light
-    domain: light
-  - platform: device
-    type: changed_states
-    device_id: 3cf9c8bc5367cd26edc9b128e7303916
+  - platform: state
     entity_id: light.sleeping_light_2
-    domain: light
   condition:
   - condition: sun
     after: sunrise
@@ -199,18 +182,14 @@
   description: Forces the bedside reading and sleeping lights to 1 percent brightness
     between 20:00 and 08:00.
   triggers:
-  - type: turned_on
-    device_id: 18551c9b3c72efc901c3e35633c1e3c7
-    entity_id: 796eb3a2a943532f618ea9933efbfad6
-    domain: light
+  - trigger: state
+    entity_id: light.reading_light
+    to: 'on'
     id: Reading
-    trigger: device
-  - type: turned_on
-    device_id: 3cf9c8bc5367cd26edc9b128e7303916
-    entity_id: c0696c96326546dbb113c5b3d97482a8
-    domain: light
+  - trigger: state
+    entity_id: light.sleeping_light_2
+    to: 'on'
     id: Sleeping
-    trigger: device
   conditions:
   - condition: time
     before: 08:00:00
@@ -258,11 +237,8 @@
     attribute: elevation
     below: 5
     enabled: false
-  - type: is_illuminance
-    condition: device
-    device_id: ff182513e25375d3e31074d0caed8a9b
-    entity_id: bbcd14c8d6ec6c74d00290784818aa79
-    domain: sensor
+  - condition: numeric_state
+    entity_id: sensor.motion_sensor_illuminance_lux
     below: 10
   actions:
   - choose:
@@ -308,11 +284,8 @@
     event: sunrise
     offset: 00:20:00
   conditions:
-  - type: is_illuminance
-    condition: device
-    device_id: bdadcf77909c9b2214e34dfa9ecef057
-    entity_id: b93f5f454feabef4f527879b2e19309b
-    domain: sensor
+  - condition: numeric_state
+    entity_id: sensor.aqara_motion_and_light_sensor_p2_illuminance_lux
     below: 30
   actions:
   - choose:
@@ -376,17 +349,13 @@
   alias: Living Room - Sync TV Power and Lighting
   description: Keeps the AV switch and bias lighting aligned with TV power events.
   trigger:
-  - platform: device
-    type: turned_on
-    device_id: a54fb9a78133e7eec040eef4ca052fc9
-    entity_id: d909cd5581bd5b7a73feef1654706ba8
-    domain: remote
+  - platform: state
+    entity_id: remote.tv_2
+    to: 'on'
     id: 'On'
-  - platform: device
-    type: turned_off
-    device_id: a54fb9a78133e7eec040eef4ca052fc9
-    entity_id: d909cd5581bd5b7a73feef1654706ba8
-    domain: remote
+  - platform: state
+    entity_id: remote.tv_2
+    to: 'off'
     id: 'Off'
   condition: []
   action:
@@ -396,10 +365,9 @@
         id:
         - 'On'
       sequence:
-      - type: turn_on
-        device_id: eda310c53d64fbfed9908fd266dc8635
-        entity_id: f9c445a5c33e26e2b2d9ef2addd13858
-        domain: switch
+      - action: switch.turn_on
+        target:
+          entity_id: switch.living_room_av_relay_switch
       - if:
         - condition: sun
           after: sunset
@@ -413,10 +381,9 @@
       sequence:
       - service: script.tv_lights_off
         data: {}
-      - type: turn_off
-        device_id: eda310c53d64fbfed9908fd266dc8635
-        entity_id: f9c445a5c33e26e2b2d9ef2addd13858
-        domain: switch
+      - action: switch.turn_off
+        target:
+          entity_id: switch.living_room_av_relay_switch
   mode: single
 - id: '1756063707572'
   alias: Living Room - Lights Off When Watching TV
@@ -515,7 +482,7 @@
         before: '16:00:00'
       sequence:
       - target:
-          device_id: fee3e1405cfa62d116d3f31ec12a9618
+          entity_id: light.floor_lamp_socket_1
         data:
           rgb_color:
           - 0
@@ -530,7 +497,7 @@
     - conditions: []
       sequence:
       - target:
-          device_id: fee3e1405cfa62d116d3f31ec12a9618
+          entity_id: light.floor_lamp_socket_1
         action: light.turn_off
   mode: single
 - id: '1733691257280'

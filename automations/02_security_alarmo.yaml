@@ -14,28 +14,25 @@
         entity_id: input_select.occupancy
         state: Away
       sequence:
-      - device_id: d0246dd7b63468505017ec29f63e3d86
-        domain: alarm_control_panel
-        entity_id: alarm_control_panel.alarmo
-        type: arm_away
+      - action: alarm_control_panel.alarm_arm_away
+        target:
+          entity_id: alarm_control_panel.alarmo
     - conditions:
       - condition: state
         entity_id: input_select.occupancy
         state: Home
       sequence:
-      - device_id: d0246dd7b63468505017ec29f63e3d86
-        domain: alarm_control_panel
-        entity_id: alarm_control_panel.alarmo
-        type: disarm
+      - action: alarm_control_panel.alarm_disarm
+        target:
+          entity_id: alarm_control_panel.alarmo
     - conditions:
       - condition: state
         entity_id: input_select.occupancy
         state: Sleeping
       sequence:
-      - device_id: d0246dd7b63468505017ec29f63e3d86
-        domain: alarm_control_panel
-        entity_id: alarm_control_panel.alarmo
-        type: arm_night
+      - action: alarm_control_panel.alarm_arm_night
+        target:
+          entity_id: alarm_control_panel.alarmo
   mode: single
 - id: '1681731859692'
   alias: Alarmo - Arm Night Routine
@@ -52,11 +49,8 @@
     trigger: state
   - at: input_datetime.bedtime_phil_steph
     trigger: time
-  - type: value
-    device_id: c054264b79e6739a057236f3a3c512b4
+  - trigger: numeric_state
     entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
-    domain: sensor
-    trigger: device
     above: 95
   conditions:
   - condition: time
@@ -88,19 +82,17 @@
             seconds: 0
           trigger: state
         continue_on_timeout: false
-      - device_id: d0246dd7b63468505017ec29f63e3d86
-        domain: alarm_control_panel
-        entity_id: alarm_control_panel.alarmo
-        type: arm_night
+      - action: alarm_control_panel.alarm_arm_night
+        target:
+          entity_id: alarm_control_panel.alarmo
     - conditions:
       - condition: state
         entity_id: input_select.occupancy
         state: Home
       sequence:
-      - device_id: d0246dd7b63468505017ec29f63e3d86
-        domain: alarm_control_panel
-        entity_id: alarm_control_panel.alarmo
-        type: arm_night
+      - action: alarm_control_panel.alarm_arm_night
+        target:
+          entity_id: alarm_control_panel.alarmo
     - conditions:
       - condition: state
         entity_id: input_select.occupancy
@@ -112,19 +104,16 @@
         entity_id: input_select.occupancy
         state: Sleeping
       sequence:
-      - device_id: d0246dd7b63468505017ec29f63e3d86
-        domain: alarm_control_panel
-        entity_id: alarm_control_panel.alarmo
-        type: arm_night
+      - action: alarm_control_panel.alarm_arm_night
+        target:
+          entity_id: alarm_control_panel.alarmo
     default:
-    - device_id: d0246dd7b63468505017ec29f63e3d86
-      domain: alarm_control_panel
-      entity_id: alarm_control_panel.alarmo
-      type: arm_night
-  - device_id: c054264b79e6739a057236f3a3c512b4
-    domain: mobile_app
-    type: notify
-    message: Alarmo Armed
+    - action: alarm_control_panel.alarm_arm_night
+      target:
+        entity_id: alarm_control_panel.alarmo
+  - action: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      message: Alarmo Armed
     enabled: true
   - data:
       message: Home has detected youre not at home. Are you coming home?
@@ -136,17 +125,11 @@
   alias: Alarmo - Disarm When Household Awake
   description: Disarms Alarmo when someone wakes up during the early-morning routine.
   trigger:
-  - type: value
-    platform: device
-    device_id: c054264b79e6739a057236f3a3c512b4
+  - trigger: numeric_state
     entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
-    domain: sensor
     below: 80
-  - type: value
-    platform: device
-    device_id: 58e2eb1fec0eb5ec9ce450433d074fcf
+  - trigger: numeric_state
     entity_id: sensor.slvdh_floors_descended
-    domain: sensor
     above: 1
   - platform: time
     at: 07:00:00
@@ -176,22 +159,19 @@
       notification_title: Alarm Setup
       action_1_title: Away
       first_action:
-      - device_id: d0246dd7b63468505017ec29f63e3d86
-        domain: alarm_control_panel
-        entity_id: alarm_control_panel.alarmo
-        type: arm_away
+      - action: alarm_control_panel.alarm_arm_away
+        target:
+          entity_id: alarm_control_panel.alarmo
       action_2_title: Night
       second_action:
-      - device_id: d0246dd7b63468505017ec29f63e3d86
-        domain: alarm_control_panel
-        entity_id: alarm_control_panel.alarmo
-        type: arm_night
+      - action: alarm_control_panel.alarm_arm_night
+        target:
+          entity_id: alarm_control_panel.alarmo
       action_3_title: Disarm
       third_action:
-      - device_id: d0246dd7b63468505017ec29f63e3d86
-        domain: alarm_control_panel
-        entity_id: alarm_control_panel.alarmo
-        type: disarm
+      - action: alarm_control_panel.alarm_disarm
+        target:
+          entity_id: alarm_control_panel.alarmo
 - id: bedtime_security_checklist
   alias: Night - Bedtime Security Checklist
   description: Provides a security checklist notification when switching to sleeping

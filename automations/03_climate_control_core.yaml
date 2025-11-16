@@ -60,17 +60,11 @@
   conditions:
   - condition: or
     conditions:
-    - type: is_temperature
-      condition: device
-      device_id: ebf0379e33b2ccccd4ee6b6c351f4ce5
+    - condition: numeric_state
       entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
-      domain: sensor
       below: 19
-    - type: is_temperature
-      condition: device
-      device_id: 4d7546906b50573a9ce56a4a8c04ff90
+    - condition: numeric_state
       entity_id: sensor.living_room_temperature_offset
-      domain: sensor
       below: 17.5
   - condition: state
     entity_id: input_boolean.super_hot_today
@@ -135,29 +129,23 @@
     state: 'on'
     alias: Living Room HVAC Master On
   actions:
-  - device_id: b084d1fcd04470308deb597901c61d5c
-    domain: climate
-    entity_id: 919759f355a72fa8f73dfe61b55457b2
-    type: set_hvac_mode
-    hvac_mode: 'off'
+  - action: climate.set_hvac_mode
+    target:
+      entity_id: climate.living_room_versatile_thermastat
+    data:
+      hvac_mode: 'off'
   mode: single
 - id: '1752139587383'
   alias: Living Room - Heater Off Overnight
   description: Turns the living room heater off each night as part of the bedtime
     routine.
   triggers:
-  - type: value
-    device_id: c054264b79e6739a057236f3a3c512b4
+  - trigger: numeric_state
     entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
-    domain: sensor
     below: 80
-    trigger: device
-  - type: value
-    device_id: 58e2eb1fec0eb5ec9ce450433d074fcf
+  - trigger: numeric_state
     entity_id: sensor.slvdh_floors_descended
-    domain: sensor
     above: 1
-    trigger: device
   conditions:
   - condition: state
     entity_id: binary_sensor.someone_home
@@ -260,18 +248,12 @@
   description: Shuts down the master bedroom climate equipment when wake-up sensors
     fire.
   triggers:
-  - type: value
-    device_id: c054264b79e6739a057236f3a3c512b4
+  - trigger: numeric_state
     entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
-    domain: sensor
     below: 80
-    trigger: device
-  - type: value
-    device_id: 58e2eb1fec0eb5ec9ce450433d074fcf
+  - trigger: numeric_state
     entity_id: sensor.slvdh_floors_descended
-    domain: sensor
     above: 1
-    trigger: device
   conditions:
   - condition: state
     entity_id: binary_sensor.someone_home

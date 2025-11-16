@@ -107,11 +107,8 @@
     event: sunrise
     offset: 0
     enabled: false
-  - type: value
-    platform: device
-    device_id: c054264b79e6739a057236f3a3c512b4
+  - trigger: numeric_state
     entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
-    domain: sensor
     above: 99
     enabled: false
   - platform: time

@@ -4,33 +4,25 @@
   description: Opens the garage door and disarms Alarmo when Phil or Steph arrive
     home and the car is connected.
   triggers:
-  - device_id: c054264b79e6739a057236f3a3c512b4
-    domain: device_tracker
+  - platform: zone
     entity_id: device_tracker.sm_s908e
-    type: enters
     zone: zone.home
-    trigger: device
-  - device_id: 58e2eb1fec0eb5ec9ce450433d074fcf
-    domain: device_tracker
+    event: enter
+  - platform: zone
     entity_id: device_tracker.slvdh_2
-    type: enters
     zone: zone.home
-    trigger: device
+    event: enter
   conditions:
-  - type: is_connected
-    condition: device
-    device_id: c054264b79e6739a057236f3a3c512b4
-    entity_id: 39a721a1e67ec5758cce90959b3d8a25
-    domain: binary_sensor
+  - condition: state
+    entity_id: binary_sensor.sm_s908e_android_auto
+    state: 'on'
   actions:
-  - device_id: 7edad8ef01a718694f8a423cbfdca0c0
-    domain: cover
-    entity_id: cover.smart_garage_door_garage
-    type: open
-  - device_id: d0246dd7b63468505017ec29f63e3d86
-    domain: alarm_control_panel
-    entity_id: alarm_control_panel.alarmo
-    type: disarm
+  - action: cover.open_cover
+    target:
+      entity_id: cover.smart_garage_door_garage
+  - action: alarm_control_panel.alarm_disarm
+    target:
+      entity_id: alarm_control_panel.alarmo
   mode: single
 - id: '1713092115962'
   alias: Nightly Garage Door Check
@@ -241,7 +233,7 @@
         metadata: {}
         data: {}
         target:
-          device_id: 38066f3083671e091a033c27c46cc53c
+          entity_id: media_player.kitchen
       start_appliance_power: 10
       include_start_notify: enable_start_notify_options
       end_appliance_power: 10
@@ -375,7 +367,7 @@
         metadata: {}
         data: {}
         target:
-          device_id: 38066f3083671e091a033c27c46cc53c
+          entity_id: media_player.kitchen
       end_appliance_power: 14
       start_custom_actions:
       - action: input_boolean.turn_on
@@ -646,15 +638,15 @@
           - condition: template
             value_template: '{{ not wait.trigger }}'
           sequence:
-          - device_id: 1237768e2dd98b4fd8a60455b374908d
-            domain: light
-            entity_id: 7341353cf94f589e859b6d7a8d463077
-            type: brightness_increase
+          - action: light.turn_on
+            target:
+              entity_id: light.lounge
+            data:
+              brightness_step_pct: 10
         default:
-        - type: toggle
-          device_id: 1237768e2dd98b4fd8a60455b374908d
-          entity_id: 7341353cf94f589e859b6d7a8d463077
-          domain: light
+        - action: light.toggle
+          target:
+            entity_id: light.lounge
         - action: light.toggle
           metadata: {}
           data: {}
@@ -668,10 +660,11 @@
           - condition: template
             value_template: '{{ click_type == ''double'' }}'
           sequence:
-          - device_id: 1237768e2dd98b4fd8a60455b374908d
-            domain: light
-            entity_id: 7341353cf94f589e859b6d7a8d463077
-            type: brightness_decrease
+          - action: light.turn_on
+            target:
+              entity_id: light.lounge
+            data:
+              brightness_step_pct: -10
         - conditions:
           - condition: template
             value_template: '{{ click_type == ''triple'' }}'
@@ -690,23 +683,23 @@
   alias: Master Bedroom Remote - Control Reading Light
   description: Maps bedside remote presses to toggling and dimming the reading light.
   triggers:
-  - device_id: f085406cb09d1a8a9f10f0b500c48ebe
-    domain: zha
-    type: remote_button_short_press
-    subtype: button_1
-    trigger: device
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: f085406cb09d1a8a9f10f0b500c48ebe
+      command: remote_button_short_press
     id: Once
-  - device_id: f085406cb09d1a8a9f10f0b500c48ebe
-    domain: zha
-    type: remote_button_long_press
-    subtype: button_1
-    trigger: device
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: f085406cb09d1a8a9f10f0b500c48ebe
+      command: remote_button_long_press
     id: Held
-  - device_id: f085406cb09d1a8a9f10f0b500c48ebe
-    domain: zha
-    type: remote_button_double_press
-    subtype: button_1
-    trigger: device
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: f085406cb09d1a8a9f10f0b500c48ebe
+      command: remote_button_double_press
     id: Double
   conditions: []
   actions:
@@ -720,7 +713,7 @@
         metadata: {}
         data: {}
         target:
-          device_id: 18551c9b3c72efc901c3e35633c1e3c7
+          entity_id: light.reading_light
     - conditions:
       - condition: trigger
         id:
@@ -757,17 +750,17 @@
   description: Maps bedside remote presses to control the sleeping light brightness
     and power.
   triggers:
-  - device_id: 8c730c300afc8f900acf8e9782eb6d62
-    domain: zha
-    type: remote_button_short_press
-    subtype: button_1
-    trigger: device
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: 8c730c300afc8f900acf8e9782eb6d62
+      command: remote_button_short_press
     id: Once
-  - device_id: 8c730c300afc8f900acf8e9782eb6d62
-    domain: zha
-    type: remote_button_double_press
-    subtype: button_1
-    trigger: device
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: 8c730c300afc8f900acf8e9782eb6d62
+      command: remote_button_double_press
     id: Double
   - device_id: 8c730c300afc8f900acf8e9782eb6d62
     domain: zha
@@ -788,8 +781,7 @@
         metadata: {}
         data: {}
         target:
-          device_id:
-          - 3cf9c8bc5367cd26edc9b128e7303916
+          entity_id: light.sleeping_light_2
     - conditions:
       - condition: trigger
         id:
@@ -825,23 +817,23 @@
   alias: Master Bedroom Remote - Toggle Room Lighting
   description: Uses the bedside remote to toggle the master bedroom lighting group.
   triggers:
-  - device_id: f085406cb09d1a8a9f10f0b500c48ebe
-    domain: zha
-    type: remote_button_short_press
-    subtype: button
-    trigger: device
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: f085406cb09d1a8a9f10f0b500c48ebe
+      command: remote_button_short_press
     enabled: false
-  - device_id: 8cb8be820d24cc85cc448e17a28fb15d
-    domain: zha
-    type: remote_button_short_press
-    subtype: button
-    trigger: device
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: 8cb8be820d24cc85cc448e17a28fb15d
+      command: remote_button_short_press
     id: Once
-  - device_id: 8cb8be820d24cc85cc448e17a28fb15d
-    domain: zha
-    type: remote_button_short_press
-    subtype: button_1
-    trigger: device
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: 8cb8be820d24cc85cc448e17a28fb15d
+      command: remote_button_short_press
     id: Held
   conditions: []
   actions:
@@ -876,23 +868,23 @@
   description: Lets the spare remote toggle the study computer desk smart switch.
     having to pull out a phone
   triggers:
-  - device_id: a957c4c649b876f99732f7bd44193c43
-    domain: zha
-    type: remote_button_short_press
-    subtype: button_1
-    trigger: device
-  - device_id: a957c4c649b876f99732f7bd44193c43
-    domain: zha
-    type: remote_button_short_press
-    subtype: button
-    trigger: device
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: a957c4c649b876f99732f7bd44193c43
+      command: remote_button_short_press
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: a957c4c649b876f99732f7bd44193c43
+      command: remote_button_short_press
   conditions: []
   actions:
   - action: switch.toggle
     metadata: {}
     data: {}
     target:
-      device_id: ac27c1acd87d567603e54ed90f046a50
+      entity_id: switch.computer_desk_light_socket_1
   mode: single
 - id: '1685157513874'
   alias: Study Desk NFC - Toggle Desk Switch
@@ -902,10 +894,9 @@
     trigger: tag
   conditions: []
   actions:
-  - type: toggle
-    device_id: ac27c1acd87d567603e54ed90f046a50
-    entity_id: 41d147d319aab7615baeff5015237de7
-    domain: switch
+  - action: switch.toggle
+    target:
+      entity_id: switch.computer_desk_light_socket_1
   mode: single
 - id: '1724225427107'
   alias: Master Bedroom - Update Sleeping Status
@@ -975,18 +966,14 @@
   description: Turns on the study desk switch and preps climate when the workday toggle
     activates.
   triggers:
-  - type: turned_on
-    device_id: dc326b28df2064ab9f7d9e983e6824e6
-    entity_id: 63cfcb8c97058003e378eefffdaa028b
-    domain: switch
+  - trigger: state
+    entity_id: switch.working_from_home
+    to: 'on'
     id: 'On'
-    trigger: device
-  - type: turned_off
-    device_id: dc326b28df2064ab9f7d9e983e6824e6
-    entity_id: 63cfcb8c97058003e378eefffdaa028b
-    domain: switch
+  - trigger: state
+    entity_id: switch.working_from_home
+    to: 'off'
     id: 'Off'
-    trigger: device
   conditions: []
   actions:
   - choose:
@@ -995,10 +982,9 @@
         id:
         - 'On'
       sequence:
-      - type: turn_on
-        device_id: ac27c1acd87d567603e54ed90f046a50
-        entity_id: 41d147d319aab7615baeff5015237de7
-        domain: switch
+      - action: switch.turn_on
+        target:
+          entity_id: switch.computer_desk_light_socket_1
       - data:
           preset_mode: comfort
         action: climate.set_preset_mode
@@ -1014,10 +1000,9 @@
         id:
         - 'Off'
       sequence:
-      - type: turn_off
-        device_id: ac27c1acd87d567603e54ed90f046a50
-        entity_id: 41d147d319aab7615baeff5015237de7
-        domain: switch
+      - action: switch.turn_off
+        target:
+          entity_id: switch.computer_desk_light_socket_1
       - data:
           hvac_mode: 'off'
         action: climate.set_hvac_mode
@@ -1038,10 +1023,9 @@
       persistent_notification: false
       action_1_title: 'On'
       first_action:
-      - type: turn_on
-        device_id: 399b754fdf1cb07ed6c2bfcf22f86dce
-        entity_id: switch.computer_desk_light_socket_1
-        domain: switch
+      - action: switch.turn_on
+        target:
+          entity_id: switch.computer_desk_light_socket_1
       - service: input_boolean.turn_off
         target:
           entity_id:
@@ -1049,10 +1033,9 @@
         data: {}
       action_2_title: 'Off'
       second_action:
-      - type: turn_off
-        device_id: 399b754fdf1cb07ed6c2bfcf22f86dce
-        entity_id: switch.computer_desk_light_socket_1
-        domain: switch
+      - action: switch.turn_off
+        target:
+          entity_id: switch.computer_desk_light_socket_1
       - service: input_boolean.turn_off
         data: {}
         target:
@@ -1540,7 +1523,7 @@
     metadata: {}
     data: {}
     target:
-      device_id: 7f15e0de838d7d32254c9598ce75aa10
+      entity_id: switch.sprinklers_relay_switch
   - delay:
       hours: 0
       minutes: 20
@@ -1550,17 +1533,15 @@
     metadata: {}
     data: {}
     target:
-      device_id: 7f15e0de838d7d32254c9598ce75aa10
+      entity_id: switch.sprinklers_relay_switch
   mode: single
 - id: '1735867240188'
   alias: Irrigation - Limit Watering to 10 Minutes
   description: Stops the irrigation run after ten minutes to prevent over-watering.
   triggers:
-  - type: turned_on
-    device_id: 7f15e0de838d7d32254c9598ce75aa10
-    entity_id: 9b99b8ca53b6982903c65cd267091adf
-    domain: switch
-    trigger: device
+  - trigger: state
+    entity_id: switch.sprinklers_relay_switch
+    to: 'on'
   conditions: []
   actions:
   - delay:
@@ -1568,25 +1549,20 @@
       minutes: 10
       seconds: 0
       milliseconds: 0
-  - type: turn_off
-    device_id: 7f15e0de838d7d32254c9598ce75aa10
-    entity_id: 9b99b8ca53b6982903c65cd267091adf
-    domain: switch
+  - action: switch.turn_off
+    target:
+      entity_id: switch.sprinklers_relay_switch
   mode: single
 - id: '1706063916168'
   alias: Leak Sensors - Notify on Water Detection
   description: Sends mobile notifications when the monitored leak sensors report water.
   trigger:
-  - type: moist
-    platform: device
-    device_id: 31301cc533660d63d02b479ee7edfeb6
-    entity_id: 3d7056108abc259f11cb5f9d88bce3bd
-    domain: binary_sensor
-  - type: moist
-    platform: device
-    device_id: 8ff9a6d91d82ddd9e30bcb8f76356d9e
-    entity_id: d5af43c0f1114b2e0d4f85f7f2602981
-    domain: binary_sensor
+  - platform: state
+    entity_id: binary_sensor.aqara_water_leak_sensor_water_leak
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.aqara_water_leak_sensor_water_leak_2
+    to: 'on'
   condition: []
   action:
   - service: notify.mobile_app_samsung_galaxy_s22_ultra
@@ -1606,16 +1582,14 @@
     path: sbyx/low-battery-level-detection-notification-for-all-battery-sensors.yaml
     input:
       actions:
-      - device_id: c054264b79e6739a057236f3a3c512b4
-        domain: mobile_app
-        type: notify
-        message: '{{sensors}}'
-        title: Low battery warning
-      - device_id: 58e2eb1fec0eb5ec9ce450433d074fcf
-        domain: mobile_app
-        type: notify
-        message: '{{sensors}}'
-        title: Low battery warning
+      - action: notify.mobile_app_samsung_galaxy_s22_ultra
+        data:
+          message: '{{sensors}}'
+          title: Low battery warning
+      - action: notify.mobile_app_slvdh
+        data:
+          message: '{{sensors}}'
+          title: Low battery warning
       threshold: 25
       exclude:
         entity_id: []
@@ -1811,27 +1785,21 @@
   actions:
   - choose:
     - conditions:
-      - condition: device
-        type: is_off
-        device_id: 232fc839ce53ebd06b58a471c2412ad2
-        entity_id: 5988af91837e47236db524998627e65e
-        domain: switch
+      - condition: state
+        entity_id: switch.computer_desk_light_socket_2
+        state: 'off'
       sequence:
-      - type: turn_on
-        device_id: 232fc839ce53ebd06b58a471c2412ad2
-        entity_id: 5988af91837e47236db524998627e65e
-        domain: switch
+      - action: switch.turn_on
+        target:
+          entity_id: switch.computer_desk_light_socket_2
     - conditions:
-      - condition: device
-        type: is_off
-        device_id: 399b754fdf1cb07ed6c2bfcf22f86dce
-        entity_id: 4e12ee54d94d1ad1c2db1176f6da428d
-        domain: switch
+      - condition: state
+        entity_id: switch.computer_desk_light_socket_2
+        state: 'off'
       sequence:
-      - type: turn_on
-        device_id: 232fc839ce53ebd06b58a471c2412ad2
-        entity_id: 5988af91837e47236db524998627e65e
-        domain: switch
+      - action: switch.turn_on
+        target:
+          entity_id: switch.computer_desk_light_socket_2
   mode: single
 - id: keep_computer_desk_light_socket_2_on
   alias: Keep Computer Desk Light Socket 2 Always On
