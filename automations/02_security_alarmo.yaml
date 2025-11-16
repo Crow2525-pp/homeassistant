@@ -151,27 +151,59 @@
   alias: Alarmo Arming Prompt
   description: Sends an actionable notification to choose an Alarmo arming mode when
     prompted.
-  use_blueprint:
-    path: vorion/actionable-notifications-for-android.yaml
-    input:
-      notify_device: c054264b79e6739a057236f3a3c512b4
-      trigger_entity: input_boolean.alarmo_actionable_notification
-      notification_title: Alarm Setup
-      action_1_title: Away
-      first_action:
+  trigger:
+  - platform: state
+    entity_id: input_boolean.alarmo_actionable_notification
+    to: 'on'
+  action:
+  - action: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: Alarm Setup
+      message: Choose an arming mode
+      data:
+        actions:
+        - action: ALARM_AWAY
+          title: Away
+        - action: ALARM_NIGHT
+          title: Night
+        - action: ALARM_DISARM
+          title: Disarm
+  - wait_for_trigger:
+    - platform: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: ALARM_AWAY
+    - platform: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: ALARM_NIGHT
+    - platform: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: ALARM_DISARM
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{ wait.trigger.event.data.action == 'ALARM_AWAY' }}"
+      sequence:
       - action: alarm_control_panel.alarm_arm_away
         target:
           entity_id: alarm_control_panel.alarmo
-      action_2_title: Night
-      second_action:
+    - conditions:
+      - condition: template
+        value_template: "{{ wait.trigger.event.data.action == 'ALARM_NIGHT' }}"
+      sequence:
       - action: alarm_control_panel.alarm_arm_night
         target:
           entity_id: alarm_control_panel.alarmo
-      action_3_title: Disarm
-      third_action:
+    - conditions:
+      - condition: template
+        value_template: "{{ wait.trigger.event.data.action == 'ALARM_DISARM' }}"
+      sequence:
       - action: alarm_control_panel.alarm_disarm
         target:
           entity_id: alarm_control_panel.alarmo
+  mode: single
 - id: bedtime_security_checklist
   alias: Night - Bedtime Security Checklist
   description: Provides a security checklist notification when switching to sleeping
