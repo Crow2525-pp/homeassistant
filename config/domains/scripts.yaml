@@ -533,10 +533,33 @@ water_plants:
 play_music:
   alias: Play Music
   sequence:
-  # Resume playback on the living room WiiM Amp
+  # Select WiiM Amp as Spotify source and resume playback
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ 'Living Room WiiM Amp' in (state_attr('media_player.spotify_philip_patterson', 'source_list') or []) }}
+        sequence:
+          - action: media_player.select_source
+            target:
+              entity_id: media_player.spotify_philip_patterson
+            data:
+              source: 'Living Room WiiM Amp'
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ 'WiiM Amp' in (state_attr('media_player.spotify_philip_patterson', 'source_list') or []) }}
+        sequence:
+          - action: media_player.select_source
+            target:
+              entity_id: media_player.spotify_philip_patterson
+            data:
+              source: 'WiiM Amp'
+    default: []
+  # Resume playback (will continue last played track/playlist)
   - action: media_player.media_play
     target:
-      entity_id: media_player.living_room_wiimamp
+      entity_id: media_player.spotify_philip_patterson
     data: {}
   mode: single
   icon: mdi:music
@@ -553,15 +576,52 @@ open_garage:
 read_news:
   alias: Read the News
   sequence:
-  # Play news briefing on all media players
-  - action: tts.google_translate_say
-    target:
-      entity_id:
-        - media_player.kitchen
-        - media_player.study_speaker
-        - media_player.master_bedroom_speaker
-    data:
-      message: "Here are your news headlines for today. You can customize this message with actual news sources."
+  # Play news briefing on selected room speaker
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: input_select.news_room_selector
+            state: 'Kitchen'
+        sequence:
+          - action: tts.google_translate_say
+            target:
+              entity_id: media_player.kitchen
+            data:
+              message: "Here are your news headlines for today. You can customize this message with actual news sources."
+      - conditions:
+          - condition: state
+            entity_id: input_select.news_room_selector
+            state: 'Study'
+        sequence:
+          - action: tts.google_translate_say
+            target:
+              entity_id: media_player.study_speaker
+            data:
+              message: "Here are your news headlines for today. You can customize this message with actual news sources."
+      - conditions:
+          - condition: state
+            entity_id: input_select.news_room_selector
+            state: 'Master Bedroom'
+        sequence:
+          - action: tts.google_translate_say
+            target:
+              entity_id: media_player.master_bedroom_speaker
+            data:
+              message: "Here are your news headlines for today. You can customize this message with actual news sources."
+      - conditions:
+          - condition: state
+            entity_id: input_select.news_room_selector
+            state: 'All Rooms'
+        sequence:
+          - action: tts.google_translate_say
+            target:
+              entity_id:
+                - media_player.kitchen
+                - media_player.study_speaker
+                - media_player.master_bedroom_speaker
+            data:
+              message: "Here are your news headlines for today. You can customize this message with actual news sources."
+    default: []
   mode: single
   icon: mdi:newspaper
 morning_news_briefing:
@@ -667,3 +727,178 @@ naptime:
   mode: single
   icon: mdi:sleep
 
+# ============================================================================
+# CLIMATE HELPER SCRIPTS
+# ============================================================================
+# These scripts encapsulate common climate actions to reduce automation complexity
+# Used by 06_living_room_climate_split.yaml and other room automations
+
+set_climate_mode:
+  alias: "Set Climate Mode"
+  description: "Generic helper to set climate hvac_mode (heat/cool/dry/fan_only/off)"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+    hvac_mode:
+      description: "HVAC mode (heat, cool, dry, fan_only, off)"
+      example: "heat"
+  sequence:
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: "{{ climate_entity }}"
+      data:
+        hvac_mode: "{{ hvac_mode }}"
+  mode: single
+
+set_climate_preset:
+  alias: "Set Climate Preset"
+  description: "Generic helper to set climate preset mode (comfort/eco/boost/frost/none)"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+    preset_mode:
+      description: "Preset mode (comfort, eco, boost, frost, none)"
+      example: "comfort"
+  sequence:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: "{{ climate_entity }}"
+      data:
+        preset_mode: "{{ preset_mode }}"
+  mode: single
+
+set_climate_mode_and_preset:
+  alias: "Set Climate Mode and Preset"
+  description: "Set both hvac_mode and preset_mode in one call"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+    hvac_mode:
+      description: "HVAC mode (heat, cool, dry, fan_only, off)"
+      example: "cool"
+    preset_mode:
+      description: "Preset mode (comfort, eco, boost, frost, none)"
+      example: "comfort"
+  sequence:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: "{{ climate_entity }}"
+      data:
+        preset_mode: "{{ preset_mode }}"
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: "{{ climate_entity }}"
+      data:
+        hvac_mode: "{{ hvac_mode }}"
+  mode: single
+
+activate_dry_mode:
+  alias: "Activate Dry Mode"
+  description: "Helper to activate dehumidification mode"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+  sequence:
+    - action: script.set_climate_mode_and_preset
+      data:
+        climate_entity: "{{ climate_entity }}"
+        hvac_mode: "dry"
+        preset_mode: "comfort"
+  mode: single
+
+activate_heating:
+  alias: "Activate Heating"
+  description: "Helper to activate heating with specified preset"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+    preset_mode:
+      description: "Preset for heating (comfort, eco, frost)"
+      example: "comfort"
+      default: "comfort"
+  sequence:
+    - action: script.set_climate_mode_and_preset
+      data:
+        climate_entity: "{{ climate_entity }}"
+        hvac_mode: "heat"
+        preset_mode: "{{ preset_mode | default('comfort') }}"
+  mode: single
+
+activate_cooling:
+  alias: "Activate Cooling"
+  description: "Helper to activate cooling with specified preset"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+    preset_mode:
+      description: "Preset for cooling (comfort, eco, boost)"
+      example: "comfort"
+      default: "comfort"
+  sequence:
+    - action: script.set_climate_mode_and_preset
+      data:
+        climate_entity: "{{ climate_entity }}"
+        hvac_mode: "cool"
+        preset_mode: "{{ preset_mode | default('comfort') }}"
+  mode: single
+
+activate_fan_only:
+  alias: "Activate Fan Only"
+  description: "Helper to activate fan-only mode (circulation without heating/cooling)"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+    preset_mode:
+      description: "Preset mode (eco, comfort)"
+      example: "eco"
+      default: "eco"
+  sequence:
+    - action: script.set_climate_mode_and_preset
+      data:
+        climate_entity: "{{ climate_entity }}"
+        hvac_mode: "fan_only"
+        preset_mode: "{{ preset_mode | default('eco') }}"
+  mode: single
+
+deactivate_climate:
+  alias: "Deactivate Climate"
+  description: "Helper to turn off climate device safely"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+  sequence:
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: "{{ climate_entity }}"
+      data:
+        hvac_mode: "off"
+  mode: single
+
+record_climate_trigger:
+  alias: "Record Climate Trigger"
+  description: "Record that a climate automation was triggered (for tracking)"
+  fields:
+    counter_entity:
+      description: "Counter entity to increment (e.g., input_number.living_room_night_triggers)"
+      example: "input_number.living_room_night_triggers_today"
+    datetime_entity:
+      description: "Datetime entity to update with trigger time"
+      example: "input_datetime.last_trigger_living_room_night"
+  sequence:
+    - action: input_number.increment
+      target:
+        entity_id: "{{ counter_entity }}"
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: "{{ datetime_entity }}"
+      data:
+        datetime: "{{ now().isoformat() }}"
+  mode: single

@@ -1,0 +1,172 @@
+# Climate Helper Scripts
+# These scripts encapsulate common climate actions to reduce automation complexity
+
+set_climate_mode:
+  alias: "Set Climate Mode"
+  description: "Generic helper to set climate hvac_mode (heat/cool/dry/fan_only/off)"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+    hvac_mode:
+      description: "HVAC mode (heat, cool, dry, fan_only, off)"
+      example: "heat"
+  sequence:
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: "{{ climate_entity }}"
+      data:
+        hvac_mode: "{{ hvac_mode }}"
+  mode: single
+
+set_climate_preset:
+  alias: "Set Climate Preset"
+  description: "Generic helper to set climate preset mode (comfort/eco/boost/frost/none)"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+    preset_mode:
+      description: "Preset mode (comfort, eco, boost, frost, none)"
+      example: "comfort"
+  sequence:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: "{{ climate_entity }}"
+      data:
+        preset_mode: "{{ preset_mode }}"
+  mode: single
+
+set_climate_mode_and_preset:
+  alias: "Set Climate Mode and Preset"
+  description: "Set both hvac_mode and preset_mode in one call"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+    hvac_mode:
+      description: "HVAC mode (heat, cool, dry, fan_only, off)"
+      example: "cool"
+    preset_mode:
+      description: "Preset mode (comfort, eco, boost, frost, none)"
+      example: "comfort"
+  sequence:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: "{{ climate_entity }}"
+      data:
+        preset_mode: "{{ preset_mode }}"
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: "{{ climate_entity }}"
+      data:
+        hvac_mode: "{{ hvac_mode }}"
+  mode: single
+
+activate_dry_mode:
+  alias: "Activate Dry Mode"
+  description: "Helper to activate dehumidification mode"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+  sequence:
+    - action: script.set_climate_mode_and_preset
+      data:
+        climate_entity: "{{ climate_entity }}"
+        hvac_mode: "dry"
+        preset_mode: "comfort"
+  mode: single
+
+activate_heating:
+  alias: "Activate Heating"
+  description: "Helper to activate heating with specified preset"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+    preset_mode:
+      description: "Preset for heating (comfort, eco, frost)"
+      example: "comfort"
+      default: "comfort"
+  sequence:
+    - action: script.set_climate_mode_and_preset
+      data:
+        climate_entity: "{{ climate_entity }}"
+        hvac_mode: "heat"
+        preset_mode: "{{ preset_mode | default('comfort') }}"
+  mode: single
+
+activate_cooling:
+  alias: "Activate Cooling"
+  description: "Helper to activate cooling with specified preset"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+    preset_mode:
+      description: "Preset for cooling (comfort, eco, boost)"
+      example: "comfort"
+      default: "comfort"
+  sequence:
+    - action: script.set_climate_mode_and_preset
+      data:
+        climate_entity: "{{ climate_entity }}"
+        hvac_mode: "cool"
+        preset_mode: "{{ preset_mode | default('comfort') }}"
+  mode: single
+
+activate_fan_only:
+  alias: "Activate Fan Only"
+  description: "Helper to activate fan-only mode (circulation without heating/cooling)"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+    preset_mode:
+      description: "Preset mode (eco, comfort)"
+      example: "eco"
+      default: "eco"
+  sequence:
+    - action: script.set_climate_mode_and_preset
+      data:
+        climate_entity: "{{ climate_entity }}"
+        hvac_mode: "fan_only"
+        preset_mode: "{{ preset_mode | default('eco') }}"
+  mode: single
+
+deactivate_climate:
+  alias: "Deactivate Climate"
+  description: "Helper to turn off climate device safely"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.living_room_versatile_thermastat"
+  sequence:
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: "{{ climate_entity }}"
+      data:
+        hvac_mode: "off"
+  mode: single
+
+record_climate_trigger:
+  alias: "Record Climate Trigger"
+  description: "Record that a climate automation was triggered (for tracking)"
+  fields:
+    counter_entity:
+      description: "Counter entity to increment (e.g., input_number.living_room_night_triggers)"
+      example: "input_number.living_room_night_triggers_today"
+    datetime_entity:
+      description: "Datetime entity to update with trigger time"
+      example: "input_datetime.last_trigger_living_room_night"
+  sequence:
+    - action: input_number.increment
+      target:
+        entity_id: "{{ counter_entity }}"
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: "{{ datetime_entity }}"
+      data:
+        datetime: "{{ now().isoformat() }}"
+  mode: single

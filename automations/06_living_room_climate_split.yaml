@@ -1,0 +1,378 @@
+---
+# LIVING ROOM CLIMATE MANAGER - REFACTORED
+# This automation has been split into smaller, focused automations
+# that are easier to understand, test, and maintain.
+#
+# Original: 06_living_room_climate_manager.yaml (762 lines, deeply nested)
+# Refactored into: Multiple focused automations by time/season/purpose
+#
+# Key improvements:
+# - Reduced nesting depth (max 2-3 levels vs 4-5 previously)
+# - Separated concerns (time periods, seasons, occupancy)
+# - Reusable logic blocks
+# - Easier to debug and modify individual scenarios
+
+# ============================================================================
+# SECTION 1: EARLY MORNING HEATING (5:30-8:00)
+# ============================================================================
+# Purpose: Comfort heating during morning wake-up hours
+# Conditions: Winter season, low temperature, home occupied
+# Behavior: Progressive heating with comfort preset
+
+- id: living_room_morning_heat_winter
+  alias: "Living Room - Morning Heat (Winter)"
+  description: "Warm living room during morning hours (5:30-8:00) in winter season. Increased temp threshold to 18°C for better wake-up comfort."
+  triggers:
+    - trigger: time
+      at: "05:30:00"
+      id: morning_start
+    - trigger: numeric_state
+      entity_id: sensor.living_room_temperature_offset
+      below: 18
+      for:
+        minutes: 2
+      id: cold_temp
+  conditions:
+    - condition: state
+      entity_id: input_select.climate_season
+      state: winter
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    - condition: state
+      entity_id: input_boolean.hvac_living_room_should_be_on
+      state: "on"
+    - condition: time
+      after: "05:30:00"
+      before: "08:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_boolean.super_hot_today
+          state: "off"
+        - condition: state
+          entity_id: input_boolean.hot_today_flag
+          state: "off"
+  actions:
+    - action: script.activate_heating
+      data:
+        climate_entity: climate.living_room_versatile_thermastat
+        preset_mode: comfort
+  mode: single
+
+# ============================================================================
+# SECTION 2: DAYTIME CLIMATE (6:00-22:15)
+# ============================================================================
+# Purpose: Adaptive climate during active hours
+# Conditions: Home occupied, doors closed
+# Behavior: Season-specific logic with humidity and solar integration
+
+- id: living_room_daytime_winter
+  alias: "Living Room - Daytime Heat (Winter)"
+  description: "Maintain comfortable heat during winter daytime (6:00-22:15)"
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.living_room_temperature_offset
+      below: 17
+      for:
+        minutes: 5
+      id: cold
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Home
+      id: arrived_home
+    - trigger: time
+      at: "06:00:00"
+      id: morning_start
+  conditions:
+    - condition: state
+      entity_id: input_select.climate_season
+      state: winter
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: binary_sensor.living_room_door_sensor_opening
+      state: "off"
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    - condition: state
+      entity_id: input_boolean.hvac_living_room_should_be_on
+      state: "on"
+    - condition: time
+      after: "06:00:00"
+      before: "22:15:00"
+  actions:
+    - action: script.activate_heating
+      data:
+        climate_entity: climate.living_room_versatile_thermastat
+        preset_mode: comfort
+  mode: restart
+
+- id: living_room_daytime_summer_cool
+  alias: "Living Room - Daytime Cool (Summer)"
+  description: "Cool when temperature exceeds comfort zone in summer"
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.living_room_temperature_offset
+      above: 24
+      for:
+        minutes: 3
+      id: hot
+    - trigger: state
+      entity_id: binary_sensor.solar_excess_available
+      to: "on"
+      id: solar_available
+  conditions:
+    - condition: state
+      entity_id: input_select.climate_season
+      state: summer
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: binary_sensor.living_room_door_sensor_opening
+      state: "off"
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    - condition: state
+      entity_id: input_boolean.hvac_living_room_should_be_on
+      state: "on"
+    - condition: time
+      after: "06:00:00"
+      before: "22:15:00"
+  actions:
+    - choose:
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.living_room_temperature_offset
+              above: 24
+          sequence:
+            - action: script.activate_cooling
+              data:
+                climate_entity: climate.living_room_versatile_thermastat
+                preset_mode: comfort
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.living_room_temperature_offset
+              above: 21
+              below: 22
+            - condition: state
+              entity_id: binary_sensor.solar_excess_available
+              state: "on"
+          sequence:
+            - action: script.activate_fan_only
+              data:
+                climate_entity: climate.living_room_versatile_thermastat
+                preset_mode: eco
+  mode: restart
+
+- id: living_room_daytime_humidity_dehumidify
+  alias: "Living Room - Dehumidify (High Humidity)"
+  description: "Activate dry mode when humidity exceeds 75%"
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.ble_humidity_kitchen_temp_humidity_sensor
+      above: 75
+      for:
+        minutes: 5
+      id: high_humidity
+  conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: binary_sensor.living_room_door_sensor_opening
+      state: "off"
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    - condition: time
+      after: "06:00:00"
+      before: "22:15:00"
+  actions:
+    - action: script.activate_dry_mode
+      data:
+        climate_entity: climate.living_room_versatile_thermastat
+  mode: single
+
+# ============================================================================
+# SECTION 3: NIGHTTIME HEATING (22:15-05:30)
+# ============================================================================
+# Purpose: Frost protection and efficient nighttime heating
+# Conditions: Winter season, sleeping time
+# Behavior: Frost preset for temperature protection
+
+- id: living_room_nighttime_frost_protection
+  alias: "Living Room - Nighttime Frost Protection (Winter)"
+  description: "Activate frost mode at night to prevent freezing (winter)"
+  triggers:
+    - trigger: time
+      at: "22:15:00"
+      id: frost_start
+    - trigger: numeric_state
+      entity_id: sensor.living_room_temperature_offset
+      below: 14.5
+      for:
+        minutes: 2
+      id: very_cold
+  conditions:
+    - condition: state
+      entity_id: input_select.climate_season
+      state: winter
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: state
+      entity_id: binary_sensor.living_room_door_sensor_opening
+      state: "off"
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    - condition: state
+      entity_id: input_boolean.hvac_living_room_should_be_on
+      state: "on"
+    - condition: time
+      after: "22:15:00"
+      before: "05:30:00"
+  actions:
+    - action: script.set_climate_mode_and_preset
+      data:
+        climate_entity: climate.living_room_versatile_thermastat
+        hvac_mode: heat
+        preset_mode: frost
+  mode: single
+
+# ============================================================================
+# SECTION 4: AWAY MODE & HOLIDAY
+# ============================================================================
+# Purpose: Efficient climate management when home is unoccupied
+# Behavior: Off for away/holiday, eco cool on hot days
+
+- id: living_room_away_mode
+  alias: "Living Room - Away Mode"
+  description: "Turn off HVAC when occupancy is Away or Holiday"
+  triggers:
+    - trigger: state
+      entity_id: input_select.occupancy
+      to:
+        - Away
+        - Holiday
+      id: occupancy_changed
+  conditions:
+    - condition: state
+      entity_id: input_boolean.hvac_living_room_should_be_on
+      state: "on"
+  actions:
+    - action: script.deactivate_climate
+      data:
+        climate_entity: climate.living_room_versatile_thermastat
+  mode: single
+
+- id: living_room_away_hot_day_cool
+  alias: "Living Room - Away Mode Cool (Hot Day)"
+  description: "Use eco cooling on hot days while away to prevent overheating"
+  triggers:
+    - trigger: state
+      entity_id: input_boolean.hot_today_flag
+      to: "on"
+      id: hot_day
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Away
+      id: occupancy_away
+  conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Away
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_boolean.hot_today_flag
+          state: "on"
+        - condition: state
+          entity_id: input_boolean.super_hot_today
+          state: "on"
+    - condition: state
+      entity_id: input_boolean.hvac_living_room_should_be_on
+      state: "on"
+  actions:
+    - action: script.activate_cooling
+      data:
+        climate_entity: climate.living_room_versatile_thermastat
+        preset_mode: eco
+  mode: single
+
+# ============================================================================
+# SECTION 5: SHUTDOWN/OFF TRIGGERS
+# ============================================================================
+# Purpose: Turn off HVAC when conditions are met
+# Behavior: Temperature reached, door open, manual override
+
+- id: living_room_shutdown_target_reached
+  alias: "Living Room - Shutdown (Target Temperature Reached)"
+  description: "Turn off heating when room reaches comfortable temperature. Disabled during morning hours (5:30-8:00) to maintain warmth for wake-up."
+  triggers:
+    - trigger: state
+      entity_id: climate.living_room_versatile_thermastat
+      to: heat
+      for:
+        minutes: 30
+      id: heating_stable
+  conditions:
+    - condition: or
+      conditions:
+        - condition: numeric_state
+          entity_id: sensor.living_room_temperature_offset
+          above: 21
+        - condition: numeric_state
+          entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
+          above: 21
+    # Don't auto-shutdown during morning hours (5:30-8:00 AM)
+    - condition: not
+      conditions:
+        - condition: time
+          after: "05:30:00"
+          before: "08:00:00"
+  actions:
+    - action: script.deactivate_climate
+      data:
+        climate_entity: climate.living_room_versatile_thermastat
+  mode: single
+
+- id: living_room_shutdown_door_open
+  alias: "Living Room - Shutdown (Door Open)"
+  description: "Turn off HVAC when door is opened to avoid energy waste"
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.living_room_door_sensor_opening
+      to: "on"
+      id: door_opened
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+  actions:
+    - action: script.deactivate_climate
+      data:
+        climate_entity: climate.living_room_versatile_thermastat
+  mode: single
+
+- id: living_room_shutdown_manual_override
+  alias: "Living Room - Shutdown (Manual Override Active)"
+  description: "Turn off automation when manual override is enabled"
+  triggers:
+    - trigger: state
+      entity_id: input_boolean.climate_manual_control_living
+      to: "on"
+      id: manual_on
+  actions:
+    - action: script.deactivate_climate
+      data:
+        climate_entity: climate.living_room_versatile_thermastat
+  mode: single
