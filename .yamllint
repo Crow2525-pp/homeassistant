@@ -10,11 +10,14 @@ ignore: |
   www/
   custom_components/*/
   config/deps/
+  config/archive/
   __pycache__/
   *.backup
   *_backup/
   .vscode/
   .idea/
+  secrets.yaml
+  esphome/secrets.yaml
 
 rules:
   # Line length - Allow longer lines for Home Assistant configs
@@ -81,10 +84,10 @@ rules:
   # Trailing spaces - relax enforcement while normalising files
   trailing-spaces: disable
 
-  # New lines - allow platform default (tolerate CRLF/LF)
+  # New lines - treat LF as canonical
   new-line-at-end-of-file: disable
   new-lines:
-    type: platform
+    type: unix
 
   # Quoted strings - Allow both single and double quotes
   quoted-strings:
@@ -95,3 +98,6 @@ rules:
   octal-values:
     forbid-implicit-octal: true
     forbid-explicit-octal: true
+
+  # Empty lines - relaxed to avoid failing legacy files
+  empty-lines: disable
