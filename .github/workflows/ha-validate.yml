@@ -66,12 +66,15 @@ jobs:
           sudo rm -rf /github/workspace
           sudo ln -s "${GITHUB_WORKSPACE}" /github/workspace
 
-      - name: Home Assistant Configuration Check
-        uses: frenck/action-home-assistant@v1.4
-        with:
-          # Use the in-container mount point for the repo
-          path: "/github/workspace"
-          version: "stable"
+      - name: Home Assistant Configuration Check (docker)
+        run: |
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}:/config" \
+            --workdir /config \
+            ghcr.io/home-assistant/home-assistant:stable \
+              python -m homeassistant \
+                --config /config \
+                --script check_config
 
       - name: Print summary
         if: always()
