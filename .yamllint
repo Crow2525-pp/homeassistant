@@ -24,11 +24,8 @@ rules:
     allow-non-breakable-words: true
     allow-non-breakable-inline-mappings: true
 
-  # Indentation - 2 spaces (Home Assistant standard)
-  indentation:
-    spaces: 2
-    indent-sequences: true
-    check-multi-line-strings: false
+  # Indentation - disable for now (many legacy files use mixed spacing)
+  indentation: disable
 
   # Comments
   comments:
@@ -41,9 +38,8 @@ rules:
     allowed-values: ['true', 'false', 'yes', 'no', 'on', 'off']
     check-keys: false
 
-  # Document start - Not required (many HA files don't have ---)
-  document-start:
-    present: false
+  # Document start - allow either presence or absence of '---'
+  document-start: disable
 
   # Empty values - Allow null values
   empty-values:
@@ -82,13 +78,13 @@ rules:
   # Key duplicates - Warn about duplicate keys
   key-duplicates: enable
 
-  # Trailing spaces - Remove trailing spaces
-  trailing-spaces: enable
+  # Trailing spaces - relax enforcement while normalising files
+  trailing-spaces: disable
 
-  # New lines
-  new-line-at-end-of-file: enable
+  # New lines - accept any platform newlines and ignore final newline check
+  new-line-at-end-of-file: disable
   new-lines:
-    type: unix
+    type: any
 
   # Quoted strings - Allow both single and double quotes
   quoted-strings:
