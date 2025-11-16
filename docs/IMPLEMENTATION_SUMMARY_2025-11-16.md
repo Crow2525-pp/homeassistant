@@ -67,6 +67,13 @@ Comprehensive fixes and improvements to Home Assistant configuration, dashboards
 
 ## 🔄 Pending Tasks (Require User Action)
 
+### New Issues (To-Do)
+
+- [ ] Computer desk button turns on the light instead of powering on the computer — update the button action to control the computer.
+- [ ] Outside motion alert should also detect faces/unknown faces instead of only generic motion events.
+- [ ] Ensure the downstairs area is pre-warmed for morning wake-up routine.
+- [ ] 5:00 AM lights-on routine should avoid turning on the bedroom light (keep this limited to the computer light).
+
 ### 1. Test Core Fixes
 
 **After restarting Home Assistant:**
