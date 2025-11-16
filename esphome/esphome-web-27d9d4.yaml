@@ -20,7 +20,7 @@ logger: { level: WARN }
 
 api:
   encryption:
-    key: "jFXd3yK0HcC/rgrRHvcIDInmjaLalx+IIXK1b5yMqiU="
+    key: !secret esphome_web_27d9d4_api_key
 
 ota:
   platform: esphome

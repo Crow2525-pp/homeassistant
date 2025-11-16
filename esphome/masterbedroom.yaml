@@ -13,11 +13,11 @@ logger:
 # Enable Home Assistant API
 api:
   encryption:
-    key: "ivMau3VcQdvM3sjXn53rXPms7jqnwgnd6VgKWV6H8Yk="
+    key: !secret esphome_masterbedroom_api_key
 
 ota:
   - platform: esphome
-    password: "e29fbd2257cc4ef8a16077a3be033311"
+    password: !secret esphome_masterbedroom_ota_password
 
 wifi:
   ssid: !secret wifi_ssid
@@ -26,7 +26,7 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Masterbedroom Fallback Hotspot"
-    password: "UMbGmSYjCw4d"
+    password: !secret esphome_masterbedroom_fallback_password
 
 captive_portal:
 

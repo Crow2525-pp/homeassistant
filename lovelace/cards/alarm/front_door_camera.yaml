@@ -5,7 +5,7 @@ camera_view: live
 fit_mode: fill
 tap_action:
   action: url
-  url_path: http://192.168.1.101:81
+  url_path: !secret camera_url_base
 card_mod:
   style: |
     ha-card {

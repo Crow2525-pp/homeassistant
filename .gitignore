@@ -41,3 +41,15 @@ esphome/secrets.yaml
 !docs/**
 !automations/
 !automations/**
+
+secrets.yaml
+*.db
+*.db-shm
+*.db-wal
+
+
+!.github/workflows/yaml-lint.yml
+!.github/workflows/ha-validate.yml
+!.yamllint
+!secrets.yaml.example
+!docs/GITHUB_ACTIONS_SETUP.md

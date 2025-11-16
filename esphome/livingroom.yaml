@@ -10,7 +10,7 @@ logger:
 
 api:
   encryption:
-    key: "jFXd3yK0HcC/rgrRHvcIDInmjaLalx+IIXK1b5yMqiU="
+    key: !secret esphome_livingroom_api_key
 ota:
   - platform: esphome
   

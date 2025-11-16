@@ -13,7 +13,7 @@ logger:
 # Enable Home Assistant API
 api:
   encryption:
-    key: "jFXd3yK0HcC/rgrRHvcIDInmjaLalx+IIXK1b5yMqiU="
+    key: !secret esphome_web_f57460_api_key
 
 ota:
   platform: esphome
@@ -25,7 +25,7 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Esphome-Web-F57460"
-    password: "vFlHFrs3rbXr"
+    password: !secret esphome_web_f57460_fallback_password
 
 captive_portal:
 
@@ -36,7 +36,7 @@ time:
 sensor:
   - platform: xiaomi_lywsd03mmc
     mac_address: "A4:C1:38:A8:17:FD"
-    bindkey: "FE43A536E140093d72DE7C8150BF9906"
+    bindkey: !secret xiaomi_ble_bindkey_1
     temperature:
       name: "HenrysRoom Temperature"
       on_value:
@@ -56,7 +56,7 @@ sensor:
 
   - platform: xiaomi_lywsd03mmc
     mac_address: "A4:C1:38:F1:20:5C"
-    bindkey: "F0C07EA59B5513636B5BA7B9809E1960"
+    bindkey: !secret xiaomi_ble_bindkey_2
     temperature:
       name: "OttosRoom Temperature"
       on_value:
