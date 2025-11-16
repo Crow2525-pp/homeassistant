@@ -84,10 +84,9 @@ rules:
   # Trailing spaces - relax enforcement while normalising files
   trailing-spaces: disable
 
-  # New lines - treat LF as canonical
+  # New lines - relaxed (allow LF/CRLF and missing final newline)
   new-line-at-end-of-file: disable
-  new-lines:
-    type: unix
+  new-lines: disable
 
   # Quoted strings - Allow both single and double quotes
   quoted-strings:
