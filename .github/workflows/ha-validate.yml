@@ -60,11 +60,17 @@ jobs:
           ls -la configuration.yaml
           ls -la secrets.yaml
 
+      - name: Ensure /github/workspace points to checkout
+        run: |
+          sudo mkdir -p /github
+          sudo rm -rf /github/workspace
+          sudo ln -s "${GITHUB_WORKSPACE}" /github/workspace
+
       - name: Home Assistant Configuration Check
         uses: frenck/action-home-assistant@v1.4
         with:
-          # Use workspace-relative path so the action can mount it correctly
-          path: "."
+          # Use the in-container mount point for the repo
+          path: "/github/workspace"
           version: "stable"
 
       - name: Print summary
