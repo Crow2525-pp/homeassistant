@@ -1,3 +1,75 @@
+# ============================================================================
+# CURTAIN BRIGHTNESS DEBUG SENSORS
+# ============================================================================
+# Helper sensors to debug curtain closing behavior
+# Use these to understand why curtains are closing at unexpected times
+
+- binary_sensor:
+    - name: "Curtain - Should Close (Brightness)"
+      unique_id: curtain_should_close_brightness
+      state: >
+        {% set brightness = states('sensor.hub_2_0be5_illuminance') | float(0) %}
+        {% set threshold = 11940 %}
+        {{ brightness < threshold }}
+      attributes:
+        current_brightness: "{{ states('sensor.hub_2_0be5_illuminance') }}"
+        threshold: "11940"
+        status: >
+          {% set brightness = states('sensor.hub_2_0be5_illuminance') | float(0) %}
+          {% set threshold = 11940 %}
+          {% if brightness < threshold %}
+            Ready to close (too dark)
+          {% else %}
+            Too bright to close (brightness {{ brightness | int }} > {{ threshold }})
+          {% endif %}
+      icon: "mdi:lightbulb"
+
+- sensor:
+    - name: "Curtain Brightness Status"
+      unique_id: curtain_brightness_status
+      state: >
+        {% set brightness = states('sensor.hub_2_0be5_illuminance') | float(0) %}
+        {% if brightness > 15000 %}
+          Very Bright ☀️
+        {% elif brightness > 11940 %}
+          Bright 🌞
+        {% elif brightness > 5000 %}
+          Moderate 🌤️
+        {% elif brightness > 2000 %}
+          Dim 🌅
+        {% elif brightness > 500 %}
+          Very Dim 🌙
+        {% else %}
+          Dark 🌑
+        {% endif %}
+      attributes:
+        brightness_lux: "{{ states('sensor.hub_2_0be5_illuminance') }}"
+        threshold_lux: 11940
+        will_close: "{{ (states('sensor.hub_2_0be5_illuminance') | float(0)) < 11940 }}"
+      icon: "mdi:brightness-5"
+
+    - name: "Curtain Close Decision"
+      unique_id: curtain_close_decision
+      state: >
+        {% set brightness = states('sensor.hub_2_0be5_illuminance') | float(0) %}
+        {% set threshold = 11940 %}
+        {% set hour = now().hour %}
+        {% set in_close_window = hour >= 16 and hour < 22 %}
+        {% if not in_close_window %}
+          Outside close window (16:00-22:00)
+        {% elif brightness > threshold %}
+          ❌ TOO BRIGHT ({{ brightness | int }}/{{ threshold }} lux)
+        {% else %}
+          ✅ READY TO CLOSE ({{ brightness | int }}/{{ threshold }} lux)
+        {% endif %}
+      attributes:
+        current_time: "{{ now().strftime('%H:%M:%S') }}"
+        brightness_lux: "{{ states('sensor.hub_2_0be5_illuminance') }}"
+        brightness_percent: "{{ ((11940 - (states('sensor.hub_2_0be5_illuminance') | float(0))) / 11940 * 100) | round(1) }}"
+        threshold_lux: 11940
+        in_close_window: "{{ now().hour >= 16 and now().hour < 22 }}"
+      icon: "mdi:window-closed"
+
 - binary_sensor:
     - name: Garage Door Alert Active
       state: "{{ is_state('cover.smart_garage_door_garage', 'open')}}"
