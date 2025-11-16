@@ -53,9 +53,17 @@ jobs:
           EOF
           fi
 
+      - name: Verify files exist
+        run: |
+          ls -la
+          echo "Configuration files:"
+          ls -la configuration.yaml
+          ls -la secrets.yaml
+
       - name: Home Assistant Configuration Check
         uses: frenck/action-home-assistant@v1.4
         with:
+          path: "${{ github.workspace }}"
           version: "stable"
 
       - name: Print summary
