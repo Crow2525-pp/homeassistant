@@ -60,16 +60,14 @@ jobs:
           ls -la configuration.yaml
           ls -la secrets.yaml
 
-      - name: Ensure /github/workspace points to checkout
-        run: |
-          sudo mkdir -p /github
-          sudo rm -rf /github/workspace
-          sudo ln -s "${GITHUB_WORKSPACE}" /github/workspace
-
       - name: Home Assistant Configuration Check (docker)
+        env:
+          WORKSPACE: ${{ github.workspace }}
         run: |
           docker run --rm \
-            -v "${GITHUB_WORKSPACE}:/config" \
+            --name ha_config_check \
+            -v "${WORKSPACE}:/config" \
+            -v "/etc/localtime:/etc/localtime:ro" \
             --workdir /config \
             ghcr.io/home-assistant/home-assistant:stable \
               python -m homeassistant \
