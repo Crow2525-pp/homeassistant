@@ -24,6 +24,10 @@
 !ui-lovelace.yaml
 !lovelace/**
 
+# Blueprints
+!blueprints/
+!blueprints/**
+
 # Smart IR
 !custom_components/smartir/custom_codes/**
 !custom_components/smartir/codes/climate/1002.json

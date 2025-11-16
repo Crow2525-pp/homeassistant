@@ -1,0 +1,80 @@
+blueprint:
+  name: Xiaomi Wireless Switch (WXKG01LM) via Xiaomi Gateway 3
+  description: Automate your Xiaomi Wireless Switch. [Working Dec 2021]
+  domain: automation
+  source_url: https://github.com/MoweME/homeassistant-blueprints/blob/main/xiaomi/WXKG01LM/WXKG01LM.yaml
+  input:
+    switch:
+      name: Xiaomi Wireless Switch
+      description: Select the _action entity of your switch here!
+      selector:
+        entity:
+          integration: xiaomi_gateway3
+          domain:
+          - sensor
+          multiple: false
+    remote_button_single_press:
+      name: Single Press
+      description: Action to run on single press
+      default: []
+      selector:
+        action: {}
+    remote_button_double_press:
+      name: Double Press
+      description: Action to run on double press
+      default: []
+      selector:
+        action: {}
+    remote_button_triple_press:
+      name: Triple Press
+      description: Action to run on triple press
+      default: []
+      selector:
+        action: {}
+    remote_button_quadruple_press:
+      name: Quadruple Press
+      description: Action to run on quadruple press
+      default: []
+      selector:
+        action: {}
+    remote_button_multiple_press:
+      name: Multiple Press
+      description: Action to run on multiple press
+      default: []
+      selector:
+        action: {}
+    remote_button_hold:
+      name: Hold
+      description: Action to run on hold
+      default: []
+      selector:
+        action: {}
+    remote_button_release:
+      name: Release
+      description: Action to run on release
+      default: []
+      selector:
+        action: {}
+trigger:
+- platform: event
+  event_type: state_changed
+  event_data:
+    entity_id: !input switch
+action:
+- variables:
+    action: '{{ trigger.event.data.new_state.state }}'
+- choose:
+  - conditions: '{{ action == ''single'' }}'
+    sequence: !input remote_button_single_press
+  - conditions: '{{ action == ''double'' }}'
+    sequence: !input remote_button_double_press
+  - conditions: '{{ action == ''triple'' }}'
+    sequence: !input remote_button_triple_press
+  - conditions: '{{ action == ''quadruple'' }}'
+    sequence: !input remote_button_quadruple_press
+  - conditions: '{{ action == ''many'' }}'
+    sequence: !input remote_button_multiple_press
+  - conditions: '{{ action == ''hold'' }}'
+    sequence: !input remote_button_hold
+  - conditions: '{{ action == ''release'' }}'
+    sequence: !input remote_button_release
