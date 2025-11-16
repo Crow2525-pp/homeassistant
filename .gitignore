@@ -21,9 +21,6 @@
 
 # Dashboard
 !.storage/lovelace
-!.storage/
-!.storage/device_registry.json
-!.storage/entity_registry.json
 !ui-lovelace.yaml
 !lovelace/**
 
