@@ -91,6 +91,20 @@ http:
     - 172.30.33.0/24
     - 127.0.0.1
 
+# Ping sensor to detect if on local network
+# NOTE: Ping integration no longer supports YAML configuration
+# Configure via UI: Settings → Devices & Services → Add Integration → Ping
+# Previous settings for reference:
+#   - host: 192.168.1.1
+#   - count: 2
+#   - scan_interval: 60
+# binary_sensor:
+#   - platform: ping
+#     name: "Local Network"
+#     host: 192.168.1.1
+#     count: 2
+#     scan_interval: 60
+
 #Roller Blinds
 cover:
   - platform: template
@@ -247,6 +261,10 @@ input_boolean:
     name: Garage Door Notify
 
     icon: mdi:information
+  local_network_access:
+    name: Local Network Access Mode
+    icon: mdi:network
+    initial: true
   network_device_down_notify:
     name: Network Device Down Notify
 
@@ -352,6 +370,15 @@ input_select:
       - Sleeping
     initial: Home
     icon: mdi:home-account
+  news_room_selector:
+    name: News Room
+    options:
+      - Kitchen
+      - Study
+      - Master Bedroom
+      - All Rooms
+    initial: Kitchen
+    icon: mdi:home-sound-in
 input_number:
   # Roller Blind Position Tracking
   roller_blind_target_position:

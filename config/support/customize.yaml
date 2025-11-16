@@ -206,10 +206,6 @@ binary_sensor.solar_excess_available:
   category: energy
 
 # Network
-binary_sensor.ping_firewalla:
-  friendly_name: "Firewalla Network"
-  category: network
-
 binary_sensor.pingext_opendns:
   friendly_name: "OpenDNS Connectivity"
   category: network

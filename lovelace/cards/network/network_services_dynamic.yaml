@@ -1,0 +1,99 @@
+type: vertical-stack
+cards:
+- type: entities
+  entities:
+    - entity: input_boolean.local_network_access
+      name: Network Access Mode
+      icon: mdi:network
+  card_mod:
+    style: |
+      ha-card {
+        background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+        color: white;
+        border-radius: 12px 12px 0 0;
+        border: none;
+        padding: 8px;
+      }
+- type: markdown
+  title: 🔗 Network Services
+  card_mod:
+    style: |
+      ha-card {
+        background: linear-gradient(145deg, #1E3A5F 0%, #0D1B2A 100%);
+        color: white;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 8px 16px rgba(30, 58, 95, 0.4);
+        border: none;
+        transition: all 0.3s ease;
+        margin-top: -8px;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(30, 58, 95, 0.5);
+      }
+      ha-markdown {
+        padding: 16px;
+      }
+      ha-markdown a {
+        color: #4FC3F7;
+        text-decoration: none;
+        display: block;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.2s ease;
+      }
+      ha-markdown a:hover {
+        color: #81D4FA;
+        padding-left: 8px;
+        background: rgba(79, 195, 247, 0.1);
+      }
+  content: |
+    {% set local = is_state('input_boolean.local_network_access', 'on') %}
+    {% set media = states('sensor.media_server_base_url') %}
+    {% set win = states('sensor.win_server_base_url') %}
+    {% set proxmox = states('sensor.proxmox_base_url') %}
+    {% set gateway = states('sensor.gateway_base_url') %}
+    {% if local %}
+    **🟢 Local Network Mode (SSL)**
+    {% else %}
+    **🔵 Remote Access Mode (Tailscale)**
+    {% endif %}
+
+    ### Media Services
+    - [Plex]({% if local %}https://plex.pspatt.net{% else %}http://{{ media }}:32400/web/index.html#!/{% endif %})
+    - [NextCloud]({% if local %}https://nextcloud.pspatt.net{% else %}http://{{ media }}:80{% endif %})
+    - [PhotoPrism]({% if local %}https://photos.pspatt.net{% else %}http://{{ media }}:2342{% endif %})
+    - [Portainer]({% if local %}https://portainer.pspatt.net{% else %}https://{{ media }}:9443/#!/2/docker/containers{% endif %})
+
+    ### Downloads
+    - [SABnzbd]({% if local %}https://sabnzbd.pspatt.net{% else %}http://{{ media }}:8080/sabnzbd/{% endif %})
+    - [qBitTorrent]({% if local %}https://qbittorrent.pspatt.net{% else %}http://{{ media }}:8070{% endif %})
+    - [Prowlarr]({% if local %}https://prowlarr.pspatt.net{% else %}http://{{ media }}:9696{% endif %})
+
+    ### Media Management
+    - [Sonarr]({% if local %}https://sonarr.pspatt.net{% else %}http://{{ media }}:8989{% endif %})
+    - [Radarr]({% if local %}https://radarr.pspatt.net{% else %}http://{{ media }}:7878{% endif %})
+    - [Lidarr]({% if local %}https://lidarr.pspatt.net{% else %}http://{{ media }}:8686{% endif %})
+    - [Readarr]({% if local %}https://readarr.pspatt.net{% else %}http://{{ media }}:8787{% endif %})
+    - [Readarr Audiobooks]({% if local %}https://readarr-ab.pspatt.net{% else %}http://{{ media }}:8787{% endif %})
+    - [Bazarr]({% if local %}https://bazarr.pspatt.net{% else %}http://{{ media }}:6767{% endif %})
+    - [Tdarr]({% if local %}https://tdarr.pspatt.net{% else %}http://{{ media }}:8265{% endif %})
+
+    ### Books & Media
+    - [Calibre Web]({% if local %}https://books.pspatt.net{% else %}http://{{ media }}:8083{% endif %})
+    - [Calibre]({% if local %}https://calibre.pspatt.net{% else %}http://{{ media }}:8080{% endif %})
+    - [Audiobooks]({% if local %}https://audiobooks.pspatt.net{% else %}http://{{ media }}:80{% endif %})
+
+    ### Utilities
+    - [SyncThing]({% if local %}https://sync.pspatt.net{% else %}http://{{ media }}:8384{% endif %})
+    - [HomeBox]({% if local %}https://homebox.pspatt.net{% else %}http://{{ media }}:7745{% endif %})
+    - [Nginx Proxy Manager]({% if local %}https://npm.pspatt.net{% else %}http://{{ media }}:81{% endif %})
+    - [Dagster Webserver](http://{{ media }}:3000/)
+
+    ### Windows Server
+    - [Blue Iris Security Cams](http://{{ win }}:81)
+    - [Mobility Print](http://{{ win }}:9163/)
+
+    ### Infrastructure
+    - [Proxmox](https://{{ proxmox }}:8006/)
+    - [Unifi Gateway](https://{{ gateway }})

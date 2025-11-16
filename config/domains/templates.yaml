@@ -1682,3 +1682,41 @@
       state: "{{ states('input_datetime.ac_filter_study_henry') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.ac_filter_study_henry') not in ['unknown', 'unavailable'] else 'Never' }}"
       icon: mdi:air-filter
 
+
+# ============================================================================
+# NETWORK SERVICE URLS - Dynamic switching between local and Tailscale
+# ============================================================================
+# These sensors detect if you're on the local network and provide appropriate URLs
+# When on LAN: uses local IPs (192.168.1.x)
+# When remote (Tailscale): uses Tailscale hostnames
+
+- sensor:
+    - name: "Media Server Base URL"
+      unique_id: media_server_base_url
+      state: >
+        {% if is_state('binary_sensor.ping_firewalla', 'on') %}
+          192.168.1.103
+        {% else %}
+          media-server
+        {% endif %}
+      icon: mdi:server-network
+
+    - name: "Win Server Base URL"
+      unique_id: win_server_base_url
+      state: >
+        {% if is_state('binary_sensor.ping_firewalla', 'on') %}
+          192.168.1.101
+        {% else %}
+          win-server
+        {% endif %}
+      icon: mdi:server-network
+
+    - name: "Proxmox Base URL"
+      unique_id: proxmox_base_url
+      state: "192.168.1.100"
+      icon: mdi:server-network
+
+    - name: "Gateway Base URL"
+      unique_id: gateway_base_url
+      state: "192.168.1.1"
+      icon: mdi:router-network
