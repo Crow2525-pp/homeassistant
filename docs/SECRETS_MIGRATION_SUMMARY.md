@@ -58,6 +58,14 @@ Migrated all hardcoded secrets and sensitive values to `secrets.yaml` for improv
 - ✅ Client ID: `google_client_id`
 - ✅ Client secret: `google_client_secret`
 
+**Reolink Cameras** (from user update)
+- ✅ Driveway camera IP: `reolink_driveway_ip`
+- ✅ Driveway camera username: `reolink_driveway_username`
+- ✅ Driveway camera password: `reolink_driveway_password`
+- ✅ Front door camera IP: `reolink_front_door_ip`
+- ✅ Front door camera username: `reolink_front_door_username`
+- ✅ Front door camera password: `reolink_front_door_password`
+
 ---
 
 ## 📂 Files Modified
@@ -150,6 +158,14 @@ server_ip: "192.168.1.103"
 camera_ip: "192.168.1.101"
 camera_url_base: "http://192.168.1.101:81"
 wiim_amp_ip: "192.168.1.170"
+
+# Reolink Cameras
+reolink_driveway_ip: "192.168.1.115"
+reolink_driveway_username: "homeassistant"
+reolink_driveway_password: "..."
+reolink_front_door_ip: "192.168.1.114"
+reolink_front_door_username: "homeassistant"
+reolink_front_door_password: "..."
 ```
 
 ---
@@ -361,8 +377,8 @@ ha core check
 
 ## 📊 Summary Statistics
 
-**Secrets migrated:** 18+
-**Files modified:** 8
+**Secrets migrated:** 24+
+**Files modified:** 10
 **Security improvements:** 100%
 **Git exposure risk:** Eliminated
 
