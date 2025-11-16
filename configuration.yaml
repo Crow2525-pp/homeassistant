@@ -379,6 +379,14 @@ input_select:
       - All Rooms
     initial: Kitchen
     icon: mdi:home-sound-in
+  roller_blind_state_simple:
+    name: Roller Blind State
+    options:
+      - closed
+      - partial
+      - open
+    initial: closed
+    icon: mdi:blinds
 input_number:
   # Roller Blind Position Tracking
   roller_blind_target_position:

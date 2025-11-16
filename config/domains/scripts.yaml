@@ -31,6 +31,159 @@ roller_blinds_stop:
       device_id: 3d7542325305f19a1d70e5b14947b2a9
   mode: single
   icon: mdi:blinds
+
+# Simplified 3-state roller blind control
+roller_blinds_open_simple:
+  alias: Roller Blinds Open (Simple)
+  sequence:
+    # Send IR open command
+    - service: remote.send_command
+      data:
+        device: Roller Blinds
+        command: Up
+      target:
+        device_id: 3d7542325305f19a1d70e5b14947b2a9
+
+    # Update state based on current position
+    - choose:
+        # From CLOSED → PARTIAL (stop after 5 seconds)
+        - conditions:
+            - condition: state
+              entity_id: input_select.roller_blind_state_simple
+              state: 'closed'
+          sequence:
+            - delay:
+                seconds: 5
+            - service: script.roller_blinds_stop
+            - service: input_select.select_option
+              target:
+                entity_id: input_select.roller_blind_state_simple
+              data:
+                option: 'partial'
+
+        # From PARTIAL → OPEN (let it run full 18 minutes)
+        - conditions:
+            - condition: state
+              entity_id: input_select.roller_blind_state_simple
+              state: 'partial'
+          sequence:
+            - delay:
+                seconds: 1080  # 18 minutes
+            - service: input_select.select_option
+              target:
+                entity_id: input_select.roller_blind_state_simple
+              data:
+                option: 'open'
+
+      # Already OPEN → Do nothing
+      default: []
+  mode: restart
+  icon: mdi:blinds-open
+
+roller_blinds_close_simple:
+  alias: Roller Blinds Close (Simple)
+  sequence:
+    # Send IR close command
+    - service: remote.send_command
+      data:
+        device: Roller Blinds
+        command: Down
+      target:
+        device_id: 3d7542325305f19a1d70e5b14947b2a9
+
+    # Update state based on current position
+    - choose:
+        # From OPEN → PARTIAL (stop after 5 seconds)
+        - conditions:
+            - condition: state
+              entity_id: input_select.roller_blind_state_simple
+              state: 'open'
+          sequence:
+            - delay:
+                seconds: 5
+            - service: script.roller_blinds_stop
+            - service: input_select.select_option
+              target:
+                entity_id: input_select.roller_blind_state_simple
+              data:
+                option: 'partial'
+
+        # From PARTIAL → CLOSED (let it run full 18 minutes)
+        - conditions:
+            - condition: state
+              entity_id: input_select.roller_blind_state_simple
+              state: 'partial'
+          sequence:
+            - delay:
+                seconds: 1080  # 18 minutes
+            - service: input_select.select_option
+              target:
+                entity_id: input_select.roller_blind_state_simple
+              data:
+                option: 'closed'
+
+      # Already CLOSED → Do nothing
+      default: []
+  mode: restart
+  icon: mdi:blinds-closed
+
+roller_blinds_set_position_simple:
+  alias: Roller Blinds Set Position (Simple)
+  fields:
+    position:
+      description: Target position (0=closed, 50=partial, 100=open)
+      example: 50
+  sequence:
+    - choose:
+        # Position 0-20 = CLOSED
+        - conditions:
+            - condition: template
+              value_template: "{{ position <= 20 }}"
+          sequence:
+            - service: script.roller_blinds_close_simple
+
+        # Position 21-79 = PARTIAL
+        - conditions:
+            - condition: template
+              value_template: "{{ position > 20 and position < 80 }}"
+          sequence:
+            # Determine if we need to open or close to get to partial
+            - choose:
+                # Currently CLOSED → Open to partial
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.roller_blind_state_simple
+                      state: 'closed'
+                  sequence:
+                    - service: script.roller_blinds_open_simple
+
+                # Currently OPEN → Close to partial
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.roller_blind_state_simple
+                      state: 'open'
+                  sequence:
+                    - service: script.roller_blinds_close_simple
+
+              # Already PARTIAL → Do nothing
+              default: []
+
+        # Position 80-100 = OPEN
+        - conditions:
+            - condition: template
+              value_template: "{{ position >= 80 }}"
+          sequence:
+            - service: script.roller_blinds_open_simple
+            # If currently CLOSED, need to open twice
+            - condition: state
+              entity_id: input_select.roller_blind_state_simple
+              state: 'closed'
+            - delay:
+                seconds: 6
+            - service: script.roller_blinds_open_simple
+  mode: restart
+  icon: mdi:blinds
+
 spotify_music_tv:
   alias: Spotify_channel
   sequence:
