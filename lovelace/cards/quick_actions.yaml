@@ -684,6 +684,19 @@ cards:
         card:
           type: vertical-stack
           cards:
+            - type: entities
+              entities:
+                - entity: input_select.news_room_selector
+                  name: Select Room
+              card_mod:
+                style: |
+                  ha-card {
+                    background: linear-gradient(145deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.15));
+                    border-radius: 12px;
+                    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+                    margin-bottom: 8px;
+                    border: 1px solid rgba(245, 158, 11, 0.3);
+                  }
             - type: button
               name: Read the News
               icon: mdi:newspaper
@@ -721,7 +734,7 @@ cards:
                     letter-spacing: 0.3px;
                   }
             - type: markdown
-              content: "📰 News briefing  \n🔊 All speakers"
+              content: "📰 News briefing  \n🔊 {{ states('input_select.news_room_selector') }}"
               card_mod:
                 style: |
                   ha-card {
