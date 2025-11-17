@@ -1,6 +1,8 @@
 esphome:
   name: esphome-web-f57460
   friendly_name: HenrysRoom
+  min_version: "2024.6.0"
+  name_add_mac_suffix: false
 
 esp32:
   board: esp32dev
@@ -27,7 +29,7 @@ wifi:
     ssid: "Esphome-Web-F57460"
     password: !secret esphome_web_f57460_fallback_password
 
-captive_portal:
+captive_portal: {}
 
 time:
   - platform: homeassistant
@@ -74,6 +76,6 @@ sensor:
     lambda: 'return 0;'
     update_interval: never
 
-bluetooth_proxy:
+bluetooth_proxy: {}
 
-esp32_ble_tracker:
+esp32_ble_tracker: {}
