@@ -88,8 +88,8 @@
   mode: single
 - id: '1649148675412'
   alias: Morning Wake-Up Lighting Routine
-  description: Turns on selected lights near sunrise, when movement is detected, or
-    at 05:00 while someone is home. Excludes all bedroom lights (computer desk is in bedroom).
+  description: Turns on living room light at 05:00 AM for morning wake-up. Excludes
+    all bedroom lights to allow natural waking.
   triggers:
   - trigger: numeric_state
     entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
@@ -112,11 +112,10 @@
     data: {}
     target:
       entity_id:
-      - light.floor_lamp_socket_1
-      - light.floor_lamp_socket_2
+      - light.lounge
   mode: single
-  # NOTE: Intentionally excludes computer_desk_light_socket_1 (in bedroom)
-  # and all other bedroom lights to allow users to wake naturally without disruption
+  # NOTE: Intentionally uses only living room (lounge) light
+  # Excludes all bedroom lights to allow users to wake naturally without disruption
 - id: '1684789400363'
   alias: Morning Shutdown for Stray Lights
   description: Turns off selected lights shortly after sunrise if they were left on
