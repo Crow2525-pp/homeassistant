@@ -1,0 +1,169 @@
+# ============================================================================
+# MORNING ROUTINE CONTROL CARD - TEMPLATE
+# ============================================================================
+# Purpose: Dashboard card for morning routine configuration and monitoring
+# Requirements: Input helpers created in Step 1 of setup guide
+# Documentation: docs/MORNING_ROUTINE_SETUP.md
+# ============================================================================
+
+type: entities
+title: Morning Routine
+icon: mdi:weather-sunset-up
+entities:
+  # Main controls
+  - entity: input_boolean.morning_routine_disabled
+    name: Disable Morning Routine
+    icon: mdi:power
+
+  - entity: input_boolean.wfh_today
+    name: Working From Home Today
+    icon: mdi:home-account
+
+  - entity: input_select.morning_preset_override
+    name: Heating Preset Override
+    icon: mdi:thermostat
+
+  - entity: input_select.morning_lights_rooms
+    name: Morning Lights
+    icon: mdi:lightbulb-group
+
+  # Divider
+  - type: section
+    label: Status
+
+  # Current status
+  - entity: sensor.essendon_airport_temp
+    name: Outside Temperature
+    icon: mdi:thermometer
+
+  - entity: climate.living_room_versatile_thermastat
+    name: Downstairs Climate
+    icon: mdi:thermostat
+
+  - entity: input_boolean.morning_routine_triggered_today
+    name: Motion Routine Triggered
+    icon: mdi:gate
+    tap_action:
+      action: more-info
+
+  # Divider
+  - type: section
+    label: Manual Triggers
+
+  # Manual trigger buttons
+  - type: button
+    name: Test Preheat Now
+    icon: mdi:play-circle
+    tap_action:
+      action: call-service
+      service: automation.trigger
+      service_data:
+        entity_id: automation.morning_preheat_downstairs
+        skip_condition: true
+    hold_action:
+      action: none
+
+  - type: button
+    name: Test Lights Now
+    icon: mdi:lightbulb-on
+    tap_action:
+      action: call-service
+      service: automation.trigger
+      service_data:
+        entity_id: automation.morning_lights_computer_room
+        skip_condition: true
+    hold_action:
+      action: none
+
+show_header_toggle: false
+state_color: true
+
+# ============================================================================
+# ALTERNATIVE: COMPACT VERSION (Minimal Space)
+# ============================================================================
+# Uncomment below for a more compact card
+#
+# type: glance
+# title: Morning Routine
+# entities:
+#   - entity: input_boolean.morning_routine_disabled
+#     name: Disabled
+#     tap_action:
+#       action: toggle
+#   - entity: input_boolean.wfh_today
+#     name: WFH
+#     tap_action:
+#       action: toggle
+#   - entity: input_select.morning_preset_override
+#     name: Preset
+#   - entity: sensor.essendon_airport_temp
+#     name: Outside
+# show_name: true
+# show_state: true
+# state_color: true
+
+# ============================================================================
+# ALTERNATIVE: DETAILED VERSION (With Automation Status)
+# ============================================================================
+# Uncomment for detailed version showing automation states and history
+#
+# type: custom:vertical-stack-in-card
+# cards:
+#   - type: entities
+#     title: Morning Routine Controls
+#     entities:
+#       - entity: input_boolean.morning_routine_disabled
+#       - entity: input_boolean.wfh_today
+#       - entity: input_select.morning_preset_override
+#       - entity: input_select.morning_lights_rooms
+#
+#   - type: entities
+#     title: Current Status
+#     entities:
+#       - entity: sensor.essendon_airport_temp
+#         secondary_info: last-changed
+#       - entity: climate.living_room_versatile_thermastat
+#         secondary_info: last-changed
+#       - entity: sensor.living_room_temperature_offset
+#         name: Current Temp
+#
+#   - type: entities
+#     title: Automations
+#     entities:
+#       - entity: automation.morning_preheat_downstairs
+#         secondary_info: last-triggered
+#       - entity: automation.morning_lights_computer_room
+#         secondary_info: last-triggered
+#       - entity: automation.morning_routine_motion_kitchen
+#         secondary_info: last-triggered
+#
+#   - type: logbook
+#     entities:
+#       - automation.morning_preheat_downstairs
+#       - automation.morning_lights_computer_room
+#       - automation.morning_routine_motion_kitchen
+#     hours_to_show: 24
+#     title: Recent Activity
+
+# ============================================================================
+# USAGE INSTRUCTIONS
+# ============================================================================
+# 1. Ensure all input helpers exist (see docs/MORNING_ROUTINE_SETUP.md Step 1)
+# 2. Copy desired card version (standard, compact, or detailed)
+# 3. Add to your Lovelace dashboard via edit mode
+# 4. Adjust entity IDs if they differ in your setup
+# 5. Test toggle switches and buttons
+# 6. Verify automation triggers work correctly
+#
+# Required Entities:
+# - input_boolean.morning_routine_disabled
+# - input_boolean.wfh_today
+# - input_boolean.morning_routine_triggered_today
+# - input_select.morning_preset_override
+# - input_select.morning_lights_rooms
+# - sensor.essendon_airport_temp (or your outside temp sensor)
+# - climate.living_room_versatile_thermastat (or your climate entity)
+# - automation.morning_preheat_downstairs
+# - automation.morning_lights_computer_room
+#
+# ============================================================================

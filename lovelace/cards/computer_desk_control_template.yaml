@@ -1,0 +1,133 @@
+# ============================================================================
+# COMPUTER DESK CONTROL CARD - TEMPLATE
+# ============================================================================
+# Purpose: Dashboard card for computer power control via smart outlet
+# Requirements: switch.computer_plug_switch entity (smart outlet)
+# Scripts: computer_power_on, computer_power_off (already exist in scripts.yaml)
+#
+# See: docs/COMPUTER_DESK_CONTROL_DECISION_GUIDE.md for setup details
+# ============================================================================
+
+type: entities
+title: Computer Desk
+icon: mdi:desktop-tower
+entities:
+  # Computer power switch status
+  - entity: switch.computer_plug_switch
+    name: Computer Power
+    icon: mdi:power-plug
+    tap_action:
+      action: toggle
+
+  # Power on button
+  - type: button
+    name: Power On Computer
+    icon: mdi:power-on
+    tap_action:
+      action: call-service
+      service: script.computer_power_on
+      service_data: {}
+    hold_action:
+      action: none
+
+  # Power off button (with warning)
+  - type: button
+    name: Power Off Computer
+    icon: mdi:power-off
+    tap_action:
+      action: call-service
+      service: script.computer_power_off
+      service_data: {}
+      confirmation:
+        text: "Are you sure? This will force shutdown the computer!"
+    hold_action:
+      action: none
+
+  # Divider
+  - type: section
+
+  # Computer desk lamp control
+  - entity: light.computer_desk_light_socket_1
+    name: Desk Lamp
+    icon: mdi:desk-lamp
+
+show_header_toggle: false
+state_color: true
+
+# ============================================================================
+# ALTERNATIVE: SIMPLE CARD (Minimal Version)
+# ============================================================================
+# Uncomment below for a simpler card with just power control
+#
+# type: glance
+# title: Computer Desk
+# entities:
+#   - entity: switch.computer_plug_switch
+#     name: Power
+#     tap_action:
+#       action: call-service
+#       service: script.computer_power_on
+#     hold_action:
+#       action: call-service
+#       service: script.computer_power_off
+#   - entity: light.computer_desk_light_socket_1
+#     name: Lamp
+# show_name: true
+# show_state: true
+
+# ============================================================================
+# ALTERNATIVE: ENHANCED CARD (With Status Display)
+# ============================================================================
+# Uncomment below for enhanced version with power usage and uptime
+# Requires: power monitoring integration
+#
+# type: custom:vertical-stack-in-card
+# cards:
+#   - type: entities
+#     title: Computer Desk
+#     entities:
+#       - entity: switch.computer_plug_switch
+#         name: Power Status
+#         secondary_info: last-changed
+#
+#   - type: horizontal-stack
+#     cards:
+#       - type: button
+#         name: Power On
+#         icon: mdi:power-on
+#         tap_action:
+#           action: call-service
+#           service: script.computer_power_on
+#       - type: button
+#         name: Power Off
+#         icon: mdi:power-off
+#         tap_action:
+#           action: call-service
+#           service: script.computer_power_off
+#           confirmation:
+#             text: "Force shutdown computer?"
+#
+#   - type: entities
+#     entities:
+#       - entity: sensor.computer_plug_current_consumption
+#         name: Power Usage
+#       - entity: light.computer_desk_light_socket_1
+#         name: Desk Lamp
+
+# ============================================================================
+# USAGE INSTRUCTIONS
+# ============================================================================
+# 1. Copy this entire file content to your Lovelace dashboard
+# 2. Navigate to your dashboard in edit mode
+# 3. Add a new card > Manual Card
+# 4. Paste the content (choose one of the card versions above)
+# 5. Adjust entity IDs if your entities have different names
+# 6. Save and test power on/off functionality
+#
+# Entity Requirements:
+# - switch.computer_plug_switch (smart outlet controlling computer)
+# - script.computer_power_on (already exists in scripts.yaml)
+# - script.computer_power_off (already exists in scripts.yaml)
+# - light.computer_desk_light_socket_1 (desk lamp - optional)
+#
+# ============================================================================

@@ -1,0 +1,181 @@
+# ============================================================================
+# PRE-COMMIT HOOKS CONFIGURATION
+# ============================================================================
+# Purpose: Automated code quality checks before git commits
+# Installation: pip install pre-commit && pre-commit install
+# Usage: Runs automatically on 'git commit', or manually with 'pre-commit run'
+# Documentation: docs/GIT_WORKFLOW_SETUP.md
+#
+# To bypass hooks in emergency: git commit --no-verify
+# To update hooks: pre-commit autoupdate
+# ============================================================================
+
+# Minimum pre-commit version required
+minimum_pre_commit_version: '2.20.0'
+
+# Don't fail if pre-commit updates are available
+fail_fast: false
+
+# Repository-wide settings
+repos:
+  # ============================================================================
+  # BASIC FILE QUALITY CHECKS
+  # ============================================================================
+  # Standard pre-commit hooks for file hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      # Prevent large files from being committed (>500KB)
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+        exclude: |
+          (?x)^(
+            .*\.db|
+            .*\.db-shm|
+            .*\.db-wal|
+            .*\.backup
+          )$
+
+      # Ensure files end with newline
+      - id: end-of-file-fixer
+        exclude: |
+          (?x)^(
+            \.storage/.*|
+            deps/.*|
+            www/.*
+          )$
+
+      # Remove trailing whitespace
+      - id: trailing-whitespace
+        args: ['--markdown-linebreak-ext=md']
+        exclude: |
+          (?x)^(
+            \.storage/.*|
+            deps/.*
+          )$
+
+      # Check for merge conflict markers
+      - id: check-merge-conflict
+
+      # Check YAML syntax (basic check)
+      - id: check-yaml
+        args: ['--unsafe']  # Allow custom tags (needed for HA)
+        exclude: |
+          (?x)^(
+            \.github/.*|
+            secrets\.yaml|
+            esphome/.*
+          )$
+
+      # Check JSON syntax
+      - id: check-json
+        exclude: |
+          (?x)^(
+            \.vscode/.*|
+            \.storage/.*
+          )$
+
+      # Detect private keys
+      - id: detect-private-key
+
+      # Check for files that would conflict on case-insensitive filesystems
+      - id: check-case-conflict
+
+  # ============================================================================
+  # YAML LINTING (Home Assistant Specific)
+  # ============================================================================
+  # Use yamllint with custom config for HA-specific syntax
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.33.0
+    hooks:
+      - id: yamllint
+        args: ['-c', '.yamllint']
+        files: \.(yaml|yml)$
+        exclude: |
+          (?x)^(
+            \.github/.*|
+            secrets\.yaml|
+            secrets\.yaml\.example|
+            esphome/secrets\.yaml|
+            \.storage/.*|
+            deps/.*|
+            www/.*
+          )$
+
+  # ============================================================================
+  # PRETTIER (Optional - Format YAML, Markdown, JSON)
+  # ============================================================================
+  # Uncomment to enable automatic formatting with Prettier
+  # NOTE: This may conflict with HA-specific YAML formatting
+  # Test thoroughly before enabling in production
+
+  # - repo: https://github.com/pre-commit/mirrors-prettier
+  #   rev: v3.1.0
+  #   hooks:
+  #     - id: prettier
+  #       types_or: [yaml, markdown, json]
+  #       args: ['--write', '--prose-wrap', 'always']
+  #       exclude: |
+  #         (?x)^(
+  #           \.github/.*|
+  #           secrets\.yaml|
+  #           \.storage/.*|
+  #           configuration\.yaml
+  #         )$
+
+  # ============================================================================
+  # MARKDOWN LINTING (Documentation Quality)
+  # ============================================================================
+  # Uncomment to enable markdown linting for documentation files
+
+  # - repo: https://github.com/igorshubovych/markdownlint-cli
+  #   rev: v0.37.0
+  #   hooks:
+  #     - id: markdownlint
+  #       args: ['--fix']
+  #       exclude: |
+  #         (?x)^(
+  #           \.github/.*
+  #         )$
+
+  # ============================================================================
+  # SHELL SCRIPT LINTING
+  # ============================================================================
+  # Uncomment if you have shell scripts in your repository
+
+  # - repo: https://github.com/shellcheck-py/shellcheck-py
+  #   rev: v0.9.0.6
+  #   hooks:
+  #     - id: shellcheck
+  #       args: ['-x', '-e', 'SC1091']  # Ignore source file not found warnings
+
+# ============================================================================
+# CONFIGURATION NOTES
+# ============================================================================
+#
+# Performance:
+# - Hooks run in parallel where possible
+# - Use 'fail_fast: true' to stop on first error (faster feedback)
+# - Large repositories: consider limiting 'files' patterns
+#
+# Customization:
+# - Add repository-specific hooks as needed
+# - Adjust 'exclude' patterns for your file structure
+# - Update 'args' to match your code style preferences
+#
+# Home Assistant Specific:
+# - YAML linting uses custom .yamllint config (see .yamllint file)
+# - Allows HA-specific syntax (templates, custom tags)
+# - Relaxed rules for legacy configuration files
+#
+# Bypassing Hooks:
+# - Emergency commits: git commit --no-verify
+# - Skip specific hook: SKIP=yamllint git commit
+# - Disable all hooks: pre-commit uninstall
+#
+# Maintenance:
+# - Update hooks: pre-commit autoupdate
+# - Test hooks: pre-commit run --all-files
+# - Clear cache: pre-commit clean
+#
+# ============================================================================

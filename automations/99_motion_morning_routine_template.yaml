@@ -1,0 +1,134 @@
+---
+# ============================================================================
+# MOTION-BASED MORNING ROUTINE - TEMPLATE
+# ============================================================================
+# Purpose: One-time morning routine triggered by kitchen motion (5:30-7:00 AM)
+# Gate Mechanism: Prevents repeated triggers throughout morning
+# Actions: Kitchen lights, optional coffee maker, optional news briefing
+#
+# Documentation: docs/MORNING_ROUTINE_SETUP.md
+# ============================================================================
+
+- id: morning_routine_motion_kitchen
+  alias: "Morning Routine - Motion Trigger (Kitchen)"
+  description: "One-time morning routine when kitchen motion detected"
+
+  # ============================================================================
+  # TRIGGER: Kitchen Motion Detected
+  # ============================================================================
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.kitchen_motion  # CUSTOMIZE: Your kitchen motion sensor
+      to: "on"
+      id: motion_detected
+
+  # ============================================================================
+  # CONDITIONS: Time Window and Gate
+  # ============================================================================
+  condition:
+    # Morning time window (5:30-7:00 AM)
+    - condition: time
+      after: "05:30:00"
+      before: "07:00:00"
+
+    # Routine not disabled by user
+    - condition: state
+      entity_id: input_boolean.morning_routine_disabled
+      state: "off"
+
+    # Gate: Routine not yet triggered today
+    - condition: state
+      entity_id: input_boolean.morning_routine_triggered_today
+      state: "off"
+
+    # Home occupied (not Away)
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+
+  # ============================================================================
+  # ACTIONS: Morning Routine Sequence
+  # ============================================================================
+  action:
+    # Step 1: Set gate to prevent re-triggering
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.morning_routine_triggered_today
+
+    # Step 2: Turn on kitchen lights
+    - service: light.turn_on
+      target:
+        # CUSTOMIZE: Replace with your kitchen light entity
+        entity_id: light.living_room_light_socket_1
+      data:
+        brightness_pct: 50  # Brighter than wake-up lights (already awake)
+        transition: 2
+
+    # Step 3 (Optional): Start coffee maker
+    # Uncomment if you have smart coffee maker:
+    # - service: switch.turn_on
+    #   target:
+    #     entity_id: switch.coffee_maker
+
+    # Step 4 (Optional): Play morning news briefing
+    # Uncomment if you have configured news script:
+    # - service: script.morning_news_briefing
+    #   data: {}
+
+    # Step 5 (Optional): Notification
+    # Uncomment to receive notification:
+    # - service: notify.persistent_notification
+    #   data:
+    #     title: "Good Morning!"
+    #     message: "Morning routine activated at {{ now().strftime('%I:%M %p') }}"
+    #     data:
+    #       tag: "morning_routine"
+
+    # Step 6: Log event
+    - service: logbook.log
+      data:
+        name: "Morning Routine"
+        message: "Kitchen motion triggered morning routine"
+        entity_id: binary_sensor.kitchen_motion
+
+  # ============================================================================
+  # MODE: Single
+  # ============================================================================
+  # Prevents multiple simultaneous triggers
+  mode: single
+
+# ============================================================================
+# GATE RESET AUTOMATION (Required)
+# ============================================================================
+# This automation resets the gate daily at midnight
+# Add this as a separate automation:
+
+# - id: morning_routine_gate_reset
+#   alias: "Morning Routine - Reset Gate Daily"
+#   description: "Reset morning trigger gate at midnight"
+#
+#   trigger:
+#     - platform: time
+#       at: "00:00:00"
+#
+#   action:
+#     - service: input_boolean.turn_off
+#       target:
+#         entity_id: input_boolean.morning_routine_triggered_today
+#
+#   mode: single
+
+# ============================================================================
+# CUSTOMIZATION CHECKLIST
+# ============================================================================
+# [ ] Replace binary_sensor.kitchen_motion with your motion sensor
+# [ ] Replace light.living_room_light_socket_1 with your kitchen light
+# [ ] Verify input helpers exist (morning_routine_disabled, morning_routine_triggered_today)
+# [ ] (Optional) Enable coffee maker automation (Step 3)
+# [ ] (Optional) Enable news briefing (Step 4)
+# [ ] (Optional) Enable notification (Step 5)
+# [ ] Adjust time window (currently 5:30-7:00 AM)
+# [ ] Create gate reset automation (see template above)
+# [ ] Test gate prevents duplicate triggers
+# [ ] Verify gate resets at midnight
+# [ ] Rename file to remove "99_" prefix

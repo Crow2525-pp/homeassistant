@@ -1,0 +1,177 @@
+---
+# ============================================================================
+# MORNING PREHEAT AUTOMATION - TEMPLATE
+# ============================================================================
+# Purpose: Intelligently preheat downstairs area before wake-up time (5:30 AM)
+# Preset Selection: Based on outside temp, WFH status, home presence, time
+# NO HARD-CODED TEMPERATURES: Uses versatile climate presets only
+#
+# Preset Logic:
+# - Override selector != auto → Use override value
+# - Not home → frost (protect pipes only)
+# - Outside < 5°C → boost (maximum warmth for very cold mornings)
+# - Outside 5-10°C → comfort (normal heating)
+# - Outside > 10°C + WFH → comfort (home all day, maintain comfort)
+# - Outside > 10°C + not WFH → eco (minimal heating, leaving soon)
+#
+# Documentation: docs/MORNING_ROUTINE_SETUP.md
+# ============================================================================
+
+- id: morning_preheat_downstairs
+  alias: "Morning Routine - Preheat Downstairs (5:30 AM)"
+  description: "Intelligent downstairs heating 30 minutes before wake-up"
+
+  # ============================================================================
+  # TRIGGER: 5:30 AM Weekdays
+  # ============================================================================
+  trigger:
+    - platform: time
+      at: "05:30:00"  # CUSTOMIZE: Adjust wake-up prep time
+      id: scheduled_preheat
+
+    # Backup trigger: if temperature drops significantly during morning window
+    - platform: numeric_state
+      entity_id: sensor.living_room_temperature_offset  # CUSTOMIZE: Your downstairs temp sensor
+      below: 16
+      for:
+        minutes: 5
+      id: emergency_cold
+
+  # ============================================================================
+  # CONDITIONS: Safety Checks
+  # ============================================================================
+  condition:
+    # Not disabled by user
+    - condition: state
+      entity_id: input_boolean.morning_routine_disabled
+      state: "off"
+
+    # Home occupied (not Away or Holiday)
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+
+    # Manual climate control not active
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+
+    # Climate entity available and should be on
+    - condition: state
+      entity_id: input_boolean.hvac_living_room_should_be_on
+      state: "on"
+
+    # Only during morning window (5:30-6:30 AM) for scheduled trigger
+    # Emergency trigger can run until 8:00 AM
+    - condition: or
+      conditions:
+        - condition: and
+          conditions:
+            - condition: trigger
+              id: scheduled_preheat
+            - condition: time
+              after: "05:30:00"
+              before: "06:30:00"
+        - condition: and
+          conditions:
+            - condition: trigger
+              id: emergency_cold
+            - condition: time
+              after: "05:30:00"
+              before: "08:00:00"
+
+  # ============================================================================
+  # ACTIONS: Calculate Preset and Activate Heating
+  # ============================================================================
+  action:
+    # Step 1: Calculate desired preset based on multiple factors
+    - variables:
+        outside_temp: "{{ states('sensor.essendon_airport_temp') | float(15) }}"  # CUSTOMIZE: Your outside temp sensor
+        wfh_today: "{{ is_state('input_boolean.wfh_today', 'on') }}"
+        home_occupied: "{{ is_state('input_select.occupancy', 'Home') }}"
+        preset_override: "{{ states('input_select.morning_preset_override') }}"
+        calculated_preset: >
+          {% set outside = states('sensor.essendon_airport_temp') | float(15) %}
+          {% set wfh = is_state('input_boolean.wfh_today', 'on') %}
+          {% set home = is_state('input_select.occupancy', 'Home') %}
+          {% set override = states('input_select.morning_preset_override') %}
+
+          {# User override takes precedence #}
+          {% if override != 'auto' and override != 'unknown' %}
+            {{ override }}
+
+          {# Not home - minimal heating for protection #}
+          {% elif not home %}
+            frost
+
+          {# Very cold morning (<5°C) - maximum warmth #}
+          {% elif outside < 5 %}
+            boost
+
+          {# Cold morning (5-10°C) - normal heating #}
+          {% elif outside < 10 %}
+            comfort
+
+          {# Mild morning but working from home - maintain comfort #}
+          {% elif wfh %}
+            comfort
+
+          {# Mild morning, leaving for work - minimal heating #}
+          {% else %}
+            eco
+          {% endif %}
+
+    # Step 2: Log preset calculation for debugging
+    - service: logbook.log
+      data:
+        name: "Morning Preheat"
+        message: >
+          Preset selected: {{ calculated_preset }}
+          (Outside: {{ outside_temp }}°C, WFH: {{ wfh_today }}, Override: {{ preset_override }})
+        entity_id: climate.living_room_versatile_thermastat  # CUSTOMIZE: Your climate entity
+
+    # Step 3: Activate heating with calculated preset
+    - service: script.activate_heating
+      data:
+        climate_entity: climate.living_room_versatile_thermastat  # CUSTOMIZE: Your versatile climate entity
+        preset_mode: "{{ calculated_preset }}"
+
+    # Step 4 (Optional): Send notification
+    # Uncomment to enable:
+    # - service: notify.persistent_notification
+    #   data:
+    #     title: "Morning Preheat Active"
+    #     message: >
+    #       Downstairs heating started at {{ now().strftime('%I:%M %p') }}.
+    #       Preset: {{ calculated_preset }} (Outside: {{ outside_temp }}°C)
+    #     data:
+    #       tag: "morning_preheat"
+
+    # Step 5: Set maximum heating duration safety timer
+    # Automatically shut off after 1 hour if target not reached
+    - delay:
+        hours: 1
+
+    # Step 6: Safety shutdown after max duration
+    - service: script.deactivate_climate
+      data:
+        climate_entity: climate.living_room_versatile_thermastat  # CUSTOMIZE: Your climate entity
+
+  # ============================================================================
+  # MODE: Restart
+  # ============================================================================
+  # Allows emergency trigger to override scheduled trigger
+  mode: restart
+
+# ============================================================================
+# CUSTOMIZATION CHECKLIST
+# ============================================================================
+# [ ] Replace sensor.essendon_airport_temp with your outside temp sensor
+# [ ] Replace sensor.living_room_temperature_offset with your downstairs temp
+# [ ] Replace climate.living_room_versatile_thermastat with your climate entity
+# [ ] Verify input helpers exist (see Step 1 in setup guide)
+# [ ] Adjust temperature thresholds if needed (currently <5°C, <10°C)
+# [ ] Adjust wake-up time (currently 5:30 AM)
+# [ ] Test preset calculation in Developer Tools > Template
+# [ ] (Optional) Enable notification by uncommenting Step 4
+# [ ] Rename file to remove "99_" prefix (e.g., 12_morning_preheat.yaml)

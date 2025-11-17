@@ -1,0 +1,38 @@
+---
+# Face Recognition Response Template - Requires Frigate or similar
+# See docs/MOTION_FACE_DETECTION_SETUP.md for integration setup
+
+- id: face_recognition_response
+  alias: "Security - Face Recognition Response"
+  description: "High-priority alert for unknown persons"
+
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.frigate_person_detected  # CUSTOMIZE
+      to: "on"
+
+  action:
+    - choose:
+        # Known person - low priority
+        - conditions:
+            - condition: template
+              value_template: "{{ trigger.to_state.attributes.person_name != 'unknown' }}"
+          sequence:
+            - service: notify.persistent_notification
+              data:
+                title: "Person Detected"
+                message: "{{ trigger.to_state.attributes.person_name }} detected"
+
+        # Unknown person - high priority
+        - conditions:
+            - condition: template
+              value_template: "{{ trigger.to_state.attributes.person_name == 'unknown' }}"
+          sequence:
+            - service: notify.mobile_app_your_phone  # CUSTOMIZE
+              data:
+                title: "⚠️ Unknown Person!"
+                message: "Unrecognized person detected"
+                data:
+                  priority: high
+
+  mode: single

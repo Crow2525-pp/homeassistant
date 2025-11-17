@@ -1,0 +1,22 @@
+# ============================================================================
+# ROLLER BLIND STATE INPUT HELPER - TEMPLATE
+# ============================================================================
+# Note: Your system already has input_select.roller_blind_state_simple
+# This file documents the configuration for reference
+# ============================================================================
+
+# Add to configuration.yaml:
+#
+# input_select:
+#   roller_blind_state_simple:
+#     name: Roller Blind State
+#     options:
+#       - open
+#       - partial
+#       - closed
+#     initial: closed
+#     icon: mdi:blinds
+
+# ============================================================================
+# Already exists in your configuration - no action needed
+# ============================================================================

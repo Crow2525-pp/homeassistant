@@ -1,0 +1,86 @@
+---
+# ============================================================================
+# BACKUP STATUS TEMPLATE SENSORS
+# ============================================================================
+# Purpose: Track backup status and calculate days since last backup
+# Dependencies: Home Assistant backup integration
+# Output: Sensors showing backup health and age
+#
+# Setup: Add to configuration.yaml:
+#   template: !include config/templates/backup_status_sensor.yaml
+# ============================================================================
+
+- sensor:
+    - name: "Last Backup Time"
+      unique_id: last_backup_time
+      state: >
+        {% set backups = state_attr('sensor.backup', 'backups') %}
+        {% if backups and backups | length > 0 %}
+          {{ backups | map(attribute='date') | max }}
+        {% else %}
+          unknown
+        {% endif %}
+      device_class: timestamp
+      icon: mdi:backup-restore
+
+    - name: "Days Since Last Backup"
+      unique_id: days_since_last_backup
+      state: >
+        {% set last_backup = states('sensor.last_backup_time') %}
+        {% if last_backup not in ['unknown', 'unavailable'] %}
+          {{ (now() - (last_backup | as_datetime)).days }}
+        {% else %}
+          unknown
+        {% endif %}
+      unit_of_measurement: "days"
+      icon: >
+        {% set days = this.state | int(0) %}
+        {% if days == 0 %}
+          mdi:check-circle
+        {% elif days <= 1 %}
+          mdi:backup-restore
+        {% elif days <= 3 %}
+          mdi:alert-circle-outline
+        {% else %}
+          mdi:alert-circle
+        {% endif %}
+      attributes:
+        status: >
+          {% set days = this.state | int(0) %}
+          {% if this.state == 'unknown' %}
+            Unknown
+          {% elif days == 0 %}
+            Backed up today
+          {% elif days == 1 %}
+            Backed up yesterday
+          {% elif days <= 3 %}
+            Recent
+          {% else %}
+            Overdue
+          {% endif %}
+
+    - name: "Total Backup Count"
+      unique_id: total_backup_count
+      state: >
+        {% set backups = state_attr('sensor.backup', 'backups') %}
+        {% if backups %}
+          {{ backups | length }}
+        {% else %}
+          0
+        {% endif %}
+      unit_of_measurement: "backups"
+      icon: mdi:database
+
+- binary_sensor:
+    - name: "Backup Overdue"
+      unique_id: backup_overdue
+      state: >
+        {% set days = states('sensor.days_since_last_backup') | int(0) %}
+        {{ days > 2 }}
+      device_class: problem
+      icon: >
+        {% if this.state == 'on' %}
+          mdi:alert-circle
+        {% else %}
+          mdi:check-circle
+        {% endif %}

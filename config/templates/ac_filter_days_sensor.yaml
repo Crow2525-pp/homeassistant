@@ -1,0 +1,165 @@
+---
+# ============================================================================
+# AC FILTER DAYS TRACKING TEMPLATE SENSOR
+# ============================================================================
+# Purpose: Calculate days since AC filter was last changed
+# Dependencies: input_datetime.ac_filter_downstairs
+# Output: Sensor showing number of days + status attributes
+#
+# Setup Instructions:
+# 1. Ensure input_datetime.ac_filter_downstairs helper exists
+# 2. Add this file to your configuration.yaml:
+#    template: !include config/templates/ac_filter_days_sensor.yaml
+#    OR copy content directly into configuration.yaml under "template:" section
+# 3. Reload template entities or restart Home Assistant
+#
+# Documentation: docs/RFID_AC_FILTER_SETUP.md
+# ============================================================================
+
+# ============================================================================
+# SENSOR: AC Filter Days Since Change
+# ============================================================================
+# Calculates number of days between current date and last filter change
+# Includes attributes for friendly display and status
+
+- sensor:
+    - name: "AC Filter Downstairs Days Since Change"
+      unique_id: ac_filter_downstairs_days_since_change
+
+      # State: Number of days since last change
+      state: >
+        {% set last_changed = states('input_datetime.ac_filter_downstairs') %}
+        {% if last_changed not in ['unknown', 'unavailable', 'none', ''] %}
+          {{ (now().date() - (last_changed | as_datetime | as_local).date()).days }}
+        {% else %}
+          unknown
+        {% endif %}
+
+      # Unit of measurement for sensor
+      unit_of_measurement: "days"
+
+      # Device class for proper categorization
+      device_class: duration
+
+      # Icon changes based on status
+      icon: >
+        {% set days = this.state | int(0) %}
+        {% if days < 30 %}
+          mdi:air-filter
+        {% elif days < 60 %}
+          mdi:air-filter-outline
+        {% else %}
+          mdi:alert-circle
+        {% endif %}
+
+      # Attributes for additional information
+      attributes:
+        # Original datetime value
+        last_changed_date: "{{ states('input_datetime.ac_filter_downstairs') }}"
+
+        # Human-friendly date format
+        last_changed_friendly: >
+          {% set last_changed = states('input_datetime.ac_filter_downstairs') %}
+          {% if last_changed not in ['unknown', 'unavailable', 'none', ''] %}
+            {{ (last_changed | as_datetime | as_local).strftime('%B %d, %Y') }}
+          {% else %}
+            Never changed
+          {% endif %}
+
+        # Status indicator (Good / Due Soon / Overdue)
+        status: >
+          {% set days = this.state | int(0) %}
+          {% if this.state == 'unknown' %}
+            Unknown
+          {% elif days < 30 %}
+            Good
+          {% elif days < 60 %}
+            Due Soon
+          {% else %}
+            Overdue
+          {% endif %}
+
+        # Next recommended change date (60 days from last change)
+        next_change_due: >
+          {% set last_changed = states('input_datetime.ac_filter_downstairs') %}
+          {% if last_changed not in ['unknown', 'unavailable', 'none', ''] %}
+            {{ ((last_changed | as_datetime | as_local) + timedelta(days=60)).strftime('%B %d, %Y') }}
+          {% else %}
+            Not set
+          {% endif %}
+
+        # Days until next change (negative if overdue)
+        days_until_change: >
+          {% set days = this.state | int(0) %}
+          {% if this.state != 'unknown' %}
+            {{ 60 - days }}
+          {% else %}
+            unknown
+          {% endif %}
+
+        # Percentage of filter life used (assumes 60 day lifespan)
+        filter_life_percentage: >
+          {% set days = this.state | int(0) %}
+          {% if this.state != 'unknown' %}
+            {{ min(100, (days / 60 * 100) | round(0)) }}
+          {% else %}
+            unknown
+          {% endif %}
+
+# ============================================================================
+# OPTIONAL: Binary Sensor for Overdue Status
+# ============================================================================
+# Uncomment below to create a binary sensor that's "on" when filter is overdue
+# Useful for automations or dashboard conditional cards
+
+# - binary_sensor:
+#     - name: "AC Filter Downstairs Overdue"
+#       unique_id: ac_filter_downstairs_overdue
+#
+#       # State: On if overdue (>60 days), off otherwise
+#       state: >
+#         {% set days = states('sensor.ac_filter_downstairs_days_since_change') | int(0) %}
+#         {{ days > 60 }}
+#
+#       # Device class for proper categorization
+#       device_class: problem
+#
+#       # Icon
+#       icon: >
+#         {% if this.state == 'on' %}
+#           mdi:alert-circle
+#         {% else %}
+#           mdi:check-circle
+#         {% endif %}
+#
+#       # Attributes
+#       attributes:
+#         days_overdue: >
+#           {% set days = states('sensor.ac_filter_downstairs_days_since_change') | int(0) %}
+#           {% if days > 60 %}
+#             {{ days - 60 }}
+#           {% else %}
+#             0
+#           {% endif %}
+
+# ============================================================================
+# CUSTOMIZATION NOTES
+# ============================================================================
+#
+# Filter Lifespan:
+# - Default is 60 days (standard for most residential AC filters)
+# - Adjust thresholds in templates if your filter has different lifespan:
+#   - Standard: 30-60 days
+#   - HEPA/High-efficiency: 90-180 days
+#   - Washable: Clean every 30 days
+#
+# Multiple Filters:
+# To track multiple AC filters, duplicate this template and change:
+# - Sensor name: "AC Filter Upstairs Days Since Change"
+# - unique_id: ac_filter_upstairs_days_since_change
+# - Entity reference: input_datetime.ac_filter_upstairs
+#
+# Integration with Dashboard:
+# See docs/RFID_AC_FILTER_SETUP.md for dashboard card examples
+#
+# ============================================================================

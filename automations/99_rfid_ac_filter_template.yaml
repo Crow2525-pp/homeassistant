@@ -1,0 +1,159 @@
+---
+# ============================================================================
+# RFID AC FILTER TRACKING AUTOMATION - TEMPLATE
+# ============================================================================
+# Purpose: Automatically update AC filter last-changed date when RFID tag scanned
+# Trigger: Tag scan event
+# Action: Update input_datetime helper with current date
+# Notifications: Persistent notification confirming filter change recorded
+#
+# Setup Instructions:
+# 1. Replace TAG_ID_HERE with your actual tag ID (find in Settings > Tags)
+# 2. Verify entity_id matches your input_datetime helper name
+# 3. Customize notification service if using mobile app notifications
+# 4. Rename file to remove "99_" prefix (e.g., 10_rfid_ac_filter.yaml)
+#
+# Prerequisites:
+# - input_datetime.ac_filter_downstairs helper must exist
+# - RFID/NFC tag registered in Home Assistant
+# - Tag ID obtained from Settings > Devices & Services > Tags
+#
+# Documentation: docs/RFID_AC_FILTER_SETUP.md
+# ============================================================================
+
+- id: rfid_ac_filter_downstairs_update
+  alias: "RFID - AC Filter Downstairs Updated"
+  description: "Update AC filter last changed date when RFID tag is scanned"
+
+  # ============================================================================
+  # TRIGGER: Tag Scanned Event
+  # ============================================================================
+  # When the specific RFID tag is scanned, trigger this automation
+  # Replace TAG_ID_HERE with your actual tag ID
+  trigger:
+    - platform: tag
+      tag_id: TAG_ID_HERE  # CUSTOMIZE: Replace with your tag ID (e.g., 859e3818-e623-47aa-9062-d89afd44489b)
+      id: tag_scanned
+
+  # ============================================================================
+  # CONDITIONS: Entity Exists Check
+  # ============================================================================
+  # Optional safety check to ensure the input_datetime helper exists
+  condition:
+    - condition: state
+      entity_id: input_datetime.ac_filter_downstairs
+      state:
+        - "unknown"
+        - "unavailable"
+      enabled: false  # Disabled by default - enable if needed
+
+  # ============================================================================
+  # ACTIONS: Update Date and Notify
+  # ============================================================================
+  action:
+    # Action 1: Update input_datetime helper with current date
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.ac_filter_downstairs  # CUSTOMIZE: Change if using different helper name
+      data:
+        date: "{{ now().strftime('%Y-%m-%d') }}"  # Sets to today's date in YYYY-MM-DD format
+
+    # Action 2: Send persistent notification confirming update
+    - action: notify.persistent_notification
+      data:
+        title: "AC Filter Changed"
+        message: >
+          Downstairs AC filter change recorded on {{ now().strftime('%B %d, %Y') }}.
+
+          Next recommended change: {{ (now() + timedelta(days=60)).strftime('%B %d, %Y') }}
+        data:
+          tag: "ac_filter_update"  # Allows notification to be replaced by subsequent scans
+
+    # Action 3 (Optional): Send mobile notification instead of/in addition to persistent notification
+    # Uncomment and customize the lines below to use mobile app notifications
+    # - action: notify.mobile_app_your_phone_name  # CUSTOMIZE: Replace with your device name
+    #   data:
+    #     title: "AC Filter Changed"
+    #     message: >
+    #       Filter change recorded on {{ now().strftime('%B %d, %Y') }}.
+    #       Next change due: {{ (now() + timedelta(days=60)).strftime('%B %d, %Y') }}
+    #     data:
+    #       tag: "ac_filter_update"
+    #       # Optional: Add action buttons
+    #       actions:
+    #         - action: "view_filter_status"
+    #           title: "View Status"
+
+    # Action 4 (Optional): Log event to logbook
+    - action: logbook.log
+      data:
+        name: "AC Filter Maintenance"
+        message: "Downstairs AC filter changed via RFID tag scan"
+        entity_id: input_datetime.ac_filter_downstairs
+
+  # ============================================================================
+  # MODE: Single
+  # ============================================================================
+  # Prevents multiple simultaneous executions if tag scanned rapidly
+  mode: single
+
+# ============================================================================
+# OPTIONAL: Replacement Reminder Automation
+# ============================================================================
+# Uncomment to add automatic reminder when filter is overdue (60+ days)
+
+# - id: ac_filter_replacement_reminder_downstairs
+#   alias: "AC Filter - Replacement Reminder (Downstairs)"
+#   description: "Remind to change AC filter after 60 days"
+#
+#   trigger:
+#     # Trigger when days since change exceeds 60
+#     - platform: numeric_state
+#       entity_id: sensor.ac_filter_downstairs_days_since_change
+#       above: 60
+#       for:
+#         hours: 1  # Wait 1 hour to avoid false triggers
+#
+#     # Also check daily at 9 AM (backup trigger)
+#     - platform: time
+#       at: "09:00:00"
+#
+#   condition:
+#     # Only remind during waking hours (9 AM - 9 PM)
+#     - condition: time
+#       after: "09:00:00"
+#       before: "21:00:00"
+#
+#     # Check filter is actually overdue
+#     - condition: numeric_state
+#       entity_id: sensor.ac_filter_downstairs_days_since_change
+#       above: 60
+#
+#   action:
+#     # Send notification
+#     - action: notify.persistent_notification
+#       data:
+#         title: "🔧 AC Filter Overdue"
+#         message: >
+#           Downstairs AC filter is overdue for replacement!
+#
+#           - Days since change: {{ states('sensor.ac_filter_downstairs_days_since_change') }}
+#           - Last changed: {{ state_attr('sensor.ac_filter_downstairs_days_since_change', 'last_changed_friendly') }}
+#           - Recommended interval: 60 days
+#
+#           Please change the filter and scan the RFID tag to update.
+#         data:
+#           tag: "ac_filter_reminder"
+#
+#   mode: single
+
+# ============================================================================
+# CUSTOMIZATION CHECKLIST
+# ============================================================================
+# [ ] Replace TAG_ID_HERE with actual tag ID
+# [ ] Verify entity_id: input_datetime.ac_filter_downstairs exists
+# [ ] (Optional) Enable mobile notification by uncommenting Action 3
+# [ ] (Optional) Enable replacement reminder by uncommenting second automation
+# [ ] Test tag scan and verify datetime updates correctly
+# [ ] Verify notification appears after scan
+# [ ] Rename file to remove "99_" prefix for production use

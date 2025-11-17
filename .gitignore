@@ -62,3 +62,6 @@ secrets.yaml
 # Tools and scripts
 !tools/
 !tools/**
+
+# Pre-commit hooks
+!.pre-commit-config.yaml

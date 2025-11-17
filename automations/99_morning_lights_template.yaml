@@ -1,0 +1,164 @@
+---
+# ============================================================================
+# MORNING LIGHTING AUTOMATION - TEMPLATE
+# ============================================================================
+# Purpose: Turn on computer room light at 5:00 AM (NOT bedroom light)
+# Critical Requirement: MUST NOT turn on bedroom light (masterbed_lights)
+# Safe entities: light.computer_desk_light_socket_1, light.lounge (if no bedroom)
+#
+# Documentation: docs/MORNING_ROUTINE_SETUP.md
+# ============================================================================
+
+- id: morning_lights_computer_room
+  alias: "Morning Routine - Lights (5:00 AM)"
+  description: "Turn on computer room light for gradual wake-up (NOT bedroom)"
+
+  # ============================================================================
+  # TRIGGER: 5:00 AM Weekdays
+  # ============================================================================
+  trigger:
+    - platform: time
+      at: "05:00:00"  # CUSTOMIZE: 30 minutes before preheat for gentle wake-up
+      id: scheduled_lights
+
+  # ============================================================================
+  # CONDITIONS: Safety Checks
+  # ============================================================================
+  condition:
+    # Not disabled by user
+    - condition: state
+      entity_id: input_boolean.morning_routine_disabled
+      state: "off"
+
+    # Home occupied (someone to wake up)
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+
+    # Only weekdays (Monday-Friday)
+    # Remove or comment out to enable weekends
+    - condition: time
+      weekday:
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
+
+    # Light room selection not set to "None"
+    - condition: template
+      value_template: "{{ states('input_select.morning_lights_rooms') != 'None' }}"
+
+  # ============================================================================
+  # ACTIONS: Turn On Selected Lights (Gradual Brightness)
+  # ============================================================================
+  action:
+    # Step 1: Determine which lights to turn on based on selector
+    - choose:
+        # Option 1: Computer Room Only (default, safe)
+        - conditions:
+            - condition: state
+              entity_id: input_select.morning_lights_rooms
+              state: 'Computer Room Only'
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id: light.computer_desk_light_socket_1  # SAFE: Computer room only
+              data:
+                brightness_pct: 30  # Gentle wake-up brightness
+                transition: 5  # Gradual 5-second fade-in
+
+        # Option 2: Kitchen Only
+        - conditions:
+            - condition: state
+              entity_id: input_select.morning_lights_rooms
+              state: 'Kitchen Only'
+          sequence:
+            - service: light.turn_on
+              target:
+                # CUSTOMIZE: Replace with your kitchen light entity
+                entity_id: light.living_room_light_socket_1
+              data:
+                brightness_pct: 40
+                transition: 5
+
+        # Option 3: Both Computer Room and Kitchen
+        - conditions:
+            - condition: state
+              entity_id: input_select.morning_lights_rooms
+              state: 'Both'
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.computer_desk_light_socket_1  # Computer room
+                  # CUSTOMIZE: Add your kitchen light
+                  - light.living_room_light_socket_1  # Kitchen (if separate)
+              data:
+                brightness_pct: 35
+                transition: 5
+
+      # Default: Do nothing if selector is "None" or unknown
+      default: []
+
+    # Step 2: Log action for debugging
+    - service: logbook.log
+      data:
+        name: "Morning Lights"
+        message: "Morning lights activated ({{ states('input_select.morning_lights_rooms') }})"
+
+    # Step 3 (Optional): Gradual brightness increase
+    # Uncomment to gradually increase brightness from 30% to 50% over 10 minutes
+    # - delay:
+    #     minutes: 5
+    # - service: light.turn_on
+    #   target:
+    #     entity_id: light.computer_desk_light_socket_1
+    #   data:
+    #     brightness_pct: 40
+    #     transition: 10
+    # - delay:
+    #     minutes: 5
+    # - service: light.turn_on
+    #   target:
+    #     entity_id: light.computer_desk_light_socket_1
+    #   data:
+    #     brightness_pct: 50
+    #     transition: 10
+
+  # ============================================================================
+  # MODE: Single
+  # ============================================================================
+  mode: single
+
+# ============================================================================
+# CRITICAL SAFETY NOTES
+# ============================================================================
+# DO NOT use these entities in this automation:
+# - light.masterbed_lights (bedroom group)
+# - light.sleeping_light (bedroom)
+# - light.sleeping_light_2 (bedroom)
+# - light.reading_light (bedroom)
+#
+# SAFE entities for morning lights:
+# - light.computer_desk_light_socket_1 (computer room)
+# - light.study_nook_lamp_socket_1 (study)
+# - light.living_room_light_socket_1 (kitchen/living)
+# - light.lounge (only if verified NOT to include bedroom lights)
+#
+# Always verify light groups do not include bedroom lights before using!
+# ============================================================================
+
+# ============================================================================
+# CUSTOMIZATION CHECKLIST
+# ============================================================================
+# [ ] Verify input_select.morning_lights_rooms helper exists
+# [ ] Verify input_boolean.morning_routine_disabled exists
+# [ ] Replace light.living_room_light_socket_1 with your kitchen light
+# [ ] Test light entities don't include bedroom lights
+# [ ] Adjust brightness levels (currently 30-40%)
+# [ ] Adjust wake-up time (currently 5:00 AM)
+# [ ] (Optional) Enable gradual brightness increase
+# [ ] (Optional) Remove weekday restriction for weekends
+# [ ] Test automation doesn't turn on bedroom lights
+# [ ] Rename file to remove "99_" prefix

@@ -1,0 +1,31 @@
+---
+# Motion Detection Template - Basic motion alerts with debounce
+# See docs/MOTION_FACE_DETECTION_SETUP.md for full setup
+
+- id: motion_detection_outside
+  alias: "Security - Outside Motion Detection"
+  description: "Alert on outside motion with 2-minute debounce"
+
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.outside_motion  # CUSTOMIZE
+      to: "on"
+      for:
+        seconds: 2  # Debounce
+
+  condition:
+    # Night mode (8 PM - 6 AM)
+    - condition: or
+      conditions:
+        - condition: time
+          after: "20:00:00"
+        - condition: time
+          before: "06:00:00"
+
+  action:
+    - service: notify.persistent_notification
+      data:
+        title: "Motion Detected"
+        message: "Outside motion at {{ now().strftime('%I:%M %p') }}"
+
+  mode: single

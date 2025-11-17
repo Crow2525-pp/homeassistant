@@ -1,0 +1,38 @@
+---
+# Roller Blind Time-Based Automation Templates
+# Note: Your system already has simplified 3-state control implemented
+# These are optional time-based automation examples
+
+- id: blinds_open_morning
+  alias: "Blinds - Open Morning (7 AM)"
+  description: "Open blinds at 7 AM on weekdays"
+
+  trigger:
+    - platform: time
+      at: "07:00:00"
+
+  condition:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    - condition: time
+      weekday: [mon, tue, wed, thu, fri]
+
+  action:
+    - service: script.roller_blinds_open_simple
+
+  mode: single
+
+- id: blinds_close_sunset
+  alias: "Blinds - Close at Sunset"
+  description: "Close blinds 30 minutes before sunset"
+
+  trigger:
+    - platform: sun
+      event: sunset
+      offset: "-00:30:00"
+
+  action:
+    - service: script.roller_blinds_close_simple
+
+  mode: single
