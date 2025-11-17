@@ -1,0 +1,77 @@
+name: Entity Reference Validation
+
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+      - development
+    paths:
+      - '**.yaml'
+      - '**.yml'
+      - 'automations/**'
+      - 'config/**'
+      - 'lovelace/**'
+      - 'tools/validate_entities.py'
+  push:
+    branches:
+      - master
+      - main
+      - development
+    paths:
+      - '**.yaml'
+      - '**.yml'
+      - 'automations/**'
+      - 'config/**'
+      - 'lovelace/**'
+      - 'tools/validate_entities.py'
+
+jobs:
+  validate-entities:
+    name: Entity Reference Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate entity references
+        run: |
+          python tools/validate_entities.py \
+            --config-dir . \
+            --report entity-validation-report.md
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: entity-validation-report
+          path: entity-validation-report.md
+          retention-days: 30
+
+      - name: Comment on PR with results
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('entity-validation-report.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## ❌ Entity Reference Validation Failed\n\n' + report
+            });
+
+      - name: Print summary
+        if: always()
+        run: |
+          if [ -f entity-validation-report.md ]; then
+            echo "📄 Validation Report:"
+            cat entity-validation-report.md
+          fi
