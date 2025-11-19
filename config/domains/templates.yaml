@@ -146,7 +146,7 @@
           {% if last_changed is not none %}
             {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
             {% set remaining = cycle_time - elapsed %}
-            {{ [remaining | round(0), 0] | max }} 
+            {{ [remaining | round(0), 0] | max }}
           {% else %}
             0
           {% endif %}
@@ -1724,7 +1724,10 @@
       state: "192.168.1.1"
       icon: mdi:router-network
 
+# ============================================================================
 # Roller Blinds - Simplified 3-state control
+# ============================================================================
+
 - cover:
   - platform: template
     covers:
