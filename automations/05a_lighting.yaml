@@ -514,3 +514,148 @@
     target:
       entity_id: light.xmas_lights_plug_socket_1
   mode: single
+- id: '1738899778775'
+  alias: Study Remote - Toggle Computer Desk
+  description: Lets the spare remote toggle the study computer desk smart switch without
+    having to pull out a phone
+  triggers:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: a957c4c649b876f99732f7bd44193c43
+      command: remote_button_short_press
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: a957c4c649b876f99732f7bd44193c43
+      command: remote_button_short_press
+  conditions: []
+  actions:
+  - action: switch.toggle
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.computer_plug_switch
+  mode: single
+- id: '1685157513874'
+  alias: Study Desk NFC - Toggle Desk Switch
+  description: Toggles the study desk switch when its NFC tag is scanned.
+  triggers:
+  - tag_id: c99ee431-d1d8-497c-9f0f-214994610aa6
+    trigger: tag
+  conditions: []
+  actions:
+  - action: switch.toggle
+    target:
+      entity_id: switch.computer_plug_switch
+  mode: single
+- id: '1707562883987'
+  alias: Study - Start Workday Desk Routine
+  description: Turns on the study desk light and preps climate when the workday toggle
+    activates.
+  triggers:
+  - trigger: state
+    entity_id: switch.working_from_home
+    to: 'on'
+    id: 'On'
+  - trigger: state
+    entity_id: switch.working_from_home
+    to: 'off'
+    id: 'Off'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 'On'
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.computer_desk_light_socket_1
+      - data:
+          preset_mode: comfort
+        action: climate.set_preset_mode
+        target:
+          entity_id: climate.henry_s_room_versatile_thermostat
+      - data:
+          hvac_mode: cool
+        action: climate.set_hvac_mode
+        target:
+          entity_id: climate.henry_s_room_versatile_thermostat
+    - conditions:
+      - condition: trigger
+        id:
+        - 'Off'
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.computer_desk_light_socket_1
+      - data:
+          hvac_mode: 'off'
+        action: climate.set_hvac_mode
+        target:
+          entity_id: climate.henry_s_room_versatile_thermostat
+  mode: single
+- id: '1684410637520'
+  alias: Workday Desk Power Prompt
+  description: Sends an actionable notification asking to power the computer desk
+    at the start of a workday.
+  trigger:
+  - platform: state
+    entity_id: input_boolean.computer_switch
+    to: 'on'
+  action:
+  - action: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: Workday Today
+      message: Want the computer desk on?
+      data:
+        actions:
+        - action: DESK_ON
+          title: 'On'
+        - action: DESK_OFF
+          title: 'Off'
+        - action: DESK_DELAY
+          title: Delay 5 min
+  - wait_for_trigger:
+    - platform: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: DESK_ON
+    - platform: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: DESK_OFF
+    - platform: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: DESK_DELAY
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{ wait.trigger.event.data.action == 'DESK_ON' }}"
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.computer_plug_switch
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.computer_switch
+    - conditions:
+      - condition: template
+        value_template: "{{ wait.trigger.event.data.action == 'DESK_OFF' }}"
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.computer_plug_switch
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.computer_switch
+    - conditions:
+      - condition: template
+        value_template: "{{ wait.trigger.event.data.action == 'DESK_DELAY' }}"
+      sequence:
+      - delay:
+          minutes: 5
+  mode: single
