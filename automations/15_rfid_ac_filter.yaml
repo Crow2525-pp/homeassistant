@@ -1,0 +1,54 @@
+---
+# ============================================================================
+# RFID AC FILTER TRACKING AUTOMATION
+# ============================================================================
+# Purpose: Update AC filter last-changed date when RFID tag scanned
+# NOTE: You MUST replace PLACEHOLDER_TAG_ID with your actual RFID tag ID
+#
+# To find your tag ID:
+# 1. Go to Settings > Devices & Services > Tags
+# 2. Scan your RFID tag
+# 3. Copy the Tag ID (UUID format: 12345678-1234-1234-1234-123456789abc)
+# 4. Replace PLACEHOLDER_TAG_ID in the trigger section below
+#
+# Documentation: docs/setup/RFID_AC_FILTER_SETUP.md
+# ============================================================================
+
+- id: rfid_ac_filter_downstairs_update
+  alias: "RFID - AC Filter Downstairs Updated"
+  description: "Update AC filter last changed date when RFID tag is scanned"
+
+  trigger:
+    - platform: tag
+      tag_id: PLACEHOLDER_TAG_ID  # TODO: REPLACE with actual tag ID from Settings > Tags
+      id: tag_scanned
+
+  condition: []
+
+  action:
+    # Action 1: Update input_datetime helper with current date
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.ac_filter_downstairs
+      data:
+        date: "{{ now().strftime('%Y-%m-%d') }}"
+
+    # Action 2: Send persistent notification confirming update
+    - action: notify.persistent_notification
+      data:
+        title: "AC Filter Changed"
+        message: >
+          Downstairs AC filter change recorded on {{ now().strftime('%B %d, %Y') }}.
+
+          Next recommended change: {{ (now() + timedelta(days=60)).strftime('%B %d, %Y') }}
+        data:
+          tag: "ac_filter_update"
+
+    # Action 3: Log event to logbook
+    - action: logbook.log
+      data:
+        name: "AC Filter Maintenance"
+        message: "Downstairs AC filter changed via RFID tag scan"
+        entity_id: input_datetime.ac_filter_downstairs
+
+  mode: single

@@ -1,0 +1,35 @@
+---
+# ============================================================================
+# MOTION DETECTION AUTOMATION
+# ============================================================================
+# Purpose: Alert on outside motion during night hours
+# Documentation: docs/setup/MOTION_FACE_DETECTION_SETUP.md
+# ============================================================================
+
+- id: motion_detection_outside
+  alias: "Security - Outside Motion Detection"
+  description: "Alert on outside motion during night hours (8 PM - 6 AM)"
+
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.frigate_person_detected
+      to: "on"
+      for:
+        seconds: 2
+
+  condition:
+    # Night mode (8 PM - 6 AM)
+    - condition: or
+      conditions:
+        - condition: time
+          after: "20:00:00"
+        - condition: time
+          before: "06:00:00"
+
+  action:
+    - service: notify.persistent_notification
+      data:
+        title: "Motion Detected"
+        message: "Outside motion detected at {{ now().strftime('%I:%M %p') }}"
+
+  mode: single

@@ -1,0 +1,76 @@
+---
+# ============================================================================
+# MOTION-BASED MORNING ROUTINE
+# ============================================================================
+# Purpose: One-time morning routine triggered by motion (5:30-7:00 AM)
+# Uses input_boolean.morning_routine_triggered_today as gate to prevent repeats
+# Documentation: docs/setup/MORNING_ROUTINE_SETUP.md
+# ============================================================================
+
+- id: morning_routine_motion_kitchen
+  alias: "Morning Routine - Motion Trigger (Kitchen)"
+  description: "One-time morning routine when motion detected in morning window"
+
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.aqara_motion_and_light_sensor_p2_occupancy
+      to: "on"
+      id: motion_detected
+
+  condition:
+    # Morning time window (5:30-7:00 AM)
+    - condition: time
+      after: "05:30:00"
+      before: "07:00:00"
+
+    # Gate: Routine not yet triggered today
+    - condition: state
+      entity_id: input_boolean.morning_routine_triggered_today
+      state: "off"
+
+    # Home occupied
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+
+  action:
+    # Step 1: Set gate to prevent re-triggering
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.morning_routine_triggered_today
+
+    # Step 2: Turn on kitchen lights
+    - service: light.turn_on
+      target:
+        entity_id: light.living_room_light_socket_1
+      data:
+        brightness_pct: 50
+        transition: 2
+
+    # Step 3: Log event
+    - service: logbook.log
+      data:
+        name: "Morning Routine"
+        message: "Morning routine activated via motion detection"
+
+  mode: single
+
+# ============================================================================
+# GATE RESET AUTOMATION (Required)
+# ============================================================================
+# Resets the gate at midnight so morning routine can trigger again next day
+
+- id: morning_routine_gate_reset
+  alias: "Morning Routine - Reset Gate Daily (Midnight)"
+  description: "Reset morning trigger gate at midnight"
+
+  trigger:
+    - platform: time
+      at: "00:00:00"
+
+  action:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.morning_routine_triggered_today
+
+  mode: single
