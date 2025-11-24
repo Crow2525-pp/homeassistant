@@ -146,7 +146,7 @@
           {% if last_changed is not none %}
             {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
             {% set remaining = cycle_time - elapsed %}
-            {{ [remaining | round(0), 0] | max }} 
+            {{ [remaining | round(0), 0] | max }}
           {% else %}
             0
           {% endif %}
@@ -1175,7 +1175,7 @@
           {% endif %}
         {% endif %}
         {% set study_doors = [
-          ("Henry's Room Door", 'binary_sensor.henry_door_sensor_magnet_opening')
+          ("Study Door", 'binary_sensor.henry_door_sensor_magnet_opening')
         ] %}
         {% set study = namespace(open=[]) %}
         {% for name, entity in study_doors %}
@@ -1187,11 +1187,11 @@
         {% if study_climate not in ['off', 'unavailable', 'unknown'] and study.open %}
           {% set mode = state_attr('climate.study_ac', 'hvac_action') or 'running' %}
           {% if mode == 'cooling' %}
-            {% set alerts.items = alerts.items + ["- Henry's Room AC: " ~ (study.open | join(', '))] %}
+            {% set alerts.items = alerts.items + ["- Study AC: " ~ (study.open | join(', '))] %}
           {% elif mode == 'heating' %}
-            {% set alerts.items = alerts.items + ["- Henry's Room Heater: " ~ (study.open | join(', '))] %}
+            {% set alerts.items = alerts.items + ["- Study Heater: " ~ (study.open | join(', '))] %}
           {% else %}
-            {% set alerts.items = alerts.items + ["- Henry's Room HVAC: " ~ (study.open | join(', '))] %}
+            {% set alerts.items = alerts.items + ["- Study HVAC: " ~ (study.open | join(', '))] %}
           {% endif %}
         {% endif %}
         {% if alerts.items %}
