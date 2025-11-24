@@ -253,4 +253,3 @@ Once this is working:
 2. Add them to your scripts.yaml
 3. Test the power control buttons
 4. Report back with success/issues
-

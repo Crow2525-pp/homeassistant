@@ -1,0 +1,43 @@
+---
+# ============================================================================
+# MORNING PREHEAT AUTOMATION
+# ============================================================================
+# Purpose: Intelligently preheat downstairs area before wake-up (5:30 AM)
+# Documentation: docs/setup/MORNING_ROUTINE_SETUP.md
+# ============================================================================
+
+- id: morning_preheat_downstairs
+  alias: "Morning Routine - Preheat Downstairs (5:30 AM)"
+  description: "Intelligent downstairs heating 30 minutes before wake-up"
+
+  trigger:
+    - platform: time
+      at: "05:30:00"
+      id: scheduled_preheat
+
+  condition:
+    # Home occupied
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+
+    # Only during morning window
+    - condition: time
+      after: "05:30:00"
+      before: "06:30:00"
+
+  action:
+    # Set thermostat to comfort mode
+    - service: climate.set_preset_mode
+      target:
+        entity_id: climate.living_room_versatile_thermastat
+      data:
+        preset_mode: comfort
+
+    # Log action
+    - service: logbook.log
+      data:
+        name: "Morning Preheat"
+        message: "Downstairs heating activated at 5:30 AM (comfort mode)"
+
+  mode: single

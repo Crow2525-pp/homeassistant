@@ -572,7 +572,7 @@
       sequence:
       - action: switch.turn_on
         target:
-          entity_id: switch.computer_desk_light_socket_1
+          entity_id: switch.computer_plug_switch
       - data:
           preset_mode: comfort
         action: climate.set_preset_mode
@@ -590,7 +590,7 @@
       sequence:
       - action: switch.turn_off
         target:
-          entity_id: switch.computer_desk_light_socket_1
+          entity_id: switch.computer_plug_switch
       - data:
           hvac_mode: 'off'
         action: climate.set_hvac_mode

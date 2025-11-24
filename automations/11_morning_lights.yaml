@@ -1,0 +1,48 @@
+---
+# ============================================================================
+# MORNING LIGHTING AUTOMATION
+# ============================================================================
+# Purpose: Turn on computer room light at 5:00 AM for gentle wake-up
+# Documentation: docs/setup/MORNING_ROUTINE_SETUP.md
+# ============================================================================
+
+- id: morning_lights_computer_room
+  alias: "Morning Routine - Lights (5:00 AM)"
+  description: "Turn on computer room light for gradual wake-up"
+
+  trigger:
+    - platform: time
+      at: "05:00:00"
+      id: scheduled_lights
+
+  condition:
+    # Not disabled by user
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+
+    # Only weekdays (Monday-Friday)
+    - condition: time
+      weekday:
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
+
+  action:
+    # Turn on computer desk light with gentle brightness
+    - service: light.turn_on
+      target:
+        entity_id: light.computer_desk_light_socket_1
+      data:
+        brightness_pct: 30
+        transition: 5
+
+    # Log action for debugging
+    - service: logbook.log
+      data:
+        name: "Morning Lights"
+        message: "Morning lights activated at 5:00 AM"
+
+  mode: single
