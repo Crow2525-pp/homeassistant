@@ -63,14 +63,17 @@ cards:
     card:
       type: vertical-stack
       cards:
-        # Quick turn-off buttons (2x2 grid)
+        # HVAC turn-off button (only shows when that room's door is open + HVAC is on)
         - type: grid
-          columns: 2
+          columns: 1
           square: false
           cards:
-            # Living Room AC OFF
+            # Living Room AC OFF (only if Living Room door is open)
             - type: conditional
               conditions:
+                - condition: state
+                  entity: binary_sensor.living_room_door_sensor_opening
+                  state: 'on'
                 - condition: state
                   entity: climate.living_room_versatile_thermostat
                   state_not: 'off'
@@ -103,9 +106,12 @@ cards:
                       box-shadow: 0 6px 12px rgba(225, 29, 72, 0.4);
                     }
 
-            # Master Bedroom AC OFF
+            # Master Bedroom AC OFF (only if Master Bedroom door is open)
             - type: conditional
               conditions:
+                - condition: state
+                  entity: binary_sensor.master_bedroom_door_sensor_opening
+                  state: 'on'
                 - condition: state
                   entity: climate.masterbed_versatile_thermostat
                   state_not: 'off'
@@ -138,9 +144,12 @@ cards:
                       box-shadow: 0 6px 12px rgba(225, 29, 72, 0.4);
                     }
 
-            # Study AC OFF
+            # Study AC OFF (only if Study door is open)
             - type: conditional
               conditions:
+                - condition: state
+                  entity: binary_sensor.henry_door_sensor_magnet_opening
+                  state: 'on'
                 - condition: state
                   entity: climate.henry_s_room_versatile_thermostat
                   state_not: 'off'
@@ -173,9 +182,12 @@ cards:
                       box-shadow: 0 6px 12px rgba(225, 29, 72, 0.4);
                     }
 
-            # Otto's Room AC OFF
+            # Otto's Room AC OFF (only if Otto's door is open)
             - type: conditional
               conditions:
+                - condition: state
+                  entity: binary_sensor.otto_room_door_sensor_opening
+                  state: 'on'
                 - condition: state
                   entity: climate.otto_s_room
                   state_not: 'off'
