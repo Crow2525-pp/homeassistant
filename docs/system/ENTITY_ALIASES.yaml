@@ -1,0 +1,226 @@
+# ENTITY_ALIASES.yaml - Entity Deprecation and Alias Mappings
+# Purpose: Document entity renames, deprecations, and aliases for LLM understanding
+# Status: Phase 1 - Core entity mappings
+# Generated: 2025-11-24
+
+version: "1.0"
+last_updated: 2025-11-24
+
+---
+
+# ============================================================================
+# CLIMATE ENTITIES - Base AC entities deprecated in favor of Versatile Thermostat
+# ============================================================================
+climate_deprecations:
+  living_room_ac:
+    deprecated: true
+    current_entity_id: climate.living_room_ac
+    replacement_entity_id: climate.living_room_versatile_thermostat
+    reason: "Versatile Thermostat provides superior control and preset management"
+    replaced_in_automations: true
+    migration_status: complete
+    notes: "All automations using climate.living_room_ac should be updated to use climate.living_room_versatile_thermostat"
+
+  masterbed_ac:
+    deprecated: true
+    current_entity_id: climate.masterbed_ac
+    replacement_entity_id: climate.masterbed_versatile_thermostat
+    reason: "Versatile Thermostat provides superior control and preset management"
+    replaced_in_automations: true
+    migration_status: complete
+    notes: "All automations using climate.masterbed_ac should be updated to use climate.masterbed_versatile_thermostat"
+
+  study_ac:
+    deprecated: true
+    current_entity_id: climate.study_ac
+    replacement_entity_id: climate.henry_s_room_versatile_thermostat
+    reason: "Versatile Thermostat provides superior control and preset management"
+    replaced_in_automations: true
+    migration_status: complete
+    notes: "Display as 'Study' not 'Henry's Room' in all UI contexts"
+
+  otto_s_ac:
+    deprecated: true
+    current_entity_id: climate.otto_s_ac
+    replacement_entity_id: climate.otto_s_room
+    reason: "Versatile Thermostat provides superior control and preset management"
+    replaced_in_automations: true
+    migration_status: complete
+    notes: |
+      All automations using climate.otto_s_ac should be updated to use climate.otto_s_room
+      Note: Otto's room entity uses different naming convention (climate.otto_s_room not climate.otto_s_room_versatile_thermostat)
+
+---
+
+# ============================================================================
+# ROOM NAME ALIASES - Display name mappings for UI consistency
+# ============================================================================
+room_aliases:
+  study:
+    primary_name: "Study"
+    entity_id: climate.henry_s_room_versatile_thermostat
+    aliases:
+      - henry_s_room
+      - henry's_room
+      - lucas_room
+      - lucas'_room
+      - study_room
+    notes: |
+      The Study room has multiple naming conventions in different systems.
+      - Door sensor: binary_sensor.henry_door_sensor_magnet_opening
+      - Thermostat: climate.henry_s_room_versatile_thermostat (display as "Study")
+      - Display in all UIs as "Study" NOT "Henry's Room"
+
+  otto:
+    primary_name: "Otto's Room"
+    entity_id: climate.otto_s_room
+    aliases:
+      - otto_s_room
+      - ottos_room
+    notes: "Consistent naming for Otto's room climate control"
+
+  living_room:
+    primary_name: "Living Room"
+    entity_id: climate.living_room_versatile_thermostat
+    aliases:
+      - lounge
+      - living_room_lounge
+    notes: "Living room may also be referred to as lounge in some contexts"
+
+  master_bedroom:
+    primary_name: "Master Bedroom"
+    entity_id: climate.masterbed_versatile_thermostat
+    aliases:
+      - masterbed
+      - master_bed
+    notes: "Master bedroom thermostat"
+
+---
+
+# ============================================================================
+# SENSOR ENTITY CHANGES - Renames and replacements
+# ============================================================================
+sensor_changes:
+  note: "Document any sensor entity changes here as they occur"
+
+---
+
+# ============================================================================
+# SWITCH ENTITY CHANGES - Device control switches
+# ============================================================================
+switch_changes:
+  computer_plug_switch:
+    status: active
+    device_name: Computer
+    integration: ZHA (Zigbee)
+    notes: "Controls computer plug power"
+    uses_in_automations:
+      - automation.computer_plug_automation
+
+  dryer_power_plug_switch:
+    status: active
+    device_name: Dryer
+    integration: ZHA (Zigbee)
+    notes: "Dryer power control - used with input_boolean.dryer_on for state tracking"
+    uses_in_automations: null
+
+  dishwasher_smart_plug_outlet:
+    status: active
+    device_name: Dishwasher
+    integration: Meross LAN
+    notes: "Dishwasher power control - used with input_boolean.dishwasher_on for state tracking"
+    uses_in_automations: null
+
+---
+
+# ============================================================================
+# INPUT BOOLEAN HELPERS - Status tracking helpers
+# ============================================================================
+input_booleans:
+  washing_machine_on:
+    entity_id: input_boolean.washing_machine_on
+    purpose: Track washing machine running status
+    used_for: Alert card displaying running appliances
+
+  dryer_on:
+    entity_id: input_boolean.dryer_on
+    purpose: Track dryer running status
+    used_for: Alert card displaying running appliances
+
+  dishwasher_on:
+    entity_id: input_boolean.dishwasher_on
+    purpose: Track dishwasher running status
+    used_for: Alert card displaying running appliances
+
+  ottos_door_open:
+    entity_id: input_boolean.ottos_door_open
+    purpose: Track Otto's bedroom door open status
+    used_for: Alert card display
+
+---
+
+# ============================================================================
+# NAMING CONVENTIONS - Standards for entity naming
+# ============================================================================
+naming_conventions:
+  climate_thermostats:
+    pattern: "climate.{room}_versatile_thermostat OR climate.{room}"
+    examples:
+      - climate.living_room_versatile_thermostat
+      - climate.masterbed_versatile_thermostat
+      - climate.henry_s_room_versatile_thermostat
+      - climate.otto_s_room
+    notes: "Versatile Thermostat entities are preferred. Base AC entities deprecated."
+
+  binary_sensors_doors:
+    pattern: "binary_sensor.{room}_door_sensor*"
+    examples:
+      - binary_sensor.henry_door_sensor_magnet_opening
+    notes: "Door sensors use opening attribute to detect door state"
+
+  switches_power:
+    pattern: "switch.{device}_plug_switch OR switch.{device}_switch"
+    examples:
+      - switch.computer_plug_switch
+      - switch.dryer_power_plug_switch
+      - switch.dishwasher_smart_plug_outlet
+    notes: "Power switches for controllable outlets and appliances"
+
+  sensors_appliance:
+    pattern: "sensor.{appliance}_estimated_remaining"
+    examples:
+      - sensor.washing_machine_estimated_remaining
+      - sensor.dryer_estimated_remaining
+      - sensor.dishwasher_estimated_remaining
+    notes: "Time remaining sensors in minutes for cycle tracking"
+
+---
+
+# ============================================================================
+# MIGRATION NOTES
+# ============================================================================
+migration_notes:
+  climate_migration:
+    status: complete
+    changes:
+      - "Replaced climate.living_room_ac with climate.living_room_versatile_thermostat"
+      - "Replaced climate.masterbed_ac with climate.masterbed_versatile_thermostat"
+      - "Replaced climate.study_ac with climate.henry_s_room_versatile_thermostat"
+      - "Replaced climate.otto_s_ac with climate.otto_s_room"
+    files_updated:
+      - "lovelace/cards/alerts.yaml - Door-open HVAC alert buttons"
+      - "config/domains/templates.yaml - HVAC door open alert template"
+      - "automations/* - Various automations using climate entities"
+    testing_status: "All GitHub Actions tests passed"
+    date_completed: 2025-11-24
+
+  room_naming_clarity:
+    status: complete
+    changes:
+      - "Study room displays as 'Study' not 'Henry's Room' in all UI elements"
+      - "Updated templates.yaml to use 'Study' labels"
+      - "Updated alerts.yaml to show 'Turn Off Study'"
+    files_updated:
+      - "config/domains/templates.yaml"
+      - "lovelace/cards/alerts.yaml"
+    date_completed: 2025-11-24

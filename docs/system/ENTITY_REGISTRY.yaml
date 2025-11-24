@@ -1,0 +1,386 @@
+# ENTITY_REGISTRY.yaml - Structured entity metadata with priorities
+# Purpose: Enable the LLM and automations to validate entities and understand which to prefer
+# Status: Phase 1 - Core entities (Climate, Lighting, Power Control)
+# Generated: 2025-11-24
+
+version: "1.0"
+last_updated: 2025-11-24
+note: "This registry focuses on entities used in automations and critical systems. Use TIER guidance for entity selection."
+
+---
+
+# ============================================================================
+# CLIMATE DOMAIN - HVAC Systems and Thermostats
+# ============================================================================
+climate:
+  description: HVAC systems, heat pumps, and thermostats
+  total_entities: 8
+  priority_guidance: |
+    ALWAYS prefer Versatile Climate entities (Versatile Thermostat) over base climate entities.
+    Versatile Thermostat provides better control, presets, and integration options.
+    Base climate entities (climate.*_ac) are deprecated but kept for backwards compatibility.
+
+  entities:
+    # TIER 1 - PRIMARY (Always prefer these)
+    living_room_versatile_thermostat:
+      entity_id: climate.living_room_versatile_thermostat
+      device: Living Room Versatile Thermostat
+      room: living_room
+      status: active
+      tier: 1
+      description: Living room climate control with Versatile Thermostat integration
+      manufacturer: Versatile Thermostat (HA Integration)
+      capabilities:
+        - set_temperature
+        - set_hvac_mode: [heat, cool, dry, fan_only, off]
+        - set_preset_mode: [comfort, eco, boost, frost, frost_protection]
+      aliases: [living_room_vc, lr_thermostat]
+      notes: "Preferred over climate.living_room_ac"
+      uses_in_automations: 2
+
+    masterbed_versatile_thermostat:
+      entity_id: climate.masterbed_versatile_thermostat
+      device: Master Bedroom Versatile Thermostat
+      room: masterbed
+      status: active
+      tier: 1
+      description: Master bedroom climate control with Versatile Thermostat integration
+      manufacturer: Versatile Thermostat (HA Integration)
+      capabilities:
+        - set_temperature
+        - set_hvac_mode: [heat, cool, dry, fan_only, off]
+        - set_preset_mode: [comfort, eco, boost, frost, frost_protection]
+      aliases: [masterbed_vc, mb_thermostat]
+      notes: "Preferred over climate.masterbed_ac"
+      uses_in_automations: 2
+
+    henry_s_room_versatile_thermostat:
+      entity_id: climate.henry_s_room_versatile_thermostat
+      device: Study/Henry's Room Versatile Thermostat
+      room: study
+      status: active
+      tier: 1
+      description: Study/Henry's room climate control with Versatile Thermostat (Display as 'Study' in UI)
+      manufacturer: Versatile Thermostat (HA Integration)
+      room_name: Study
+      room_aliases: [henry_s_room, lucas_room, study_ac]
+      capabilities:
+        - set_temperature
+        - set_hvac_mode: [heat, cool, dry, fan_only, off]
+        - set_preset_mode: [comfort, eco, boost, frost, frost_protection]
+      aliases: [study_vc, henry_thermostat, lucas_thermostat]
+      notes: "Preferred over climate.study_ac. Display as 'Study' not 'Henry's Room'"
+      uses_in_automations: 2
+
+    otto_s_room_versatile_thermostat:
+      entity_id: climate.otto_s_room
+      device: Otto's Room Versatile Thermostat
+      room: otto
+      status: active
+      tier: 1
+      description: Otto's room climate control with Versatile Thermostat integration
+      manufacturer: Versatile Thermostat (HA Integration)
+      capabilities:
+        - set_temperature
+        - set_hvac_mode: [heat, cool, dry, fan_only, off]
+        - set_preset_mode: [comfort, eco, boost, frost, frost_protection]
+      aliases: [otto_vc, ottos_room_ac]
+      notes: "Preferred over deprecated base climate entity"
+      uses_in_automations: 2
+
+    # TIER 2 - SECONDARY (Use if Tier 1 not available - deprecated)
+    living_room_ac:
+      entity_id: climate.living_room_ac
+      device: Living Room AC (DEPRECATED)
+      room: living_room
+      status: deprecated
+      tier: 2
+      description: Living room climate control (base entity, DEPRECATED)
+      manufacturer: Unknown
+      reason_deprecated: "Superseded by Versatile Climate thermostats"
+      replacement: climate.living_room_versatile_thermostat
+      notes: "Keep for backwards compatibility only. DO NOT use in new automations."
+
+    masterbed_ac:
+      entity_id: climate.masterbed_ac
+      device: Master Bedroom AC (DEPRECATED)
+      room: masterbed
+      status: deprecated
+      tier: 2
+      description: Master bedroom climate control (base entity, DEPRECATED)
+      manufacturer: Unknown
+      reason_deprecated: "Superseded by Versatile Climate thermostats"
+      replacement: climate.masterbed_versatile_thermostat
+      notes: "Keep for backwards compatibility only. DO NOT use in new automations."
+
+    study_ac:
+      entity_id: climate.study_ac
+      device: Study AC (DEPRECATED)
+      room: study
+      status: deprecated
+      tier: 2
+      description: Study climate control (base entity, DEPRECATED)
+      manufacturer: Unknown
+      reason_deprecated: "Superseded by Versatile Climate thermostats"
+      replacement: climate.henry_s_room_versatile_thermostat
+      notes: "Keep for backwards compatibility only. DO NOT use in new automations."
+
+    otto_s_ac:
+      entity_id: climate.otto_s_ac
+      device: Otto's AC (DEPRECATED)
+      room: otto
+      status: deprecated
+      tier: 2
+      description: Otto's room climate control (base entity, DEPRECATED)
+      manufacturer: Unknown
+      reason_deprecated: "Superseded by Versatile Climate thermostats"
+      replacement: climate.otto_s_room
+      notes: "Keep for backwards compatibility only. DO NOT use in new automations."
+
+---
+
+# ============================================================================
+# COVER DOMAIN - Doors, Blinds, and Covers
+# ============================================================================
+cover:
+  description: Garage doors, blinds, curtains, and other movable covers
+  total_entities: 4
+  priority_guidance: |
+    Use the Smart Garage Door entity for garage automation.
+    Blind entities are primarily for manual control.
+
+  entities:
+    smart_garage_door_garage:
+      entity_id: cover.smart_garage_door_garage
+      device: Smart Garage Door
+      location: garage
+      status: active
+      tier: 1
+      description: Smart garage door with open/close control
+      manufacturer: Smart Garage Door (Integration)
+      capabilities:
+        - open_cover
+        - close_cover
+        - stop_cover
+        - set_cover_position
+      notes: "Used for garage door open alert automation"
+      uses_in_automations: 1
+
+---
+
+# ============================================================================
+# INPUT BOOLEAN DOMAIN - Helper Toggles
+# ============================================================================
+input_boolean:
+  description: Custom boolean helpers for tracking appliance status and other states
+  total_entities: 46
+  priority_guidance: |
+    These are manually created helpers for tracking state.
+    Use in automations and automations for conditional logic.
+
+  key_entities:
+    washing_machine_on:
+      entity_id: input_boolean.washing_machine_on
+      status: active
+      tier: 1
+      description: Tracks if washing machine is currently running
+      uses_in_automations: 1
+
+    dryer_on:
+      entity_id: input_boolean.dryer_on
+      status: active
+      tier: 1
+      description: Tracks if dryer is currently running
+      uses_in_automations: 1
+
+    dishwasher_on:
+      entity_id: input_boolean.dishwasher_on
+      status: active
+      tier: 1
+      description: Tracks if dishwasher is currently running
+      uses_in_automations: 1
+
+    ottos_door_open:
+      entity_id: input_boolean.ottos_door_open
+      status: active
+      tier: 1
+      description: Tracks if Otto's bedroom door is open
+      uses_in_automations: 1
+
+---
+
+# ============================================================================
+# BINARY SENSOR DOMAIN - State Sensors
+# ============================================================================
+binary_sensor:
+  description: Binary state sensors (on/off, open/closed, etc.)
+  total_entities: 246
+  priority_guidance: |
+    Focus on door/window sensors and key alert sensors.
+    Many diagnostic sensors can be safely disabled.
+
+  key_entities:
+    hvac_door_open_alert:
+      entity_id: binary_sensor.hvac_door_open_alert
+      status: active
+      tier: 1
+      description: Alert when any door is open while HVAC is running
+      integration: template
+      uses_in_automations: 1
+
+    henry_door_sensor_magnet_opening:
+      entity_id: binary_sensor.henry_door_sensor_magnet_opening
+      status: active
+      tier: 1
+      description: Study/Henry's room door open sensor
+      manufacturer: Xiaomi
+      device_name: Study Door
+      room_aliases: [study_door, lucas_room_door]
+      uses_in_automations: 1
+
+---
+
+# ============================================================================
+# SENSOR DOMAIN - Numeric and Text Sensors
+# ============================================================================
+sensor:
+  description: State reporting sensors (temperature, humidity, power, time, etc.)
+  total_entities: 2542
+  priority_guidance: |
+    Too many sensors to list all. Focus on key ones for automations.
+    Most diagnostic/monitoring sensors can be safely disabled.
+
+  key_entities:
+    washing_machine_estimated_remaining:
+      entity_id: sensor.washing_machine_estimated_remaining
+      status: active
+      tier: 1
+      description: Estimated minutes remaining for washing machine cycle
+      uses_in_automations: 1
+
+    dryer_estimated_remaining:
+      entity_id: sensor.dryer_estimated_remaining
+      status: active
+      tier: 1
+      description: Estimated minutes remaining for dryer cycle
+      uses_in_automations: 1
+
+    dishwasher_estimated_remaining:
+      entity_id: sensor.dishwasher_estimated_remaining
+      status: active
+      tier: 1
+      description: Estimated minutes remaining for dishwasher cycle
+      uses_in_automations: 1
+
+---
+
+# ============================================================================
+# SWITCH DOMAIN - Power and Device Control
+# ============================================================================
+switch:
+  description: Power switches, smart outlets, and control switches
+  total_entities: 168
+  priority_guidance: |
+    Prioritize physical device switches over integration/diagnostic switches.
+    Many integration pre-release and monitoring switches can be disabled.
+
+  key_entities:
+    computer_plug_switch:
+      entity_id: switch.computer_plug_switch
+      status: active
+      tier: 1
+      description: Computer plug switch for power control
+      manufacturer: ZHA (Zigbee)
+      device_name: Computer Plug
+      uses_in_automations: 1
+
+    dryer_power_plug_switch:
+      entity_id: switch.dryer_power_plug_switch
+      status: active
+      tier: 1
+      description: Dryer power plug switch
+      manufacturer: ZHA (Zigbee)
+      uses_in_automations: 1
+
+    dishwasher_smart_plug_outlet:
+      entity_id: switch.dishwasher_smart_plug_outlet
+      status: active
+      tier: 1
+      description: Dishwasher smart plug outlet switch
+      manufacturer: Meross LAN
+      uses_in_automations: 1
+
+---
+
+# ============================================================================
+# AUTOMATION DOMAIN - Automations
+# ============================================================================
+automation:
+  description: Home Assistant automations (user-created and system)
+  total_entities: 157
+  priority_guidance: |
+    Refer to automations directory for current automation list.
+    This registry tracks key automation purposes.
+
+  key_automations:
+    daily_backup:
+      entity_id: automation.daily_backup
+      status: active
+      tier: 1
+      description: Daily backup at 3:00 AM
+      created: 2025-11-24
+
+    morning_lights:
+      entity_id: automation.morning_lights
+      status: active
+      tier: 1
+      description: Wake-up lighting sequence at 5:00 AM
+      created: 2025-11-24
+
+    morning_preheat:
+      entity_id: automation.morning_preheat
+      status: active
+      tier: 1
+      description: HVAC preheat starting at 5:30 AM
+      created: 2025-11-24
+
+    motion_detection:
+      entity_id: automation.motion_detection
+      status: active
+      tier: 1
+      description: Night motion detection alerts
+      created: 2025-11-24
+
+    motion_morning_routine:
+      entity_id: automation.motion_morning_routine
+      status: active
+      tier: 1
+      description: Motion-triggered morning sequence with gate reset
+      created: 2025-11-24
+
+    rfid_ac_filter:
+      entity_id: automation.rfid_ac_filter
+      status: active
+      tier: 1
+      description: RFID tag AC filter tracking
+      created: 2025-11-24
+
+---
+
+# ============================================================================
+# NOTES & METADATA
+# ============================================================================
+notes:
+  last_cleaned: 2025-11-24
+  cleanup_actions:
+    - "Removed 12 empty devices from device registry"
+  next_steps:
+    - "Complete ENTITY_ALIASES.yaml for all deprecated entities"
+    - "Create validation script to check entities exist"
+    - "Document entity relationships and dependencies"
+  disabled_entities_review:
+    - "See docs/reference/disabled_entities.txt for comprehensive list of disabled entities"
+    - "Review and remove stale diagnostic/monitoring entities in future update"
+  orphaned_entities_review:
+    - "See docs/reference/orphaned_entities.txt for entities without devices"
+    - "Review manual helpers to identify ones that can be deleted"
