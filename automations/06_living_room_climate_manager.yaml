@@ -744,18 +744,5 @@
                 entity_id: climate.living_room_versatile_thermastat
               data:
                 hvac_mode: 'off'
-    default:
-    - choose:
-      - conditions:
-        - condition: not
-          conditions:
-          - condition: state
-            entity_id: climate.living_room_versatile_thermastat
-            state: 'off'
-        sequence:
-        - service: climate.set_hvac_mode
-          target:
-            entity_id: climate.living_room_versatile_thermastat
-          data:
-            hvac_mode: 'off'
+    default: []
   mode: single

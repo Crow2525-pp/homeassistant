@@ -672,18 +672,5 @@
                 entity_id: climate.otto_s_room
               data:
                 hvac_mode: 'off'
-    default:
-    - choose:
-      - conditions:
-        - condition: not
-          conditions:
-          - condition: state
-            entity_id: climate.otto_s_room
-            state: 'off'
-        sequence:
-        - service: climate.set_hvac_mode
-          target:
-            entity_id: climate.otto_s_room
-          data:
-            hvac_mode: 'off'
+    default: []
   mode: single
