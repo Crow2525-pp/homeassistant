@@ -5,10 +5,10 @@
 # Purpose: Automated daily backups at 3:00 AM with notifications
 # Trigger: Time-based (3:00 AM daily)
 # Action: Create backup, send notification
-# Requirements: Home Assistant 2024.9+ (backup.create service)
+# Requirements: Home Assistant with Supervisor backups (hassio.backup_full service)
 #
 # Setup Instructions:
-# 1. Verify backup.create service exists (Developer Tools > Services)
+# 1. Verify hassio.backup_full service exists (Developer Tools > Services)
 # 2. Customize notification service (persistent, mobile, email)
 # 3. (Optional) Adjust backup time
 # 4. Test backup manually before deploying
@@ -47,12 +47,13 @@
   # ACTIONS: Create Backup and Notify
   # ============================================================================
   action:
-    # Action 1: Create backup
-    - service: backup.create
-      data: {}  # Leave empty for default backup (full backup)
+    # Action 1: Create backup (Supervisor service for widest compatibility)
+    - service: hassio.backup_full
+      data:
+        name: "Auto Backup {{ now().strftime('%Y-%m-%d') }}"
         # Optional parameters:
-        # name: "Auto Backup {{ now().strftime('%Y-%m-%d') }}"
         # password: "your_encryption_password"  # Encrypt backup
+        # Note: On HA 2024.9+ you can switch to `backup.create` if available.
 
     # Action 2: Wait for backup to complete (optional but recommended)
     - delay:
@@ -61,7 +62,7 @@
     # Action 3: Send success notification
     - service: notify.persistent_notification  # CUSTOMIZE: Change to your notification service
       data:
-        title: "✓ Backup Successful"
+        title: "Backup Successful"
         message: >
           Daily backup completed successfully.
 
@@ -121,7 +122,7 @@
 #     # Send high-priority failure notification
 #     - service: notify.persistent_notification
 #       data:
-#         title: "⚠️ Backup Failed"
+#         title: "Backup Failed"
 #         message: >
 #           Daily backup failed at {{ now().strftime('%I:%M %p') }}.
 #
