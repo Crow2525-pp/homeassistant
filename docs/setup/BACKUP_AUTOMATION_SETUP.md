@@ -28,7 +28,7 @@ This guide sets up automated daily backups of your Home Assistant configuration 
 
 ## Prerequisites
 
-- Home Assistant 2024.9 or newer (`backup.create` service)
+- Home Assistant with Supervisor backups enabled (`hassio.backup_full` service). On HA 2024.9+ you can optionally use the newer `backup.create` service.
 - Sufficient disk space for backups (2-5 GB recommended)
 - Notification service configured (persistent, mobile app, or email)
 - (Optional) Cloud storage integration for off-site backup
@@ -39,12 +39,11 @@ This guide sets up automated daily backups of your Home Assistant configuration 
 
 ## Step 1: Verify Backup Service Available
 
-Check if `backup.create` service exists:
+Check for a supported backup service:
 
 1. Go to **Developer Tools** > **Services**
-2. Search for `backup.create`
-3. If found: Home Assistant 2024.9+ - continue
-4. If not found: Update Home Assistant or use legacy backup method
+2. Prefer `backup.create` on HA 2024.9+; otherwise ensure `hassio.backup_full` exists
+3. If neither service appears, enable Supervisor backups or update Home Assistant before proceeding
 
 ---
 
@@ -69,8 +68,8 @@ Copy the template automation from `automations/99_daily_backup_template.yaml` or
 
 1. **Action 1:** Create backup
    - Action type: **Call service**
-   - Service: `backup.create`
-   - Service data: (leave empty for default)
+   - Service: `hassio.backup_full` (or `backup.create` if available)
+   - Service data: e.g. `name: "Auto Backup {{ now().strftime('%Y-%m-%d') }}"`
 
 2. **Action 2:** Notify on success
    - Action type: **Call service**
