@@ -26,40 +26,6 @@
 # OPTION B: NAS/SAMBA BACKUP
 # ============================================================================
 
-- id: system_backup_to_nas
-  alias: "System - Backup to NAS"
-  description: "Copy daily backup to NAS for off-site storage"
-
-  trigger:
-    # Run 30 minutes after daily backup
-    - platform: time
-      at: "03:30:00"
-
-  condition:
-    # Verify NAS is reachable
-    # CUSTOMIZE: Add your NAS availability sensor
-    # - condition: state
-    #   entity_id: binary_sensor.nas_available
-    #   state: "on"
-
-  action:
-    # Copy latest backup to NAS
-    - service: shell_command.backup_to_nas  # Define shell command in configuration.yaml
-
-    # Wait for copy to complete
-    - delay:
-        seconds: 30
-
-    # Notify on success
-    - service: notify.persistent_notification
-      data:
-        title: "NAS Backup Complete"
-        message: "Backup uploaded to NAS at {{ now().strftime('%I:%M %p') }}"
-        data:
-          tag: "nas_backup"
-
-  mode: single
-
 # ============================================================================
 # OPTION C: DROPBOX/ONEDRIVE BACKUP (Requires Integration)
 # ============================================================================
