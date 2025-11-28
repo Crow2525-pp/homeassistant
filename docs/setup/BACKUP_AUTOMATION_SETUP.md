@@ -165,7 +165,7 @@ Use the template automation `automations/99_offsite_backup_template.yaml`:
 
 1. Ensure Samba Share integration is configured
 2. Mount network share in Home Assistant
-3. Create automation to copy backup file to NAS
+3. Create automation to copy backup file to NAS (template includes a `has_service` check so it will skip and notify if the shell command is missing)
 
 **Example:**
 ```yaml
@@ -174,8 +174,18 @@ Use the template automation `automations/99_offsite_backup_template.yaml`:
   trigger:
     - platform: time
       at: "03:30:00"
-  action:
-    - service: shell_command.backup_to_nas
+action:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ has_service('shell_command.backup_to_nas') }}"
+          sequence:
+            - service: shell_command.backup_to_nas
+        default:
+          - service: notify.persistent_notification
+            data:
+              title: "NAS Backup Skipped"
+              message: "shell_command.backup_to_nas is not configured. Add it to configuration.yaml."
 ```
 
 Define shell command in `configuration.yaml`:
