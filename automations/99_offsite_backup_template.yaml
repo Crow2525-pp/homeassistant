@@ -43,20 +43,35 @@
     #   state: "on"
 
   action:
-    # Copy latest backup to NAS
-    - service: shell_command.backup_to_nas  # Define shell command in configuration.yaml
+    # Only run if the shell command exists; otherwise notify and stop.
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ has_service('shell_command.backup_to_nas') }}"
+          sequence:
+            # Copy latest backup to NAS
+            - service: shell_command.backup_to_nas  # Define shell command in configuration.yaml
 
-    # Wait for copy to complete
-    - delay:
-        seconds: 30
+            # Wait for copy to complete
+            - delay:
+                seconds: 30
 
-    # Notify on success
-    - service: notify.persistent_notification
-      data:
-        title: "NAS Backup Complete"
-        message: "Backup uploaded to NAS at {{ now().strftime('%I:%M %p') }}"
-        data:
-          tag: "nas_backup"
+            # Notify on success
+            - service: notify.persistent_notification
+              data:
+                title: "NAS Backup Complete"
+                message: "Backup uploaded to NAS at {{ now().strftime('%I:%M %p') }}"
+                data:
+                  tag: "nas_backup"
+      default:
+        - service: notify.persistent_notification
+          data:
+            title: "NAS Backup Skipped"
+            message: >
+              NAS backup automation skipped because shell_command.backup_to_nas
+              is not configured. Add it to configuration.yaml or disable this automation.
+            data:
+              tag: "nas_backup_missing"
 
   mode: single
 
