@@ -62,7 +62,7 @@ lovelace:
       type: module
 
   dashboards:
-    lite_dashboard:
+    lite-dashboard:
       mode: yaml
       filename: lovelace/dashboards/lite.yaml
       title: "Lite Dashboard"
