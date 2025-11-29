@@ -61,6 +61,14 @@ lovelace:
     - url: /local/community/lovelace-layout-card/layout-card.js
       type: module
 
+  dashboards:
+    lite_dashboard:
+      mode: yaml
+      filename: lovelace/dashboards/lite.yaml
+      title: "Lite Dashboard"
+      icon: mdi:lightning-bolt
+      show_in_sidebar: true
+
 logger:
   default: warning
   logs:
@@ -93,7 +101,7 @@ http:
 
 # Ping sensor to detect if on local network
 # NOTE: Ping integration no longer supports YAML configuration
-# Configure via UI: Settings → Devices & Services → Add Integration → Ping
+# Configure via UI: Settings -> Devices & Services -> Add Integration -> Ping
 # Previous settings for reference:
 #   - host: 192.168.1.1
 #   - count: 2
@@ -422,7 +430,7 @@ input_number:
     max: 28
     step: 0.5
     initial: 26
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer-chevron-up
   master_bedroom_temp_winter_heat:
     name: Master Bedroom Winter Heating Threshold
@@ -430,7 +438,7 @@ input_number:
     max: 20
     step: 0.5
     initial: 16
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer-chevron-down
   master_bedroom_temp_comfort_low:
     name: Master Bedroom Comfort Low
@@ -438,7 +446,7 @@ input_number:
     max: 22
     step: 0.5
     initial: 18
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer
   master_bedroom_temp_comfort_high:
     name: Master Bedroom Comfort High
@@ -446,7 +454,7 @@ input_number:
     max: 28
     step: 0.5
     initial: 22
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer
   # Living Room Climate Thresholds
   living_room_temp_summer_cool:
@@ -455,7 +463,7 @@ input_number:
     max: 32
     step: 0.5
     initial: 28
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer-chevron-up
   living_room_temp_winter_heat:
     name: Living Room Winter Heating Threshold
@@ -463,7 +471,7 @@ input_number:
     max: 22
     step: 0.5
     initial: 19
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer-chevron-down
   living_room_temp_winter_morning:
     name: Living Room Winter Morning Preheat Threshold
@@ -471,7 +479,7 @@ input_number:
     max: 21
     step: 0.5
     initial: 19
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer-clock
   living_room_temp_comfort:
     name: Living Room Comfort Temperature
@@ -479,7 +487,7 @@ input_number:
     max: 24
     step: 0.5
     initial: 20
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer
   # Otto's Room Climate Thresholds
   ottos_room_temp_heating:
@@ -488,7 +496,7 @@ input_number:
     max: 21
     step: 0.5
     initial: 18.5
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer-chevron-down
   ottos_room_temp_comfort_low:
     name: Otto's Room Comfort Low
@@ -496,7 +504,7 @@ input_number:
     max: 21
     step: 0.5
     initial: 18.5
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer
   ottos_room_temp_comfort_high:
     name: Otto's Room Comfort High
@@ -504,7 +512,7 @@ input_number:
     max: 24
     step: 0.5
     initial: 19.5
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer
   ottos_room_temp_warm:
     name: Otto's Room Warm Threshold
@@ -512,7 +520,7 @@ input_number:
     max: 25
     step: 0.5
     initial: 22
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer-chevron-up
   ottos_room_temp_hot:
     name: Otto's Room Hot Threshold
@@ -520,7 +528,7 @@ input_number:
     max: 26
     step: 0.5
     initial: 23
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer-alert
   ottos_room_temp_very_hot:
     name: Otto's Room Very Hot Threshold
@@ -528,7 +536,7 @@ input_number:
     max: 28
     step: 0.5
     initial: 25
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer-high
   # Henry's Room / Study Climate Thresholds
   henrys_room_temp_heating:
@@ -537,7 +545,7 @@ input_number:
     max: 21
     step: 0.5
     initial: 21
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer-chevron-down
   henrys_room_temp_comfort_low:
     name: Henry's Room Comfort Low
@@ -545,7 +553,7 @@ input_number:
     max: 23
     step: 0.5
     initial: 21
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer
   henrys_room_temp_comfort_high:
     name: Henry's Room Comfort High
@@ -553,7 +561,7 @@ input_number:
     max: 25
     step: 0.5
     initial: 23
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer
   henrys_room_temp_warm:
     name: Henry's Room Warm Threshold
@@ -561,7 +569,7 @@ input_number:
     max: 25
     step: 0.5
     initial: 22
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer-chevron-up
   henrys_room_temp_hot:
     name: Henry's Room Hot Threshold
@@ -569,7 +577,7 @@ input_number:
     max: 26
     step: 0.5
     initial: 24
-    unit_of_measurement: "°C"
+    unit_of_measurement: "C"
     icon: mdi:thermometer-alert
   # Automation Trigger Counters (daily, reset at midnight)
   seasonal_climate_triggers_today:
@@ -782,11 +790,10 @@ alert:
       - 60
     can_acknowledge: true
     skip_first: false
-    title: "⚠️ WAN Down"
+    title: "WAN Down"
     message: >
       WAN has been down for {{ relative_time(states.binary_sensor.wan_down_alert_active.last_changed) }}.
       Please check your WAN connection.
-    done_message: "✅ WAN Down Alert RESOLVED at {{ as_timestamp(states.binary_sensor.wan_down_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}"
+    done_message: "WAN Down Alert RESOLVED at {{ as_timestamp(states.binary_sensor.wan_down_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}"
     notifiers:
       - STD_Warning
-
