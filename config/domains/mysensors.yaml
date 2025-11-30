@@ -40,6 +40,14 @@
   start: "{{ now().replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0) }}"
   end: "{{ now() }}"
 
+# News headlines (ABC Victoria)
+- platform: feedparser
+  name: ABC Victoria Headlines
+  feed_url: https://www.abc.net.au/news/feed/45910/rss.xml
+  show_topn: 5
+  date_format: "%a %I:%M %p"
+  scan_interval: 1800
+
 # Work location statistics - This financial year (July 1 - June 30)
 - platform: history_stats
   name: WFH Days This Financial Year
@@ -65,4 +73,3 @@
       {{ (now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=365)) }}
     {% endif %}
   end: "{{ now() }}"
-
