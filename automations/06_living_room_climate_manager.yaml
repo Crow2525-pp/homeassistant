@@ -532,6 +532,17 @@
                 - condition: numeric_state
                   entity_id: sensor.ble_temperature_kitchen_temp_humidity_sensor
                   below: 17
+              - condition: and
+                conditions:
+                - condition: state
+                  entity_id: input_boolean.warm_today_flag
+                  state: 'off'
+                - condition: state
+                  entity_id: input_boolean.hot_today_flag
+                  state: 'off'
+                - condition: state
+                  entity_id: input_boolean.super_hot_today
+                  state: 'off'
               sequence:
               - choose:
                 - conditions:
