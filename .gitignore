@@ -28,6 +28,10 @@
 !blueprints/
 !blueprints/**
 
+# Ignore large HACS frontend builds
+custom_components/hacs/hacs_frontend/frontend_es5
+custom_components/hacs/hacs_frontend/frontend_latest
+
 # Smart IR
 !custom_components/smartir/custom_codes/**
 !custom_components/smartir/codes/climate/1002.json
