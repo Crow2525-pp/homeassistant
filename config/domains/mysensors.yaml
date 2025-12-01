@@ -41,12 +41,13 @@
   end: "{{ now() }}"
 
 # News headlines (ABC Victoria)
-- platform: feedparser
-  name: ABC Victoria Headlines
-  feed_url: https://www.abc.net.au/news/feed/45910/rss.xml
-  show_topn: 5
-  date_format: "%a %I:%M %p"
-  scan_interval: 1800
+# Disabled: feedparser integration not available
+# - platform: feedparser
+#   name: ABC Victoria Headlines
+#   feed_url: https://www.abc.net.au/news/feed/45910/rss.xml
+#   show_topn: 5
+#   date_format: "%a %I:%M %p"
+#   scan_interval: 1800
 
 # Work location statistics - This financial year (July 1 - June 30)
 - platform: history_stats
