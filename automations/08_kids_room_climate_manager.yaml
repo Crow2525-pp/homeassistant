@@ -587,6 +587,9 @@
             - condition: numeric_state
               entity_id: sensor.study_esp32_ottosroom_temperature
               above: 24
+          - condition: numeric_state
+            entity_id: sensor.study_esp32_ottosroom_temperature
+            above: 20
           sequence:
           - choose:
             - conditions:
