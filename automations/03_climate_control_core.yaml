@@ -348,13 +348,23 @@
     to: 'off'
     id: Manual Control Off
   conditions:
-  - condition: time
-    after: '08:00:00'
-    before: '18:00:00'
-  - condition: state
-    entity_id: binary_sensor.working_from_home
-    state: 'on'
-    alias: Working From Home
+  - condition: or
+    conditions:
+    # Allow Warm and Daytime End triggers to always proceed (turn off heating)
+    - condition: trigger
+      id:
+      - Warm
+      - Daytime End
+    # For heating triggers, require time window and WFH
+    - condition: and
+      conditions:
+      - condition: time
+        after: '08:00:00'
+        before: '18:00:00'
+      - condition: state
+        entity_id: binary_sensor.working_from_home
+        state: 'on'
+        alias: Working From Home
   - condition: state
     entity_id: input_boolean.climate_manual_control_master
     state: 'off'
