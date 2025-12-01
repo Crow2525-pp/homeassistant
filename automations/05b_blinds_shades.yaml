@@ -131,6 +131,14 @@
 - id: '1749869631608'
   alias: Curtains - Cover Control Automation
   description: Coordinates cover control automation behaviour for the curtain group.
+  conditions:
+  - condition: or
+    conditions:
+    - condition: time
+      after: '17:15:00'
+    - condition: state
+      entity_id: binary_sensor.working_from_home
+      state: 'off'
   use_blueprint:
     path: hvorragend/cover_control_automation.yaml
     input:
@@ -163,6 +171,13 @@
   - condition: state
     entity_id: input_boolean.blind_manual_control
     state: 'off'
+  - condition: or
+    conditions:
+    - condition: time
+      after: '17:15:00'
+    - condition: state
+      entity_id: binary_sensor.working_from_home
+      state: 'off'
   use_blueprint:
     path: hvorragend/cover_control_automation.yaml
     input:
