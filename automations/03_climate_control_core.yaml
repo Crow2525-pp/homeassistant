@@ -322,6 +322,80 @@
         target:
           entity_id: fan.masterbedroom_fan
   mode: single
+- id: '1747602740393'
+  alias: Master Bedroom - Daytime Comfort Heating
+  description: Maintains comfort temperature in the master bedroom during daytime working
+    hours (06:00-18:00). Activates heating when temperature drops below 18°C.
+  triggers:
+  - trigger: numeric_state
+    entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+    below: 18
+    for:
+      minutes: 0
+    id: Cold
+  - trigger: numeric_state
+    entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+    above: 20
+    id: Warm
+  - trigger: time
+    at: '06:00:00'
+    id: Daytime Start
+  - trigger: time
+    at: '18:00:00'
+    id: Daytime End
+  - trigger: state
+    entity_id: input_boolean.climate_manual_control_master
+    to: 'off'
+    id: Manual Control Off
+  conditions:
+  - condition: time
+    after: '06:00:00'
+    before: '18:00:00'
+  - condition: state
+    entity_id: input_boolean.climate_manual_control_master
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.hvac_master_bedroom_should_be_on
+    state: 'on'
+    alias: Master Bedroom HVAC Master On
+  - condition: state
+    entity_id: binary_sensor.someone_home
+    state: 'on'
+    alias: Someone Home
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Cold
+        - Daytime Start
+        - Manual Control Off
+      - condition: numeric_state
+        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        below: 18
+      sequence:
+      - action: climate.set_preset_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          preset_mode: comfort
+      - action: climate.set_hvac_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          hvac_mode: heat
+    - conditions:
+      - condition: trigger
+        id:
+        - Warm
+        - Daytime End
+      sequence:
+      - action: climate.set_hvac_mode
+        target:
+          entity_id: climate.masterbed_versatile_thermostat
+        data:
+          hvac_mode: 'off'
+  mode: single
 - id: '1747602740394'
   alias: Master Bedroom - Heater Night Assist
   description: Turns on the master bedroom heater overnight when temperatures fall
