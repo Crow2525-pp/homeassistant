@@ -325,7 +325,7 @@
 - id: '1747602740393'
   alias: Master Bedroom - Daytime Comfort Heating
   description: Maintains comfort temperature in the master bedroom during working-from-home
-    hours (06:00-18:00). Activates heating when temperature drops below 18°C and you're WFH.
+    hours (08:00-18:00). Activates heating when temperature drops below 18°C and you're WFH.
   triggers:
   - trigger: numeric_state
     entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
@@ -338,7 +338,7 @@
     above: 20
     id: Warm
   - trigger: time
-    at: '06:00:00'
+    at: '08:00:00'
     id: Daytime Start
   - trigger: time
     at: '18:00:00'
@@ -349,7 +349,7 @@
     id: Manual Control Off
   conditions:
   - condition: time
-    after: '06:00:00'
+    after: '08:00:00'
     before: '18:00:00'
   - condition: state
     entity_id: binary_sensor.working_from_home
