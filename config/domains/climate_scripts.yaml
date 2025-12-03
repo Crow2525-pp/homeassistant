@@ -7,7 +7,7 @@ set_climate_mode:
   fields:
     climate_entity:
       description: "Climate entity to control"
-      example: "climate.living_room_versatile_thermastat"
+      example: "climate.living_room_versatile_thermostat"
     hvac_mode:
       description: "HVAC mode (heat, cool, dry, fan_only, off)"
       example: "heat"
@@ -25,7 +25,7 @@ set_climate_preset:
   fields:
     climate_entity:
       description: "Climate entity to control"
-      example: "climate.living_room_versatile_thermastat"
+      example: "climate.living_room_versatile_thermostat"
     preset_mode:
       description: "Preset mode (comfort, eco, boost, frost, none)"
       example: "comfort"
@@ -43,7 +43,7 @@ set_climate_mode_and_preset:
   fields:
     climate_entity:
       description: "Climate entity to control"
-      example: "climate.living_room_versatile_thermastat"
+      example: "climate.living_room_versatile_thermostat"
     hvac_mode:
       description: "HVAC mode (heat, cool, dry, fan_only, off)"
       example: "cool"
@@ -69,7 +69,7 @@ activate_dry_mode:
   fields:
     climate_entity:
       description: "Climate entity to control"
-      example: "climate.living_room_versatile_thermastat"
+      example: "climate.living_room_versatile_thermostat"
   sequence:
     - action: script.set_climate_mode_and_preset
       data:
@@ -84,7 +84,7 @@ activate_heating:
   fields:
     climate_entity:
       description: "Climate entity to control"
-      example: "climate.living_room_versatile_thermastat"
+      example: "climate.living_room_versatile_thermostat"
     preset_mode:
       description: "Preset for heating (comfort, eco, frost)"
       example: "comfort"
@@ -103,7 +103,7 @@ activate_cooling:
   fields:
     climate_entity:
       description: "Climate entity to control"
-      example: "climate.living_room_versatile_thermastat"
+      example: "climate.living_room_versatile_thermostat"
     preset_mode:
       description: "Preset for cooling (comfort, eco, boost)"
       example: "comfort"
@@ -122,7 +122,7 @@ activate_fan_only:
   fields:
     climate_entity:
       description: "Climate entity to control"
-      example: "climate.living_room_versatile_thermastat"
+      example: "climate.living_room_versatile_thermostat"
     preset_mode:
       description: "Preset mode (eco, comfort)"
       example: "eco"
@@ -141,7 +141,7 @@ deactivate_climate:
   fields:
     climate_entity:
       description: "Climate entity to control"
-      example: "climate.living_room_versatile_thermastat"
+      example: "climate.living_room_versatile_thermostat"
   sequence:
     - action: climate.set_hvac_mode
       target:
