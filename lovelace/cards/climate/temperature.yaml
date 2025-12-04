@@ -28,9 +28,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.living_room_temperature_offset') | float < 18 %}
+                {% if states('sensor.living_room_temperature_offset') | float(0) < 18 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.living_room_temperature_offset') | float > 24 %}
+                {% elif states('sensor.living_room_temperature_offset') | float(0) > 24 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -46,9 +46,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.study_esp32_henrysroom_temperature') | float < 18 %}
+                {% if states('sensor.study_esp32_henrysroom_temperature') | float(0) < 18 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.study_esp32_henrysroom_temperature') | float > 24 %}
+                {% elif states('sensor.study_esp32_henrysroom_temperature') | float(0) > 24 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -64,9 +64,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.study_esp32_ottosroom_temperature') | float < 18 %}
+                {% if states('sensor.study_esp32_ottosroom_temperature') | float(0) < 18 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.study_esp32_ottosroom_temperature') | float > 24 %}
+                {% elif states('sensor.study_esp32_ottosroom_temperature') | float(0) > 24 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -82,9 +82,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float < 18 %}
+                {% if states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) < 18 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float > 24 %}
+                {% elif states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) > 24 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -100,9 +100,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.essendon_airport_temp') | float < 18 %}
+                {% if states('sensor.essendon_airport_temp') | float(0) < 18 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.essendon_airport_temp') | float > 24 %}
+                {% elif states('sensor.essendon_airport_temp') | float(0) > 24 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)

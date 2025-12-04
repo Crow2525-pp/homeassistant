@@ -332,8 +332,8 @@ cards:
       **Climate Manual Control:** {{ '🔴 ACTIVE - Automations Paused' if is_state('input_boolean.climate_manual_control_living', 'on') else '✅ Off - Automations Active' }}
 
       ### Why Current State?
-      {% set temp = states('sensor.living_room_temperature_offset') | float %}
-      {% set kitchen_temp = states('sensor.ble_temperature_kitchen_temp_humidity_sensor') | float %}
+      {% set temp = states('sensor.living_room_temperature_offset') | float(0) %}
+      {% set kitchen_temp = states('sensor.ble_temperature_kitchen_temp_humidity_sensor') | float(0) %}
       {% set season = states('input_select.climate_season') %}
       {% set occupancy = states('input_select.occupancy') %}
       {% set hvac = states('climate.living_room_versatile_thermostat') %}
