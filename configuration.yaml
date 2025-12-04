@@ -340,11 +340,9 @@ input_boolean:
   hvac_study_should_be_on:
     name: Study HVAC Should Be On
     icon: mdi:thermometer
-    initial: false
   hvac_kids_room_should_be_on:
     name: Kids Room HVAC Should Be On
     icon: mdi:thermometer
-    initial: false
 
 # Cover Control Automation Status Helpers
 input_text:
