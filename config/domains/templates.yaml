@@ -141,7 +141,7 @@
       unique_id: washing_machine_estimated_remaining
       state: >
         {% set cycle_time = 55 %}
-        {% if is_state('input_boolean.washing_machine_on', 'on') and states.input_boolean.washing_machine_on.last_changed %}
+        {% if is_state('input_boolean.washing_machine_on', 'on') and states.input_boolean.washing_machine_on is not none and states.input_boolean.washing_machine_on.last_changed %}
           {% set last_changed = as_timestamp(states.input_boolean.washing_machine_on.last_changed) %}
           {% if last_changed is not none %}
             {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
@@ -162,7 +162,7 @@
       unique_id: dryer_estimated_remaining
       state: >
         {% set cycle_time = 120 %}
-        {% if is_state('input_boolean.dryer_on', 'on') and states.input_boolean.dryer_on.last_changed %}
+        {% if is_state('input_boolean.dryer_on', 'on') and states.input_boolean.dryer_on is not none and states.input_boolean.dryer_on.last_changed %}
           {% set last_changed = as_timestamp(states.input_boolean.dryer_on.last_changed) %}
           {% if last_changed is not none %}
             {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
@@ -183,7 +183,7 @@
       unique_id: dishwasher_estimated_remaining
       state: >
         {% set cycle_time = 150 %}
-        {% if is_state('input_boolean.dishwasher_on', 'on') and states.input_boolean.dishwasher_on.last_changed %}
+        {% if is_state('input_boolean.dishwasher_on', 'on') and states.input_boolean.dishwasher_on is not none and states.input_boolean.dishwasher_on.last_changed %}
           {% set last_changed = as_timestamp(states.input_boolean.dishwasher_on.last_changed) %}
           {% if last_changed is not none %}
             {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
