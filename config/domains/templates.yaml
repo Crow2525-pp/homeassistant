@@ -84,11 +84,11 @@
 - binary_sensor:
     ## Internet Connection Status based on TX and RX
     - name: Internet Connection
-      state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float > 0) or (states('sensor.ucg_ultra_port_5_rx') | float > 0)) }}"
+      state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float(0) > 0) or (states('sensor.ucg_ultra_port_5_rx') | float(0) > 0)) }}"
 
     ## WAN Down Alert Active with 250-second delay
     - name: WAN Down Alert Active
-      state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float == 0) and (states('sensor.ucg_ultra_port_5_rx') | float == 0) and ((as_timestamp(now()) - as_timestamp(states.sensor.ucg_ultra_port_5_tx.last_changed)) | int(0) > 250)) }}"
+      state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float(0) == 0) and (states('sensor.ucg_ultra_port_5_rx') | float(0) == 0) and ((as_timestamp(now()) - as_timestamp(states.sensor.ucg_ultra_port_5_tx.last_changed)) | int(0) > 250)) }}"
 
 - binary_sensor:
     - name: "Holiday Season"
@@ -203,7 +203,7 @@
     - name: "Living Room Temperature (Offset)"
       unique_id: livingroom_irblaster_temperature_offset
       unit_of_measurement: "°C"
-      state: "{{ (states('sensor.livingroom_irblaster_temperature') | float + 1.7) | round(1) }}"
+      state: "{{ (states('sensor.livingroom_irblaster_temperature') | float(0) + 1.7) | round(1) }}"
 
 # Removed orphaned trigger template - no entity was defined
 # This will become a validation error in HA Core 2026.5
@@ -685,7 +685,7 @@
         {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
           unknown
         {% else %}
-          {{ (inside_state | float - outside_state | float) | round(1) }}
+          {{ (inside_state | float(0) - outside_state | float(0)) | round(1) }}
         {% endif %}
       attributes:
         inside_temperature: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
@@ -696,7 +696,7 @@
           {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
             unknown
           {% else %}
-            {% set delta = (inside_state | float - outside_state | float) %}
+            {% set delta = (inside_state | float(0) - outside_state | float(0)) %}
             {% if delta > 1.5 %}
               cooling
             {% elif delta < -1.5 %}
@@ -717,7 +717,7 @@
         {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
           unknown
         {% else %}
-          {{ (inside_state | float - outside_state | float) | round(1) }}
+          {{ (inside_state | float(0) - outside_state | float(0)) | round(1) }}
         {% endif %}
       attributes:
         inside_temperature: "{{ states('sensor.living_room_temperature_offset') }}"
@@ -728,7 +728,7 @@
           {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
             unknown
           {% else %}
-            {% set delta = (inside_state | float - outside_state | float) %}
+            {% set delta = (inside_state | float(0) - outside_state | float(0)) %}
             {% if delta > 1.5 %}
               cooling
             {% elif delta < -1.5 %}
@@ -749,7 +749,7 @@
         {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
           unknown
         {% else %}
-          {{ (inside_state | float - outside_state | float) | round(1) }}
+          {{ (inside_state | float(0) - outside_state | float(0)) | round(1) }}
         {% endif %}
       attributes:
         inside_temperature: "{{ states('sensor.study_esp32_henrysroom_temperature') }}"
@@ -760,7 +760,7 @@
           {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
             unknown
           {% else %}
-            {% set delta = (inside_state | float - outside_state | float) %}
+            {% set delta = (inside_state | float(0) - outside_state | float(0)) %}
             {% if delta > 1.5 %}
               cooling
             {% elif delta < -1.5 %}
@@ -781,7 +781,7 @@
         {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
           unknown
         {% else %}
-          {{ (inside_state | float - outside_state | float) | round(1) }}
+          {{ (inside_state | float(0) - outside_state | float(0)) | round(1) }}
         {% endif %}
       attributes:
         inside_temperature: "{{ states('sensor.study_esp32_ottosroom_temperature') }}"
@@ -792,7 +792,7 @@
           {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
             unknown
           {% else %}
-            {% set delta = (inside_state | float - outside_state | float) %}
+            {% set delta = (inside_state | float(0) - outside_state | float(0)) %}
             {% if delta > 1.5 %}
               cooling
             {% elif delta < -1.5 %}
