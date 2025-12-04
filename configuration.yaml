@@ -235,6 +235,50 @@ cover:
                     data:
                       duration: "00:18:00"
 
+      roller_blinds_simple:
+        device_class: blind
+        friendly_name: "Roller Blinds (Simple)"
+        unique_id: roller_blinds_simple
+
+        value_template: >-
+          {% set state = states('input_select.roller_blind_state_simple') %}
+          {% if state in ['opening', 'open'] %}
+            open
+          {% elif state in ['closing', 'closed'] %}
+            closed
+          {% else %}
+            open
+          {% endif %}
+
+        position_template: >-
+          {% set state = states('input_select.roller_blind_state_simple') %}
+          {% if state == 'closed' %}
+            0
+          {% elif state == 'open' %}
+            100
+          {% else %}
+            50
+          {% endif %}
+
+        open_cover:
+          - action: script.roller_blinds_open_simple
+
+        close_cover:
+          - action: script.roller_blinds_close_simple
+
+        stop_cover:
+          - action: script.roller_blinds_stop
+
+        set_cover_position:
+          - action: input_select.select_option
+            target:
+              entity_id: input_select.roller_blind_state_simple
+            data:
+              option: "{{ 'open' if position | int(0) >= 50 else 'closed' }}"
+          - action: script.roller_blinds_set_position_simple
+            data:
+              position: "{{ position }}"
+
 light:
   - platform: template
     lights:

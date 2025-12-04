@@ -1,25 +1,24 @@
 ---
 # ============================================================================
-# ROLLER BLINDS AUTOMATION - SIMPLE SCHEDULE + MANUAL CONTROLS
+# ROLLER BLINDS AUTOMATION - 50% DEFAULT POSITION
 # ============================================================================
 # This file contains:
-# 1. Simple time-based schedule (morning open, sunset close)
-# 2. Manual NFC tag controls (up/down/partial)
+# 1. Default 50% position at morning and evening (easy open/close from middle)
+# 2. Manual NFC tag controls (full open/full close)
 # 3. Wind protection automation (safety feature)
 # 4. Manual blind control tracker
 #
-# Note: Blueprint automation removed - the Broadlink IR cover doesn't report
-# position feedback (current_position/current_tilt_position attributes),
-# which caused blueprint template errors. Using simple reliable controls.
+# Note: Blinds default to 50% position so they can be easily opened or closed
+# from the middle. Blueprint automation removed due to position feedback errors.
 # ============================================================================
 
 # ============================================================================
-# SIMPLE TIME-BASED SCHEDULE
+# DEFAULT 50% POSITION SCHEDULE
 # ============================================================================
 
 - id: '1644437526741'
-  alias: Blinds - Open at Morning
-  description: Open roller blinds at 8:00 AM on weekdays when not manually controlled
+  alias: Blinds - Set to 50% at Morning
+  description: Set roller blinds to 50% (half open) at 8:00 AM on weekdays when not manually controlled
   trigger:
   - platform: time
     at: '08:00:00'
@@ -35,13 +34,16 @@
     entity_id: input_boolean.blind_manual_control
     state: 'off'
   action:
-  - service: script.roller_blinds_up
-    data: {}
+  - service: cover.set_cover_position
+    target:
+      entity_id: cover.roller_blinds_chan1
+    data:
+      position: 50
   mode: single
 
 - id: '1644402690424'
-  alias: Blinds - Close at Sunset
-  description: Close roller blinds at sunset when not manually controlled
+  alias: Blinds - Set to 50% at Evening
+  description: Set roller blinds to 50% (half open) at sunset when not manually controlled
   trigger:
   - platform: sun
     event: sunset
@@ -50,9 +52,11 @@
     entity_id: input_boolean.blind_manual_control
     state: 'off'
   action:
-  - service: cover.close_cover
+  - service: cover.set_cover_position
     target:
       entity_id: cover.roller_blinds_chan1
+    data:
+      position: 50
   mode: single
 
 # ============================================================================
@@ -62,8 +66,7 @@
 - id: '1682548783368'
   alias: Safety - Raise Blinds When Windy
   description: Automatically raises roller blinds when wind speed exceeds 40 km/h
-    to prevent damage. Waits for wind to drop below 25 km/h before restoring previous
-    position.
+    to prevent damage. Waits for wind to drop below 25 km/h before restoring to 50%.
   trigger:
   - platform: template
     value_template: '{{ state_attr(''weather.home'', ''wind_speed'') > 40}}'
@@ -76,8 +79,6 @@
     entity_id: input_boolean.blind_manual_control
     state: 'off'
   action:
-  - variables:
-      original_position: '{{ states(''cover.roller_blinds_chan1'') }}'
   - service: cover.open_cover
     data: {}
     target:
@@ -93,13 +94,12 @@
   - service: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
       title: Wind Speed Reduced
-      message: Safe to restore blinds to previous position
-  - action: "{% if original_position == 'closed' %}\n  cover.close_cover\n{% elif
-      original_position == 'open' %}\n  cover.open_cover\n{% else %}\n  cover.stop_cover\n{%
-      endif %}\n"
+      message: Restoring blinds to 50% position
+  - service: cover.set_cover_position
     target:
       entity_id: cover.roller_blinds_chan1
-    alias: Restore Blinds to Previous Position
+    data:
+      position: 50
   mode: single
 
 # ============================================================================
@@ -107,8 +107,8 @@
 # ============================================================================
 
 - id: '1685572749524'
-  alias: Master Bedroom NFC - Control Blinds (Open)
-  description: Tap NFC tag to open roller blinds fully
+  alias: Master Bedroom NFC - Open Blinds Fully
+  description: Tap NFC tag to open roller blinds fully (100%)
   trigger:
   - platform: tag
     tag_id: 531bec6b-8dea-4b53-ae0c-5840aca23f70
@@ -119,20 +119,21 @@
   mode: single
 
 - id: '1693433717718'
-  alias: Tag Masterbed - Stop Blinds (Manual Control)
-  description: Tap NFC tag to stop blinds at current position
+  alias: Master Bedroom NFC - Close Blinds Fully
+  description: Tap NFC tag to close roller blinds fully (0%)
   trigger:
   - platform: tag
     tag_id: 9d687fe2-e6f7-4d6f-838a-cee2712e3fdb
   condition: []
   action:
-  - service: script.roller_blinds_stop
-    data: {}
+  - service: cover.close_cover
+    target:
+      entity_id: cover.roller_blinds_chan1
   mode: single
 
 - id: '1690150562163'
   alias: Master Bedroom NFC - Heat and Lift Desk Corner
-  description: Sets the bedroom climate to heat and opens blinds after a delay when
+  description: Sets the bedroom climate to heat and opens blinds fully after a delay when
     that NFC tag is scanned.
   trigger:
   - platform: tag
