@@ -252,7 +252,7 @@
     - conditions:
       - condition: time
         after: '22:15:00'
-        before: 05:30:00
+        before: '05:30:00'
       - condition: state
         entity_id: input_select.climate_season
         state: winter
@@ -298,8 +298,8 @@
               hvac_mode: heat
     - conditions:
       - condition: time
-        after: 05:30:00
-        before: 08:00:00
+        after: '05:30:00'
+        before: '08:00:00'
       - condition: state
         entity_id: input_select.climate_season
         state: winter
@@ -353,8 +353,8 @@
               hvac_mode: heat
     - conditions:
       - condition: time
-        after: 05:30:00
-        before: 08:00:00
+        after: '05:30:00'
+        before: '08:00:00'
       - condition: state
         entity_id: input_select.climate_season
         state: spring
@@ -408,8 +408,8 @@
               hvac_mode: heat
     - conditions:
       - condition: time
-        after: 05:30:00
-        before: 08:00:00
+        after: '05:30:00'
+        before: '08:00:00'
       - condition: state
         entity_id: input_select.climate_season
         state: autumn
@@ -463,7 +463,7 @@
               hvac_mode: heat
     - conditions:
       - condition: time
-        after: 06:00:00
+        after: '06:00:00'
         before: '22:15:00'
       - condition: state
         entity_id: input_select.occupancy
@@ -576,8 +576,8 @@
           - choose:
             - conditions:
               - condition: time
-                after: 06:00:00
-                before: 12:00:00
+                after: '06:00:00'
+                before: '12:00:00'
               - condition: or
                 conditions:
                 - condition: numeric_state
@@ -721,8 +721,8 @@
           - choose:
             - conditions:
               - condition: time
-                after: 06:00:00
-                before: 12:00:00
+                after: '06:00:00'
+                before: '12:00:00'
               - condition: or
                 conditions:
                 - condition: numeric_state
@@ -925,8 +925,8 @@
                       hvac_mode: cool
             - conditions:
               - condition: time
-                after: 06:00:00
-                before: 12:00:00
+                after: '06:00:00'
+                before: '12:00:00'
               - condition: or
                 conditions:
                 - condition: numeric_state
