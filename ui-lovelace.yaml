@@ -303,7 +303,7 @@ views:
   #         - type: heading
   #           heading: "Air Conditioning "
   #         - type: tile
-  #           entity: climate.living_room_versatile_thermastat
+  #           entity: climate.living_room_versatile_thermostat
   #           name: Living Room
   #           hide_state: false
   #           vertical: false
@@ -574,7 +574,7 @@ views:
   #             - type: climate-preset-modes
   #               style: dropdown
   #           type: tile
-  #           entity: climate.living_room_versatile_thermastat
+  #           entity: climate.living_room_versatile_thermostat
   #           name: Themostat
   #           state_content:
   #             - state
@@ -836,7 +836,7 @@ views:
   #         - type: heading
   #           heading: HVAC
   #         - type: tile
-  #           entity: climate.living_room_versatile_thermastat
+  #           entity: climate.living_room_versatile_thermostat
   #           features:
   #             - type: climate-fan-modes
   #               style: dropdown

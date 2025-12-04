@@ -38,7 +38,7 @@ views:
         square: false
         cards:
           - type: thermostat
-            entity: climate.living_room_versatile_thermastat
+            entity: climate.living_room_versatile_thermostat
             name: Living
           - type: thermostat
             entity: climate.henry_s_room_versatile_thermostat

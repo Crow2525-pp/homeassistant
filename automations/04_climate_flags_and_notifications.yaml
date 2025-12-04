@@ -405,7 +405,7 @@
       minutes: 30
   conditions:
   - condition: state
-    entity_id: climate.living_room_versatile_thermastat
+    entity_id: climate.living_room_versatile_thermostat
     state: 'off'
   - condition: template
     value_template: "{% set last = states('input_datetime.last_climate_notification_living')
@@ -489,16 +489,16 @@
   actions:
   - action: climate.turn_on
     target:
-      entity_id: climate.living_room_versatile_thermastat
+      entity_id: climate.living_room_versatile_thermostat
   - action: climate.set_temperature
     target:
-      entity_id: climate.living_room_versatile_thermastat
+      entity_id: climate.living_room_versatile_thermostat
     data:
       temperature: "{% if states('sensor.living_room_climate_suggestion') == 'heat_now'
         %}\n  22\n{% else %}\n  24\n{% endif %}\n"
   - action: climate.set_hvac_mode
     target:
-      entity_id: climate.living_room_versatile_thermastat
+      entity_id: climate.living_room_versatile_thermostat
     data:
       hvac_mode: "{% if states('sensor.living_room_climate_suggestion') == 'heat_now'
         %}\n  heat\n{% else %}\n  cool\n{% endif %}\n"
@@ -575,7 +575,7 @@
   triggers:
   - trigger: state
     entity_id:
-    - climate.living_room_versatile_thermastat
+    - climate.living_room_versatile_thermostat
   conditions:
   - condition: template
     value_template: '{{ trigger.to_state.context.user_id is not none }}'
