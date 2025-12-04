@@ -1,16 +1,59 @@
 ---
 # ============================================================================
-# ROLLER BLINDS AUTOMATION - SIMPLE UP/DOWN/STOP
+# ROLLER BLINDS AUTOMATION - SIMPLE SCHEDULE + MANUAL CONTROLS
 # ============================================================================
 # This file contains:
-# 1. Manual NFC tag controls (up/down/partial)
-# 2. Wind protection automation (safety feature)
-# 3. Manual blind control tracker
+# 1. Simple time-based schedule (morning open, sunset close)
+# 2. Manual NFC tag controls (up/down/partial)
+# 3. Wind protection automation (safety feature)
+# 4. Manual blind control tracker
 #
 # Note: Blueprint automation removed - the Broadlink IR cover doesn't report
 # position feedback (current_position/current_tilt_position attributes),
-# which caused blueprint template errors. Using simple controls instead.
+# which caused blueprint template errors. Using simple reliable controls.
 # ============================================================================
+
+# ============================================================================
+# SIMPLE TIME-BASED SCHEDULE
+# ============================================================================
+
+- id: '1644437526741'
+  alias: Blinds - Open at Morning
+  description: Open roller blinds at 8:00 AM on weekdays when not manually controlled
+  trigger:
+  - platform: time
+    at: '08:00:00'
+  condition:
+  - condition: time
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+  - condition: state
+    entity_id: input_boolean.blind_manual_control
+    state: 'off'
+  action:
+  - service: script.roller_blinds_up
+    data: {}
+  mode: single
+
+- id: '1644402690424'
+  alias: Blinds - Close at Sunset
+  description: Close roller blinds at sunset when not manually controlled
+  trigger:
+  - platform: sun
+    event: sunset
+  condition:
+  - condition: state
+    entity_id: input_boolean.blind_manual_control
+    state: 'off'
+  action:
+  - service: cover.close_cover
+    target:
+      entity_id: cover.roller_blinds_chan1
+  mode: single
 
 # ============================================================================
 # SAFETY AUTOMATION: Wind Protection
@@ -76,16 +119,15 @@
   mode: single
 
 - id: '1693433717718'
-  alias: Tag Masterbed - Close Blinds Partially
-  description: Tap NFC tag to close blinds partially
+  alias: Tag Masterbed - Stop Blinds (Manual Control)
+  description: Tap NFC tag to stop blinds at current position
   trigger:
   - platform: tag
     tag_id: 9d687fe2-e6f7-4d6f-838a-cee2712e3fdb
   condition: []
   action:
-  - service: cover.close_cover
-    target:
-      entity_id: cover.roller_blinds_chan1
+  - service: script.roller_blinds_stop
+    data: {}
   mode: single
 
 - id: '1690150562163'
@@ -128,7 +170,6 @@
   - trigger: state
     entity_id:
     - cover.roller_blinds_chan1
-    attribute: current_position
   conditions:
   - condition: template
     value_template: '{{ trigger.to_state.context.user_id is not none }}'
