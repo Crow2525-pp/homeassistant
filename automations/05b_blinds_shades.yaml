@@ -4,8 +4,9 @@
 # ============================================================================
 # This file contains:
 # 1. Blueprint-based automation for outdoor roller blinds (primary control)
-# 2. NFC tag-based manual controls (up/down/stop via tags)
-# 3. Simple manual blind control tracker
+# 2. Safety automation for wind protection (since blueprint doesn't handle wind)
+# 3. NFC tag-based manual controls (up/down/stop via tags)
+# 4. Simple manual blind control tracker
 #
 # Removed: Position-based helpers, time-based automations, and complex
 # positional logic. The blueprint handles all climate-based control.
@@ -75,6 +76,55 @@
       sun_time_duration: 120
 
 # ============================================================================
+# SAFETY AUTOMATION: Wind Protection
+# ============================================================================
+# The blueprint doesn't handle high wind speeds, so this automation
+# protects the blinds from damage during extreme weather events.
+
+- id: '1682548783368'
+  alias: Safety - Raise Blinds When Windy
+  description: Automatically raises roller blinds when wind speed exceeds 40 km/h
+    to prevent damage. Waits for wind to drop below 25 km/h before restoring previous
+    position.
+  trigger:
+  - platform: template
+    value_template: '{{ state_attr(''weather.home'', ''wind_speed'') > 40}}'
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+  condition:
+  - condition: state
+    entity_id: input_boolean.blind_manual_control
+    state: 'off'
+  action:
+  - variables:
+      original_position: '{{ states(''cover.roller_blinds_chan1'') }}'
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.roller_blinds_chan1
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: 'Safety Alert: High Winds'
+      message: Roller blinds raised to protect from wind damage (>40 km/h)
+  - wait_for_trigger:
+    - platform: template
+      value_template: '{{ state_attr(''weather.home'', ''wind_speed'') < 25 }}'
+    continue_on_timeout: false
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: Wind Speed Reduced
+      message: Safe to restore blinds to previous position
+  - action: "{% if original_position == 'closed' %}\n  cover.close_cover\n{% elif
+      original_position == 'open' %}\n  cover.open_cover\n{% else %}\n  cover.stop_cover\n{%
+      endif %}\n"
+    target:
+      entity_id: cover.roller_blinds_chan1
+    alias: Restore Blinds to Previous Position
+  mode: single
+
+# ============================================================================
 # NFC TAG CONTROLS - Manual Blind Control
 # ============================================================================
 
@@ -92,15 +142,17 @@
 
 - id: '1693433717718'
   alias: Tag Masterbed - Close Blinds Partially
-  description: Tap NFC tag to close blinds partially
+  description: Tap NFC tag to close blinds to 50% (shading position)
   trigger:
   - platform: tag
     tag_id: 9d687fe2-e6f7-4d6f-838a-cee2712e3fdb
   condition: []
   action:
-  - service: cover.close_cover
+  - service: cover.set_cover_position
     target:
       entity_id: cover.roller_blinds_chan1
+    data:
+      position: 50
   mode: single
 
 - id: '1690150562163'
