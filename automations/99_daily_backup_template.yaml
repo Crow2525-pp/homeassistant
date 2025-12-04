@@ -1,0 +1,15 @@
+---
+# ============================================================================
+# DAILY BACKUP AUTOMATION - TEMPLATE (DISABLED)
+# ============================================================================
+# This file is a TEMPLATE ONLY and should NOT be used directly.
+#
+# Use "automations/10_system_daily_backup.yaml" instead, which contains
+# the active, working daily backup automation with id: system_daily_backup_3_am
+#
+# This file must contain an empty list ([]) to satisfy the YAML list
+# requirement of the automation: !include_dir_merge_list directive in
+# configuration.yaml
+# ============================================================================
+
+[]
