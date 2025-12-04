@@ -32,56 +32,5 @@
       data:
         title: "Backup Completed"
         message: "Daily backup created successfully at {{ now().strftime('%I:%M %p') }}"
-        data:
-          tag: "daily_backup"
 
   mode: single
-
----
-# System - Backup to NAS - FIXED VERSION
-# Replaces automation.system_backup_to_nas which used invalid shell_command.backup_to_nas
-# This is a template - customize the service call to match your setup:
-#
-# Option 1: If you have a shell_command defined, add to configuration.yaml:
-#   shell_command:
-#     backup_to_nas: "rsync -av /backup /nas/backup/"
-#   Then use: service: shell_command.backup_to_nas (define the command first!)
-#
-# Option 2: Use a script instead:
-#   - service: script.backup_to_nas
-#   (define the script first)
-#
-# Option 3: For now, this automation is DISABLED until you decide how to implement it
-# (Uncomment below when you have configured the actual backup target)
-
-# - id: 'system_backup_to_nas'
-#   alias: "System - Backup to NAS"
-#   description: "Backup Home Assistant to NAS after daily backup"
-#
-#   trigger:
-#     - platform: time
-#       at: "04:00:00"
-#
-#   condition: []
-#
-#   action:
-#     # CHOOSE ONE METHOD BELOW:
-#
-#     # Method 1: Shell command (after adding to configuration.yaml)
-#     # - service: shell_command.backup_to_nas
-#
-#     # Method 2: Call a script (after creating the script)
-#     # - service: script.backup_to_nas
-#
-#     # Method 3: Use native HA services (example: REST API call)
-#     # - service: rest_command.backup_to_nas
-#
-#     # For now, send notification that NAS backup needs configuration
-#     - service: notify.persistent_notification
-#       data:
-#         title: "NAS Backup Not Configured"
-#         message: "To enable NAS backups, configure a shell_command or script and uncomment this automation."
-#         data:
-#           tag: "nas_backup"
-#
-#   mode: single
