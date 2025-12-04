@@ -47,13 +47,14 @@
   # ACTIONS: Create Backup and Notify
   # ============================================================================
   action:
-    # Action 1: Create backup (Supervisor service for widest compatibility)
+    # Action 1: Create backup using Supervisor service (REQUIRED - widely compatible)
+    # IMPORTANT: Use hassio.backup_full ONLY. Do NOT use backup.create which causes
+    # "unknown action" errors in many Home Assistant versions.
     - service: hassio.backup_full
       data:
         name: "Auto Backup {{ now().strftime('%Y-%m-%d') }}"
         # Optional parameters:
         # password: "your_encryption_password"  # Encrypt backup
-        # Note: On HA 2024.9+ you can switch to `backup.create` if available.
 
     # Action 2: Wait for backup to complete (optional but recommended)
     - delay:
@@ -110,8 +111,8 @@
 #     - platform: event
 #       event_type: call_service
 #       event_data:
-#         domain: backup
-#         service: create
+#         domain: hassio
+#         service: backup_full
 #
 #   condition:
 #     # Only trigger if service call failed
@@ -147,44 +148,20 @@
 #   mode: single
 
 # ============================================================================
-# CLEANUP OLD BACKUPS (Optional)
-# ============================================================================
-# Uncomment to automatically delete old backups after 7 days
-
-# - id: system_cleanup_old_backups
-#   alias: "System - Cleanup Old Backups"
-#   description: "Delete backups older than 7 days to save disk space"
-#
-#   trigger:
-#     # Run after daily backup completes (4:00 AM)
-#     - platform: time
-#       at: "04:00:00"
-#
-#   action:
-#     # Delete backups older than 7 days
-#     - service: backup.remove
-#       data:
-#         keep_days: 7  # CUSTOMIZE: Adjust retention period
-#
-#     # Notify how many backups removed
-#     - service: notify.persistent_notification
-#       data:
-#         title: "Backup Cleanup"
-#         message: "Old backups removed (keeping last 7 days)"
-#         data:
-#           tag: "backup_cleanup"
-#
-#   mode: single
-
-# ============================================================================
 # CUSTOMIZATION CHECKLIST
 # ============================================================================
-# [ ] Verify backup.create service exists (HA 2024.9+)
+# [ ] Verify hassio.backup_full service exists (Developer Tools > Services)
 # [ ] Customize backup time (default: 3:00 AM)
 # [ ] Configure notification service (persistent, mobile, email)
 # [ ] (Optional) Enable backup failure alert
-# [ ] (Optional) Enable automatic cleanup
 # [ ] (Optional) Add backup encryption password
 # [ ] Test backup creation manually
 # [ ] Verify backup file appears in Settings > System > Backups
 # [ ] Rename file to remove "99_" prefix for production
+#
+# TROUBLESHOOTING:
+# - If you see "unknown action: backup.create" error: Ensure you're using
+#   hassio.backup_full service, not backup.create
+# - If backup fails to run: Check that the service exists in Developer Tools
+# - If you're on Home Assistant OS: You may need to use supervisor.backup_full
+#
