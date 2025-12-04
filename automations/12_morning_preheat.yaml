@@ -30,7 +30,7 @@
     # Set thermostat to comfort mode
     - service: climate.set_preset_mode
       target:
-        entity_id: climate.living_room_versatile_thermastat
+        entity_id: climate.living_room_versatile_thermostat
       data:
         preset_mode: comfort
 

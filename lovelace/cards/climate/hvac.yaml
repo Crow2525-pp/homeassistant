@@ -311,7 +311,7 @@ cards:
       - type: vertical-stack
         cards:
           - type: tile
-            entity: climate.living_room_versatile_thermastat
+            entity: climate.living_room_versatile_thermostat
             name: Living Room
             features:
               - type: climate-hvac-modes
@@ -416,4 +416,4 @@ cards:
                 tap_action:
                   action: more-info
 
-
+

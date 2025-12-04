@@ -128,12 +128,12 @@
         message: >
           Preset selected: {{ calculated_preset }}
           (Outside: {{ outside_temp }}°C, WFH: {{ wfh_today }}, Override: {{ preset_override }})
-        entity_id: climate.living_room_versatile_thermastat  # CUSTOMIZE: Your climate entity
+        entity_id: climate.living_room_versatile_thermostat  # CUSTOMIZE: Your climate entity
 
     # Step 3: Activate heating with calculated preset
     - service: script.activate_heating
       data:
-        climate_entity: climate.living_room_versatile_thermastat  # CUSTOMIZE: Your versatile climate entity
+        climate_entity: climate.living_room_versatile_thermostat  # CUSTOMIZE: Your versatile climate entity
         preset_mode: "{{ calculated_preset }}"
 
     # Step 4 (Optional): Send notification
@@ -155,7 +155,7 @@
     # Step 6: Safety shutdown after max duration
     - service: script.deactivate_climate
       data:
-        climate_entity: climate.living_room_versatile_thermastat  # CUSTOMIZE: Your climate entity
+        climate_entity: climate.living_room_versatile_thermostat  # CUSTOMIZE: Your climate entity
 
   # ============================================================================
   # MODE: Restart
@@ -168,7 +168,7 @@
 # ============================================================================
 # [ ] Replace sensor.essendon_airport_temp with your outside temp sensor
 # [ ] Replace sensor.living_room_temperature_offset with your downstairs temp
-# [ ] Replace climate.living_room_versatile_thermastat with your climate entity
+# [ ] Replace climate.living_room_versatile_thermostat with your climate entity
 # [ ] Verify input helpers exist (see Step 1 in setup guide)
 # [ ] Adjust temperature thresholds if needed (currently <5°C, <10°C)
 # [ ] Adjust wake-up time (currently 5:30 AM)

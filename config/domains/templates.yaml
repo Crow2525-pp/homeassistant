@@ -141,7 +141,7 @@
       unique_id: washing_machine_estimated_remaining
       state: >
         {% set cycle_time = 55 %}
-        {% if is_state('input_boolean.washing_machine_on', 'on') and states.input_boolean.washing_machine_on.last_changed %}
+        {% if is_state('input_boolean.washing_machine_on', 'on') and states.input_boolean.washing_machine_on is not none and states.input_boolean.washing_machine_on.last_changed %}
           {% set last_changed = as_timestamp(states.input_boolean.washing_machine_on.last_changed) %}
           {% if last_changed is not none %}
             {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
@@ -162,7 +162,7 @@
       unique_id: dryer_estimated_remaining
       state: >
         {% set cycle_time = 120 %}
-        {% if is_state('input_boolean.dryer_on', 'on') and states.input_boolean.dryer_on.last_changed %}
+        {% if is_state('input_boolean.dryer_on', 'on') and states.input_boolean.dryer_on is not none and states.input_boolean.dryer_on.last_changed %}
           {% set last_changed = as_timestamp(states.input_boolean.dryer_on.last_changed) %}
           {% if last_changed is not none %}
             {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
@@ -183,7 +183,7 @@
       unique_id: dishwasher_estimated_remaining
       state: >
         {% set cycle_time = 150 %}
-        {% if is_state('input_boolean.dishwasher_on', 'on') and states.input_boolean.dishwasher_on.last_changed %}
+        {% if is_state('input_boolean.dishwasher_on', 'on') and states.input_boolean.dishwasher_on is not none and states.input_boolean.dishwasher_on.last_changed %}
           {% set last_changed = as_timestamp(states.input_boolean.dishwasher_on.last_changed) %}
           {% if last_changed is not none %}
             {% set elapsed = (as_timestamp(now()) - last_changed) / 60 %}
@@ -1726,34 +1726,32 @@
 
 # Roller Blinds - Simplified 3-state control
 - cover:
-  - platform: template
-    covers:
-      roller_blinds_simple:
-        friendly_name: "Roller Blinds"
-        device_class: blind
-        value_template: >-
-          {% if is_state('input_select.roller_blind_state_simple', 'closed') %}
-            closed
-          {% elif is_state('input_select.roller_blind_state_simple', 'open') %}
-            open
-          {% else %}
-            open
-          {% endif %}
-        position_template: >-
-          {% if is_state('input_select.roller_blind_state_simple', 'closed') %}
-            0
-          {% elif is_state('input_select.roller_blind_state_simple', 'open') %}
-            100
-          {% else %}
-            50
-          {% endif %}
-        open_cover:
-          service: script.roller_blinds_open_simple
-        close_cover:
-          service: script.roller_blinds_close_simple
-        stop_cover:
-          service: script.roller_blinds_stop
-        set_cover_position:
-          service: script.roller_blinds_set_position_simple
-          data:
-            position: "{{ position }}"
+    - unique_id: roller_blinds_simple
+      name: "Roller Blinds"
+      device_class: blind
+      value_template: >-
+        {% if is_state('input_select.roller_blind_state_simple', 'closed') %}
+          closed
+        {% elif is_state('input_select.roller_blind_state_simple', 'open') %}
+          open
+        {% else %}
+          open
+        {% endif %}
+      position_template: >-
+        {% if is_state('input_select.roller_blind_state_simple', 'closed') %}
+          0
+        {% elif is_state('input_select.roller_blind_state_simple', 'open') %}
+          100
+        {% else %}
+          50
+        {% endif %}
+      open_cover:
+        service: script.roller_blinds_open_simple
+      close_cover:
+        service: script.roller_blinds_close_simple
+      stop_cover:
+        service: script.roller_blinds_stop
+      set_cover_position:
+        service: script.roller_blinds_set_position_simple
+        data:
+          position: "{{ position }}"

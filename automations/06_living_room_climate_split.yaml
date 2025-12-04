@@ -59,7 +59,7 @@
   actions:
     - action: script.activate_heating
       data:
-        climate_entity: climate.living_room_versatile_thermastat
+        climate_entity: climate.living_room_versatile_thermostat
         preset_mode: comfort
   mode: single
 
@@ -109,7 +109,7 @@
   actions:
     - action: script.activate_heating
       data:
-        climate_entity: climate.living_room_versatile_thermastat
+        climate_entity: climate.living_room_versatile_thermostat
         preset_mode: comfort
   mode: restart
 
@@ -155,7 +155,7 @@
           sequence:
             - action: script.activate_cooling
               data:
-                climate_entity: climate.living_room_versatile_thermastat
+                climate_entity: climate.living_room_versatile_thermostat
                 preset_mode: comfort
         - conditions:
             - condition: numeric_state
@@ -168,7 +168,7 @@
           sequence:
             - action: script.activate_fan_only
               data:
-                climate_entity: climate.living_room_versatile_thermastat
+                climate_entity: climate.living_room_versatile_thermostat
                 preset_mode: eco
   mode: restart
 
@@ -198,7 +198,7 @@
   actions:
     - action: script.activate_dry_mode
       data:
-        climate_entity: climate.living_room_versatile_thermastat
+        climate_entity: climate.living_room_versatile_thermostat
   mode: single
 
 # ============================================================================
@@ -243,7 +243,7 @@
   actions:
     - action: script.set_climate_mode_and_preset
       data:
-        climate_entity: climate.living_room_versatile_thermastat
+        climate_entity: climate.living_room_versatile_thermostat
         hvac_mode: heat
         preset_mode: frost
   mode: single
@@ -271,7 +271,7 @@
   actions:
     - action: script.deactivate_climate
       data:
-        climate_entity: climate.living_room_versatile_thermastat
+        climate_entity: climate.living_room_versatile_thermostat
   mode: single
 
 - id: living_room_away_hot_day_cool
@@ -304,7 +304,7 @@
   actions:
     - action: script.activate_cooling
       data:
-        climate_entity: climate.living_room_versatile_thermastat
+        climate_entity: climate.living_room_versatile_thermostat
         preset_mode: eco
   mode: single
 
@@ -319,7 +319,7 @@
   description: "Turn off heating when room reaches comfortable temperature. Disabled during morning hours (5:30-8:00) to maintain warmth for wake-up."
   triggers:
     - trigger: state
-      entity_id: climate.living_room_versatile_thermastat
+      entity_id: climate.living_room_versatile_thermostat
       to: heat
       for:
         minutes: 30
@@ -342,7 +342,7 @@
   actions:
     - action: script.deactivate_climate
       data:
-        climate_entity: climate.living_room_versatile_thermastat
+        climate_entity: climate.living_room_versatile_thermostat
   mode: single
 
 - id: living_room_shutdown_door_open
@@ -360,7 +360,7 @@
   actions:
     - action: script.deactivate_climate
       data:
-        climate_entity: climate.living_room_versatile_thermastat
+        climate_entity: climate.living_room_versatile_thermostat
   mode: single
 
 - id: living_room_shutdown_manual_override
@@ -374,5 +374,5 @@
   actions:
     - action: script.deactivate_climate
       data:
-        climate_entity: climate.living_room_versatile_thermastat
+        climate_entity: climate.living_room_versatile_thermostat
   mode: single

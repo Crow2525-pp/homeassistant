@@ -73,7 +73,7 @@ climate.living_room_ac:
   room: living_room
   category: climate
 
-climate.living_room_versatile_thermastat:
+climate.living_room_versatile_thermostat:
   friendly_name: "Living Room Versatile Thermostat"
   room: living_room
   category: climate

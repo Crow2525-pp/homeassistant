@@ -85,12 +85,12 @@
       preset_mode: comfort
     action: climate.set_preset_mode
     target:
-      entity_id: climate.living_room_versatile_thermastat
+      entity_id: climate.living_room_versatile_thermostat
   - action: climate.set_hvac_mode
     data:
       hvac_mode: heat
     target:
-      entity_id: climate.living_room_versatile_thermastat
+      entity_id: climate.living_room_versatile_thermostat
   mode: single
 - id: '1746997822978'
   alias: Living Room - Turn Off Heater When Warm
@@ -107,7 +107,7 @@
     at: 06:00:00
   conditions:
   - condition: state
-    entity_id: climate.living_room_versatile_thermastat
+    entity_id: climate.living_room_versatile_thermostat
     state: heat
     for:
       hours: 0
@@ -131,7 +131,7 @@
   actions:
   - action: climate.set_hvac_mode
     target:
-      entity_id: climate.living_room_versatile_thermastat
+      entity_id: climate.living_room_versatile_thermostat
     data:
       hvac_mode: 'off'
   mode: single
@@ -223,7 +223,7 @@
           hvac_mode: 'off'
         action: climate.set_hvac_mode
         target:
-          entity_id: climate.living_room_versatile_thermastat
+          entity_id: climate.living_room_versatile_thermostat
     - conditions:
       - condition: trigger
         id:
@@ -234,14 +234,14 @@
           preset_mode: eco
         action: climate.set_preset_mode
         target:
-          entity_id: climate.living_room_versatile_thermastat
+          entity_id: climate.living_room_versatile_thermostat
       - metadata: {}
         data:
           hvac_mode: heat
         action: climate.set_hvac_mode
         target:
           entity_id:
-          - climate.living_room_versatile_thermastat
+          - climate.living_room_versatile_thermostat
   mode: single
 - id: '1714337117111'
   alias: Master Bedroom - Turn Off AC on Wake
