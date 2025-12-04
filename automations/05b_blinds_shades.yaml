@@ -1,85 +1,20 @@
 ---
 # ============================================================================
-# ROLLER BLINDS AUTOMATION - SIMPLIFIED
+# ROLLER BLINDS AUTOMATION - SIMPLE UP/DOWN/STOP
 # ============================================================================
 # This file contains:
-# 1. Blueprint-based automation for outdoor roller blinds (primary control)
-# 2. Safety automation for wind protection (since blueprint doesn't handle wind)
-# 3. NFC tag-based manual controls (up/down/stop via tags)
-# 4. Simple manual blind control tracker
+# 1. Manual NFC tag controls (up/down/partial)
+# 2. Wind protection automation (safety feature)
+# 3. Manual blind control tracker
 #
-# Removed: Position-based helpers, time-based automations, and complex
-# positional logic. The blueprint handles all climate-based control.
+# Note: Blueprint automation removed - the Broadlink IR cover doesn't report
+# position feedback (current_position/current_tilt_position attributes),
+# which caused blueprint template errors. Using simple controls instead.
 # ============================================================================
-
-- id: '1749858009259'
-  alias: Outdoor Blinds - Cover Control Automation
-  description: Coordinates cover control automation behaviour for the outdoor blinds.
-  conditions:
-  - condition: state
-    entity_id: input_boolean.blind_manual_control
-    state: 'off'
-  - condition: or
-    conditions:
-    - condition: time
-      after: '17:15:00'
-    - condition: state
-      entity_id: binary_sensor.working_from_home
-      state: 'off'
-  use_blueprint:
-    path: hvorragend/cover_control_automation.yaml
-    input:
-      auto_options:
-      - auto_up_enabled
-      - auto_down_enabled
-      - auto_brightness_enabled
-      - auto_sun_enabled
-      - auto_ventilate_enabled
-      - auto_shading_enabled
-      cover_status_options: cover_helper_enabled
-      cover_status_helper: input_text.cover_status_helper
-      cover_drive_time: 90
-      workday_sensor: binary_sensor.workday_sensor
-      default_brightness_sensor: sensor.hub_2_0be5_illuminance
-      brightness_up: 1000
-      brightness_down: 11900
-      contact_window_opened: binary_sensor.balcony_door_sensor_magnet_opening_2
-      resident_sensor: input_boolean.home_presence
-      resident_config:
-      - resident_closing_enabled
-      - resident_allow_opening
-      check_config: true
-      blind: cover.roller_blinds_chan1
-      open_position: 100
-      close_position: 0
-      ventilate_position: 30
-      shading_position: 25
-      position_tolerance: 0
-      shading_brightness_sensor: sensor.hub_2_0be5_illuminance
-      shading_temperatur_sensor1: sensor.ble_temperature_masterbed_temp_humidity_sensor
-      shading_temperatur_sensor2: sensor.essendon_airport_temp
-      shading_forecast_sensor: sensor.essendon_airport_max_temp
-      shading_sun_brightness_start: 20000
-      shading_sun_brightness_end: 12000
-      shading_elevation_min: 30
-      shading_azimuth_start: 45
-      shading_azimuth_end: 360
-      is_shading_end_immediate_by_sun_position: true
-      auto_shading_start_condition: []
-      auto_shading_end_condition:
-      - condition: sun
-        after: sunset
-      drive_delay_fix: 16
-      drive_delay_random: 5
-      sun_elevation_up: 12
-      sun_elevation_down: 5
-      sun_time_duration: 120
 
 # ============================================================================
 # SAFETY AUTOMATION: Wind Protection
 # ============================================================================
-# The blueprint doesn't handle high wind speeds, so this automation
-# protects the blinds from damage during extreme weather events.
 
 - id: '1682548783368'
   alias: Safety - Raise Blinds When Windy
@@ -142,17 +77,15 @@
 
 - id: '1693433717718'
   alias: Tag Masterbed - Close Blinds Partially
-  description: Tap NFC tag to close blinds to 50% (shading position)
+  description: Tap NFC tag to close blinds partially
   trigger:
   - platform: tag
     tag_id: 9d687fe2-e6f7-4d6f-838a-cee2712e3fdb
   condition: []
   action:
-  - service: cover.set_cover_position
+  - service: cover.close_cover
     target:
       entity_id: cover.roller_blinds_chan1
-    data:
-      position: 50
   mode: single
 
 - id: '1690150562163'
@@ -189,8 +122,8 @@
 
 - id: '1727826000001'
   alias: Automation Tracker - Manual Blind Control
-  description: Records when manual blind control is enabled so blueprint automation
-    can respect the override (pauses for 2 hours).
+  description: Records when manual blind control is enabled so automation can
+    respect the override (pauses for 2 hours).
   triggers:
   - trigger: state
     entity_id:
