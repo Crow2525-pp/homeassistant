@@ -1,52 +1,28 @@
 ---
 # ============================================================================
-# ROLLER BLINDS AUTOMATION - 50% DEFAULT POSITION
+# ROLLER BLINDS AUTOMATION - MAINTAIN 50% POSITION
 # ============================================================================
 # This file contains:
-# 1. Default 50% position at morning and evening (easy open/close from middle)
+# 1. Automation to maintain blinds at 50% position (default state)
 # 2. Manual NFC tag controls (full open/full close)
 # 3. Wind protection automation (safety feature)
 # 4. Manual blind control tracker
 #
-# Note: Blinds default to 50% position so they can be easily opened or closed
-# from the middle. Blueprint automation removed due to position feedback errors.
+# Note: Blinds are kept at 50% by default, allowing easy adjustment to
+# fully open or fully closed from the middle position. Blueprint automation
+# removed due to position feedback errors.
 # ============================================================================
 
 # ============================================================================
-# DEFAULT 50% POSITION SCHEDULE
+# MAINTAIN 50% POSITION - Resets blinds to 50% periodically
 # ============================================================================
 
-- id: '1644437526741'
-  alias: Blinds - Set to 50% at Morning
-  description: Set roller blinds to 50% (half open) at 8:00 AM on weekdays when not manually controlled
+- id: '1644437526742'
+  alias: Blinds - Maintain 50% Position
+  description: Keeps roller blinds at 50% (half open) as default resting position
   trigger:
-  - platform: time
-    at: '08:00:00'
-  condition:
-  - condition: time
-    weekday:
-    - mon
-    - tue
-    - wed
-    - thu
-    - fri
-  - condition: state
-    entity_id: input_boolean.blind_manual_control
-    state: 'off'
-  action:
-  - service: cover.set_cover_position
-    target:
-      entity_id: cover.roller_blinds_chan1
-    data:
-      position: 50
-  mode: single
-
-- id: '1644402690424'
-  alias: Blinds - Set to 50% at Evening
-  description: Set roller blinds to 50% (half open) at sunset when not manually controlled
-  trigger:
-  - platform: sun
-    event: sunset
+  - platform: time_pattern
+    hours: /1
   condition:
   - condition: state
     entity_id: input_boolean.blind_manual_control
