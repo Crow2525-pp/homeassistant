@@ -1,39 +1,15 @@
 ---
 # ============================================================================
-# ROLLER BLINDS AUTOMATION - MAINTAIN 50% POSITION
+# ROLLER BLINDS AUTOMATION - SIMPLE UP/DOWN/STOP CONTROLS
 # ============================================================================
 # This file contains:
-# 1. Automation to maintain blinds at 50% position (default state)
-# 2. Manual NFC tag controls (full open/full close)
-# 3. Wind protection automation (safety feature)
-# 4. Manual blind control tracker
+# 1. Simple up/down/stop controls via NFC tags (no position tracking)
+# 2. Wind protection automation (safety feature)
+# 3. Manual blind control tracker
 #
-# Note: Blinds are kept at 50% by default, allowing easy adjustment to
-# fully open or fully closed from the middle position. Blueprint automation
-# removed due to position feedback errors.
+# Note: No position tracking - cover doesn't report current_position.
+# Using simple open/close/stop commands that work reliably.
 # ============================================================================
-
-# ============================================================================
-# MAINTAIN 50% POSITION - Resets blinds to 50% periodically
-# ============================================================================
-
-- id: '1644437526742'
-  alias: Blinds - Maintain 50% Position
-  description: Keeps roller blinds at 50% (half open) as default resting position
-  trigger:
-  - platform: time_pattern
-    hours: /1
-  condition:
-  - condition: state
-    entity_id: input_boolean.blind_manual_control
-    state: 'off'
-  action:
-  - service: cover.set_cover_position
-    target:
-      entity_id: cover.roller_blinds_chan1
-    data:
-      position: 50
-  mode: single
 
 # ============================================================================
 # SAFETY AUTOMATION: Wind Protection
@@ -42,7 +18,7 @@
 - id: '1682548783368'
   alias: Safety - Raise Blinds When Windy
   description: Automatically raises roller blinds when wind speed exceeds 40 km/h
-    to prevent damage. Waits for wind to drop below 25 km/h before restoring to 50%.
+    to prevent damage. Waits for wind to drop below 25 km/h.
   trigger:
   - platform: template
     value_template: '{{ state_attr(''weather.home'', ''wind_speed'') > 40}}'
@@ -70,33 +46,28 @@
   - service: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
       title: Wind Speed Reduced
-      message: Restoring blinds to 50% position
-  - service: cover.set_cover_position
-    target:
-      entity_id: cover.roller_blinds_chan1
-    data:
-      position: 50
-  mode: single
+      message: Wind speed is safe
 
 # ============================================================================
-# NFC TAG CONTROLS - Manual Blind Control
+# NFC TAG CONTROLS - Simple Up/Down/Stop
 # ============================================================================
 
 - id: '1685572749524'
-  alias: Master Bedroom NFC - Open Blinds Fully
-  description: Tap NFC tag to open roller blinds fully (100%)
+  alias: Master Bedroom NFC - Blinds Up
+  description: Tap NFC tag to move blinds up
   trigger:
   - platform: tag
     tag_id: 531bec6b-8dea-4b53-ae0c-5840aca23f70
   condition: []
   action:
-  - service: script.roller_blinds_up
-    data: {}
+  - service: cover.open_cover
+    target:
+      entity_id: cover.roller_blinds_chan1
   mode: single
 
 - id: '1693433717718'
-  alias: Master Bedroom NFC - Close Blinds Fully
-  description: Tap NFC tag to close roller blinds fully (0%)
+  alias: Master Bedroom NFC - Blinds Down
+  description: Tap NFC tag to move blinds down
   trigger:
   - platform: tag
     tag_id: 9d687fe2-e6f7-4d6f-838a-cee2712e3fdb
@@ -108,31 +79,16 @@
   mode: single
 
 - id: '1690150562163'
-  alias: Master Bedroom NFC - Heat and Lift Desk Corner
-  description: Sets the bedroom climate to heat and opens blinds fully after a delay when
-    that NFC tag is scanned.
+  alias: Master Bedroom NFC - Blinds Stop
+  description: Tap NFC tag to stop blinds
   trigger:
   - platform: tag
     tag_id: 38314bff-f8ff-4949-908c-eab6853d970e
   condition: []
   action:
-  - service: climate.set_preset_mode
-    data:
-      preset_mode: comfort
+  - service: cover.stop_cover
     target:
-      area_id: master_bedroom
-  - service: climate.set_hvac_mode
-    data:
-      hvac_mode: heat
-    target:
-      area_id: master_bedroom
-  - delay:
-      hours: 3
-      minutes: 0
-      seconds: 0
-      milliseconds: 0
-  - service: script.roller_blinds_up
-    data: {}
+      entity_id: cover.roller_blinds_chan1
   mode: single
 
 # ============================================================================
