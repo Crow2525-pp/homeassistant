@@ -1762,6 +1762,7 @@
 
 - light:
     - unique_id: tv_backlight
+      object_id: tv_backlight
       name: "TV Back Lightstrip"
       icon: mdi:television-ambient-light
       turn_on:
