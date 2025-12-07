@@ -12,6 +12,8 @@
 !groups.yaml
 !scenes.yaml
 !scripts.yaml
+!sensors.yaml
+!sensor.yaml
 !mysensors.yaml
 !notifications.yaml
 !templates.yaml
