@@ -1,0 +1,61 @@
+---
+# ============================================================================
+# MASTER BEDROOM MORNING COMFORT AUTOMATION
+# ============================================================================
+# Purpose: Set master bedroom to comfort preset at 7 AM
+# Behavior: Determines heating or cooling based on outside temperature
+# ============================================================================
+
+- id: master_bedroom_morning_comfort
+  alias: "Master Bedroom - Morning Comfort (7:00 AM)"
+  description: "Set master bedroom to comfort preset at 7 AM with temperature-based HVAC mode"
+
+  trigger:
+    - platform: time
+      at: "07:00:00"
+      id: scheduled_comfort
+
+  condition:
+    # Home occupied
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+
+  action:
+    # Calculate HVAC mode based on outside temperature
+    - variables:
+        outside_temp: "{{ states('sensor.essendon_airport_temp') | float(20) }}"
+        # Determine mode: heat if cold (<18°C), cool if hot (>22°C), off if moderate
+        hvac_mode: >
+          {% if outside_temp < 18 %}
+            heat
+          {% elif outside_temp > 22 %}
+            cool
+          {% else %}
+            off
+          {% endif %}
+
+    # Set preset to comfort
+    - service: climate.set_preset_mode
+      target:
+        entity_id: climate.masterbed_versatile_thermostat
+      data:
+        preset_mode: comfort
+
+    # Set HVAC mode based on outside temperature
+    - service: climate.set_hvac_mode
+      target:
+        entity_id: climate.masterbed_versatile_thermostat
+      data:
+        hvac_mode: "{{ hvac_mode }}"
+
+    # Log action
+    - service: logbook.log
+      data:
+        name: "Master Bedroom Morning Comfort"
+        message: >
+          Comfort preset activated at 7:00 AM.
+          Outside temp: {{ outside_temp }}°C
+          Mode: {{ hvac_mode }}
+
+  mode: single
