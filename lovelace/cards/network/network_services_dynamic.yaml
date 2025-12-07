@@ -82,7 +82,8 @@ cards:
     ### Books & Media
     - [Calibre Web]({% if local %}https://books.pspatt.net{% else %}http://{{ media }}:8083{% endif %})
     - [Calibre]({% if local %}https://calibre.pspatt.net{% else %}http://{{ media }}:8080{% endif %})
-    - [Audiobooks]({% if local %}https://audiobooks.pspatt.net{% else %}http://{{ media }}:80{% endif %})
+    - [Audiobookshelf]({% if local %}https://audiobooks.pspatt.net{% else %}http://{{ media }}:13378{% endif %})
+    - [Reader Audiobooks]({% if local %}https://reader.pspatt.net{% else %}http://{{ media }}:8789{% endif %})
 
     ### Utilities
     - [SyncThing]({% if local %}https://sync.pspatt.net{% else %}http://{{ media }}:8384{% endif %})

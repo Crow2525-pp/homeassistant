@@ -81,6 +81,9 @@ cards:
       name: Reader Audiobooks
       url: http://192.168.1.103:8789/
     - type: weblink
+      name: Audiobookshelf
+      url: http://192.168.1.103:13378/
+    - type: weblink
       name: Dagster Webserver
       url: http://192.168.1.103:3000/
     - type: weblink
