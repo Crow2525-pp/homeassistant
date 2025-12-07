@@ -1,0 +1,109 @@
+---
+# ============================================================================
+# BACKUP TO NAS AUTOMATION
+# ============================================================================
+# Purpose: Copy Home Assistant backups to Network Attached Storage
+# Trigger: Time-based (3:30 AM - after daily backup completes)
+# Action: Check if shell command exists, then copy backup to NAS
+# Requirements: NAS mounted in Home Assistant, shell_command configured
+#
+# Setup Instructions:
+# 1. Mount your NAS in Home Assistant (e.g., via Samba/SMB integration)
+# 2. Configure shell_command.backup_to_nas in configuration.yaml (see example below)
+# 3. Test shell command manually before deploying
+# 4. Verify backups appear on NAS after automation runs
+#
+# Example shell_command configuration (add to configuration.yaml):
+# shell_command:
+#   backup_to_nas: "cp /backup/*.tar /media/nas/ha_backups/"
+#
+# Documentation: docs/BACKUP_AUTOMATION_SETUP.md
+# ============================================================================
+
+- id: system_backup_to_nas
+  alias: "System - Backup to NAS"
+  description: "Copy daily backup to NAS at 3:30 AM (after backup completes)"
+
+  # ============================================================================
+  # TRIGGER: Daily at 3:30 AM (30 minutes after backup)
+  # ============================================================================
+  trigger:
+    - platform: time
+      at: "03:30:00"  # CUSTOMIZE: Adjust if you changed backup time
+
+  # ============================================================================
+  # CONDITIONS: Optional Conditions
+  # ============================================================================
+  condition:
+    # Only run if daily backup likely completed
+    # Uncomment to add conditions:
+    # - condition: state
+    #   entity_id: binary_sensor.backup_success
+    #   state: "on"
+
+  # ============================================================================
+  # ACTIONS: Copy to NAS or Notify if Not Configured
+  # ============================================================================
+  action:
+    - choose:
+        # Option 1: If shell command exists, run it
+        - conditions:
+            - condition: template
+              value_template: "{{ has_service('shell_command', 'backup_to_nas') }}"
+          sequence:
+            - service: shell_command.backup_to_nas
+            - service: notify.persistent_notification
+              data:
+                title: "NAS Backup Successful"
+                message: >
+                  Backup copied to NAS successfully.
+
+                  Time: {{ now().strftime('%I:%M %p on %B %d, %Y') }}
+                data:
+                  tag: "nas_backup"
+
+      # Default: If shell command doesn't exist, send warning
+      default:
+        - service: notify.persistent_notification
+          data:
+            title: "NAS Backup Skipped"
+            message: >
+              ⚠️ Shell command 'backup_to_nas' is not configured.
+
+              To enable NAS backups:
+              1. Mount your NAS in Home Assistant
+              2. Add shell_command to configuration.yaml:
+
+                 shell_command:
+                   backup_to_nas: "cp /backup/*.tar /media/nas/ha_backups/"
+
+              3. Restart Home Assistant
+              4. Test this automation manually
+
+              See docs/BACKUP_AUTOMATION_SETUP.md for details.
+            data:
+              tag: "nas_backup_warning"
+
+    # Log action to logbook
+    - service: logbook.log
+      data:
+        name: "NAS Backup"
+        message: >
+          {% if has_service('shell_command', 'backup_to_nas') %}
+          Backup copied to NAS successfully
+          {% else %}
+          Skipped - shell_command.backup_to_nas not configured
+          {% endif %}
+
+  mode: single
+
+# ============================================================================
+# CUSTOMIZATION CHECKLIST
+# ============================================================================
+# [ ] Mount NAS in Home Assistant
+# [ ] Add shell_command.backup_to_nas to configuration.yaml
+# [ ] Customize NAS path in shell command
+# [ ] Test shell command manually from Developer Tools
+# [ ] Run this automation manually to verify
+# [ ] Check that backup files appear on NAS
+# [ ] (Optional) Add error handling for failed copies
