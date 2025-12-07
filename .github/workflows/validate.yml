@@ -1,0 +1,55 @@
+name: Validate Configuration
+
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+      - development
+  push:
+    branches:
+      - master
+      - main
+      - development
+
+permissions:
+  contents: read
+
+jobs:
+  # Detect which paths changed to conditionally run jobs
+  detect-changes:
+    name: Detect file changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      yaml_changed: ${{ steps.filter.outputs.yaml }}
+      esphome_changed: ${{ steps.filter.outputs.esphome }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            yaml:
+              - '**.yaml'
+              - '**.yml'
+              - 'configuration.yaml'
+              - 'automations/**'
+              - 'config/**'
+              - 'lovelace/**'
+            esphome:
+              - 'esphome/**'
+
+  # Call the reusable validation workflow
+  validation:
+    name: Run validation checks
+    needs: detect-changes
+    uses: ./.github/workflows/reusable-validation.yml
+    permissions:
+      contents: read
+    with:
+      run_esphome: ${{ needs.detect-changes.outputs.esphome_changed == 'true' }}
+      run_ha_stable: ${{ needs.detect-changes.outputs.yaml_changed == 'true' }}
