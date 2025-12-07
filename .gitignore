@@ -59,6 +59,7 @@ secrets.yaml
 !.github/workflows/validate.yml
 !.github/workflows/reusable-validation.yml
 !.github/workflows/entity-validate.yml
+!.github/workflows/deploy.yml
 !.yamllint
 !secrets.yaml.example
 !docs/GITHUB_ACTIONS_SETUP.md
