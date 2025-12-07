@@ -1755,3 +1755,16 @@
         service: script.roller_blinds_set_position_simple
         data:
           position: "{{ position }}"
+
+# ============================================================================
+# LIGHT TEMPLATES
+# ============================================================================
+
+- light:
+    - unique_id: tv_backlight
+      name: "TV Back Lightstrip"
+      icon: mdi:television-ambient-light
+      turn_on:
+        - action: script.tv_lights_on
+      turn_off:
+        - action: script.tv_lights_off

@@ -235,18 +235,6 @@ cover:
                     data:
                       duration: "00:18:00"
 
-light:
-  - platform: template
-    lights:
-      tv_backlight:
-        friendly_name: "TV Back Lightstrip"
-        unique_id: light.tv_backlight
-        icon_template: "mdi:television-ambient-light"
-        turn_on:
-          action: script.tv_lights_on
-        turn_off:
-          action: script.tv_lights_off
-
 # Disabled integrations (commented out - not in use):
 # adaptive_lighting - requires specific light entities and brightness control
 # battery_notes - requires compatible battery-powered devices
