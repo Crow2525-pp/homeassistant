@@ -53,7 +53,7 @@
         name: "Auto Backup {{ now().strftime('%Y-%m-%d') }}"
         # Optional parameters:
         # password: "your_encryption_password"  # Encrypt backup
-        # Note: On HA 2024.9+ you can switch to `backup.create` if available.
+        # Note: Use hassio.backup_full for compatibility; do not switch to backup.create unless verified in your HA instance.
 
     # Action 2: Wait for backup to complete (optional but recommended)
     - delay:
@@ -179,7 +179,7 @@
 # ============================================================================
 # CUSTOMIZATION CHECKLIST
 # ============================================================================
-# [ ] Verify backup.create service exists (HA 2024.9+)
+# [ ] Verify hassio.backup_full service exists (Developer Tools > Services)
 # [ ] Customize backup time (default: 3:00 AM)
 # [ ] Configure notification service (persistent, mobile, email)
 # [ ] (Optional) Enable backup failure alert

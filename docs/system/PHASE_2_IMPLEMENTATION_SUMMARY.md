@@ -315,7 +315,7 @@ All template files follow `.yamllint` configuration:
 ### Home Assistant Compatibility
 
 **Service Calls Validated:**
-- ✓ `backup.create` (HA 2024.9+ - documented in prerequisites)
+- ✓ `hassio.backup_full` (Supervisor backup service, broadly available)
 - ✓ `climate.set_hvac_mode` (standard)
 - ✓ `climate.set_preset_mode` (versatile climate)
 - ✓ `input_datetime.set_datetime` (standard)
@@ -393,7 +393,7 @@ All automations follow standard HA structure:
 ### System Requirements
 
 **Home Assistant Version:**
-- Minimum: 2024.9 (for `backup.create` service)
+- Minimum: Supervisor backups enabled (for `hassio.backup_full` service)
 - Recommended: Latest stable release
 
 **Integrations Required:**
@@ -474,7 +474,7 @@ All automations follow standard HA structure:
 
 ### Limitations
 
-1. **Backup Service:** Requires Home Assistant 2024.9+ for `backup.create` service
+1. **Backup Service:** Requires Supervisor backups (`hassio.backup_full` service); `backup.create` is optional if your HA version exposes it
 2. **Face Detection:** Requires additional integration (not included in templates)
 3. **Motion Sensors:** Entity IDs may need customization based on your sensors
 4. **Climate Presets:** Assumes versatile climate with eco/comfort/boost/frost presets

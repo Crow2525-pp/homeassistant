@@ -22,7 +22,7 @@ Two backup automations were reporting "unknown action" errors:
 ## Fixes Applied
 
 ### Fix 1: Daily Backup Template Updated
-File: `automations/99_daily_backup_template.yaml`
+File: `automations/10_system_daily_backup.yaml`
 
 **Changes:**
 - Explicitly documented to use `hassio.backup_full` ONLY
