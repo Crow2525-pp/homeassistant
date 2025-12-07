@@ -116,18 +116,6 @@ http:
 # Roller Blinds - Migrated to modern template syntax
 # See config/domains/templates.yaml for cover definitions
 
-light:
-  - platform: template
-    lights:
-      tv_backlight:
-        friendly_name: "TV Back Lightstrip"
-        unique_id: light.tv_backlight
-        icon_template: "mdi:television-ambient-light"
-        turn_on:
-          action: script.tv_lights_on
-        turn_off:
-          action: script.tv_lights_off
-
 # Disabled integrations (commented out - not in use):
 # adaptive_lighting - requires specific light entities and brightness control
 # battery_notes - requires compatible battery-powered devices
@@ -700,3 +688,24 @@ alert:
     done_message: "WAN Down Alert RESOLVED at {{ as_timestamp(states.binary_sensor.wan_down_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}"
     notifiers:
       - STD_Warning
+
+# ============================================================================
+# SHELL COMMANDS
+# ============================================================================
+# Shell commands allow running shell scripts/commands from automations
+# Uncomment and configure as needed
+
+shell_command:
+  # NAS Backup Command
+  # Used by automation: System - Backup to NAS (automations/11_backup_to_nas.yaml)
+  # Instructions:
+  # 1. Mount your NAS in Home Assistant (Settings > System > Network Storage)
+  # 2. Update the path below to match your NAS mount point
+  # 3. Uncomment the line below
+  # 4. Restart Home Assistant
+  # 5. Test the automation manually
+  backup_to_nas: "echo 'NAS backup not configured. Update path in configuration.yaml'"
+  # Example for NAS mounted at /media/nas:
+  # backup_to_nas: "cp /backup/*.tar /media/nas/ha_backups/"
+  # Example for Samba share:
+  # backup_to_nas: "cp /backup/*.tar /mnt/nas/homeassistant/backups/"

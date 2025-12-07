@@ -1867,3 +1867,16 @@
                     entity_id: timer.roller_blind_timer
                   data:
                     duration: "00:18:00"
+
+# ============================================================================
+# LIGHT TEMPLATES
+# ============================================================================
+
+- light:
+    - unique_id: tv_backlight
+      name: "TV Back Lightstrip"
+      icon: mdi:television-ambient-light
+      turn_on:
+        - action: script.tv_lights_on
+      turn_off:
+        - action: script.tv_lights_off
