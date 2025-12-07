@@ -386,15 +386,33 @@ input_select:
     initial: Kitchen
     icon: mdi:home-sound-in
   roller_blind_state_simple:
-    name: Roller Blind State
+    name: Roller Blind State (Simple)
     options:
       - closed
       - partial
       - open
     initial: closed
     icon: mdi:blinds
+  roller_blind_state:
+    name: Roller Blind State
+    options:
+      - opening
+      - closing
+      - open
+      - closed
+    initial: closed
+    icon: mdi:blinds
 input_number:
   # Roller Blind Position Tracking
+  roller_blind_position:
+    name: Roller Blind Position
+    min: 0
+    max: 100
+    step: 1
+    initial: 0
+    mode: box
+    icon: mdi:blinds
+    unit_of_measurement: '%'
   roller_blind_target_position:
     name: Roller Blind Target Position
     min: 0
@@ -739,6 +757,12 @@ input_datetime:
     name: Last Trigger - Climate Flags Mark Hot Day
     has_date: true
     has_time: true
+
+timer:
+  roller_blind_timer:
+    name: Roller Blind Movement Timer
+    icon: mdi:timer
+    restore: false
 
 alert:
   garage_door_info_alert_active:

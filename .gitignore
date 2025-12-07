@@ -56,9 +56,10 @@ secrets.yaml
 *.db-wal
 
 
-!.github/workflows/yaml-lint.yml
-!.github/workflows/ha-validate.yml
+!.github/workflows/validate.yml
+!.github/workflows/reusable-validation.yml
 !.github/workflows/entity-validate.yml
+!.github/workflows/deploy.yml
 !.yamllint
 !secrets.yaml.example
 !docs/GITHUB_ACTIONS_SETUP.md
