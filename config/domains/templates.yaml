@@ -1729,7 +1729,7 @@
     - unique_id: roller_blinds_simple
       name: "Roller Blinds"
       device_class: blind
-      value_template: >-
+      state: >-
         {% if is_state('input_select.roller_blind_state_simple', 'closed') %}
           closed
         {% elif is_state('input_select.roller_blind_state_simple', 'open') %}
@@ -1737,7 +1737,7 @@
         {% else %}
           open
         {% endif %}
-      position_template: >-
+      position: >-
         {% if is_state('input_select.roller_blind_state_simple', 'closed') %}
           0
         {% elif is_state('input_select.roller_blind_state_simple', 'open') %}
@@ -1761,9 +1761,9 @@
       name: "Roller blinds (MasterBedroom)"
       device_class: blind
       # Read position from tracked helper (Broadlink covers don't report position)
-      position_template: "{{ states('input_number.roller_blind_position') | int(0) }}"
+      position: "{{ states('input_number.roller_blind_position') | int(0) }}"
       # Use the state tracking helper
-      value_template: >-
+      state: >-
         {% set state = states('input_select.roller_blind_state') %}
         {% if state in ['opening', 'open'] %}
           open
