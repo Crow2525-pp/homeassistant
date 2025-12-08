@@ -6,7 +6,7 @@ cards:
     icon: mdi:blinds
 
   - type: tile
-    entity: cover.roller_blinds_chan1
+    entity: cover.roller_blinds_masterbedroom
     name: Roller Blinds
     features:
       - type: cover-open-close
