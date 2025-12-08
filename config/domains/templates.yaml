@@ -1746,15 +1746,15 @@
           50
         {% endif %}
       open_cover:
-        service: script.roller_blinds_open_simple
+        - service: script.roller_blinds_open_simple
       close_cover:
-        service: script.roller_blinds_close_simple
+        - service: script.roller_blinds_close_simple
       stop_cover:
-        service: script.roller_blinds_stop
+        - service: script.roller_blinds_stop
       set_cover_position:
-        service: script.roller_blinds_set_position_simple
-        data:
-          position: "{{ position }}"
+        - service: script.roller_blinds_set_position_simple
+          data:
+            position: "{{ position }}"
 
     # Roller Blinds - Full position tracking (Master Bedroom)
     - unique_id: roller_blinds_MasterBedroom
@@ -1774,35 +1774,35 @@
         {% endif %}
       # Quick, non-blocking actions
       open_cover:
-        - action: input_select.select_option
+        - service: input_select.select_option
           target:
             entity_id: input_select.roller_blind_state
           data:
             option: "opening"
-        - action: script.roller_blinds_up
-        - action: timer.start
+        - service: script.roller_blinds_up
+        - service: timer.start
           target:
             entity_id: timer.roller_blind_timer
           data:
             duration: "00:18:00"
       close_cover:
-        - action: input_select.select_option
+        - service: input_select.select_option
           target:
             entity_id: input_select.roller_blind_state
           data:
             option: "closing"
-        - action: script.roller_blinds_down
-        - action: timer.start
+        - service: script.roller_blinds_down
+        - service: timer.start
           target:
             entity_id: timer.roller_blind_timer
           data:
             duration: "00:18:00"
       stop_cover:
-        - action: script.roller_blinds_stop
-        - action: timer.cancel
+        - service: script.roller_blinds_stop
+        - service: timer.cancel
           target:
             entity_id: timer.roller_blind_timer
-        - action: input_select.select_option
+        - service: input_select.select_option
           target:
             entity_id: input_select.roller_blind_state
           data:
@@ -1810,7 +1810,7 @@
       # Allow setting position (CCA needs this)
       set_cover_position:
         # Always set target position first
-        - action: input_number.set_value
+        - service: input_number.set_value
           target:
             entity_id: input_number.roller_blind_target_position
           data:
@@ -1820,13 +1820,13 @@
             # If target is 100, open fully
             - conditions: "{{ position == 100 }}"
               sequence:
-                - action: input_select.select_option
+                - service: input_select.select_option
                   target:
                     entity_id: input_select.roller_blind_state
                   data:
                     option: "opening"
-                - action: script.roller_blinds_up
-                - action: timer.start
+                - service: script.roller_blinds_up
+                - service: timer.start
                   target:
                     entity_id: timer.roller_blind_timer
                   data:
@@ -1834,13 +1834,13 @@
             # If target is 0, close fully
             - conditions: "{{ position == 0 }}"
               sequence:
-                - action: input_select.select_option
+                - service: input_select.select_option
                   target:
                     entity_id: input_select.roller_blind_state
                   data:
                     option: "closing"
-                - action: script.roller_blinds_down
-                - action: timer.start
+                - service: script.roller_blinds_down
+                - service: timer.start
                   target:
                     entity_id: timer.roller_blind_timer
                   data:
@@ -1850,7 +1850,7 @@
                 {{ position > 0 and position < 100 and
                    (position - states('input_number.roller_blind_position') | int(0)) | abs > 5 }}
               sequence:
-                - action: input_select.select_option
+                - service: input_select.select_option
                   target:
                     entity_id: input_select.roller_blind_state
                   data:
@@ -1858,11 +1858,11 @@
                 - choose:
                     - conditions: "{{ position > states('input_number.roller_blind_position') | int(0) }}"
                       sequence:
-                        - action: script.roller_blinds_up
+                        - service: script.roller_blinds_up
                     - conditions: "{{ position < states('input_number.roller_blind_position') | int(0) }}"
                       sequence:
-                        - action: script.roller_blinds_down
-                - action: timer.start
+                        - service: script.roller_blinds_down
+                - service: timer.start
                   target:
                     entity_id: timer.roller_blind_timer
                   data:
