@@ -1737,7 +1737,7 @@
         {% else %}
           open
         {% endif %}
-      current_cover_position: >-
+      position: >-
         {% if is_state('input_select.roller_blind_state_simple', 'closed') %}
           0
         {% elif is_state('input_select.roller_blind_state_simple', 'open') %}
@@ -1761,7 +1761,7 @@
       name: "Roller blinds (MasterBedroom)"
       device_class: blind
       # Read position from tracked helper (Broadlink covers don't report position)
-      current_cover_position: "{{ states('input_number.roller_blind_position') | int(0) }}"
+      position: "{{ states('input_number.roller_blind_position') | int(0) }}"
       # Use the state tracking helper
       state: >-
         {% set state = states('input_select.roller_blind_state') %}
