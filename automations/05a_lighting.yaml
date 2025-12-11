@@ -500,20 +500,6 @@
           entity_id: light.floor_lamp_socket_1
         action: light.turn_off
   mode: single
-- id: '1733691257280'
-  alias: Holiday Lights - Turn On Morning Routine
-  description: Starts the morning run of the Christmas lights during the season.
-  triggers:
-  - trigger: time
-    at: 05:30:00
-  conditions: []
-  actions:
-  - action: light.turn_on
-    metadata: {}
-    data: {}
-    target:
-      entity_id: light.xmas_lights_plug_socket_1
-  mode: single
 - id: '1734000000002'
   alias: Outdoor Holiday Lights - Sunset to 9:45pm
   description: Turns outdoor Christmas lights on at sunset and off at 9:45pm.
