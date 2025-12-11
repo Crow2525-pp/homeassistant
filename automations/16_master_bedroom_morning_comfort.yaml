@@ -2,13 +2,15 @@
 # ============================================================================
 # MASTER BEDROOM MORNING COMFORT AUTOMATION
 # ============================================================================
-# Purpose: Set master bedroom to comfort preset at 7 AM
+# Purpose: Set master bedroom climate at 7 AM
 # Behavior: Determines heating or cooling based on outside temperature
+#           Uses comfort preset in winter, eco for all other seasons
+# Exit times: 7:00am (superhot), 8:00am (hot), 8:30am (warm), or when room too hot
 # ============================================================================
 
 - id: master_bedroom_morning_comfort
   alias: "Master Bedroom - Morning Comfort (7:00 AM)"
-  description: "Set master bedroom to comfort preset at 7 AM with temperature-based HVAC mode"
+  description: "Set master bedroom climate at 7 AM with seasonal preset (comfort in winter, eco otherwise). Skips if away/holiday or manual override active."
 
   trigger:
     - platform: time
@@ -16,15 +18,25 @@
       id: scheduled_comfort
 
   condition:
-    # Home occupied
+    # Only run when home or sleeping (not away or holiday)
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    # Manual override not active
     - condition: state
-      entity_id: input_select.occupancy
-      state: Home
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
 
   action:
-    # Calculate HVAC mode based on outside temperature
+    # Calculate HVAC mode and preset based on season and outside temperature
     - variables:
         outside_temp: "{{ states('sensor.essendon_airport_temp') | float(20) }}"
+        season: "{{ states('input_select.climate_season') }}"
         # Determine mode: heat if cold (<18°C), cool if hot (>22°C), off if moderate
         hvac_mode: >
           {% if outside_temp < 18 %}
@@ -34,13 +46,15 @@
           {% else %}
             off
           {% endif %}
+        # Comfort in winter, eco for all other seasons
+        preset: "{{ 'comfort' if season == 'winter' else 'eco' }}"
 
-    # Set preset to comfort
+    # Set preset based on season
     - service: climate.set_preset_mode
       target:
         entity_id: climate.masterbed_versatile_thermostat
       data:
-        preset_mode: comfort
+        preset_mode: "{{ preset }}"
 
     # Set HVAC mode based on outside temperature
     - service: climate.set_hvac_mode
@@ -54,8 +68,130 @@
       data:
         name: "Master Bedroom Morning Comfort"
         message: >
-          Comfort preset activated at 7:00 AM.
+          {{ preset | title }} preset activated at 7:00 AM.
+          Season: {{ season }}
           Outside temp: {{ outside_temp }}°C
           Mode: {{ hvac_mode }}
+
+  mode: single
+
+# ============================================================================
+# MASTER BEDROOM MORNING COMFORT - AUTO EXIT
+# ============================================================================
+# Purpose: Turn off morning comfort based on temperature conditions
+# Exit times:
+#   - 7:00am: superhot day (>25°C forecast)
+#   - 8:00am: hot day (>21°C forecast)
+#   - 8:30am: warm day (>18°C forecast)
+#   - Immediate: room temp exceeds outside temp (already warm enough)
+# ============================================================================
+
+- id: master_bedroom_morning_comfort_exit
+  alias: "Master Bedroom - Morning Comfort Exit"
+  description: "Turn off morning comfort early based on heat flags or room temperature"
+
+  trigger:
+    # Superhot day - exit at 7:00am (immediately after start)
+    - platform: time
+      at: "07:00:00"
+      id: exit_superhot
+    # Hot day - exit at 8:00am
+    - platform: time
+      at: "08:00:00"
+      id: exit_hot
+    # Warm day - exit at 8:30am
+    - platform: time
+      at: "08:30:00"
+      id: exit_warm
+    # Room temp exceeds outside temp - exit immediately
+    - platform: template
+      value_template: >
+        {{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)
+           > states('sensor.essendon_airport_temp') | float(0) + 2 }}
+      id: exit_room_hot
+
+  condition:
+    # Only run when home or sleeping
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    # Manual override not active
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
+    # Only during morning window (7am - 9am)
+    - condition: time
+      after: "07:00:00"
+      before: "09:00:00"
+
+  action:
+    - choose:
+        # Superhot day - exit immediately at 7am
+        - conditions:
+            - condition: trigger
+              id: exit_superhot
+            - condition: state
+              entity_id: input_boolean.super_hot_today
+              state: "on"
+          sequence:
+            - service: climate.turn_off
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+            - service: logbook.log
+              data:
+                name: "Master Bedroom Morning Comfort"
+                message: "Turned off at 7:00 AM - superhot day forecast"
+
+        # Hot day - exit at 8am
+        - conditions:
+            - condition: trigger
+              id: exit_hot
+            - condition: state
+              entity_id: input_boolean.hot_today_flag
+              state: "on"
+          sequence:
+            - service: climate.turn_off
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+            - service: logbook.log
+              data:
+                name: "Master Bedroom Morning Comfort"
+                message: "Turned off at 8:00 AM - hot day forecast"
+
+        # Warm day - exit at 8:30am
+        - conditions:
+            - condition: trigger
+              id: exit_warm
+            - condition: state
+              entity_id: input_boolean.warm_today_flag
+              state: "on"
+          sequence:
+            - service: climate.turn_off
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+            - service: logbook.log
+              data:
+                name: "Master Bedroom Morning Comfort"
+                message: "Turned off at 8:30 AM - warm day forecast"
+
+        # Room already warmer than outside - exit immediately
+        - conditions:
+            - condition: trigger
+              id: exit_room_hot
+          sequence:
+            - service: climate.turn_off
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+            - service: logbook.log
+              data:
+                name: "Master Bedroom Morning Comfort"
+                message: >
+                  Turned off - room temp ({{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}°C)
+                  exceeds outside temp ({{ states('sensor.essendon_airport_temp') }}°C)
 
   mode: single
