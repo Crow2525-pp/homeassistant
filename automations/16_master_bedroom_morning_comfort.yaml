@@ -4,12 +4,12 @@
 # ============================================================================
 # Purpose: Set master bedroom climate at 7 AM
 # Behavior: Determines heating or cooling based on outside temperature
-#           Uses eco preset in summer, comfort preset in winter
+#           Uses comfort preset in winter, eco for all other seasons
 # ============================================================================
 
 - id: master_bedroom_morning_comfort
   alias: "Master Bedroom - Morning Comfort (7:00 AM)"
-  description: "Set master bedroom climate at 7 AM with seasonal preset (eco in summer, comfort in winter)"
+  description: "Set master bedroom climate at 7 AM with seasonal preset (comfort in winter, eco otherwise). Respects manual override."
 
   trigger:
     - platform: time
@@ -21,6 +21,10 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Home
+    # Manual override not active
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
 
   action:
     # Calculate HVAC mode and preset based on season and outside temperature
@@ -36,8 +40,8 @@
           {% else %}
             off
           {% endif %}
-        # Eco in summer, comfort in winter
-        preset: "{{ 'eco' if season == 'summer' else 'comfort' }}"
+        # Comfort in winter, eco for all other seasons
+        preset: "{{ 'comfort' if season == 'winter' else 'eco' }}"
 
     # Set preset based on season
     - service: climate.set_preset_mode
