@@ -2,13 +2,14 @@
 # ============================================================================
 # MASTER BEDROOM MORNING COMFORT AUTOMATION
 # ============================================================================
-# Purpose: Set master bedroom to comfort preset at 7 AM
+# Purpose: Set master bedroom climate at 7 AM
 # Behavior: Determines heating or cooling based on outside temperature
+#           Uses eco preset in summer, comfort preset in winter
 # ============================================================================
 
 - id: master_bedroom_morning_comfort
   alias: "Master Bedroom - Morning Comfort (7:00 AM)"
-  description: "Set master bedroom to comfort preset at 7 AM with temperature-based HVAC mode"
+  description: "Set master bedroom climate at 7 AM with seasonal preset (eco in summer, comfort in winter)"
 
   trigger:
     - platform: time
@@ -22,9 +23,10 @@
       state: Home
 
   action:
-    # Calculate HVAC mode based on outside temperature
+    # Calculate HVAC mode and preset based on season and outside temperature
     - variables:
         outside_temp: "{{ states('sensor.essendon_airport_temp') | float(20) }}"
+        season: "{{ states('input_select.climate_season') }}"
         # Determine mode: heat if cold (<18°C), cool if hot (>22°C), off if moderate
         hvac_mode: >
           {% if outside_temp < 18 %}
@@ -34,13 +36,15 @@
           {% else %}
             off
           {% endif %}
+        # Eco in summer, comfort in winter
+        preset: "{{ 'eco' if season == 'summer' else 'comfort' }}"
 
-    # Set preset to comfort
+    # Set preset based on season
     - service: climate.set_preset_mode
       target:
         entity_id: climate.masterbed_versatile_thermostat
       data:
-        preset_mode: comfort
+        preset_mode: "{{ preset }}"
 
     # Set HVAC mode based on outside temperature
     - service: climate.set_hvac_mode
@@ -54,7 +58,8 @@
       data:
         name: "Master Bedroom Morning Comfort"
         message: >
-          Comfort preset activated at 7:00 AM.
+          {{ preset | title }} preset activated at 7:00 AM.
+          Season: {{ season }}
           Outside temp: {{ outside_temp }}°C
           Mode: {{ hvac_mode }}
 
