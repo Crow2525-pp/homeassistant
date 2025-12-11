@@ -9,7 +9,7 @@
 
 - id: master_bedroom_morning_comfort
   alias: "Master Bedroom - Morning Comfort (7:00 AM)"
-  description: "Set master bedroom climate at 7 AM with seasonal preset (comfort in winter, eco otherwise). Respects manual override."
+  description: "Set master bedroom climate at 7 AM with seasonal preset (comfort in winter, eco otherwise). Skips if away/holiday or manual override active."
 
   trigger:
     - platform: time
@@ -17,10 +17,15 @@
       id: scheduled_comfort
 
   condition:
-    # Home occupied
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
+    # Only run when home or sleeping (not away or holiday)
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
     # Manual override not active
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
