@@ -10,23 +10,23 @@
   alias: "System - Git Pull Addon Autostart"
   description: "Start Git Pull addon when Home Assistant starts, as backup to boot setting"
 
-  trigger:
-    - platform: homeassistant
+  triggers:
+    - trigger: homeassistant
       event: start
 
-  condition: []
+  conditions: []
 
-  action:
+  actions:
     # Small delay to let supervisor settle
     - delay:
         seconds: 30
 
     # Start the Git Pull addon
-    - service: hassio.addon_start
+    - action: hassio.addon_start
       data:
         addon: core_git_pull
 
-    - service: logbook.log
+    - action: logbook.log
       data:
         name: "Git Pull Addon"
         message: "Started via automation after Home Assistant boot"
