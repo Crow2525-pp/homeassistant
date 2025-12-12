@@ -529,18 +529,14 @@
           entity_id: light.outdoor_xmas_lights
 - id: '1734000000001'
   alias: Holiday Lights - Auto On/Off Schedule
-  description: Keeps Christmas lights on except between 1am and 5am during holiday season.
+  description: Keeps Christmas lights on between 5am and 11:30pm during holiday season.
   triggers:
   - trigger: time
     at: '05:00:00'
     id: turn_on
   - trigger: time
-    at: '01:00:00'
+    at: '23:30:00'
     id: turn_off
-  - trigger: state
-    entity_id: binary_sensor.holiday_season
-    to: 'on'
-    id: season_start
   conditions:
   - condition: state
     entity_id: binary_sensor.holiday_season
@@ -548,17 +544,8 @@
   actions:
   - choose:
     - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: turn_on
-        - condition: and
-          conditions:
-          - condition: trigger
-            id: season_start
-          - condition: time
-            after: '05:00:00'
-            before: '23:30:00'
+      - condition: trigger
+        id: turn_on
       sequence:
       - action: light.turn_on
         target:
