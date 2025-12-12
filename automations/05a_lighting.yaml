@@ -551,7 +551,7 @@
             id: season_start
           - condition: time
             after: '05:00:00'
-            before: '01:00:00'
+            before: '23:30:00'
       sequence:
       - action: light.turn_on
         target:
@@ -562,7 +562,7 @@
       sequence:
       - action: light.turn_off
         target:
-          entity_id: light.outdoor_xmas_lights
+          entity_id: light.xmas_lights_plug_socket_1
   mode: single
 - id: '1738899778775'
   alias: Study Remote - Toggle Computer Desk
