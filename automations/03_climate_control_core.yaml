@@ -411,10 +411,6 @@
   - condition: state
     entity_id: input_boolean.climate_manual_control_master
     state: 'off'
-  - condition: state
-    entity_id: input_boolean.hvac_master_bedroom_should_be_on
-    state: 'on'
-    alias: Master Bedroom HVAC Master On
   actions:
   - choose:
     - conditions:
