@@ -195,3 +195,72 @@
                   exceeds outside temp ({{ states('sensor.essendon_airport_temp') }}°C)
 
   mode: single
+
+# ============================================================================
+# MASTER BEDROOM HUMIDITY CONTROL
+# ============================================================================
+# Purpose: Maintain humidity below 55% using dehumidification mode
+# Behavior: Activates dry mode when humidity exceeds 55%
+# ============================================================================
+
+- id: master_bedroom_humidity_dehumidify
+  alias: "Master Bedroom - Dehumidify (High Humidity)"
+  description: "Activate dry mode when humidity exceeds 55%"
+
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+      above: 55
+      for:
+        minutes: 5
+      id: high_humidity
+
+  condition:
+    # Only run when home or sleeping
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    # Doors closed (prevents wasting energy)
+    - condition: state
+      entity_id: binary_sensor.interior_garage_door_sensor_magnet_opening
+      state: "off"
+    - condition: state
+      entity_id: binary_sensor.front_door_sensor_opening
+      state: "off"
+    # Manual override not active
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
+    # Active hours (6:00 AM - 10:15 PM)
+    - condition: time
+      after: "06:00:00"
+      before: "22:15:00"
+
+  action:
+    # Set preset to comfort for effective dehumidification
+    - service: climate.set_preset_mode
+      target:
+        entity_id: climate.masterbed_versatile_thermostat
+      data:
+        preset_mode: comfort
+
+    # Activate dry mode
+    - service: climate.set_hvac_mode
+      target:
+        entity_id: climate.masterbed_versatile_thermostat
+      data:
+        hvac_mode: dry
+
+    # Log action
+    - service: logbook.log
+      data:
+        name: "Master Bedroom Humidity Control"
+        message: >
+          Dry mode activated - humidity at {{ states('sensor.ble_humidity_masterbed_temp_humidity_sensor') }}%
+
+  mode: single

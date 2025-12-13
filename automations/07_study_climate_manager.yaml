@@ -231,7 +231,7 @@
         - conditions:
           - condition: numeric_state
             entity_id: sensor.study_esp32_henrysroom_humidity
-            above: 75
+            above: 55
           sequence:
           - choose:
             - conditions:
@@ -369,7 +369,7 @@
         - conditions:
           - condition: numeric_state
             entity_id: sensor.study_esp32_henrysroom_humidity
-            above: 75
+            above: 55
           sequence:
           - choose:
             - conditions:
@@ -554,7 +554,7 @@
         - conditions:
           - condition: numeric_state
             entity_id: sensor.study_esp32_henrysroom_humidity
-            above: 75
+            above: 55
           sequence:
           - choose:
             - conditions:

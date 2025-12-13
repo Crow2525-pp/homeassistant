@@ -174,11 +174,11 @@
 
 - id: living_room_daytime_humidity_dehumidify
   alias: "Living Room - Dehumidify (High Humidity)"
-  description: "Activate dry mode when humidity exceeds 75%"
+  description: "Activate dry mode when humidity exceeds 55%"
   triggers:
     - trigger: numeric_state
       entity_id: sensor.ble_humidity_kitchen_temp_humidity_sensor
-      above: 75
+      above: 55
       for:
         minutes: 5
       id: high_humidity
@@ -188,6 +188,12 @@
       state: Home
     - condition: state
       entity_id: binary_sensor.living_room_door_sensor_opening
+      state: "off"
+    - condition: state
+      entity_id: binary_sensor.interior_garage_door_sensor_magnet_opening
+      state: "off"
+    - condition: state
+      entity_id: binary_sensor.front_door_sensor_opening
       state: "off"
     - condition: state
       entity_id: input_boolean.climate_manual_control_living

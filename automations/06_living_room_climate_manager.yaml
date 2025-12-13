@@ -482,7 +482,7 @@
         - conditions:
           - condition: numeric_state
             entity_id: sensor.ble_humidity_kitchen_temp_humidity_sensor
-            above: 75
+            above: 55
           sequence:
           - choose:
             - conditions:
