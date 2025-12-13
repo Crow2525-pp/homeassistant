@@ -512,10 +512,6 @@
   - condition: state
     entity_id: input_boolean.warm_today_flag
     state: 'on'
-  - condition: state
-    entity_id: input_boolean.hvac_master_bedroom_should_be_on
-    state: 'on'
-    alias: Master Bedroom HVAC Master On
   actions:
   - action: input_datetime.set_datetime
     target:
