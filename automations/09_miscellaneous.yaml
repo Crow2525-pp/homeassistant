@@ -18,11 +18,6 @@
     entity_id: climate.masterbed_versatile_thermostat
     to: 'off'
     id: climate_off
-  conditions:
-  - condition: state
-    entity_id: input_boolean.hvac_master_bedroom_should_be_on
-    state: 'on'
-    alias: Master Bedroom HVAC Master On
   actions:
   - choose:
     - conditions:

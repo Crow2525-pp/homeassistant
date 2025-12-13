@@ -231,46 +231,6 @@
     target:
       area_id: master_bedroom
   mode: single
-- id: '1699526539731'
-  alias: Master Bedroom - Fan On When AC Starts
-  description: Adjusts the master bedroom fan when the climate shifts between cooling
-    and heating.
-  triggers:
-  - trigger: state
-    entity_id: climate.masterbed_versatile_thermostat
-    to: cool
-    id: Cool
-  - trigger: state
-    entity_id: climate.masterbed_versatile_thermostat
-    to: heat
-    id: Heat
-  conditions:
-  - condition: state
-    entity_id: input_boolean.hvac_master_bedroom_should_be_on
-    state: 'on'
-    alias: Master Bedroom HVAC Master On
-  actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: Cool
-      - condition: state
-        entity_id: fan.masterbedroom_fan
-        state: 'off'
-      sequence:
-      - service: fan.set_percentage
-        data:
-          percentage: 33
-        target:
-          entity_id: fan.masterbedroom_fan
-    - conditions:
-      - condition: trigger
-        id: Heat
-      sequence:
-      - service: fan.turn_off
-        target:
-          entity_id: fan.masterbedroom_fan
-  mode: single
 - id: '1747602740393'
   alias: Master Bedroom - Daytime Comfort Heating
   description: Maintains comfort temperature in the master bedroom during working-from-home
