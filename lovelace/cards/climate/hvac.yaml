@@ -443,32 +443,6 @@ cards:
                 .mdc-menu-surface mwc-list-item::part(text) {
                   color: rgba(255, 255, 255, 0.95) !important;
                 }
-          - type: entity
-            entity: sensor.livingroom_irblaster_humidity
-            name: " "
-            card_mod:
-              style: |
-                ha-card {
-                  background: transparent;
-                  box-shadow: none;
-                  border: none;
-                  padding: 0;
-                  margin: -12px 0 -8px 0;
-                  font-size: 10px;
-                  text-align: right;
-                }
-                .name {
-                  display: none;
-                }
-                .info {
-                  margin: 0;
-                  padding-right: 8px;
-                }
-                .state {
-                  font-size: 10px;
-                  color: rgba(255, 255, 255, 0.6);
-                  font-weight: 400;
-                }
           - type: custom:mini-graph-card
             entities:
               - entity: sensor.living_room_temperature_offset
@@ -479,7 +453,7 @@ cards:
                 name: Humidity
                 color: '#60A5FA'
                 y_axis: secondary
-            hours_to_show: 24
+            hours_to_show: 6
             points_per_hour: 4
             line_width: 2
             font_size: 75
