@@ -47,7 +47,7 @@ cards:
                   filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
                   color: white !important;
                 }
-                
+
                 :host {
                   --mdc-theme-surface: #1E293B !important;
                   --mdc-theme-on-surface: rgba(255, 255, 255, 0.95) !important;
@@ -71,6 +71,32 @@ cards:
                 }
                 .mdc-menu-surface mwc-list-item::part(text) {
                   color: rgba(255, 255, 255, 0.95) !important;
+                }
+          - type: entity
+            entity: sensor.ble_humidity_masterbed_temp_humidity_sensor
+            name: " "
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  border: none;
+                  padding: 0;
+                  margin: -12px 0 -8px 0;
+                  font-size: 10px;
+                  text-align: right;
+                }
+                .name {
+                  display: none;
+                }
+                .info {
+                  margin: 0;
+                  padding-right: 8px;
+                }
+                .state {
+                  font-size: 10px;
+                  color: rgba(255, 255, 255, 0.6);
+                  font-weight: 400;
                 }
           - type: custom:mini-graph-card
             entities:
@@ -147,7 +173,7 @@ cards:
                   filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
                   color: white !important;
                 }
-                
+
                 :host {
                   --mdc-theme-surface: #1E293B !important;
                   --mdc-theme-on-surface: rgba(255, 255, 255, 0.95) !important;
@@ -171,6 +197,32 @@ cards:
                 }
                 .mdc-menu-surface mwc-list-item::part(text) {
                   color: rgba(255, 255, 255, 0.95) !important;
+                }
+          - type: entity
+            entity: sensor.study_esp32_ottosroom_humidity
+            name: " "
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  border: none;
+                  padding: 0;
+                  margin: -12px 0 -8px 0;
+                  font-size: 10px;
+                  text-align: right;
+                }
+                .name {
+                  display: none;
+                }
+                .info {
+                  margin: 0;
+                  padding-right: 8px;
+                }
+                .state {
+                  font-size: 10px;
+                  color: rgba(255, 255, 255, 0.6);
+                  font-weight: 400;
                 }
           - type: custom:mini-graph-card
             entities:
@@ -245,7 +297,7 @@ cards:
                   filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
                   color: white !important;
                 }
-                
+
                 :host {
                   --mdc-theme-surface: #1E293B !important;
                   --mdc-theme-on-surface: rgba(255, 255, 255, 0.95) !important;
@@ -269,6 +321,32 @@ cards:
                 }
                 .mdc-menu-surface mwc-list-item::part(text) {
                   color: rgba(255, 255, 255, 0.95) !important;
+                }
+          - type: entity
+            entity: sensor.study_esp32_henrysroom_humidity
+            name: " "
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  border: none;
+                  padding: 0;
+                  margin: -12px 0 -8px 0;
+                  font-size: 10px;
+                  text-align: right;
+                }
+                .name {
+                  display: none;
+                }
+                .info {
+                  margin: 0;
+                  padding-right: 8px;
+                }
+                .state {
+                  font-size: 10px;
+                  color: rgba(255, 255, 255, 0.6);
+                  font-weight: 400;
                 }
           - type: custom:mini-graph-card
             entities:
@@ -340,7 +418,7 @@ cards:
                   filter: drop-shadow(0 2px 4px rgba(0, 0, 0,0.2));
                   color: white !important;
                 }
-                
+
                 :host {
                   --mdc-theme-surface: #1E293B !important;
                   --mdc-theme-on-surface: rgba(255, 255, 255, 0.95) !important;
@@ -364,6 +442,32 @@ cards:
                 }
                 .mdc-menu-surface mwc-list-item::part(text) {
                   color: rgba(255, 255, 255, 0.95) !important;
+                }
+          - type: entity
+            entity: sensor.ble_humidity_kitchen_temp_humidity_sensor
+            name: " "
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  border: none;
+                  padding: 0;
+                  margin: -12px 0 -8px 0;
+                  font-size: 10px;
+                  text-align: right;
+                }
+                .name {
+                  display: none;
+                }
+                .info {
+                  margin: 0;
+                  padding-right: 8px;
+                }
+                .state {
+                  font-size: 10px;
+                  color: rgba(255, 255, 255, 0.6);
+                  font-weight: 400;
                 }
           - type: custom:mini-graph-card
             entities:
