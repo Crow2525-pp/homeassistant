@@ -20,6 +20,10 @@ cards:
           - type: tile
             entity: climate.masterbed_versatile_thermostat
             name: Master Bedroom
+            state_content:
+              - state
+              - current_temperature
+              - current_humidity
             features:
               - type: climate-hvac-modes
               - type: climate-preset-modes
@@ -72,38 +76,17 @@ cards:
                 .mdc-menu-surface mwc-list-item::part(text) {
                   color: rgba(255, 255, 255, 0.95) !important;
                 }
-          - type: entity
-            entity: sensor.ble_humidity_masterbed_temp_humidity_sensor
-            name: " "
-            card_mod:
-              style: |
-                ha-card {
-                  background: transparent;
-                  box-shadow: none;
-                  border: none;
-                  padding: 0;
-                  margin: -12px 0 -8px 0;
-                  font-size: 10px;
-                  text-align: right;
-                }
-                .name {
-                  display: none;
-                }
-                .info {
-                  margin: 0;
-                  padding-right: 8px;
-                }
-                .state {
-                  font-size: 10px;
-                  color: rgba(255, 255, 255, 0.6);
-                  font-weight: 400;
-                }
           - type: custom:mini-graph-card
             entities:
               - entity: sensor.ble_temperature_masterbed_temp_humidity_sensor
                 name: Temperature
                 color: '#3B82F6'
-            hours_to_show: 24
+                y_axis: primary
+              - entity: sensor.ble_humidity_masterbed_temp_humidity_sensor
+                name: Humidity
+                color: '#60A5FA'
+                y_axis: secondary
+            hours_to_show: 6
             points_per_hour: 4
             line_width: 2
             font_size: 75
@@ -112,7 +95,8 @@ cards:
               name: false
               icon: false
               state: false
-              legend: false
+              legend: true
+              labels: secondary
             card_mod:
               style: |
                 ha-card {
@@ -146,6 +130,10 @@ cards:
           - type: tile
             entity: climate.otto_s_room
             name: Otto and Henry's Room
+            state_content:
+              - state
+              - current_temperature
+              - current_humidity
             features:
               - type: climate-hvac-modes
               - type: climate-preset-modes
@@ -198,38 +186,17 @@ cards:
                 .mdc-menu-surface mwc-list-item::part(text) {
                   color: rgba(255, 255, 255, 0.95) !important;
                 }
-          - type: entity
-            entity: sensor.study_esp32_ottosroom_humidity
-            name: " "
-            card_mod:
-              style: |
-                ha-card {
-                  background: transparent;
-                  box-shadow: none;
-                  border: none;
-                  padding: 0;
-                  margin: -12px 0 -8px 0;
-                  font-size: 10px;
-                  text-align: right;
-                }
-                .name {
-                  display: none;
-                }
-                .info {
-                  margin: 0;
-                  padding-right: 8px;
-                }
-                .state {
-                  font-size: 10px;
-                  color: rgba(255, 255, 255, 0.6);
-                  font-weight: 400;
-                }
           - type: custom:mini-graph-card
             entities:
               - entity: sensor.study_esp32_ottosroom_temperature
                 name: Temperature
                 color: '#F59E0B'
-            hours_to_show: 24
+                y_axis: primary
+              - entity: sensor.study_esp32_ottosroom_humidity
+                name: Humidity
+                color: '#60A5FA'
+                y_axis: secondary
+            hours_to_show: 6
             points_per_hour: 4
             line_width: 2
             font_size: 75
@@ -238,7 +205,8 @@ cards:
               name: false
               icon: false
               state: false
-              legend: false
+              legend: true
+              labels: secondary
             card_mod:
               style: |
                 ha-card {
@@ -270,6 +238,10 @@ cards:
           - type: tile
             entity: climate.henry_s_room_versatile_thermostat
             name: Lucas's Room
+            state_content:
+              - state
+              - current_temperature
+              - current_humidity
             features:
               - type: climate-hvac-modes
               - type: climate-preset-modes
@@ -322,38 +294,17 @@ cards:
                 .mdc-menu-surface mwc-list-item::part(text) {
                   color: rgba(255, 255, 255, 0.95) !important;
                 }
-          - type: entity
-            entity: sensor.study_esp32_henrysroom_humidity
-            name: " "
-            card_mod:
-              style: |
-                ha-card {
-                  background: transparent;
-                  box-shadow: none;
-                  border: none;
-                  padding: 0;
-                  margin: -12px 0 -8px 0;
-                  font-size: 10px;
-                  text-align: right;
-                }
-                .name {
-                  display: none;
-                }
-                .info {
-                  margin: 0;
-                  padding-right: 8px;
-                }
-                .state {
-                  font-size: 10px;
-                  color: rgba(255, 255, 255, 0.6);
-                  font-weight: 400;
-                }
           - type: custom:mini-graph-card
             entities:
               - entity: sensor.study_esp32_henrysroom_temperature
                 name: Temperature
                 color: '#10B981'
-            hours_to_show: 24
+                y_axis: primary
+              - entity: sensor.study_esp32_henrysroom_humidity
+                name: Humidity
+                color: '#60A5FA'
+                y_axis: secondary
+            hours_to_show: 6
             points_per_hour: 4
             line_width: 2
             font_size: 75
@@ -362,7 +313,8 @@ cards:
               name: false
               icon: false
               state: false
-              legend: false
+              legend: true
+              labels: secondary
             card_mod:
               style: |
                 ha-card {
@@ -391,6 +343,10 @@ cards:
           - type: tile
             entity: climate.living_room_versatile_thermostat
             name: Living Room
+            state_content:
+              - state
+              - current_temperature
+              - current_humidity
             features:
               - type: climate-hvac-modes
               - type: climate-preset-modes
@@ -443,38 +399,17 @@ cards:
                 .mdc-menu-surface mwc-list-item::part(text) {
                   color: rgba(255, 255, 255, 0.95) !important;
                 }
-          - type: entity
-            entity: sensor.ble_humidity_kitchen_temp_humidity_sensor
-            name: " "
-            card_mod:
-              style: |
-                ha-card {
-                  background: transparent;
-                  box-shadow: none;
-                  border: none;
-                  padding: 0;
-                  margin: -12px 0 -8px 0;
-                  font-size: 10px;
-                  text-align: right;
-                }
-                .name {
-                  display: none;
-                }
-                .info {
-                  margin: 0;
-                  padding-right: 8px;
-                }
-                .state {
-                  font-size: 10px;
-                  color: rgba(255, 255, 255, 0.6);
-                  font-weight: 400;
-                }
           - type: custom:mini-graph-card
             entities:
               - entity: sensor.living_room_temperature_offset
                 name: Temperature
                 color: '#EC4899'
-            hours_to_show: 24
+                y_axis: primary
+              - entity: sensor.livingroom_irblaster_humidity
+                name: Humidity
+                color: '#60A5FA'
+                y_axis: secondary
+            hours_to_show: 6
             points_per_hour: 4
             line_width: 2
             font_size: 75
@@ -483,7 +418,8 @@ cards:
               name: false
               icon: false
               state: false
-              legend: false
+              legend: true
+              labels: secondary
             card_mod:
               style: |
                 ha-card {
