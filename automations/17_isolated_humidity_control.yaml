@@ -1,0 +1,227 @@
+---
+# ============================================================================
+# ISOLATED HUMIDITY CONTROL
+# ============================================================================
+# Purpose: Monitor humidity levels across all rooms and activate dry mode
+#          when humidity exceeds 55%. This automation is completely isolated
+#          from climate managers to ensure humidity control is always active.
+# ============================================================================
+
+# ============================================================================
+# LIVING ROOM HUMIDITY CONTROL
+# ============================================================================
+
+- id: living_room_isolated_humidity_control
+  alias: "Living Room - Isolated Humidity Control"
+  description: "Activate dry mode when humidity exceeds 55% (isolated from climate manager)"
+
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.ble_humidity_kitchen_temp_humidity_sensor
+      above: 55
+      for:
+        minutes: 5
+      id: high_humidity
+
+  condition:
+    # Only when home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    # Manual override not active
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    # Active hours (6:00 AM - 10:15 PM)
+    - condition: time
+      after: "06:00:00"
+      before: "22:15:00"
+
+  action:
+    - action: script.activate_dry_mode
+      data:
+        climate_entity: climate.living_room_versatile_thermostat
+
+    # Log action
+    - action: logbook.log
+      data:
+        name: "Living Room Humidity Control"
+        message: >
+          Dry mode activated - humidity at {{ states('sensor.ble_humidity_kitchen_temp_humidity_sensor') }}%
+
+  mode: single
+
+# ============================================================================
+# MASTER BEDROOM HUMIDITY CONTROL
+# ============================================================================
+
+- id: master_bedroom_isolated_humidity_control
+  alias: "Master Bedroom - Isolated Humidity Control"
+  description: "Activate dry mode when humidity exceeds 55% (isolated from climate manager)"
+
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+      above: 55
+      for:
+        minutes: 5
+      id: high_humidity
+
+  condition:
+    # Only when home or sleeping
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    # Manual override not active
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
+    # Active hours (6:00 AM - 10:15 PM)
+    - condition: time
+      after: "06:00:00"
+      before: "22:15:00"
+
+  action:
+    # Set preset to comfort for effective dehumidification
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.masterbed_versatile_thermostat
+      data:
+        preset_mode: comfort
+
+    # Activate dry mode
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: climate.masterbed_versatile_thermostat
+      data:
+        hvac_mode: dry
+
+    # Log action
+    - action: logbook.log
+      data:
+        name: "Master Bedroom Humidity Control"
+        message: >
+          Dry mode activated - humidity at {{ states('sensor.ble_humidity_masterbed_temp_humidity_sensor') }}%
+
+  mode: single
+
+# ============================================================================
+# STUDY (HENRY'S ROOM) HUMIDITY CONTROL
+# ============================================================================
+
+- id: study_isolated_humidity_control
+  alias: "Study - Isolated Humidity Control"
+  description: "Activate dry mode when humidity exceeds 55% (isolated from climate manager)"
+
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.study_esp32_henrysroom_humidity
+      above: 55
+      for:
+        minutes: 5
+      id: high_humidity
+
+  condition:
+    # Only when home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    # Door must be closed
+    - condition: state
+      entity_id: binary_sensor.henry_door_sensor_magnet_opening
+      state: "off"
+    # Manual override not active
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_study
+      state: "off"
+    # Active hours (6:00 AM - 10:15 PM)
+    - condition: time
+      after: "06:00:00"
+      before: "22:15:00"
+
+  action:
+    # Set preset to comfort for effective dehumidification
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.henry_s_room_versatile_thermostat
+      data:
+        preset_mode: comfort
+
+    # Activate dry mode
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: climate.henry_s_room_versatile_thermostat
+      data:
+        hvac_mode: dry
+
+    # Log action
+    - action: logbook.log
+      data:
+        name: "Study Humidity Control"
+        message: >
+          Dry mode activated - humidity at {{ states('sensor.study_esp32_henrysroom_humidity') }}%
+
+  mode: single
+
+# ============================================================================
+# KIDS ROOM (OTTO'S ROOM) HUMIDITY CONTROL
+# ============================================================================
+
+- id: kids_room_isolated_humidity_control
+  alias: "Kids Room - Isolated Humidity Control"
+  description: "Activate dry mode when humidity exceeds 55% (isolated from climate manager)"
+
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.study_esp32_ottosroom_humidity
+      above: 55
+      for:
+        minutes: 5
+      id: high_humidity
+
+  condition:
+    # Only when home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+    # Door must be closed
+    - condition: state
+      entity_id: binary_sensor.otto_room_door_sensor_opening
+      state: "off"
+    # Manual override not active
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_otto
+      state: "off"
+    # Active hours (6:00 AM - 10:15 PM)
+    - condition: time
+      after: "06:00:00"
+      before: "22:15:00"
+
+  action:
+    # Set preset to comfort for effective dehumidification
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.otto_s_room
+      data:
+        preset_mode: comfort
+
+    # Activate dry mode
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: climate.otto_s_room
+      data:
+        hvac_mode: dry
+
+    # Log action
+    - action: logbook.log
+      data:
+        name: "Kids Room Humidity Control"
+        message: >
+          Dry mode activated - humidity at {{ states('sensor.study_esp32_ottosroom_humidity') }}%
+
+  mode: single
