@@ -444,7 +444,7 @@ cards:
                   color: rgba(255, 255, 255, 0.95) !important;
                 }
           - type: entity
-            entity: sensor.ble_humidity_kitchen_temp_humidity_sensor
+            entity: sensor.livingroom_irblaster_humidity
             name: " "
             card_mod:
               style: |
@@ -474,6 +474,11 @@ cards:
               - entity: sensor.living_room_temperature_offset
                 name: Temperature
                 color: '#EC4899'
+                y_axis: primary
+              - entity: sensor.livingroom_irblaster_humidity
+                name: Humidity
+                color: '#60A5FA'
+                y_axis: secondary
             hours_to_show: 24
             points_per_hour: 4
             line_width: 2
@@ -483,7 +488,8 @@ cards:
               name: false
               icon: false
               state: false
-              legend: false
+              legend: true
+              labels: secondary
             card_mod:
               style: |
                 ha-card {
