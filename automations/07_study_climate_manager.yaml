@@ -11,9 +11,6 @@
     entity_id: sensor.study_esp32_henrysroom_temperature
     id: temperature_change
   - platform: state
-    entity_id: sensor.study_esp32_henrysroom_humidity
-    id: humidity_change
-  - platform: state
     entity_id: binary_sensor.henry_door_sensor_magnet_opening
     id: door_change
   - platform: state
@@ -155,6 +152,14 @@
             data:
               hvac_mode: 'off'
       - stop: Away mode - climate disabled
+    - conditions:
+      - condition: state
+        entity_id: input_select.occupancy
+        state: Home
+      - condition: state
+        entity_id: binary_sensor.henry_door_sensor_magnet_opening
+        state: 'off'
+      sequence:
   - choose:
     - conditions:
       - condition: time
@@ -594,4 +599,70 @@
               data:
                 hvac_mode: 'off'
     default: []
+  mode: single
+
+# ============================================================================
+# STUDY HUMIDITY CONTROL
+# ============================================================================
+# Purpose: Maintain humidity below 55% using dehumidification mode
+# Behavior: Activates dry mode when humidity exceeds 55%
+# ============================================================================
+
+- id: study_humidity_dehumidify
+  alias: "Study - Dehumidify (High Humidity)"
+  description: "Activate dry mode when humidity exceeds 55%"
+
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.study_esp32_henrysroom_humidity
+    above: 55
+    for:
+      minutes: 5
+    id: high_humidity
+
+  condition:
+  - condition: state
+    entity_id: input_select.occupancy
+    state: Home
+  - condition: state
+    entity_id: binary_sensor.henry_door_sensor_magnet_opening
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.climate_manual_control_study
+    state: 'off'
+
+  action:
+  - choose:
+    - conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: climate.henry_s_room_versatile_thermostat
+          attribute: preset_mode
+          state: comfort
+      sequence:
+      - service: climate.set_preset_mode
+        target:
+          entity_id: climate.henry_s_room_versatile_thermostat
+        data:
+          preset_mode: comfort
+  - choose:
+    - conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: climate.henry_s_room_versatile_thermostat
+          state: dry
+      sequence:
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.henry_s_room_versatile_thermostat
+        data:
+          hvac_mode: dry
+  - service: logbook.log
+    data:
+      name: "Study Humidity Control"
+      message: >
+        Dry mode activated - humidity at {{ states('sensor.study_esp32_henrysroom_humidity') }}%
+
   mode: single
