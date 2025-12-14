@@ -172,35 +172,6 @@
                 preset_mode: eco
   mode: restart
 
-- id: living_room_daytime_humidity_dehumidify
-  alias: "Living Room - Dehumidify (High Humidity)"
-  description: "Activate dry mode when humidity exceeds 55%"
-  triggers:
-    - trigger: numeric_state
-      entity_id: sensor.ble_humidity_kitchen_temp_humidity_sensor
-      above: 55
-      for:
-        minutes: 5
-      id: high_humidity
-  conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: binary_sensor.living_room_door_sensor_opening
-      state: "off"
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_living
-      state: "off"
-    - condition: time
-      after: "06:00:00"
-      before: "22:15:00"
-  actions:
-    - action: script.activate_dry_mode
-      data:
-        climate_entity: climate.living_room_versatile_thermostat
-  mode: single
-
 # ============================================================================
 # SECTION 3: NIGHTTIME HEATING (22:15-05:30)
 # ============================================================================

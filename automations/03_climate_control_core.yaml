@@ -428,9 +428,6 @@
         - condition: state
           entity_id: input_select.climate_season
           state: autumn
-      - condition: state
-        entity_id: input_boolean.warm_today_flag
-        state: 'on'
       sequence:
       - action: input_datetime.set_datetime
         target:
