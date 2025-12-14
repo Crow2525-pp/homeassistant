@@ -229,10 +229,6 @@
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
       state: "off"
-    # Active hours (6:00 AM - 10:15 PM)
-    - condition: time
-      after: "06:00:00"
-      before: "22:15:00"
 
   action:
     # Set preset to comfort for effective dehumidification
