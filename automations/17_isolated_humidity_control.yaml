@@ -32,10 +32,6 @@
     - condition: state
       entity_id: input_boolean.climate_manual_control_living
       state: "off"
-    # HVAC should be enabled
-    - condition: state
-      entity_id: input_boolean.hvac_living_room_should_be_on
-      state: "on"
     # Active hours (6:00 AM - 10:15 PM)
     - condition: time
       after: "06:00:00"
