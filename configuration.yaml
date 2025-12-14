@@ -61,14 +61,6 @@ lovelace:
     - url: /local/community/lovelace-layout-card/layout-card.js
       type: module
 
-  dashboards:
-    lite-dashboard:
-      mode: yaml
-      filename: lovelace/dashboards/lite.yaml
-      title: "Lite Dashboard"
-      icon: mdi:lightning-bolt
-      show_in_sidebar: true
-
 logger:
   default: warning
   logs:
