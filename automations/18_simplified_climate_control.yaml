@@ -1,10 +1,10 @@
 ---
-# Simplified, per-room climate control using setpoint deltas and hysteresis.
+# Per-room climate control using setpoint deltas and hysteresis.
 # No door/occupancy/master switches. Manual override still respected.
 # Each room has 6 automations: Heat Day/Night, Cool Day/Night, Humidity Day/Night.
 
-- id: master_heat_day_simplified
-  alias: "Master Bedroom - Heat Day (Simplified)"
+- id: master_heat_day
+  alias: "Master Bedroom - Heat Day"
   description: "Heat during daytime if below setpoint delta; turn off when above."
   triggers:
     - platform: state
@@ -51,8 +51,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: master_heat_night_simplified
-  alias: "Master Bedroom - Heat Night (Simplified)"
+- id: master_heat_night
+  alias: "Master Bedroom - Heat Night"
   description: "Heat overnight with hysteresis; turn off when back to setpoint."
   triggers:
     - platform: state
@@ -99,8 +99,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: master_cool_day_simplified
-  alias: "Master Bedroom - Cool Day (Simplified)"
+- id: master_cool_day
+  alias: "Master Bedroom - Cool Day"
   description: "Cool during daytime if above setpoint delta; turn off when back."
   triggers:
     - platform: state
@@ -147,8 +147,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: master_cool_night_simplified
-  alias: "Master Bedroom - Cool Night (Simplified)"
+- id: master_cool_night
+  alias: "Master Bedroom - Cool Night"
   description: "Cool overnight if above setpoint delta; off when back."
   triggers:
     - platform: state
@@ -195,8 +195,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: master_humidity_day_simplified
-  alias: "Master Bedroom - Humidity Day (Simplified)"
+- id: master_humidity_day
+  alias: "Master Bedroom - Humidity Day"
   description: "Dry mode during day if humidity above 55%; off below 50%."
   triggers:
     - platform: numeric_state
@@ -240,8 +240,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: master_humidity_night_simplified
-  alias: "Master Bedroom - Humidity Night (Simplified)"
+- id: master_humidity_night
+  alias: "Master Bedroom - Humidity Night"
   description: "Dry mode overnight if humidity above 55%; off below 50%."
   triggers:
     - platform: numeric_state
@@ -285,8 +285,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: living_heat_day_simplified
-  alias: "Living Room - Heat Day (Simplified)"
+- id: living_heat_day
+  alias: "Living Room - Heat Day"
   description: "Heat during daytime if below setpoint delta; turn off when above."
   triggers:
     - platform: state
@@ -333,8 +333,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: living_heat_night_simplified
-  alias: "Living Room - Heat Night (Simplified)"
+- id: living_heat_night
+  alias: "Living Room - Heat Night"
   description: "Heat overnight if below setpoint delta; off when recovered."
   triggers:
     - platform: state
@@ -381,8 +381,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: living_cool_day_simplified
-  alias: "Living Room - Cool Day (Simplified)"
+- id: living_cool_day
+  alias: "Living Room - Cool Day"
   description: "Cool during daytime if above setpoint delta; off when back."
   triggers:
     - platform: state
@@ -429,8 +429,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: living_cool_night_simplified
-  alias: "Living Room - Cool Night (Simplified)"
+- id: living_cool_night
+  alias: "Living Room - Cool Night"
   description: "Cool overnight if above setpoint delta; off when back."
   triggers:
     - platform: state
@@ -477,8 +477,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: living_humidity_day_simplified
-  alias: "Living Room - Humidity Day (Simplified)"
+- id: living_humidity_day
+  alias: "Living Room - Humidity Day"
   description: "Dry mode during day if humidity above 55%; off below 50%."
   triggers:
     - platform: numeric_state
@@ -522,8 +522,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: living_humidity_night_simplified
-  alias: "Living Room - Humidity Night (Simplified)"
+- id: living_humidity_night
+  alias: "Living Room - Humidity Night"
   description: "Dry mode overnight if humidity above 55%; off below 50%."
   triggers:
     - platform: numeric_state
@@ -567,8 +567,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: henry_heat_day_simplified
-  alias: "Henry/Study - Heat Day (Simplified)"
+- id: henry_heat_day
+  alias: "Henry/Study - Heat Day"
   description: "Heat during daytime if below setpoint delta; turn off when above."
   triggers:
     - platform: state
@@ -615,8 +615,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: henry_heat_night_simplified
-  alias: "Henry/Study - Heat Night (Simplified)"
+- id: henry_heat_night
+  alias: "Henry/Study - Heat Night"
   description: "Heat overnight if below setpoint delta; off when recovered."
   triggers:
     - platform: state
@@ -663,8 +663,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: henry_cool_day_simplified
-  alias: "Henry/Study - Cool Day (Simplified)"
+- id: henry_cool_day
+  alias: "Henry/Study - Cool Day"
   description: "Cool during daytime if above setpoint delta; off when back."
   triggers:
     - platform: state
@@ -711,8 +711,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: henry_cool_night_simplified
-  alias: "Henry/Study - Cool Night (Simplified)"
+- id: henry_cool_night
+  alias: "Henry/Study - Cool Night"
   description: "Cool overnight if above setpoint delta; off when back."
   triggers:
     - platform: state
@@ -759,8 +759,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: henry_humidity_day_simplified
-  alias: "Henry/Study - Humidity Day (Simplified)"
+- id: henry_humidity_day
+  alias: "Henry/Study - Humidity Day"
   description: "Dry mode during day if humidity above 55%; off below 50%."
   triggers:
     - platform: numeric_state
@@ -804,8 +804,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: henry_humidity_night_simplified
-  alias: "Henry/Study - Humidity Night (Simplified)"
+- id: henry_humidity_night
+  alias: "Henry/Study - Humidity Night"
   description: "Dry mode overnight if humidity above 55%; off below 50%."
   triggers:
     - platform: numeric_state
@@ -849,8 +849,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: otto_heat_day_simplified
-  alias: "Otto's Room - Heat Day (Simplified)"
+- id: otto_heat_day
+  alias: "Otto's Room - Heat Day"
   description: "Heat during daytime if below setpoint delta; turn off when above."
   triggers:
     - platform: state
@@ -897,8 +897,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: otto_heat_night_simplified
-  alias: "Otto's Room - Heat Night (Simplified)"
+- id: otto_heat_night
+  alias: "Otto's Room - Heat Night"
   description: "Heat overnight if below setpoint delta; off when recovered."
   triggers:
     - platform: state
@@ -945,8 +945,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: otto_cool_day_simplified
-  alias: "Otto's Room - Cool Day (Simplified)"
+- id: otto_cool_day
+  alias: "Otto's Room - Cool Day"
   description: "Cool during daytime if above setpoint delta; off when back."
   triggers:
     - platform: state
@@ -993,8 +993,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: otto_cool_night_simplified
-  alias: "Otto's Room - Cool Night (Simplified)"
+- id: otto_cool_night
+  alias: "Otto's Room - Cool Night"
   description: "Cool overnight if above setpoint delta; off when back."
   triggers:
     - platform: state
@@ -1041,8 +1041,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: otto_humidity_day_simplified
-  alias: "Otto's Room - Humidity Day (Simplified)"
+- id: otto_humidity_day
+  alias: "Otto's Room - Humidity Day"
   description: "Dry mode during day if humidity above 55%; off below 50%."
   triggers:
     - platform: numeric_state
@@ -1086,8 +1086,8 @@
                 hvac_mode: "off"
   mode: single
 
-- id: otto_humidity_night_simplified
-  alias: "Otto's Room - Humidity Night (Simplified)"
+- id: otto_humidity_night
+  alias: "Otto's Room - Humidity Night"
   description: "Dry mode overnight if humidity above 55%; off below 50%."
   triggers:
     - platform: numeric_state
