@@ -456,6 +456,139 @@ input_number:
     initial: 24
     unit_of_measurement: "C"
     icon: mdi:thermometer-alert
+  # Simplified Climate Hysteresis (per-room, used by new modular automations)
+  masterbed_heat_on_delta:
+    name: Master Bedroom Heat On Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: -0.3
+    unit_of_measurement: "C"
+    icon: mdi:thermometer-minus
+  masterbed_heat_off_delta:
+    name: Master Bedroom Heat Off Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: 0
+    unit_of_measurement: "C"
+    icon: mdi:thermometer
+  masterbed_cool_on_delta:
+    name: Master Bedroom Cool On Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: 0.3
+    unit_of_measurement: "C"
+    icon: mdi:thermometer-plus
+  masterbed_cool_off_delta:
+    name: Master Bedroom Cool Off Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: 0
+    unit_of_measurement: "C"
+    icon: mdi:thermometer
+
+  living_room_heat_on_delta:
+    name: Living Room Heat On Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: -0.3
+    unit_of_measurement: "C"
+    icon: mdi:thermometer-minus
+  living_room_heat_off_delta:
+    name: Living Room Heat Off Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: 0
+    unit_of_measurement: "C"
+    icon: mdi:thermometer
+  living_room_cool_on_delta:
+    name: Living Room Cool On Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: 0.3
+    unit_of_measurement: "C"
+    icon: mdi:thermometer-plus
+  living_room_cool_off_delta:
+    name: Living Room Cool Off Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: 0
+    unit_of_measurement: "C"
+    icon: mdi:thermometer
+
+  henrys_room_heat_on_delta:
+    name: Henry's Room Heat On Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: -0.3
+    unit_of_measurement: "C"
+    icon: mdi:thermometer-minus
+  henrys_room_heat_off_delta:
+    name: Henry's Room Heat Off Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: 0
+    unit_of_measurement: "C"
+    icon: mdi:thermometer
+  henrys_room_cool_on_delta:
+    name: Henry's Room Cool On Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: 0.3
+    unit_of_measurement: "C"
+    icon: mdi:thermometer-plus
+  henrys_room_cool_off_delta:
+    name: Henry's Room Cool Off Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: 0
+    unit_of_measurement: "C"
+    icon: mdi:thermometer
+
+  ottos_room_heat_on_delta:
+    name: Otto's Room Heat On Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: -0.3
+    unit_of_measurement: "C"
+    icon: mdi:thermometer-minus
+  ottos_room_heat_off_delta:
+    name: Otto's Room Heat Off Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: 0
+    unit_of_measurement: "C"
+    icon: mdi:thermometer
+  ottos_room_cool_on_delta:
+    name: Otto's Room Cool On Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: 0.3
+    unit_of_measurement: "C"
+    icon: mdi:thermometer-plus
+  ottos_room_cool_off_delta:
+    name: Otto's Room Cool Off Delta
+    min: -3
+    max: 3
+    step: 0.1
+    initial: 0
+    unit_of_measurement: "C"
+    icon: mdi:thermometer
+
   # Automation Trigger Counters (daily, reset at midnight)
   seasonal_climate_triggers_today:
     name: Seasonal Climate Manager Triggers Today

@@ -1,0 +1,1132 @@
+---
+# Simplified, per-room climate control using setpoint deltas and hysteresis.
+# No door/occupancy/master switches. Manual override still respected.
+# Each room has 6 automations: Heat Day/Night, Cool Day/Night, Humidity Day/Night.
+
+- id: master_heat_day_simplified
+  alias: "Master Bedroom - Heat Day (Simplified)"
+  description: "Heat during daytime if below setpoint delta; turn off when above."
+  triggers:
+    - platform: state
+      entity_id: sensor.masterbed_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
+    - condition: time
+      after: "06:00:00"
+      before: "22:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: winter
+        - condition: state
+          entity_id: input_select.climate_season
+          state: autumn
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.masterbed_temp_setpoint_delta') | float(99) <=
+                   states('input_number.masterbed_heat_on_delta') | float(-0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.masterbed_temp_setpoint_delta') | float(0) >=
+                   states('input_number.masterbed_heat_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: master_heat_night_simplified
+  alias: "Master Bedroom - Heat Night (Simplified)"
+  description: "Heat overnight with hysteresis; turn off when back to setpoint."
+  triggers:
+    - platform: state
+      entity_id: sensor.masterbed_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
+    - condition: time
+      after: "22:00:00"
+      before: "06:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: winter
+        - condition: state
+          entity_id: input_select.climate_season
+          state: autumn
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.masterbed_temp_setpoint_delta') | float(99) <=
+                   states('input_number.masterbed_heat_on_delta') | float(-0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.masterbed_temp_setpoint_delta') | float(0) >=
+                   states('input_number.masterbed_heat_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: master_cool_day_simplified
+  alias: "Master Bedroom - Cool Day (Simplified)"
+  description: "Cool during daytime if above setpoint delta; turn off when back."
+  triggers:
+    - platform: state
+      entity_id: sensor.masterbed_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
+    - condition: time
+      after: "06:00:00"
+      before: "22:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: summer
+        - condition: state
+          entity_id: input_select.climate_season
+          state: spring
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.masterbed_temp_setpoint_delta') | float(-99) >=
+                   states('input_number.masterbed_cool_on_delta') | float(0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.masterbed_temp_setpoint_delta') | float(0) <=
+                   states('input_number.masterbed_cool_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: master_cool_night_simplified
+  alias: "Master Bedroom - Cool Night (Simplified)"
+  description: "Cool overnight if above setpoint delta; off when back."
+  triggers:
+    - platform: state
+      entity_id: sensor.masterbed_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
+    - condition: time
+      after: "22:00:00"
+      before: "06:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: summer
+        - condition: state
+          entity_id: input_select.climate_season
+          state: spring
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.masterbed_temp_setpoint_delta') | float(-99) >=
+                   states('input_number.masterbed_cool_on_delta') | float(0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.masterbed_temp_setpoint_delta') | float(0) <=
+                   states('input_number.masterbed_cool_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: master_humidity_day_simplified
+  alias: "Master Bedroom - Humidity Day (Simplified)"
+  description: "Dry mode during day if humidity above 55%; off below 50%."
+  triggers:
+    - platform: numeric_state
+      entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+      above: 55
+      for:
+        minutes: 5
+      id: high
+    - platform: numeric_state
+      entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+      below: 50
+      for:
+        minutes: 5
+      id: low
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
+    - condition: time
+      after: "06:00:00"
+      before: "22:00:00"
+  actions:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: high
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: dry
+        - conditions:
+            - condition: trigger
+              id: low
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: master_humidity_night_simplified
+  alias: "Master Bedroom - Humidity Night (Simplified)"
+  description: "Dry mode overnight if humidity above 55%; off below 50%."
+  triggers:
+    - platform: numeric_state
+      entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+      above: 55
+      for:
+        minutes: 5
+      id: high
+    - platform: numeric_state
+      entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+      below: 50
+      for:
+        minutes: 5
+      id: low
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
+    - condition: time
+      after: "22:00:00"
+      before: "06:00:00"
+  actions:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: high
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: dry
+        - conditions:
+            - condition: trigger
+              id: low
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: living_heat_day_simplified
+  alias: "Living Room - Heat Day (Simplified)"
+  description: "Heat during daytime if below setpoint delta; turn off when above."
+  triggers:
+    - platform: state
+      entity_id: sensor.living_room_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    - condition: time
+      after: "06:00:00"
+      before: "22:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: winter
+        - condition: state
+          entity_id: input_select.climate_season
+          state: autumn
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.living_room_temp_setpoint_delta') | float(99) <=
+                   states('input_number.living_room_heat_on_delta') | float(-0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.living_room_temp_setpoint_delta') | float(0) >=
+                   states('input_number.living_room_heat_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: living_heat_night_simplified
+  alias: "Living Room - Heat Night (Simplified)"
+  description: "Heat overnight if below setpoint delta; off when recovered."
+  triggers:
+    - platform: state
+      entity_id: sensor.living_room_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    - condition: time
+      after: "22:00:00"
+      before: "06:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: winter
+        - condition: state
+          entity_id: input_select.climate_season
+          state: autumn
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.living_room_temp_setpoint_delta') | float(99) <=
+                   states('input_number.living_room_heat_on_delta') | float(-0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.living_room_temp_setpoint_delta') | float(0) >=
+                   states('input_number.living_room_heat_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: living_cool_day_simplified
+  alias: "Living Room - Cool Day (Simplified)"
+  description: "Cool during daytime if above setpoint delta; off when back."
+  triggers:
+    - platform: state
+      entity_id: sensor.living_room_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    - condition: time
+      after: "06:00:00"
+      before: "22:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: summer
+        - condition: state
+          entity_id: input_select.climate_season
+          state: spring
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.living_room_temp_setpoint_delta') | float(-99) >=
+                   states('input_number.living_room_cool_on_delta') | float(0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.living_room_temp_setpoint_delta') | float(0) <=
+                   states('input_number.living_room_cool_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: living_cool_night_simplified
+  alias: "Living Room - Cool Night (Simplified)"
+  description: "Cool overnight if above setpoint delta; off when back."
+  triggers:
+    - platform: state
+      entity_id: sensor.living_room_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    - condition: time
+      after: "22:00:00"
+      before: "06:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: summer
+        - condition: state
+          entity_id: input_select.climate_season
+          state: spring
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.living_room_temp_setpoint_delta') | float(-99) >=
+                   states('input_number.living_room_cool_on_delta') | float(0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.living_room_temp_setpoint_delta') | float(0) <=
+                   states('input_number.living_room_cool_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: living_humidity_day_simplified
+  alias: "Living Room - Humidity Day (Simplified)"
+  description: "Dry mode during day if humidity above 55%; off below 50%."
+  triggers:
+    - platform: numeric_state
+      entity_id: sensor.livingroom_irblaster_humidity
+      above: 55
+      for:
+        minutes: 5
+      id: high
+    - platform: numeric_state
+      entity_id: sensor.livingroom_irblaster_humidity
+      below: 50
+      for:
+        minutes: 5
+      id: low
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    - condition: time
+      after: "06:00:00"
+      before: "22:00:00"
+  actions:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: high
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: dry
+        - conditions:
+            - condition: trigger
+              id: low
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: living_humidity_night_simplified
+  alias: "Living Room - Humidity Night (Simplified)"
+  description: "Dry mode overnight if humidity above 55%; off below 50%."
+  triggers:
+    - platform: numeric_state
+      entity_id: sensor.livingroom_irblaster_humidity
+      above: 55
+      for:
+        minutes: 5
+      id: high
+    - platform: numeric_state
+      entity_id: sensor.livingroom_irblaster_humidity
+      below: 50
+      for:
+        minutes: 5
+      id: low
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    - condition: time
+      after: "22:00:00"
+      before: "06:00:00"
+  actions:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: high
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: dry
+        - conditions:
+            - condition: trigger
+              id: low
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: henry_heat_day_simplified
+  alias: "Henry/Study - Heat Day (Simplified)"
+  description: "Heat during daytime if below setpoint delta; turn off when above."
+  triggers:
+    - platform: state
+      entity_id: sensor.henry_room_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_study
+      state: "off"
+    - condition: time
+      after: "06:00:00"
+      before: "22:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: winter
+        - condition: state
+          entity_id: input_select.climate_season
+          state: autumn
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.henry_room_temp_setpoint_delta') | float(99) <=
+                   states('input_number.henrys_room_heat_on_delta') | float(-0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.henry_room_temp_setpoint_delta') | float(0) >=
+                   states('input_number.henrys_room_heat_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: henry_heat_night_simplified
+  alias: "Henry/Study - Heat Night (Simplified)"
+  description: "Heat overnight if below setpoint delta; off when recovered."
+  triggers:
+    - platform: state
+      entity_id: sensor.henry_room_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_study
+      state: "off"
+    - condition: time
+      after: "22:00:00"
+      before: "06:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: winter
+        - condition: state
+          entity_id: input_select.climate_season
+          state: autumn
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.henry_room_temp_setpoint_delta') | float(99) <=
+                   states('input_number.henrys_room_heat_on_delta') | float(-0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.henry_room_temp_setpoint_delta') | float(0) >=
+                   states('input_number.henrys_room_heat_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: henry_cool_day_simplified
+  alias: "Henry/Study - Cool Day (Simplified)"
+  description: "Cool during daytime if above setpoint delta; off when back."
+  triggers:
+    - platform: state
+      entity_id: sensor.henry_room_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_study
+      state: "off"
+    - condition: time
+      after: "06:00:00"
+      before: "22:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: summer
+        - condition: state
+          entity_id: input_select.climate_season
+          state: spring
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.henry_room_temp_setpoint_delta') | float(-99) >=
+                   states('input_number.henrys_room_cool_on_delta') | float(0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.henry_room_temp_setpoint_delta') | float(0) <=
+                   states('input_number.henrys_room_cool_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: henry_cool_night_simplified
+  alias: "Henry/Study - Cool Night (Simplified)"
+  description: "Cool overnight if above setpoint delta; off when back."
+  triggers:
+    - platform: state
+      entity_id: sensor.henry_room_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_study
+      state: "off"
+    - condition: time
+      after: "22:00:00"
+      before: "06:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: summer
+        - condition: state
+          entity_id: input_select.climate_season
+          state: spring
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.henry_room_temp_setpoint_delta') | float(-99) >=
+                   states('input_number.henrys_room_cool_on_delta') | float(0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.henry_room_temp_setpoint_delta') | float(0) <=
+                   states('input_number.henrys_room_cool_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: henry_humidity_day_simplified
+  alias: "Henry/Study - Humidity Day (Simplified)"
+  description: "Dry mode during day if humidity above 55%; off below 50%."
+  triggers:
+    - platform: numeric_state
+      entity_id: sensor.study_esp32_henrysroom_humidity
+      above: 55
+      for:
+        minutes: 5
+      id: high
+    - platform: numeric_state
+      entity_id: sensor.study_esp32_henrysroom_humidity
+      below: 50
+      for:
+        minutes: 5
+      id: low
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_study
+      state: "off"
+    - condition: time
+      after: "06:00:00"
+      before: "22:00:00"
+  actions:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: high
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: dry
+        - conditions:
+            - condition: trigger
+              id: low
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: henry_humidity_night_simplified
+  alias: "Henry/Study - Humidity Night (Simplified)"
+  description: "Dry mode overnight if humidity above 55%; off below 50%."
+  triggers:
+    - platform: numeric_state
+      entity_id: sensor.study_esp32_henrysroom_humidity
+      above: 55
+      for:
+        minutes: 5
+      id: high
+    - platform: numeric_state
+      entity_id: sensor.study_esp32_henrysroom_humidity
+      below: 50
+      for:
+        minutes: 5
+      id: low
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_study
+      state: "off"
+    - condition: time
+      after: "22:00:00"
+      before: "06:00:00"
+  actions:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: high
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: dry
+        - conditions:
+            - condition: trigger
+              id: low
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: otto_heat_day_simplified
+  alias: "Otto's Room - Heat Day (Simplified)"
+  description: "Heat during daytime if below setpoint delta; turn off when above."
+  triggers:
+    - platform: state
+      entity_id: sensor.otto_room_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_otto
+      state: "off"
+    - condition: time
+      after: "06:00:00"
+      before: "22:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: winter
+        - condition: state
+          entity_id: input_select.climate_season
+          state: autumn
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.otto_room_temp_setpoint_delta') | float(99) <=
+                   states('input_number.ottos_room_heat_on_delta') | float(-0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.otto_room_temp_setpoint_delta') | float(0) >=
+                   states('input_number.ottos_room_heat_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: otto_heat_night_simplified
+  alias: "Otto's Room - Heat Night (Simplified)"
+  description: "Heat overnight if below setpoint delta; off when recovered."
+  triggers:
+    - platform: state
+      entity_id: sensor.otto_room_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_otto
+      state: "off"
+    - condition: time
+      after: "22:00:00"
+      before: "06:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: winter
+        - condition: state
+          entity_id: input_select.climate_season
+          state: autumn
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.otto_room_temp_setpoint_delta') | float(99) <=
+                   states('input_number.ottos_room_heat_on_delta') | float(-0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.otto_room_temp_setpoint_delta') | float(0) >=
+                   states('input_number.ottos_room_heat_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: otto_cool_day_simplified
+  alias: "Otto's Room - Cool Day (Simplified)"
+  description: "Cool during daytime if above setpoint delta; off when back."
+  triggers:
+    - platform: state
+      entity_id: sensor.otto_room_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_otto
+      state: "off"
+    - condition: time
+      after: "06:00:00"
+      before: "22:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: summer
+        - condition: state
+          entity_id: input_select.climate_season
+          state: spring
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.otto_room_temp_setpoint_delta') | float(-99) >=
+                   states('input_number.ottos_room_cool_on_delta') | float(0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.otto_room_temp_setpoint_delta') | float(0) <=
+                   states('input_number.ottos_room_cool_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: otto_cool_night_simplified
+  alias: "Otto's Room - Cool Night (Simplified)"
+  description: "Cool overnight if above setpoint delta; off when back."
+  triggers:
+    - platform: state
+      entity_id: sensor.otto_room_temp_setpoint_delta
+      for: "00:03:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_otto
+      state: "off"
+    - condition: time
+      after: "22:00:00"
+      before: "06:00:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.climate_season
+          state: summer
+        - condition: state
+          entity_id: input_select.climate_season
+          state: spring
+  actions:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.otto_room_temp_setpoint_delta') | float(-99) >=
+                   states('input_number.ottos_room_cool_on_delta') | float(0.3) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.otto_room_temp_setpoint_delta') | float(0) <=
+                   states('input_number.ottos_room_cool_off_delta') | float(0) }}
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: otto_humidity_day_simplified
+  alias: "Otto's Room - Humidity Day (Simplified)"
+  description: "Dry mode during day if humidity above 55%; off below 50%."
+  triggers:
+    - platform: numeric_state
+      entity_id: sensor.study_esp32_ottosroom_humidity
+      above: 55
+      for:
+        minutes: 5
+      id: high
+    - platform: numeric_state
+      entity_id: sensor.study_esp32_ottosroom_humidity
+      below: 50
+      for:
+        minutes: 5
+      id: low
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_otto
+      state: "off"
+    - condition: time
+      after: "06:00:00"
+      before: "22:00:00"
+  actions:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: high
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: dry
+        - conditions:
+            - condition: trigger
+              id: low
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: "off"
+  mode: single
+
+- id: otto_humidity_night_simplified
+  alias: "Otto's Room - Humidity Night (Simplified)"
+  description: "Dry mode overnight if humidity above 55%; off below 50%."
+  triggers:
+    - platform: numeric_state
+      entity_id: sensor.study_esp32_ottosroom_humidity
+      above: 55
+      for:
+        minutes: 5
+      id: high
+    - platform: numeric_state
+      entity_id: sensor.study_esp32_ottosroom_humidity
+      below: 50
+      for:
+        minutes: 5
+      id: low
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_otto
+      state: "off"
+    - condition: time
+      after: "22:00:00"
+      before: "06:00:00"
+  actions:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: high
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: dry
+        - conditions:
+            - condition: trigger
+              id: low
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: "off"
+  mode: single
