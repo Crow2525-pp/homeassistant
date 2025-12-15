@@ -484,7 +484,79 @@
             Room is warm ({{ temp }}°C) but no excess solar
           {% else %}
             Room temperature is comfortable ({{ temp }}°C)
-          {% endif %}
+  {% endif %}
+
+    - name: "Master Bedroom Temp vs Setpoint"
+      unique_id: masterbed_temp_setpoint_delta
+      unit_of_measurement: "°C"
+      icon: mdi:thermometer-chevron-up
+      state: >
+        {% set current = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') %}
+        {% set target = state_attr('climate.masterbed_versatile_thermostat', 'temperature') %}
+        {% if current in ['unknown', 'unavailable'] or target in [None, 'unknown', 'unavailable'] %}
+          unknown
+        {% else %}
+          {{ (current | float(0) - target | float(0)) | round(1) }}
+        {% endif %}
+      attributes:
+        current_temp: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        target_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'temperature') }}"
+        preset_mode: "{{ state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') }}"
+        hvac_mode: "{{ states('climate.masterbed_versatile_thermostat') }}"
+
+    - name: "Living Room Temp vs Setpoint"
+      unique_id: living_room_temp_setpoint_delta
+      unit_of_measurement: "°C"
+      icon: mdi:thermometer-chevron-up
+      state: >
+        {% set current = states('sensor.living_room_temperature_offset') %}
+        {% set target = state_attr('climate.living_room_versatile_thermostat', 'temperature') %}
+        {% if current in ['unknown', 'unavailable'] or target in [None, 'unknown', 'unavailable'] %}
+          unknown
+        {% else %}
+          {{ (current | float(0) - target | float(0)) | round(1) }}
+        {% endif %}
+      attributes:
+        current_temp: "{{ states('sensor.living_room_temperature_offset') }}"
+        target_temp: "{{ state_attr('climate.living_room_versatile_thermostat', 'temperature') }}"
+        preset_mode: "{{ state_attr('climate.living_room_versatile_thermostat', 'preset_mode') }}"
+        hvac_mode: "{{ states('climate.living_room_versatile_thermostat') }}"
+
+    - name: "Henry's Room Temp vs Setpoint"
+      unique_id: henry_room_temp_setpoint_delta
+      unit_of_measurement: "°C"
+      icon: mdi:thermometer-chevron-up
+      state: >
+        {% set current = states('sensor.study_esp32_henrysroom_temperature') %}
+        {% set target = state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') %}
+        {% if current in ['unknown', 'unavailable'] or target in [None, 'unknown', 'unavailable'] %}
+          unknown
+        {% else %}
+          {{ (current | float(0) - target | float(0)) | round(1) }}
+        {% endif %}
+      attributes:
+        current_temp: "{{ states('sensor.study_esp32_henrysroom_temperature') }}"
+        target_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') }}"
+        preset_mode: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') }}"
+        hvac_mode: "{{ states('climate.henry_s_room_versatile_thermostat') }}"
+
+    - name: "Otto's Room Temp vs Setpoint"
+      unique_id: otto_room_temp_setpoint_delta
+      unit_of_measurement: "°C"
+      icon: mdi:thermometer-chevron-up
+      state: >
+        {% set current = states('sensor.ottos_room_temp_humidity_sensor_temperature') %}
+        {% set target = state_attr('climate.otto_s_room', 'temperature') %}
+        {% if current in ['unknown', 'unavailable'] or target in [None, 'unknown', 'unavailable'] %}
+          unknown
+        {% else %}
+          {{ (current | float(0) - target | float(0)) | round(1) }}
+        {% endif %}
+      attributes:
+        current_temp: "{{ states('sensor.ottos_room_temp_humidity_sensor_temperature') }}"
+        target_temp: "{{ state_attr('climate.otto_s_room', 'temperature') }}"
+        preset_mode: "{{ state_attr('climate.otto_s_room', 'preset_mode') }}"
+        hvac_mode: "{{ states('climate.otto_s_room') }}"
 
 - binary_sensor:
     # Appliance suggestions based on solar excess
