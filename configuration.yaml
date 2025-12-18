@@ -158,7 +158,7 @@ input_boolean:
     icon: mdi:thermostat
     initial: false
   climate_manual_control_study:
-    name: Study Climate Manual Override
+    name: Lucas's Room Climate Manual Override
     icon: mdi:thermostat
     initial: false
   super_hot_today:
@@ -199,7 +199,7 @@ input_boolean:
     icon: mdi:thermometer
     initial: false
   hvac_study_should_be_on:
-    name: Study HVAC Should Be On
+    name: Lucas's Room HVAC Should Be On
     icon: mdi:thermometer
   hvac_kids_room_should_be_on:
     name: Kids Room HVAC Should Be On
@@ -548,6 +548,52 @@ input_number:
     icon: mdi:counter
 
 input_datetime:
+  # Per-room wake/bed times for HVAC scheduling
+  # Master Bedroom (Steph & Phil)
+  wakeup_time_master_bedroom:
+    name: Wake-up Time - Master Bedroom
+    has_date: false
+    has_time: true
+    icon: mdi:weather-sunset-up
+  bedtime_master_bedroom:
+    name: Bedtime - Master Bedroom
+    has_date: false
+    has_time: true
+    icon: mdi:weather-night
+  # Otto's Room (Henry & Otto)
+  wakeup_time_ottos_room:
+    name: Wake-up Time - Otto's Room
+    has_date: false
+    has_time: true
+    icon: mdi:weather-sunset-up
+  bedtime_ottos_room:
+    name: Bedtime - Otto's Room
+    has_date: false
+    has_time: true
+    icon: mdi:weather-night
+  # Lucas's Room (formerly Study/Henry's Room)
+  wakeup_time_lucas_room:
+    name: Wake-up Time - Lucas's Room
+    has_date: false
+    has_time: true
+    icon: mdi:weather-sunset-up
+  bedtime_lucas_room:
+    name: Bedtime - Lucas's Room
+    has_date: false
+    has_time: true
+    icon: mdi:weather-night
+  # Living Room (follows household-wide schedule)
+  wakeup_time_living_room:
+    name: Wake-up Time - Living Room
+    has_date: false
+    has_time: true
+    icon: mdi:weather-sunset-up
+  bedtime_living_room:
+    name: Bedtime - Living Room
+    has_date: false
+    has_time: true
+    icon: mdi:weather-night
+
   last_climate_notification_living:
     name: Last Climate Notification - Living Room
     has_date: true
@@ -569,7 +615,7 @@ input_datetime:
     has_date: true
     has_time: true
   ac_filter_study_henry:
-    name: AC Filter Last Changed - Study/Henry's Room
+    name: AC Filter Last Changed - Lucas's Room
     has_date: true
     has_time: true
   # Automation Trigger Tracking

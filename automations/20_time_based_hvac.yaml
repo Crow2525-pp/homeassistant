@@ -1,0 +1,814 @@
+---
+# ============================================================================
+# TIME-BASED HVAC AUTOMATIONS
+# ============================================================================
+# This file implements per-room climate control based on wake/bed times.
+#
+# Logic:
+# - Gates (always checked): manual override off, occupancy home/sleeping, HVAC master on
+# - Living Room: Always comfort when home/sleeping, eco when away
+# - Bedrooms: Comfort during day (wake to bed), Boost during night (bed to wake)
+# - Boost mode determines heat/cool based on season and temp delta
+#
+# Rooms:
+# - Living Room: Communal space
+# - Master Bedroom: Steph & Phil
+# - Otto's Room: Henry & Otto (shared)
+# - Lucas's Room: Lucas (formerly Henry's Room/Study)
+# ============================================================================
+
+# ============================================================================
+# LIVING ROOM - Always comfort when home/sleeping
+# ============================================================================
+
+- id: living_room_time_based_comfort
+  alias: "HVAC - Living Room - Comfort (Home/Sleeping)"
+  description: "Set living room to comfort when home or sleeping. Eco when away."
+  triggers:
+    - trigger: state
+      entity_id: input_select.occupancy
+      id: occupancy_change
+    - trigger: time
+      at: input_datetime.wakeup_time_living_room
+      id: wake_time
+    - trigger: time
+      at: input_datetime.bedtime_living_room
+      id: bed_time
+    - trigger: state
+      entity_id: input_boolean.climate_manual_control_living
+      to: "off"
+      id: manual_override_cleared
+    - trigger: homeassistant
+      event: start
+      id: ha_start
+  conditions:
+    # Gate 1: Manual override must be off
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    # Gate 2: HVAC master switch must be on
+    - condition: state
+      entity_id: input_boolean.hvac_living_room_should_be_on
+      state: "on"
+  actions:
+    - choose:
+        # Away or Holiday - Set to eco and turn off
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Away
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Holiday
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                preset_mode: eco
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                hvac_mode: "off"
+        # Home or Sleeping - Set to comfort with appropriate heat/cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Home
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Sleeping
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+              data:
+                preset_mode: comfort
+            # Determine heat or cool based on season and temp
+            - choose:
+                # Winter/Autumn or cold outside - Heat
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: winter
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: autumn
+                        - condition: numeric_state
+                          entity_id: sensor.essendon_airport_temp
+                          below: 18
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_versatile_thermostat
+                      data:
+                        hvac_mode: heat
+                # Summer/Spring or hot outside - Cool
+                - conditions:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: summer
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: spring
+                        - condition: numeric_state
+                          entity_id: sensor.essendon_airport_temp
+                          above: 24
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_versatile_thermostat
+                      data:
+                        hvac_mode: cool
+              # Default - off if neither condition met
+              default:
+                - action: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.living_room_versatile_thermostat
+                  data:
+                    hvac_mode: "off"
+  mode: single
+
+# ============================================================================
+# MASTER BEDROOM - Comfort day, Boost night
+# ============================================================================
+
+- id: master_bedroom_time_based_day
+  alias: "HVAC - Master Bedroom - Daytime Comfort"
+  description: "Set master bedroom to comfort during daytime (wake to bed)."
+  triggers:
+    - trigger: time
+      at: input_datetime.wakeup_time_master_bedroom
+      id: wake_time
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Home
+      id: arrived_home
+    - trigger: state
+      entity_id: input_boolean.climate_manual_control_master
+      to: "off"
+      id: manual_override_cleared
+  conditions:
+    # Gate 1: Manual override must be off
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
+    # Gate 2: Occupancy must be Home or Sleeping
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    # Gate 3: HVAC master switch must be on
+    - condition: state
+      entity_id: input_boolean.hvac_master_bedroom_should_be_on
+      state: "on"
+    # Time must be within daytime (wake to bed)
+    - condition: template
+      value_template: >
+        {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
+        {% set bed = states('input_datetime.bedtime_master_bedroom') %}
+        {% set now_time = now().strftime('%H:%M:%S') %}
+        {{ wake <= now_time < bed }}
+  actions:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.masterbed_versatile_thermostat
+      data:
+        preset_mode: comfort
+    # Determine heat or cool based on season and temp delta
+    - choose:
+        # Winter/Autumn or room is cold - Heat
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: winter
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: autumn
+                - condition: numeric_state
+                  entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                  below: 18
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: heat
+        # Summer/Spring or room is hot - Cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: summer
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: spring
+                - condition: numeric_state
+                  entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                  above: 24
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: cool
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.masterbed_versatile_thermostat
+          data:
+            hvac_mode: "off"
+  mode: single
+
+- id: master_bedroom_time_based_night
+  alias: "HVAC - Master Bedroom - Nighttime Boost"
+  description: "Set master bedroom to boost during nighttime (bed to wake)."
+  triggers:
+    - trigger: time
+      at: input_datetime.bedtime_master_bedroom
+      id: bed_time
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Sleeping
+      id: going_to_sleep
+    - trigger: state
+      entity_id: input_boolean.climate_manual_control_master
+      to: "off"
+      id: manual_override_cleared
+  conditions:
+    # Gate 1: Manual override must be off
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
+    # Gate 2: Occupancy must be Home or Sleeping
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    # Gate 3: HVAC master switch must be on
+    - condition: state
+      entity_id: input_boolean.hvac_master_bedroom_should_be_on
+      state: "on"
+    # Time must be within nighttime (bed to wake, wraps midnight)
+    - condition: template
+      value_template: >
+        {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
+        {% set bed = states('input_datetime.bedtime_master_bedroom') %}
+        {% set now_time = now().strftime('%H:%M:%S') %}
+        {{ now_time >= bed or now_time < wake }}
+  actions:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.masterbed_versatile_thermostat
+      data:
+        preset_mode: boost
+    # Determine heat or cool based on season and temp delta
+    - choose:
+        # Winter/Autumn or room/outside is cold - Heat
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: winter
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: autumn
+                - condition: numeric_state
+                  entity_id: sensor.essendon_airport_temp
+                  below: 15
+                - condition: numeric_state
+                  entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                  below: 18
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: heat
+        # Summer/Spring or room is hot - Cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: summer
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: spring
+                - condition: numeric_state
+                  entity_id: sensor.essendon_airport_temp
+                  above: 22
+                - condition: numeric_state
+                  entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                  above: 24
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: cool
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.masterbed_versatile_thermostat
+          data:
+            hvac_mode: "off"
+  mode: single
+
+- id: master_bedroom_away_mode
+  alias: "HVAC - Master Bedroom - Away Mode"
+  description: "Set master bedroom to eco when away."
+  triggers:
+    - trigger: state
+      entity_id: input_select.occupancy
+      to:
+        - Away
+        - Holiday
+      id: away
+  conditions:
+    - condition: state
+      entity_id: input_boolean.hvac_master_bedroom_should_be_on
+      state: "on"
+  actions:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.masterbed_versatile_thermostat
+      data:
+        preset_mode: eco
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: climate.masterbed_versatile_thermostat
+      data:
+        hvac_mode: "off"
+  mode: single
+
+# ============================================================================
+# OTTO'S ROOM (Henry & Otto) - Comfort day, Boost night
+# ============================================================================
+
+- id: ottos_room_time_based_day
+  alias: "HVAC - Otto's Room - Daytime Comfort"
+  description: "Set Otto's room to comfort during daytime (wake to bed)."
+  triggers:
+    - trigger: time
+      at: input_datetime.wakeup_time_ottos_room
+      id: wake_time
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Home
+      id: arrived_home
+    - trigger: state
+      entity_id: input_boolean.climate_manual_control_otto
+      to: "off"
+      id: manual_override_cleared
+  conditions:
+    # Gate 1: Manual override must be off
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_otto
+      state: "off"
+    # Gate 2: Occupancy must be Home or Sleeping
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    # Gate 3: HVAC master switch must be on
+    - condition: state
+      entity_id: input_boolean.hvac_kids_room_should_be_on
+      state: "on"
+    # Time must be within daytime (wake to bed)
+    - condition: template
+      value_template: >
+        {% set wake = states('input_datetime.wakeup_time_ottos_room') %}
+        {% set bed = states('input_datetime.bedtime_ottos_room') %}
+        {% set now_time = now().strftime('%H:%M:%S') %}
+        {{ wake <= now_time < bed }}
+  actions:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.otto_s_room
+      data:
+        preset_mode: comfort
+    # Determine heat or cool based on season and temp delta
+    - choose:
+        # Winter/Autumn or room is cold - Heat
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: winter
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: autumn
+                - condition: numeric_state
+                  entity_id: sensor.ottos_room_temp_humidity_sensor_temperature
+                  below: 18
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: heat
+        # Summer/Spring or room is hot - Cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: summer
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: spring
+                - condition: numeric_state
+                  entity_id: sensor.ottos_room_temp_humidity_sensor_temperature
+                  above: 24
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: cool
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.otto_s_room
+          data:
+            hvac_mode: "off"
+  mode: single
+
+- id: ottos_room_time_based_night
+  alias: "HVAC - Otto's Room - Nighttime Boost"
+  description: "Set Otto's room to boost during nighttime (bed to wake)."
+  triggers:
+    - trigger: time
+      at: input_datetime.bedtime_ottos_room
+      id: bed_time
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Sleeping
+      id: going_to_sleep
+    - trigger: state
+      entity_id: input_boolean.climate_manual_control_otto
+      to: "off"
+      id: manual_override_cleared
+  conditions:
+    # Gate 1: Manual override must be off
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_otto
+      state: "off"
+    # Gate 2: Occupancy must be Home or Sleeping
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    # Gate 3: HVAC master switch must be on
+    - condition: state
+      entity_id: input_boolean.hvac_kids_room_should_be_on
+      state: "on"
+    # Time must be within nighttime (bed to wake, wraps midnight)
+    - condition: template
+      value_template: >
+        {% set wake = states('input_datetime.wakeup_time_ottos_room') %}
+        {% set bed = states('input_datetime.bedtime_ottos_room') %}
+        {% set now_time = now().strftime('%H:%M:%S') %}
+        {{ now_time >= bed or now_time < wake }}
+  actions:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.otto_s_room
+      data:
+        preset_mode: boost
+    # Determine heat or cool based on season and temp delta
+    - choose:
+        # Winter/Autumn or room/outside is cold - Heat
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: winter
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: autumn
+                - condition: numeric_state
+                  entity_id: sensor.essendon_airport_temp
+                  below: 15
+                - condition: numeric_state
+                  entity_id: sensor.ottos_room_temp_humidity_sensor_temperature
+                  below: 18
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: heat
+        # Summer/Spring or room is hot - Cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: summer
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: spring
+                - condition: numeric_state
+                  entity_id: sensor.essendon_airport_temp
+                  above: 22
+                - condition: numeric_state
+                  entity_id: sensor.ottos_room_temp_humidity_sensor_temperature
+                  above: 24
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: cool
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.otto_s_room
+          data:
+            hvac_mode: "off"
+  mode: single
+
+- id: ottos_room_away_mode
+  alias: "HVAC - Otto's Room - Away Mode"
+  description: "Set Otto's room to eco when away."
+  triggers:
+    - trigger: state
+      entity_id: input_select.occupancy
+      to:
+        - Away
+        - Holiday
+      id: away
+  conditions:
+    - condition: state
+      entity_id: input_boolean.hvac_kids_room_should_be_on
+      state: "on"
+  actions:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.otto_s_room
+      data:
+        preset_mode: eco
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: climate.otto_s_room
+      data:
+        hvac_mode: "off"
+  mode: single
+
+# ============================================================================
+# LUCAS'S ROOM (formerly Study/Henry's Room) - Comfort day, Boost night
+# ============================================================================
+
+- id: lucas_room_time_based_day
+  alias: "HVAC - Lucas's Room - Daytime Comfort"
+  description: "Set Lucas's room to comfort during daytime (wake to bed)."
+  triggers:
+    - trigger: time
+      at: input_datetime.wakeup_time_lucas_room
+      id: wake_time
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Home
+      id: arrived_home
+    - trigger: state
+      entity_id: input_boolean.climate_manual_control_study
+      to: "off"
+      id: manual_override_cleared
+  conditions:
+    # Gate 1: Manual override must be off
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_study
+      state: "off"
+    # Gate 2: Occupancy must be Home or Sleeping
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    # Gate 3: HVAC master switch must be on
+    - condition: state
+      entity_id: input_boolean.hvac_study_should_be_on
+      state: "on"
+    # Time must be within daytime (wake to bed)
+    - condition: template
+      value_template: >
+        {% set wake = states('input_datetime.wakeup_time_lucas_room') %}
+        {% set bed = states('input_datetime.bedtime_lucas_room') %}
+        {% set now_time = now().strftime('%H:%M:%S') %}
+        {{ wake <= now_time < bed }}
+  actions:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.henry_s_room_versatile_thermostat
+      data:
+        preset_mode: comfort
+    # Determine heat or cool based on season and temp delta
+    - choose:
+        # Winter/Autumn or room is cold - Heat
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: winter
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: autumn
+                - condition: numeric_state
+                  entity_id: sensor.study_esp32_henrysroom_temperature
+                  below: 18
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: heat
+        # Summer/Spring or room is hot - Cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: summer
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: spring
+                - condition: numeric_state
+                  entity_id: sensor.study_esp32_henrysroom_temperature
+                  above: 24
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: cool
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.henry_s_room_versatile_thermostat
+          data:
+            hvac_mode: "off"
+  mode: single
+
+- id: lucas_room_time_based_night
+  alias: "HVAC - Lucas's Room - Nighttime Boost"
+  description: "Set Lucas's room to boost during nighttime (bed to wake)."
+  triggers:
+    - trigger: time
+      at: input_datetime.bedtime_lucas_room
+      id: bed_time
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Sleeping
+      id: going_to_sleep
+    - trigger: state
+      entity_id: input_boolean.climate_manual_control_study
+      to: "off"
+      id: manual_override_cleared
+  conditions:
+    # Gate 1: Manual override must be off
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_study
+      state: "off"
+    # Gate 2: Occupancy must be Home or Sleeping
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    # Gate 3: HVAC master switch must be on
+    - condition: state
+      entity_id: input_boolean.hvac_study_should_be_on
+      state: "on"
+    # Time must be within nighttime (bed to wake, wraps midnight)
+    - condition: template
+      value_template: >
+        {% set wake = states('input_datetime.wakeup_time_lucas_room') %}
+        {% set bed = states('input_datetime.bedtime_lucas_room') %}
+        {% set now_time = now().strftime('%H:%M:%S') %}
+        {{ now_time >= bed or now_time < wake }}
+  actions:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.henry_s_room_versatile_thermostat
+      data:
+        preset_mode: boost
+    # Determine heat or cool based on season and temp delta
+    - choose:
+        # Winter/Autumn or room/outside is cold - Heat
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: winter
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: autumn
+                - condition: numeric_state
+                  entity_id: sensor.essendon_airport_temp
+                  below: 15
+                - condition: numeric_state
+                  entity_id: sensor.study_esp32_henrysroom_temperature
+                  below: 18
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: heat
+        # Summer/Spring or room is hot - Cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: summer
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: spring
+                - condition: numeric_state
+                  entity_id: sensor.essendon_airport_temp
+                  above: 22
+                - condition: numeric_state
+                  entity_id: sensor.study_esp32_henrysroom_temperature
+                  above: 24
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: cool
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.henry_s_room_versatile_thermostat
+          data:
+            hvac_mode: "off"
+  mode: single
+
+- id: lucas_room_away_mode
+  alias: "HVAC - Lucas's Room - Away Mode"
+  description: "Set Lucas's room to eco when away."
+  triggers:
+    - trigger: state
+      entity_id: input_select.occupancy
+      to:
+        - Away
+        - Holiday
+      id: away
+  conditions:
+    - condition: state
+      entity_id: input_boolean.hvac_study_should_be_on
+      state: "on"
+  actions:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.henry_s_room_versatile_thermostat
+      data:
+        preset_mode: eco
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: climate.henry_s_room_versatile_thermostat
+      data:
+        hvac_mode: "off"
+  mode: single
