@@ -554,44 +554,52 @@ input_datetime:
     name: Wake-up Time - Master Bedroom
     has_date: false
     has_time: true
+    initial: "06:00:00"
     icon: mdi:weather-sunset-up
   bedtime_master_bedroom:
     name: Bedtime - Master Bedroom
     has_date: false
     has_time: true
+    initial: "21:00:00"
     icon: mdi:weather-night
   # Otto's Room (Henry & Otto)
   wakeup_time_ottos_room:
     name: Wake-up Time - Otto's Room
     has_date: false
     has_time: true
+    initial: "06:30:00"
     icon: mdi:weather-sunset-up
   bedtime_ottos_room:
     name: Bedtime - Otto's Room
     has_date: false
     has_time: true
+    initial: "18:30:00"
     icon: mdi:weather-night
   # Lucas's Room (formerly Study/Henry's Room)
   wakeup_time_lucas_room:
     name: Wake-up Time - Lucas's Room
     has_date: false
     has_time: true
+    initial: "06:30:00"
     icon: mdi:weather-sunset-up
   bedtime_lucas_room:
     name: Bedtime - Lucas's Room
     has_date: false
     has_time: true
+    initial: "18:15:00"
     icon: mdi:weather-night
   # Living Room (follows household-wide schedule)
   wakeup_time_living_room:
     name: Wake-up Time - Living Room
     has_date: false
     has_time: true
+    initial: "06:00:00"
     icon: mdi:weather-sunset-up
   bedtime_living_room:
     name: Bedtime - Living Room
     has_date: false
     has_time: true
+    initial: "22:00:00"
     icon: mdi:weather-night
 
   last_climate_notification_living:
