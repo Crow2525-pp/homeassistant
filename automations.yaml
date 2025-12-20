@@ -75,3 +75,20 @@
           entity_id: scene.living_room_evening
         data: {}
   mode: single
+- id: 'front_door_switch_office_led'
+  alias: Front Door ZHA Switch - Toggle Office LED Strip
+  description: Toggles the office LED strip light when the front door switch is pressed
+  triggers:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: REPLACE_WITH_DEVICE_ID
+      command: remote_button_short_press
+  conditions: []
+  actions:
+  - action: light.toggle
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.led_strip_office_light
+  mode: single
