@@ -194,7 +194,7 @@
                   state: autumn
                 - condition: numeric_state
                   entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
-                  below: 18
+                  below: 17.0
           sequence:
             - action: climate.set_hvac_mode
               target:
