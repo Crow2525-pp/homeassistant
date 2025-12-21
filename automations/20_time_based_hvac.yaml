@@ -11,6 +11,9 @@
 # - Night mode determines heat/cool based on season and temp delta:
 #   - Heat mode uses Frost preset (minimum temperature protection)
 #   - Cool mode uses Boost preset (aggressive cooling)
+# - Humidity consideration:
+#   - Heating: Only enable if outside humidity < 80% (avoids stuffy conditions)
+#   - Cooling: Enable at lower temps (20°C+) if humidity > 70% (feels hotter)
 #
 # Rooms:
 # - Living Room: Communal space
@@ -99,9 +102,14 @@
                         - condition: state
                           entity_id: input_select.climate_season
                           state: autumn
-                        - condition: numeric_state
-                          entity_id: sensor.essendon_airport_temp
-                          below: 18
+                        - condition: and
+                          conditions:
+                            - condition: numeric_state
+                              entity_id: sensor.essendon_airport_temp
+                              below: 18
+                            - condition: numeric_state
+                              entity_id: sensor.essendon_airport_humidity
+                              below: 80
                   sequence:
                     - action: climate.set_hvac_mode
                       target:
@@ -118,6 +126,14 @@
                         - condition: state
                           entity_id: input_select.climate_season
                           state: spring
+                        - condition: and
+                          conditions:
+                            - condition: numeric_state
+                              entity_id: sensor.essendon_airport_temp
+                              above: 22
+                            - condition: numeric_state
+                              entity_id: sensor.essendon_airport_humidity
+                              above: 70
                         - condition: numeric_state
                           entity_id: sensor.essendon_airport_temp
                           above: 24
@@ -279,9 +295,14 @@
                 - condition: state
                   entity_id: input_select.climate_season
                   state: autumn
-                - condition: numeric_state
-                  entity_id: sensor.essendon_airport_temp
-                  below: 15
+                - condition: and
+                  conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_temp
+                      below: 15
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_humidity
+                      below: 80
                 - condition: numeric_state
                   entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
                   below: 18
@@ -306,6 +327,14 @@
                 - condition: state
                   entity_id: input_select.climate_season
                   state: spring
+                - condition: and
+                  conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_temp
+                      above: 20
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_humidity
+                      above: 70
                 - condition: numeric_state
                   entity_id: sensor.essendon_airport_temp
                   above: 22
@@ -498,9 +527,14 @@
                 - condition: state
                   entity_id: input_select.climate_season
                   state: autumn
-                - condition: numeric_state
-                  entity_id: sensor.essendon_airport_temp
-                  below: 15
+                - condition: and
+                  conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_temp
+                      below: 15
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_humidity
+                      below: 80
                 - condition: numeric_state
                   entity_id: sensor.ottos_room_temp_humidity_sensor_temperature
                   below: 18
@@ -525,6 +559,14 @@
                 - condition: state
                   entity_id: input_select.climate_season
                   state: spring
+                - condition: and
+                  conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_temp
+                      above: 20
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_humidity
+                      above: 70
                 - condition: numeric_state
                   entity_id: sensor.essendon_airport_temp
                   above: 22
@@ -717,9 +759,14 @@
                 - condition: state
                   entity_id: input_select.climate_season
                   state: autumn
-                - condition: numeric_state
-                  entity_id: sensor.essendon_airport_temp
-                  below: 15
+                - condition: and
+                  conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_temp
+                      below: 15
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_humidity
+                      below: 80
                 - condition: numeric_state
                   entity_id: sensor.study_esp32_henrysroom_temperature
                   below: 18
@@ -744,6 +791,14 @@
                 - condition: state
                   entity_id: input_select.climate_season
                   state: spring
+                - condition: and
+                  conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_temp
+                      above: 20
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_humidity
+                      above: 70
                 - condition: numeric_state
                   entity_id: sensor.essendon_airport_temp
                   above: 22
