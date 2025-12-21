@@ -7,8 +7,10 @@
 # Logic:
 # - Gates (always checked): manual override off, occupancy home/sleeping
 # - Living Room: Always comfort when home/sleeping, eco when away
-# - Bedrooms: Comfort during day (wake to bed), Boost during night (bed to wake)
-# - Boost mode determines heat/cool based on season and temp delta
+# - Bedrooms: Comfort during day (wake to bed), Frost/Boost during night (bed to wake)
+# - Night mode determines heat/cool based on season and temp delta:
+#   - Heat mode uses Frost preset (minimum temperature protection)
+#   - Cool mode uses Boost preset (aggressive cooling)
 #
 # Rooms:
 # - Living Room: Communal space
@@ -135,7 +137,7 @@
   mode: single
 
 # ============================================================================
-# MASTER BEDROOM - Comfort day, Boost night
+# MASTER BEDROOM - Comfort day, Frost/Boost night
 # ============================================================================
 
 - id: master_bedroom_time_based_day
@@ -229,8 +231,8 @@
   mode: single
 
 - id: master_bedroom_time_based_night
-  alias: "HVAC - Master Bedroom - Nighttime Boost"
-  description: "Set master bedroom to boost during nighttime (bed to wake)."
+  alias: "HVAC - Master Bedroom - Nighttime Frost/Boost"
+  description: "Set master bedroom to frost (heat) or boost (cool) during nighttime (bed to wake)."
   triggers:
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
@@ -265,14 +267,9 @@
         {% set now_time = now().strftime('%H:%M:%S') %}
         {{ now_time >= bed or now_time < wake }}
   actions:
-    - action: climate.set_preset_mode
-      target:
-        entity_id: climate.masterbed_versatile_thermostat
-      data:
-        preset_mode: boost
     # Determine heat or cool based on season and temp delta
     - choose:
-        # Winter/Autumn or room/outside is cold - Heat
+        # Winter/Autumn or room/outside is cold - Heat with Frost preset
         - conditions:
             - condition: or
               conditions:
@@ -294,7 +291,12 @@
                 entity_id: climate.masterbed_versatile_thermostat
               data:
                 hvac_mode: heat
-        # Summer/Spring or room is hot - Cool
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                preset_mode: frost
+        # Summer/Spring or room is hot - Cool with Boost preset
         - conditions:
             - condition: or
               conditions:
@@ -316,6 +318,11 @@
                 entity_id: climate.masterbed_versatile_thermostat
               data:
                 hvac_mode: cool
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                preset_mode: boost
       default:
         - action: climate.set_hvac_mode
           target:
@@ -349,7 +356,7 @@
   mode: single
 
 # ============================================================================
-# OTTO'S ROOM (Henry & Otto) - Comfort day, Boost night
+# OTTO'S ROOM (Henry & Otto) - Comfort day, Frost/Boost night
 # ============================================================================
 
 - id: ottos_room_time_based_day
@@ -443,8 +450,8 @@
   mode: single
 
 - id: ottos_room_time_based_night
-  alias: "HVAC - Otto's Room - Nighttime Boost"
-  description: "Set Otto's room to boost during nighttime (bed to wake)."
+  alias: "HVAC - Otto's Room - Nighttime Frost/Boost"
+  description: "Set Otto's room to frost (heat) or boost (cool) during nighttime (bed to wake)."
   triggers:
     - trigger: time
       at: input_datetime.bedtime_ottos_room
@@ -479,14 +486,9 @@
         {% set now_time = now().strftime('%H:%M:%S') %}
         {{ now_time >= bed or now_time < wake }}
   actions:
-    - action: climate.set_preset_mode
-      target:
-        entity_id: climate.otto_s_room
-      data:
-        preset_mode: boost
     # Determine heat or cool based on season and temp delta
     - choose:
-        # Winter/Autumn or room/outside is cold - Heat
+        # Winter/Autumn or room/outside is cold - Heat with Frost preset
         - conditions:
             - condition: or
               conditions:
@@ -508,7 +510,12 @@
                 entity_id: climate.otto_s_room
               data:
                 hvac_mode: heat
-        # Summer/Spring or room is hot - Cool
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                preset_mode: frost
+        # Summer/Spring or room is hot - Cool with Boost preset
         - conditions:
             - condition: or
               conditions:
@@ -530,6 +537,11 @@
                 entity_id: climate.otto_s_room
               data:
                 hvac_mode: cool
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                preset_mode: boost
       default:
         - action: climate.set_hvac_mode
           target:
@@ -563,7 +575,7 @@
   mode: single
 
 # ============================================================================
-# LUCAS'S ROOM (formerly Study/Henry's Room) - Comfort day, Boost night
+# LUCAS'S ROOM (formerly Study/Henry's Room) - Comfort day, Frost/Boost night
 # ============================================================================
 
 - id: lucas_room_time_based_day
@@ -657,8 +669,8 @@
   mode: single
 
 - id: lucas_room_time_based_night
-  alias: "HVAC - Lucas's Room - Nighttime Boost"
-  description: "Set Lucas's room to boost during nighttime (bed to wake)."
+  alias: "HVAC - Lucas's Room - Nighttime Frost/Boost"
+  description: "Set Lucas's room to frost (heat) or boost (cool) during nighttime (bed to wake)."
   triggers:
     - trigger: time
       at: input_datetime.bedtime_lucas_room
@@ -693,14 +705,9 @@
         {% set now_time = now().strftime('%H:%M:%S') %}
         {{ now_time >= bed or now_time < wake }}
   actions:
-    - action: climate.set_preset_mode
-      target:
-        entity_id: climate.henry_s_room_versatile_thermostat
-      data:
-        preset_mode: boost
     # Determine heat or cool based on season and temp delta
     - choose:
-        # Winter/Autumn or room/outside is cold - Heat
+        # Winter/Autumn or room/outside is cold - Heat with Frost preset
         - conditions:
             - condition: or
               conditions:
@@ -722,7 +729,12 @@
                 entity_id: climate.henry_s_room_versatile_thermostat
               data:
                 hvac_mode: heat
-        # Summer/Spring or room is hot - Cool
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                preset_mode: frost
+        # Summer/Spring or room is hot - Cool with Boost preset
         - conditions:
             - condition: or
               conditions:
@@ -744,6 +756,11 @@
                 entity_id: climate.henry_s_room_versatile_thermostat
               data:
                 hvac_mode: cool
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                preset_mode: boost
       default:
         - action: climate.set_hvac_mode
           target:
