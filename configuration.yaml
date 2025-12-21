@@ -554,7 +554,7 @@ input_datetime:
     name: Wake-up Time - Master Bedroom
     has_date: false
     has_time: true
-    initial: "06:00:00"
+    initial: "06:30:00"
     icon: mdi:weather-sunset-up
   bedtime_master_bedroom:
     name: Bedtime - Master Bedroom
