@@ -11,7 +11,6 @@ tts:
 
 sensor: !include config/domains/mysensors.yaml
 group: !include config/domains/groups.yaml
-automation manual: !include automations.yaml
 automation: !include_dir_merge_list automations
 script: !include config/domains/scripts.yaml
 scene: !include config/domains/scenes.yaml
