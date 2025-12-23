@@ -8,7 +8,7 @@
 #
 # Preset Logic:
 # - Override selector != auto → Use override value
-# - Not home → frost (protect pipes only)
+# - Not home → eco (energy-efficient protection)
 # - Outside < 5°C → boost (maximum warmth for very cold mornings)
 # - Outside 5-10°C → comfort (normal heating)
 # - Outside > 10°C + WFH → comfort (home all day, maintain comfort)
@@ -102,7 +102,7 @@
 
           {# Not home - minimal heating for protection #}
           {% elif not home %}
-            frost
+            eco
 
           {# Very cold morning (<5°C) - maximum warmth #}
           {% elif outside < 5 %}
