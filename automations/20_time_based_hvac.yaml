@@ -212,7 +212,7 @@
                   state: autumn
                 - condition: numeric_state
                   entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
-                  below: 17.0
+                  below: 16.0
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -444,7 +444,7 @@
                   state: autumn
                 - condition: numeric_state
                   entity_id: sensor.ottos_room_temp_humidity_sensor_temperature
-                  below: 18
+                  below: 16
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -676,7 +676,7 @@
                   state: autumn
                 - condition: numeric_state
                   entity_id: sensor.study_esp32_henrysroom_temperature
-                  below: 18
+                  below: 16
           sequence:
             - action: climate.set_hvac_mode
               target:
