@@ -216,7 +216,7 @@
       data:
         climate_entity: climate.living_room_versatile_thermostat
         hvac_mode: heat
-        preset_mode: frost
+        preset_mode: eco
   mode: single
 
 # ============================================================================

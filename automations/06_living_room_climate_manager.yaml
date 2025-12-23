@@ -3,7 +3,7 @@
   alias: HVAC - Living Room Versatile Climate Manager
   description: 'Makes intelligent decisions about WHEN and WHICH MODE (heat/cool/dry/fan_only/off)
     for living room climate. Includes fan_only mode for 21-22°C in summer. Reactive
-    cooling only (no preemptive). Frost mode after 22:15. Seasonal bias applied.
+    cooling only (no preemptive). Eco mode after 22:15. Seasonal bias applied.
 
     '
   triggers:
@@ -276,13 +276,13 @@
             - condition: state
               entity_id: climate.living_room_versatile_thermostat
               attribute: preset_mode
-              state: frost
+              state: eco
           sequence:
           - service: climate.set_preset_mode
             target:
               entity_id: climate.living_room_versatile_thermostat
             data:
-              preset_mode: frost
+              preset_mode: eco
       - choose:
         - conditions:
           - condition: not
