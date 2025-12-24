@@ -277,7 +277,40 @@
         drift: "{{ current_temp - target_temp }}"
 
     - choose:
-        # Winter/Autumn - Heat mode with drift check
+        # Drift check: Too hot (drift > +2°C) - Switch to cooling
+        - conditions:
+            - condition: template
+              value_template: "{{ drift > 2 and preset_mode != 'none' }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: cool
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                preset_mode: boost
+
+        # Drift check: Too cold (drift < -2°C) - Switch to heating
+        - conditions:
+            - condition: template
+              value_template: "{{ drift < -2 and preset_mode != 'none' }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: heat
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                preset_mode: frost
+
+        # No drift issue: Use seasonal defaults
+        # Winter/Autumn - Default to heating
         - conditions:
             - condition: or
               conditions:
@@ -288,31 +321,18 @@
                   entity_id: input_select.climate_season
                   state: autumn
           sequence:
-            - choose:
-                # Too hot: drift > +2°C, turn off heating
-                - conditions:
-                    - condition: template
-                      value_template: "{{ drift > 2 and hvac_mode == 'heat' and preset_mode != 'none' }}"
-                  sequence:
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        hvac_mode: "off"
-                # Normal: activate heating
-              default:
-                - action: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.masterbed_versatile_thermostat
-                  data:
-                    hvac_mode: heat
-                - action: climate.set_preset_mode
-                  target:
-                    entity_id: climate.masterbed_versatile_thermostat
-                  data:
-                    preset_mode: frost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: heat
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                preset_mode: frost
 
-        # Summer/Spring - Cool mode with drift check
+        # Summer/Spring - Default to cooling
         - conditions:
             - condition: or
               conditions:
@@ -323,31 +343,18 @@
                   entity_id: input_select.climate_season
                   state: spring
           sequence:
-            - choose:
-                # Too cold: drift < -2°C, turn off cooling
-                - conditions:
-                    - condition: template
-                      value_template: "{{ drift < -2 and hvac_mode == 'cool' and preset_mode != 'none' }}"
-                  sequence:
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_versatile_thermostat
-                      data:
-                        hvac_mode: "off"
-                # Normal: activate cooling
-              default:
-                - action: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.masterbed_versatile_thermostat
-                  data:
-                    hvac_mode: cool
-                - action: climate.set_preset_mode
-                  target:
-                    entity_id: climate.masterbed_versatile_thermostat
-                  data:
-                    preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: cool
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                preset_mode: boost
 
-      # Default - turn off if no season match
+      # Default - turn off if no condition matched
       default:
         - action: climate.set_hvac_mode
           target:
@@ -524,7 +531,40 @@
         drift: "{{ current_temp - target_temp }}"
 
     - choose:
-        # Winter/Autumn - Heat mode with drift check
+        # Drift check: Too hot (drift > +2°C) - Switch to cooling
+        - conditions:
+            - condition: template
+              value_template: "{{ drift > 2 and preset_mode != 'none' }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: cool
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                preset_mode: boost
+
+        # Drift check: Too cold (drift < -2°C) - Switch to heating
+        - conditions:
+            - condition: template
+              value_template: "{{ drift < -2 and preset_mode != 'none' }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: heat
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                preset_mode: frost
+
+        # No drift issue: Use seasonal defaults
+        # Winter/Autumn - Default to heating
         - conditions:
             - condition: or
               conditions:
@@ -535,31 +575,18 @@
                   entity_id: input_select.climate_season
                   state: autumn
           sequence:
-            - choose:
-                # Too hot: drift > +2°C, turn off heating
-                - conditions:
-                    - condition: template
-                      value_template: "{{ drift > 2 and hvac_mode == 'heat' and preset_mode != 'none' }}"
-                  sequence:
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        hvac_mode: "off"
-                # Normal: activate heating
-              default:
-                - action: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.otto_s_room
-                  data:
-                    hvac_mode: heat
-                - action: climate.set_preset_mode
-                  target:
-                    entity_id: climate.otto_s_room
-                  data:
-                    preset_mode: frost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: heat
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                preset_mode: frost
 
-        # Summer/Spring - Cool mode with drift check
+        # Summer/Spring - Default to cooling
         - conditions:
             - condition: or
               conditions:
@@ -570,31 +597,18 @@
                   entity_id: input_select.climate_season
                   state: spring
           sequence:
-            - choose:
-                # Too cold: drift < -2°C, turn off cooling
-                - conditions:
-                    - condition: template
-                      value_template: "{{ drift < -2 and hvac_mode == 'cool' and preset_mode != 'none' }}"
-                  sequence:
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.otto_s_room
-                      data:
-                        hvac_mode: "off"
-                # Normal: activate cooling
-              default:
-                - action: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.otto_s_room
-                  data:
-                    hvac_mode: cool
-                - action: climate.set_preset_mode
-                  target:
-                    entity_id: climate.otto_s_room
-                  data:
-                    preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: cool
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                preset_mode: boost
 
-      # Default - turn off if no season match
+      # Default - turn off if no condition matched
       default:
         - action: climate.set_hvac_mode
           target:
@@ -771,7 +785,40 @@
         drift: "{{ current_temp - target_temp }}"
 
     - choose:
-        # Winter/Autumn - Heat mode with drift check
+        # Drift check: Too hot (drift > +2°C) - Switch to cooling
+        - conditions:
+            - condition: template
+              value_template: "{{ drift > 2 and preset_mode != 'none' }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: cool
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                preset_mode: boost
+
+        # Drift check: Too cold (drift < -2°C) - Switch to heating
+        - conditions:
+            - condition: template
+              value_template: "{{ drift < -2 and preset_mode != 'none' }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: heat
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                preset_mode: frost
+
+        # No drift issue: Use seasonal defaults
+        # Winter/Autumn - Default to heating
         - conditions:
             - condition: or
               conditions:
@@ -782,31 +829,18 @@
                   entity_id: input_select.climate_season
                   state: autumn
           sequence:
-            - choose:
-                # Too hot: drift > +2°C, turn off heating
-                - conditions:
-                    - condition: template
-                      value_template: "{{ drift > 2 and hvac_mode == 'heat' and preset_mode != 'none' }}"
-                  sequence:
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        hvac_mode: "off"
-                # Normal: activate heating
-              default:
-                - action: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.henry_s_room_versatile_thermostat
-                  data:
-                    hvac_mode: heat
-                - action: climate.set_preset_mode
-                  target:
-                    entity_id: climate.henry_s_room_versatile_thermostat
-                  data:
-                    preset_mode: frost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: heat
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                preset_mode: frost
 
-        # Summer/Spring - Cool mode with drift check
+        # Summer/Spring - Default to cooling
         - conditions:
             - condition: or
               conditions:
@@ -817,31 +851,18 @@
                   entity_id: input_select.climate_season
                   state: spring
           sequence:
-            - choose:
-                # Too cold: drift < -2°C, turn off cooling
-                - conditions:
-                    - condition: template
-                      value_template: "{{ drift < -2 and hvac_mode == 'cool' and preset_mode != 'none' }}"
-                  sequence:
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
-                      data:
-                        hvac_mode: "off"
-                # Normal: activate cooling
-              default:
-                - action: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.henry_s_room_versatile_thermostat
-                  data:
-                    hvac_mode: cool
-                - action: climate.set_preset_mode
-                  target:
-                    entity_id: climate.henry_s_room_versatile_thermostat
-                  data:
-                    preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: cool
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                preset_mode: boost
 
-      # Default - turn off if no season match
+      # Default - turn off if no condition matched
       default:
         - action: climate.set_hvac_mode
           target:
