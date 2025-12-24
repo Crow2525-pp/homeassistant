@@ -177,45 +177,16 @@
         {% set now_time = now().strftime('%H:%M:%S') %}
         {{ wake <= now_time < bed }}
   actions:
+    # Step 1: Set comfort preset for daytime
     - action: climate.set_preset_mode
       target:
         entity_id: climate.masterbed_versatile_thermostat
       data:
         preset_mode: comfort
 
-    # Drift-based climate control using preset targets
-    - variables:
-        current_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'current_temperature') | float(20) }}"
-        target_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'temperature') | float(20) }}"
-        preset_mode: "{{ state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') }}"
-        hvac_mode: "{{ states('climate.masterbed_versatile_thermostat') }}"
-        drift: "{{ current_temp - target_temp }}"
-
+    # Step 2: Set initial hvac_mode based on season
     - choose:
-        # Drift check: Too hot (drift > +2°C) - Switch to cooling
-        - conditions:
-            - condition: template
-              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: cool
-
-        # Drift check: Too cold (drift < -2°C) - Switch to heating
-        - conditions:
-            - condition: template
-              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: heat
-
-        # No drift issue: Use seasonal defaults
-        # Winter/Autumn - Default to heating
+        # Winter/Autumn - Start with heating
         - conditions:
             - condition: or
               conditions:
@@ -232,7 +203,7 @@
               data:
                 hvac_mode: heat
 
-        # Summer/Spring - Default to cooling
+        # Summer/Spring - Start with cooling
         - conditions:
             - condition: or
               conditions:
@@ -249,13 +220,41 @@
               data:
                 hvac_mode: cool
 
-      # Default - turn off if no condition matched
-      default:
-        - action: climate.set_hvac_mode
-          target:
-            entity_id: climate.masterbed_versatile_thermostat
-          data:
-            hvac_mode: "off"
+    # Step 3: Wait for comfort preset to apply and target temp to update
+    - delay:
+        seconds: 2
+
+    # Step 4: Calculate drift from the comfort preset's target
+    - variables:
+        current_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'current_temperature') | float(20) }}"
+        target_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'temperature') | float(20) }}"
+        preset_mode: "{{ state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') }}"
+        hvac_mode: "{{ states('climate.masterbed_versatile_thermostat') }}"
+        drift: "{{ current_temp - target_temp }}"
+
+    # Step 5: Check drift and override hvac_mode if needed (preserve comfort preset)
+    - choose:
+        # Too hot: drift > +2°C from comfort target - Switch to cooling
+        - conditions:
+            - condition: template
+              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: cool
+
+        # Too cold: drift < -2°C from comfort target - Switch to heating
+        - conditions:
+            - condition: template
+              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: heat
   mode: single
 
 - id: master_bedroom_time_based_night
@@ -298,44 +297,9 @@
         {% set now_time = now().strftime('%H:%M:%S') %}
         {{ now_time >= bed or now_time < wake }}
   actions:
-    # Drift-based climate control using preset targets
-    # Check if climate needs adjustment based on drift from preset target
-    - variables:
-        current_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'current_temperature') | float(20) }}"
-        target_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'temperature') | float(20) }}"
-        preset_mode: "{{ state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') }}"
-        hvac_mode: "{{ states('climate.masterbed_versatile_thermostat') }}"
-        drift: "{{ current_temp - target_temp }}"
-
+    # Step 1: Set the correct nighttime preset based on season
     - choose:
-        # Drift check: Too hot (drift > +2°C) - Switch to cooling
-        # Only check when hvac_mode is 'off' or 'heat'
-        # Preset mode is preserved (already set by time-based logic)
-        - conditions:
-            - condition: template
-              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: cool
-
-        # Drift check: Too cold (drift < -2°C) - Switch to heating
-        # Only check when hvac_mode is 'off' or 'cool'
-        # Preset mode is preserved (already set by time-based logic)
-        - conditions:
-            - condition: template
-              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: heat
-
-        # No drift issue: Use seasonal defaults
-        # Winter/Autumn - Default to heating
+        # Winter/Autumn - Use eco preset for energy-efficient heating
         - conditions:
             - condition: or
               conditions:
@@ -346,18 +310,18 @@
                   entity_id: input_select.climate_season
                   state: autumn
           sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: heat
             - action: climate.set_preset_mode
               target:
                 entity_id: climate.masterbed_versatile_thermostat
               data:
                 preset_mode: eco
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: heat
 
-        # Summer/Spring - Default to cooling
+        # Summer/Spring - Use boost preset for aggressive cooling
         - conditions:
             - condition: or
               conditions:
@@ -368,24 +332,52 @@
                   entity_id: input_select.climate_season
                   state: spring
           sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: cool
             - action: climate.set_preset_mode
               target:
                 entity_id: climate.masterbed_versatile_thermostat
               data:
                 preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: cool
 
-      # Default - turn off if no condition matched
-      default:
-        - action: climate.set_hvac_mode
-          target:
-            entity_id: climate.masterbed_versatile_thermostat
-          data:
-            hvac_mode: "off"
+    # Step 2: Wait briefly for preset to apply and target temp to update
+    - delay:
+        seconds: 2
+
+    # Step 3: Calculate drift from the nighttime preset's target
+    - variables:
+        current_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'current_temperature') | float(20) }}"
+        target_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'temperature') | float(20) }}"
+        preset_mode: "{{ state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') }}"
+        hvac_mode: "{{ states('climate.masterbed_versatile_thermostat') }}"
+        drift: "{{ current_temp - target_temp }}"
+
+    # Step 4: Check drift and override hvac_mode if needed (preserve preset)
+    - choose:
+        # Too hot: drift > +2°C from eco/boost target - Switch to cooling
+        - conditions:
+            - condition: template
+              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: cool
+
+        # Too cold: drift < -2°C from eco/boost target - Switch to heating
+        - conditions:
+            - condition: template
+              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+              data:
+                hvac_mode: heat
   mode: single
 
 - id: master_bedroom_away_mode
@@ -456,45 +448,16 @@
         {% set now_time = now().strftime('%H:%M:%S') %}
         {{ wake <= now_time < bed }}
   actions:
+    # Step 1: Set comfort preset for daytime
     - action: climate.set_preset_mode
       target:
         entity_id: climate.otto_s_room
       data:
         preset_mode: comfort
 
-    # Drift-based climate control using preset targets
-    - variables:
-        current_temp: "{{ state_attr('climate.otto_s_room', 'current_temperature') | float(20) }}"
-        target_temp: "{{ state_attr('climate.otto_s_room', 'temperature') | float(20) }}"
-        preset_mode: "{{ state_attr('climate.otto_s_room', 'preset_mode') }}"
-        hvac_mode: "{{ states('climate.otto_s_room') }}"
-        drift: "{{ current_temp - target_temp }}"
-
+    # Step 2: Set initial hvac_mode based on season
     - choose:
-        # Drift check: Too hot (drift > +2°C) - Switch to cooling
-        - conditions:
-            - condition: template
-              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: cool
-
-        # Drift check: Too cold (drift < -2°C) - Switch to heating
-        - conditions:
-            - condition: template
-              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: heat
-
-        # No drift issue: Use seasonal defaults
-        # Winter/Autumn - Default to heating
+        # Winter/Autumn - Start with heating
         - conditions:
             - condition: or
               conditions:
@@ -511,7 +474,7 @@
               data:
                 hvac_mode: heat
 
-        # Summer/Spring - Default to cooling
+        # Summer/Spring - Start with cooling
         - conditions:
             - condition: or
               conditions:
@@ -528,13 +491,41 @@
               data:
                 hvac_mode: cool
 
-      # Default - turn off if no condition matched
-      default:
-        - action: climate.set_hvac_mode
-          target:
-            entity_id: climate.otto_s_room
-          data:
-            hvac_mode: "off"
+    # Step 3: Wait for comfort preset to apply and target temp to update
+    - delay:
+        seconds: 2
+
+    # Step 4: Calculate drift from the comfort preset's target
+    - variables:
+        current_temp: "{{ state_attr('climate.otto_s_room', 'current_temperature') | float(20) }}"
+        target_temp: "{{ state_attr('climate.otto_s_room', 'temperature') | float(20) }}"
+        preset_mode: "{{ state_attr('climate.otto_s_room', 'preset_mode') }}"
+        hvac_mode: "{{ states('climate.otto_s_room') }}"
+        drift: "{{ current_temp - target_temp }}"
+
+    # Step 5: Check drift and override hvac_mode if needed (preserve comfort preset)
+    - choose:
+        # Too hot: drift > +2°C from comfort target - Switch to cooling
+        - conditions:
+            - condition: template
+              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: cool
+
+        # Too cold: drift < -2°C from comfort target - Switch to heating
+        - conditions:
+            - condition: template
+              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: heat
   mode: single
 
 - id: ottos_room_time_based_night
@@ -577,44 +568,9 @@
         {% set now_time = now().strftime('%H:%M:%S') %}
         {{ now_time >= bed or now_time < wake }}
   actions:
-    # Drift-based climate control using preset targets
-    # Check if climate needs adjustment based on drift from preset target
-    - variables:
-        current_temp: "{{ state_attr('climate.otto_s_room', 'current_temperature') | float(20) }}"
-        target_temp: "{{ state_attr('climate.otto_s_room', 'temperature') | float(20) }}"
-        preset_mode: "{{ state_attr('climate.otto_s_room', 'preset_mode') }}"
-        hvac_mode: "{{ states('climate.otto_s_room') }}"
-        drift: "{{ current_temp - target_temp }}"
-
+    # Step 1: Set the correct nighttime preset based on season
     - choose:
-        # Drift check: Too hot (drift > +2°C) - Switch to cooling
-        # Only check when hvac_mode is 'off' or 'heat'
-        # Preset mode is preserved (already set by time-based logic)
-        - conditions:
-            - condition: template
-              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: cool
-
-        # Drift check: Too cold (drift < -2°C) - Switch to heating
-        # Only check when hvac_mode is 'off' or 'cool'
-        # Preset mode is preserved (already set by time-based logic)
-        - conditions:
-            - condition: template
-              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: heat
-
-        # No drift issue: Use seasonal defaults
-        # Winter/Autumn - Default to heating
+        # Winter/Autumn - Use eco preset for energy-efficient heating
         - conditions:
             - condition: or
               conditions:
@@ -625,18 +581,18 @@
                   entity_id: input_select.climate_season
                   state: autumn
           sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: heat
             - action: climate.set_preset_mode
               target:
                 entity_id: climate.otto_s_room
               data:
                 preset_mode: eco
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: heat
 
-        # Summer/Spring - Default to cooling
+        # Summer/Spring - Use boost preset for aggressive cooling
         - conditions:
             - condition: or
               conditions:
@@ -647,24 +603,52 @@
                   entity_id: input_select.climate_season
                   state: spring
           sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: cool
             - action: climate.set_preset_mode
               target:
                 entity_id: climate.otto_s_room
               data:
                 preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: cool
 
-      # Default - turn off if no condition matched
-      default:
-        - action: climate.set_hvac_mode
-          target:
-            entity_id: climate.otto_s_room
-          data:
-            hvac_mode: "off"
+    # Step 2: Wait briefly for preset to apply and target temp to update
+    - delay:
+        seconds: 2
+
+    # Step 3: Calculate drift from the nighttime preset's target
+    - variables:
+        current_temp: "{{ state_attr('climate.otto_s_room', 'current_temperature') | float(20) }}"
+        target_temp: "{{ state_attr('climate.otto_s_room', 'temperature') | float(20) }}"
+        preset_mode: "{{ state_attr('climate.otto_s_room', 'preset_mode') }}"
+        hvac_mode: "{{ states('climate.otto_s_room') }}"
+        drift: "{{ current_temp - target_temp }}"
+
+    # Step 4: Check drift and override hvac_mode if needed (preserve preset)
+    - choose:
+        # Too hot: drift > +2°C from eco/boost target - Switch to cooling
+        - conditions:
+            - condition: template
+              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: cool
+
+        # Too cold: drift < -2°C from eco/boost target - Switch to heating
+        - conditions:
+            - condition: template
+              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.otto_s_room
+              data:
+                hvac_mode: heat
   mode: single
 
 - id: ottos_room_away_mode
@@ -735,45 +719,16 @@
         {% set now_time = now().strftime('%H:%M:%S') %}
         {{ wake <= now_time < bed }}
   actions:
+    # Step 1: Set comfort preset for daytime
     - action: climate.set_preset_mode
       target:
         entity_id: climate.henry_s_room_versatile_thermostat
       data:
         preset_mode: comfort
 
-    # Drift-based climate control using preset targets
-    - variables:
-        current_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'current_temperature') | float(20) }}"
-        target_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') | float(20) }}"
-        preset_mode: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') }}"
-        hvac_mode: "{{ states('climate.henry_s_room_versatile_thermostat') }}"
-        drift: "{{ current_temp - target_temp }}"
-
+    # Step 2: Set initial hvac_mode based on season
     - choose:
-        # Drift check: Too hot (drift > +2°C) - Switch to cooling
-        - conditions:
-            - condition: template
-              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: cool
-
-        # Drift check: Too cold (drift < -2°C) - Switch to heating
-        - conditions:
-            - condition: template
-              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: heat
-
-        # No drift issue: Use seasonal defaults
-        # Winter/Autumn - Default to heating
+        # Winter/Autumn - Start with heating
         - conditions:
             - condition: or
               conditions:
@@ -790,7 +745,7 @@
               data:
                 hvac_mode: heat
 
-        # Summer/Spring - Default to cooling
+        # Summer/Spring - Start with cooling
         - conditions:
             - condition: or
               conditions:
@@ -807,13 +762,41 @@
               data:
                 hvac_mode: cool
 
-      # Default - turn off if no condition matched
-      default:
-        - action: climate.set_hvac_mode
-          target:
-            entity_id: climate.henry_s_room_versatile_thermostat
-          data:
-            hvac_mode: "off"
+    # Step 3: Wait for comfort preset to apply and target temp to update
+    - delay:
+        seconds: 2
+
+    # Step 4: Calculate drift from the comfort preset's target
+    - variables:
+        current_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'current_temperature') | float(20) }}"
+        target_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') | float(20) }}"
+        preset_mode: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') }}"
+        hvac_mode: "{{ states('climate.henry_s_room_versatile_thermostat') }}"
+        drift: "{{ current_temp - target_temp }}"
+
+    # Step 5: Check drift and override hvac_mode if needed (preserve comfort preset)
+    - choose:
+        # Too hot: drift > +2°C from comfort target - Switch to cooling
+        - conditions:
+            - condition: template
+              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: cool
+
+        # Too cold: drift < -2°C from comfort target - Switch to heating
+        - conditions:
+            - condition: template
+              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: heat
   mode: single
 
 - id: lucas_room_time_based_night
@@ -856,44 +839,9 @@
         {% set now_time = now().strftime('%H:%M:%S') %}
         {{ now_time >= bed or now_time < wake }}
   actions:
-    # Drift-based climate control using preset targets
-    # Check if climate needs adjustment based on drift from preset target
-    - variables:
-        current_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'current_temperature') | float(20) }}"
-        target_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') | float(20) }}"
-        preset_mode: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') }}"
-        hvac_mode: "{{ states('climate.henry_s_room_versatile_thermostat') }}"
-        drift: "{{ current_temp - target_temp }}"
-
+    # Step 1: Set the correct nighttime preset based on season
     - choose:
-        # Drift check: Too hot (drift > +2°C) - Switch to cooling
-        # Only check when hvac_mode is 'off' or 'heat'
-        # Preset mode is preserved (already set by time-based logic)
-        - conditions:
-            - condition: template
-              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: cool
-
-        # Drift check: Too cold (drift < -2°C) - Switch to heating
-        # Only check when hvac_mode is 'off' or 'cool'
-        # Preset mode is preserved (already set by time-based logic)
-        - conditions:
-            - condition: template
-              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: heat
-
-        # No drift issue: Use seasonal defaults
-        # Winter/Autumn - Default to heating
+        # Winter/Autumn - Use eco preset for energy-efficient heating
         - conditions:
             - condition: or
               conditions:
@@ -904,18 +852,18 @@
                   entity_id: input_select.climate_season
                   state: autumn
           sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: heat
             - action: climate.set_preset_mode
               target:
                 entity_id: climate.henry_s_room_versatile_thermostat
               data:
                 preset_mode: eco
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: heat
 
-        # Summer/Spring - Default to cooling
+        # Summer/Spring - Use boost preset for aggressive cooling
         - conditions:
             - condition: or
               conditions:
@@ -926,24 +874,52 @@
                   entity_id: input_select.climate_season
                   state: spring
           sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: cool
             - action: climate.set_preset_mode
               target:
                 entity_id: climate.henry_s_room_versatile_thermostat
               data:
                 preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: cool
 
-      # Default - turn off if no condition matched
-      default:
-        - action: climate.set_hvac_mode
-          target:
-            entity_id: climate.henry_s_room_versatile_thermostat
-          data:
-            hvac_mode: "off"
+    # Step 2: Wait briefly for preset to apply and target temp to update
+    - delay:
+        seconds: 2
+
+    # Step 3: Calculate drift from the nighttime preset's target
+    - variables:
+        current_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'current_temperature') | float(20) }}"
+        target_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') | float(20) }}"
+        preset_mode: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') }}"
+        hvac_mode: "{{ states('climate.henry_s_room_versatile_thermostat') }}"
+        drift: "{{ current_temp - target_temp }}"
+
+    # Step 4: Check drift and override hvac_mode if needed (preserve preset)
+    - choose:
+        # Too hot: drift > +2°C from eco/boost target - Switch to cooling
+        - conditions:
+            - condition: template
+              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: cool
+
+        # Too cold: drift < -2°C from eco/boost target - Switch to heating
+        - conditions:
+            - condition: template
+              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+              data:
+                hvac_mode: heat
   mode: single
 
 - id: lucas_room_away_mode
