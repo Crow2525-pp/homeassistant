@@ -5,11 +5,11 @@
 # This file implements per-room climate control based on wake/bed times.
 #
 # Logic:
-# - Gates (always checked): manual override off, occupancy home/sleeping
-# - Living Room: Always comfort when home/sleeping, eco when away
+# - Gates: manual override off; time-based actions require occupancy home/sleeping
+# - Living Room: Comfort at wake/bed when home/sleeping; off when away
 # - Bedrooms: Comfort during day (wake to bed), Eco/Boost during night (bed to wake)
-# - Night mode determines heat/cool based on season and temp delta:
-#   - Heat mode uses Frost preset (minimum temperature protection)
+# - Night mode determines heat/cool based on season:
+#   - Heat mode uses Eco preset (energy-efficient heating)
 #   - Cool mode uses Boost preset (aggressive cooling)
 #
 # Rooms:
@@ -20,12 +20,12 @@
 # ============================================================================
 
 # ============================================================================
-# LIVING ROOM - Always comfort when home/sleeping
+# LIVING ROOM - Comfort at wake/bed, off when away
 # ============================================================================
 
 - id: living_room_time_based_comfort
   alias: "HVAC - Living Room - Comfort (Home/Sleeping)"
-  description: "Set living room to comfort when home or sleeping. Eco when away."
+  description: "Set comfort at wake/bed when home or sleeping. Turn off when away."
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -36,21 +36,6 @@
     - trigger: time
       at: input_datetime.bedtime_living_room
       id: bed_time
-    - trigger: state
-      entity_id: input_boolean.climate_manual_control_living
-      to: "off"
-      id: manual_override_cleared
-    - trigger: homeassistant
-      event: start
-      id: ha_start
-    - trigger: state
-      entity_id: climate.living_room_versatile_thermostat
-      attribute: current_temperature
-      id: climate_current_temp_change
-    - trigger: state
-      entity_id: climate.living_room_versatile_thermostat
-      attribute: temperature
-      id: climate_target_temp_change
   conditions:
     # Gate: Manual override must be off
     - condition: state
@@ -58,8 +43,10 @@
       state: "off"
   actions:
     - choose:
-        # Away or Holiday - Set to eco and turn off
+        # Occupancy change - just turn on/off
         - conditions:
+            - condition: template
+              value_template: "{{ trigger.id == 'occupancy_change' }}"
             - condition: or
               conditions:
                 - condition: state
@@ -69,18 +56,29 @@
                   entity_id: input_select.occupancy
                   state: Holiday
           sequence:
-            - action: climate.set_preset_mode
+            - action: climate.turn_off
               target:
                 entity_id: climate.living_room_versatile_thermostat
-              data:
-                preset_mode: eco
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.living_room_versatile_thermostat
-              data:
-                hvac_mode: "off"
-        # Home or Sleeping - Set to comfort with appropriate heat/cool
         - conditions:
+            - condition: template
+              value_template: "{{ trigger.id == 'occupancy_change' }}"
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Home
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Sleeping
+          sequence:
+            - action: climate.turn_on
+              target:
+                entity_id: climate.living_room_versatile_thermostat
+
+        # Time gates - set comfort and choose heat/cool for the day
+        - conditions:
+            - condition: template
+              value_template: "{{ trigger.id in ['wake_time', 'bed_time'] }}"
             - condition: or
               conditions:
                 - condition: state
@@ -149,22 +147,6 @@
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
       id: wake_time
-    - trigger: state
-      entity_id: input_select.occupancy
-      to: Home
-      id: arrived_home
-    - trigger: state
-      entity_id: input_boolean.climate_manual_control_master
-      to: "off"
-      id: manual_override_cleared
-    - trigger: state
-      entity_id: climate.masterbed_versatile_thermostat
-      attribute: current_temperature
-      id: climate_current_temp_change
-    - trigger: state
-      entity_id: climate.masterbed_versatile_thermostat
-      attribute: temperature
-      id: climate_target_temp_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -230,52 +212,6 @@
               data:
                 hvac_mode: cool
 
-    # Step 3: Wait for comfort preset to apply and target temp to update
-    - delay:
-        seconds: 2
-
-    # Step 4: Calculate drift and slope from the comfort preset's target
-    - variables:
-        specific_states: "{{ state_attr('climate.masterbed_versatile_thermostat', 'specific_states') or {} }}"
-        current_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'current_temperature') | float(none) }}"
-        target_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'temperature') | float(none) }}"
-        preset_mode: "{{ state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') }}"
-        hvac_mode: "{{ states('climate.masterbed_versatile_thermostat') }}"
-        slope: "{{ specific_states.temperature_slope | float(none) }}"
-        drift: >
-          {{ current_temp - target_temp if current_temp is not none and target_temp is not none else none }}
-
-    # Step 5: Check overshoot using slope and drift (preserve comfort preset)
-    - choose:
-        # Overcooled while cooling: falling slope + drift <= -2°C -> switch to heat
-        - conditions:
-            - condition: template
-              value_template: >
-                {{ preset_mode is not none and preset_mode != 'none'
-                   and hvac_mode == 'cool'
-                   and slope is not none and slope < 0
-                   and drift is not none and drift <= -2 }}
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: heat
-
-        # Overheated while heating: rising slope + drift >= +2°C -> switch to cool
-        - conditions:
-            - condition: template
-              value_template: >
-                {{ preset_mode is not none and preset_mode != 'none'
-                   and hvac_mode == 'heat'
-                   and slope is not none and slope > 0
-                   and drift is not none and drift >= 2 }}
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: cool
   mode: single
 
 - id: master_bedroom_time_based_night
@@ -285,22 +221,6 @@
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
       id: bed_time
-    - trigger: state
-      entity_id: input_select.occupancy
-      to: Sleeping
-      id: going_to_sleep
-    - trigger: state
-      entity_id: input_boolean.climate_manual_control_master
-      to: "off"
-      id: manual_override_cleared
-    - trigger: state
-      entity_id: climate.masterbed_versatile_thermostat
-      attribute: current_temperature
-      id: climate_current_temp_change
-    - trigger: state
-      entity_id: climate.masterbed_versatile_thermostat
-      attribute: temperature
-      id: climate_target_temp_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -369,57 +289,11 @@
               data:
                 hvac_mode: cool
 
-    # Step 2: Wait briefly for preset to apply and target temp to update
-    - delay:
-        seconds: 2
-
-    # Step 3: Calculate drift and slope from the nighttime preset's target
-    - variables:
-        specific_states: "{{ state_attr('climate.masterbed_versatile_thermostat', 'specific_states') or {} }}"
-        current_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'current_temperature') | float(none) }}"
-        target_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'temperature') | float(none) }}"
-        preset_mode: "{{ state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') }}"
-        hvac_mode: "{{ states('climate.masterbed_versatile_thermostat') }}"
-        slope: "{{ specific_states.temperature_slope | float(none) }}"
-        drift: >
-          {{ current_temp - target_temp if current_temp is not none and target_temp is not none else none }}
-
-    # Step 4: Check overshoot using slope and drift (preserve preset)
-    - choose:
-        # Overcooled while cooling: falling slope + drift <= -2°C -> switch to heat
-        - conditions:
-            - condition: template
-              value_template: >
-                {{ preset_mode is not none and preset_mode != 'none'
-                   and hvac_mode == 'cool'
-                   and slope is not none and slope < 0
-                   and drift is not none and drift <= -2 }}
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: heat
-
-        # Overheated while heating: rising slope + drift >= +2°C -> switch to cool
-        - conditions:
-            - condition: template
-              value_template: >
-                {{ preset_mode is not none and preset_mode != 'none'
-                   and hvac_mode == 'heat'
-                   and slope is not none and slope > 0
-                   and drift is not none and drift >= 2 }}
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: cool
   mode: single
 
 - id: master_bedroom_away_mode
   alias: "HVAC - Master Bedroom - Away Mode"
-  description: "Set master bedroom to eco when away."
+  description: "Turn master bedroom off when away and back on when home/sleeping."
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -427,18 +301,29 @@
         - Away
         - Holiday
       id: away
+    - trigger: state
+      entity_id: input_select.occupancy
+      to:
+        - Home
+        - Sleeping
+      id: home
   conditions: []
   actions:
-    - action: climate.set_preset_mode
-      target:
-        entity_id: climate.masterbed_versatile_thermostat
-      data:
-        preset_mode: eco
-    - action: climate.set_hvac_mode
-      target:
-        entity_id: climate.masterbed_versatile_thermostat
-      data:
-        hvac_mode: "off"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ trigger.id == 'away' }}"
+          sequence:
+            - action: climate.turn_off
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
+        - conditions:
+            - condition: template
+              value_template: "{{ trigger.id == 'home' }}"
+          sequence:
+            - action: climate.turn_on
+              target:
+                entity_id: climate.masterbed_versatile_thermostat
   mode: single
 
 # ============================================================================
@@ -452,22 +337,6 @@
     - trigger: time
       at: input_datetime.wakeup_time_ottos_room
       id: wake_time
-    - trigger: state
-      entity_id: input_select.occupancy
-      to: Home
-      id: arrived_home
-    - trigger: state
-      entity_id: input_boolean.climate_manual_control_otto
-      to: "off"
-      id: manual_override_cleared
-    - trigger: state
-      entity_id: climate.otto_s_room
-      attribute: current_temperature
-      id: climate_current_temp_change
-    - trigger: state
-      entity_id: climate.otto_s_room
-      attribute: temperature
-      id: climate_target_temp_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -533,52 +402,6 @@
               data:
                 hvac_mode: cool
 
-    # Step 3: Wait for comfort preset to apply and target temp to update
-    - delay:
-        seconds: 2
-
-    # Step 4: Calculate drift and slope from the comfort preset's target
-    - variables:
-        specific_states: "{{ state_attr('climate.otto_s_room', 'specific_states') or {} }}"
-        current_temp: "{{ state_attr('climate.otto_s_room', 'current_temperature') | float(none) }}"
-        target_temp: "{{ state_attr('climate.otto_s_room', 'temperature') | float(none) }}"
-        preset_mode: "{{ state_attr('climate.otto_s_room', 'preset_mode') }}"
-        hvac_mode: "{{ states('climate.otto_s_room') }}"
-        slope: "{{ specific_states.temperature_slope | float(none) }}"
-        drift: >
-          {{ current_temp - target_temp if current_temp is not none and target_temp is not none else none }}
-
-    # Step 5: Check overshoot using slope and drift (preserve comfort preset)
-    - choose:
-        # Overcooled while cooling: falling slope + drift <= -2°C -> switch to heat
-        - conditions:
-            - condition: template
-              value_template: >
-                {{ preset_mode is not none and preset_mode != 'none'
-                   and hvac_mode == 'cool'
-                   and slope is not none and slope < 0
-                   and drift is not none and drift <= -2 }}
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: heat
-
-        # Overheated while heating: rising slope + drift >= +2°C -> switch to cool
-        - conditions:
-            - condition: template
-              value_template: >
-                {{ preset_mode is not none and preset_mode != 'none'
-                   and hvac_mode == 'heat'
-                   and slope is not none and slope > 0
-                   and drift is not none and drift >= 2 }}
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: cool
   mode: single
 
 - id: ottos_room_time_based_night
@@ -588,22 +411,6 @@
     - trigger: time
       at: input_datetime.bedtime_ottos_room
       id: bed_time
-    - trigger: state
-      entity_id: input_select.occupancy
-      to: Sleeping
-      id: going_to_sleep
-    - trigger: state
-      entity_id: input_boolean.climate_manual_control_otto
-      to: "off"
-      id: manual_override_cleared
-    - trigger: state
-      entity_id: climate.otto_s_room
-      attribute: current_temperature
-      id: climate_current_temp_change
-    - trigger: state
-      entity_id: climate.otto_s_room
-      attribute: temperature
-      id: climate_target_temp_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -672,57 +479,11 @@
               data:
                 hvac_mode: cool
 
-    # Step 2: Wait briefly for preset to apply and target temp to update
-    - delay:
-        seconds: 2
-
-    # Step 3: Calculate drift and slope from the nighttime preset's target
-    - variables:
-        specific_states: "{{ state_attr('climate.otto_s_room', 'specific_states') or {} }}"
-        current_temp: "{{ state_attr('climate.otto_s_room', 'current_temperature') | float(none) }}"
-        target_temp: "{{ state_attr('climate.otto_s_room', 'temperature') | float(none) }}"
-        preset_mode: "{{ state_attr('climate.otto_s_room', 'preset_mode') }}"
-        hvac_mode: "{{ states('climate.otto_s_room') }}"
-        slope: "{{ specific_states.temperature_slope | float(none) }}"
-        drift: >
-          {{ current_temp - target_temp if current_temp is not none and target_temp is not none else none }}
-
-    # Step 4: Check overshoot using slope and drift (preserve preset)
-    - choose:
-        # Overcooled while cooling: falling slope + drift <= -2°C -> switch to heat
-        - conditions:
-            - condition: template
-              value_template: >
-                {{ preset_mode is not none and preset_mode != 'none'
-                   and hvac_mode == 'cool'
-                   and slope is not none and slope < 0
-                   and drift is not none and drift <= -2 }}
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: heat
-
-        # Overheated while heating: rising slope + drift >= +2°C -> switch to cool
-        - conditions:
-            - condition: template
-              value_template: >
-                {{ preset_mode is not none and preset_mode != 'none'
-                   and hvac_mode == 'heat'
-                   and slope is not none and slope > 0
-                   and drift is not none and drift >= 2 }}
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: cool
   mode: single
 
 - id: ottos_room_away_mode
   alias: "HVAC - Otto's Room - Away Mode"
-  description: "Set Otto's room to eco when away."
+  description: "Turn Otto's room off when away and back on when home/sleeping."
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -730,18 +491,29 @@
         - Away
         - Holiday
       id: away
+    - trigger: state
+      entity_id: input_select.occupancy
+      to:
+        - Home
+        - Sleeping
+      id: home
   conditions: []
   actions:
-    - action: climate.set_preset_mode
-      target:
-        entity_id: climate.otto_s_room
-      data:
-        preset_mode: eco
-    - action: climate.set_hvac_mode
-      target:
-        entity_id: climate.otto_s_room
-      data:
-        hvac_mode: "off"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ trigger.id == 'away' }}"
+          sequence:
+            - action: climate.turn_off
+              target:
+                entity_id: climate.otto_s_room
+        - conditions:
+            - condition: template
+              value_template: "{{ trigger.id == 'home' }}"
+          sequence:
+            - action: climate.turn_on
+              target:
+                entity_id: climate.otto_s_room
   mode: single
 
 # ============================================================================
@@ -755,22 +527,6 @@
     - trigger: time
       at: input_datetime.wakeup_time_lucas_room
       id: wake_time
-    - trigger: state
-      entity_id: input_select.occupancy
-      to: Home
-      id: arrived_home
-    - trigger: state
-      entity_id: input_boolean.climate_manual_control_study
-      to: "off"
-      id: manual_override_cleared
-    - trigger: state
-      entity_id: climate.henry_s_room_versatile_thermostat
-      attribute: current_temperature
-      id: climate_current_temp_change
-    - trigger: state
-      entity_id: climate.henry_s_room_versatile_thermostat
-      attribute: temperature
-      id: climate_target_temp_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -836,52 +592,6 @@
               data:
                 hvac_mode: cool
 
-    # Step 3: Wait for comfort preset to apply and target temp to update
-    - delay:
-        seconds: 2
-
-    # Step 4: Calculate drift and slope from the comfort preset's target
-    - variables:
-        specific_states: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'specific_states') or {} }}"
-        current_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'current_temperature') | float(none) }}"
-        target_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') | float(none) }}"
-        preset_mode: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') }}"
-        hvac_mode: "{{ states('climate.henry_s_room_versatile_thermostat') }}"
-        slope: "{{ specific_states.temperature_slope | float(none) }}"
-        drift: >
-          {{ current_temp - target_temp if current_temp is not none and target_temp is not none else none }}
-
-    # Step 5: Check overshoot using slope and drift (preserve comfort preset)
-    - choose:
-        # Overcooled while cooling: falling slope + drift <= -2°C -> switch to heat
-        - conditions:
-            - condition: template
-              value_template: >
-                {{ preset_mode is not none and preset_mode != 'none'
-                   and hvac_mode == 'cool'
-                   and slope is not none and slope < 0
-                   and drift is not none and drift <= -2 }}
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: heat
-
-        # Overheated while heating: rising slope + drift >= +2°C -> switch to cool
-        - conditions:
-            - condition: template
-              value_template: >
-                {{ preset_mode is not none and preset_mode != 'none'
-                   and hvac_mode == 'heat'
-                   and slope is not none and slope > 0
-                   and drift is not none and drift >= 2 }}
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: cool
   mode: single
 
 - id: lucas_room_time_based_night
@@ -891,22 +601,6 @@
     - trigger: time
       at: input_datetime.bedtime_lucas_room
       id: bed_time
-    - trigger: state
-      entity_id: input_select.occupancy
-      to: Sleeping
-      id: going_to_sleep
-    - trigger: state
-      entity_id: input_boolean.climate_manual_control_study
-      to: "off"
-      id: manual_override_cleared
-    - trigger: state
-      entity_id: climate.henry_s_room_versatile_thermostat
-      attribute: current_temperature
-      id: climate_current_temp_change
-    - trigger: state
-      entity_id: climate.henry_s_room_versatile_thermostat
-      attribute: temperature
-      id: climate_target_temp_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -975,57 +669,11 @@
               data:
                 hvac_mode: cool
 
-    # Step 2: Wait briefly for preset to apply and target temp to update
-    - delay:
-        seconds: 2
-
-    # Step 3: Calculate drift and slope from the nighttime preset's target
-    - variables:
-        specific_states: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'specific_states') or {} }}"
-        current_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'current_temperature') | float(none) }}"
-        target_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') | float(none) }}"
-        preset_mode: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') }}"
-        hvac_mode: "{{ states('climate.henry_s_room_versatile_thermostat') }}"
-        slope: "{{ specific_states.temperature_slope | float(none) }}"
-        drift: >
-          {{ current_temp - target_temp if current_temp is not none and target_temp is not none else none }}
-
-    # Step 4: Check overshoot using slope and drift (preserve preset)
-    - choose:
-        # Overcooled while cooling: falling slope + drift <= -2°C -> switch to heat
-        - conditions:
-            - condition: template
-              value_template: >
-                {{ preset_mode is not none and preset_mode != 'none'
-                   and hvac_mode == 'cool'
-                   and slope is not none and slope < 0
-                   and drift is not none and drift <= -2 }}
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: heat
-
-        # Overheated while heating: rising slope + drift >= +2°C -> switch to cool
-        - conditions:
-            - condition: template
-              value_template: >
-                {{ preset_mode is not none and preset_mode != 'none'
-                   and hvac_mode == 'heat'
-                   and slope is not none and slope > 0
-                   and drift is not none and drift >= 2 }}
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: cool
   mode: single
 
 - id: lucas_room_away_mode
   alias: "HVAC - Lucas's Room - Away Mode"
-  description: "Set Lucas's room to eco when away."
+  description: "Turn Lucas's room off when away and back on when home/sleeping."
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -1033,16 +681,27 @@
         - Away
         - Holiday
       id: away
+    - trigger: state
+      entity_id: input_select.occupancy
+      to:
+        - Home
+        - Sleeping
+      id: home
   conditions: []
   actions:
-    - action: climate.set_preset_mode
-      target:
-        entity_id: climate.henry_s_room_versatile_thermostat
-      data:
-        preset_mode: eco
-    - action: climate.set_hvac_mode
-      target:
-        entity_id: climate.henry_s_room_versatile_thermostat
-      data:
-        hvac_mode: "off"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ trigger.id == 'away' }}"
+          sequence:
+            - action: climate.turn_off
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
+        - conditions:
+            - condition: template
+              value_template: "{{ trigger.id == 'home' }}"
+          sequence:
+            - action: climate.turn_on
+              target:
+                entity_id: climate.henry_s_room_versatile_thermostat
   mode: single
