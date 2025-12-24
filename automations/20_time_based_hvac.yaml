@@ -43,6 +43,9 @@
     - trigger: homeassistant
       event: start
       id: ha_start
+    - trigger: state
+      entity_id: climate.living_room_versatile_thermostat
+      id: climate_state_change
   conditions:
     # Gate: Manual override must be off
     - condition: state
@@ -87,9 +90,9 @@
                 entity_id: climate.living_room_versatile_thermostat
               data:
                 preset_mode: comfort
-            # Determine heat or cool based on season and temp
+            # Determine heat or cool based on season only (no outside temp)
             - choose:
-                # Winter/Autumn or cold outside - Heat
+                # Winter/Autumn - Heat
                 - conditions:
                     - condition: or
                       conditions:
@@ -99,16 +102,13 @@
                         - condition: state
                           entity_id: input_select.climate_season
                           state: autumn
-                        - condition: numeric_state
-                          entity_id: sensor.essendon_airport_temp
-                          below: 18
                   sequence:
                     - action: climate.set_hvac_mode
                       target:
                         entity_id: climate.living_room_versatile_thermostat
                       data:
                         hvac_mode: heat
-                # Summer/Spring or hot outside - Cool
+                # Summer/Spring - Cool
                 - conditions:
                     - condition: or
                       conditions:
@@ -118,16 +118,13 @@
                         - condition: state
                           entity_id: input_select.climate_season
                           state: spring
-                        - condition: numeric_state
-                          entity_id: sensor.essendon_airport_temp
-                          above: 24
                   sequence:
                     - action: climate.set_hvac_mode
                       target:
                         entity_id: climate.living_room_versatile_thermostat
                       data:
                         hvac_mode: cool
-              # Default - off if neither condition met
+              # Default - off if no season match
               default:
                 - action: climate.set_hvac_mode
                   target:
@@ -245,6 +242,9 @@
       entity_id: input_boolean.climate_manual_control_master
       to: "off"
       id: manual_override_cleared
+    - trigger: state
+      entity_id: climate.masterbed_versatile_thermostat
+      id: climate_state_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -267,9 +267,17 @@
         {% set now_time = now().strftime('%H:%M:%S') %}
         {{ now_time >= bed or now_time < wake }}
   actions:
-    # Determine heat or cool based on season and temp delta
+    # Drift-based climate control using preset targets
+    # Check if climate needs adjustment based on drift from preset target
+    - variables:
+        current_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'current_temperature') | float(20) }}"
+        target_temp: "{{ state_attr('climate.masterbed_versatile_thermostat', 'temperature') | float(20) }}"
+        preset_mode: "{{ state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') }}"
+        hvac_mode: "{{ states('climate.masterbed_versatile_thermostat') }}"
+        drift: "{{ current_temp - target_temp }}"
+
     - choose:
-        # Winter/Autumn or room/outside is cold - Heat with Frost preset
+        # Winter/Autumn - Heat mode with drift check
         - conditions:
             - condition: or
               conditions:
@@ -279,24 +287,32 @@
                 - condition: state
                   entity_id: input_select.climate_season
                   state: autumn
-                - condition: numeric_state
-                  entity_id: sensor.essendon_airport_temp
-                  below: 15
-                - condition: numeric_state
-                  entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
-                  below: 18
           sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: heat
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                preset_mode: frost
-        # Summer/Spring or room is hot - Cool with Boost preset
+            - choose:
+                # Too hot: drift > +2°C, turn off heating
+                - conditions:
+                    - condition: template
+                      value_template: "{{ drift > 2 and hvac_mode == 'heat' and preset_mode != 'none' }}"
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: "off"
+                # Normal: activate heating
+              default:
+                - action: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    hvac_mode: heat
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    preset_mode: frost
+
+        # Summer/Spring - Cool mode with drift check
         - conditions:
             - condition: or
               conditions:
@@ -306,23 +322,32 @@
                 - condition: state
                   entity_id: input_select.climate_season
                   state: spring
-                - condition: numeric_state
-                  entity_id: sensor.essendon_airport_temp
-                  above: 22
-                - condition: numeric_state
-                  entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
-                  above: 24
           sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                hvac_mode: cool
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.masterbed_versatile_thermostat
-              data:
-                preset_mode: boost
+            - choose:
+                # Too cold: drift < -2°C, turn off cooling
+                - conditions:
+                    - condition: template
+                      value_template: "{{ drift < -2 and hvac_mode == 'cool' and preset_mode != 'none' }}"
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_versatile_thermostat
+                      data:
+                        hvac_mode: "off"
+                # Normal: activate cooling
+              default:
+                - action: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    hvac_mode: cool
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.masterbed_versatile_thermostat
+                  data:
+                    preset_mode: boost
+
+      # Default - turn off if no season match
       default:
         - action: climate.set_hvac_mode
           target:
@@ -464,6 +489,9 @@
       entity_id: input_boolean.climate_manual_control_otto
       to: "off"
       id: manual_override_cleared
+    - trigger: state
+      entity_id: climate.otto_s_room
+      id: climate_state_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -486,9 +514,17 @@
         {% set now_time = now().strftime('%H:%M:%S') %}
         {{ now_time >= bed or now_time < wake }}
   actions:
-    # Determine heat or cool based on season and temp delta
+    # Drift-based climate control using preset targets
+    # Check if climate needs adjustment based on drift from preset target
+    - variables:
+        current_temp: "{{ state_attr('climate.otto_s_room', 'current_temperature') | float(20) }}"
+        target_temp: "{{ state_attr('climate.otto_s_room', 'temperature') | float(20) }}"
+        preset_mode: "{{ state_attr('climate.otto_s_room', 'preset_mode') }}"
+        hvac_mode: "{{ states('climate.otto_s_room') }}"
+        drift: "{{ current_temp - target_temp }}"
+
     - choose:
-        # Winter/Autumn or room/outside is cold - Heat with Frost preset
+        # Winter/Autumn - Heat mode with drift check
         - conditions:
             - condition: or
               conditions:
@@ -498,24 +534,32 @@
                 - condition: state
                   entity_id: input_select.climate_season
                   state: autumn
-                - condition: numeric_state
-                  entity_id: sensor.essendon_airport_temp
-                  below: 15
-                - condition: numeric_state
-                  entity_id: sensor.ottos_room_temp_humidity_sensor_temperature
-                  below: 18
           sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: heat
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                preset_mode: frost
-        # Summer/Spring or room is hot - Cool with Boost preset
+            - choose:
+                # Too hot: drift > +2°C, turn off heating
+                - conditions:
+                    - condition: template
+                      value_template: "{{ drift > 2 and hvac_mode == 'heat' and preset_mode != 'none' }}"
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: "off"
+                # Normal: activate heating
+              default:
+                - action: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.otto_s_room
+                  data:
+                    hvac_mode: heat
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.otto_s_room
+                  data:
+                    preset_mode: frost
+
+        # Summer/Spring - Cool mode with drift check
         - conditions:
             - condition: or
               conditions:
@@ -525,23 +569,32 @@
                 - condition: state
                   entity_id: input_select.climate_season
                   state: spring
-                - condition: numeric_state
-                  entity_id: sensor.essendon_airport_temp
-                  above: 22
-                - condition: numeric_state
-                  entity_id: sensor.ottos_room_temp_humidity_sensor_temperature
-                  above: 24
           sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                hvac_mode: cool
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.otto_s_room
-              data:
-                preset_mode: boost
+            - choose:
+                # Too cold: drift < -2°C, turn off cooling
+                - conditions:
+                    - condition: template
+                      value_template: "{{ drift < -2 and hvac_mode == 'cool' and preset_mode != 'none' }}"
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.otto_s_room
+                      data:
+                        hvac_mode: "off"
+                # Normal: activate cooling
+              default:
+                - action: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.otto_s_room
+                  data:
+                    hvac_mode: cool
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.otto_s_room
+                  data:
+                    preset_mode: boost
+
+      # Default - turn off if no season match
       default:
         - action: climate.set_hvac_mode
           target:
@@ -683,6 +736,9 @@
       entity_id: input_boolean.climate_manual_control_study
       to: "off"
       id: manual_override_cleared
+    - trigger: state
+      entity_id: climate.henry_s_room_versatile_thermostat
+      id: climate_state_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -705,9 +761,17 @@
         {% set now_time = now().strftime('%H:%M:%S') %}
         {{ now_time >= bed or now_time < wake }}
   actions:
-    # Determine heat or cool based on season and temp delta
+    # Drift-based climate control using preset targets
+    # Check if climate needs adjustment based on drift from preset target
+    - variables:
+        current_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'current_temperature') | float(20) }}"
+        target_temp: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') | float(20) }}"
+        preset_mode: "{{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') }}"
+        hvac_mode: "{{ states('climate.henry_s_room_versatile_thermostat') }}"
+        drift: "{{ current_temp - target_temp }}"
+
     - choose:
-        # Winter/Autumn or room/outside is cold - Heat with Frost preset
+        # Winter/Autumn - Heat mode with drift check
         - conditions:
             - condition: or
               conditions:
@@ -717,24 +781,32 @@
                 - condition: state
                   entity_id: input_select.climate_season
                   state: autumn
-                - condition: numeric_state
-                  entity_id: sensor.essendon_airport_temp
-                  below: 15
-                - condition: numeric_state
-                  entity_id: sensor.study_esp32_henrysroom_temperature
-                  below: 18
           sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: heat
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                preset_mode: frost
-        # Summer/Spring or room is hot - Cool with Boost preset
+            - choose:
+                # Too hot: drift > +2°C, turn off heating
+                - conditions:
+                    - condition: template
+                      value_template: "{{ drift > 2 and hvac_mode == 'heat' and preset_mode != 'none' }}"
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: "off"
+                # Normal: activate heating
+              default:
+                - action: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.henry_s_room_versatile_thermostat
+                  data:
+                    hvac_mode: heat
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.henry_s_room_versatile_thermostat
+                  data:
+                    preset_mode: frost
+
+        # Summer/Spring - Cool mode with drift check
         - conditions:
             - condition: or
               conditions:
@@ -744,23 +816,32 @@
                 - condition: state
                   entity_id: input_select.climate_season
                   state: spring
-                - condition: numeric_state
-                  entity_id: sensor.essendon_airport_temp
-                  above: 22
-                - condition: numeric_state
-                  entity_id: sensor.study_esp32_henrysroom_temperature
-                  above: 24
           sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                hvac_mode: cool
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.henry_s_room_versatile_thermostat
-              data:
-                preset_mode: boost
+            - choose:
+                # Too cold: drift < -2°C, turn off cooling
+                - conditions:
+                    - condition: template
+                      value_template: "{{ drift < -2 and hvac_mode == 'cool' and preset_mode != 'none' }}"
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.henry_s_room_versatile_thermostat
+                      data:
+                        hvac_mode: "off"
+                # Normal: activate cooling
+              default:
+                - action: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.henry_s_room_versatile_thermostat
+                  data:
+                    hvac_mode: cool
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.henry_s_room_versatile_thermostat
+                  data:
+                    preset_mode: boost
+
+      # Default - turn off if no season match
       default:
         - action: climate.set_hvac_mode
           target:
