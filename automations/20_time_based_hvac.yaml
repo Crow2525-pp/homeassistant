@@ -278,9 +278,10 @@
 
     - choose:
         # Drift check: Too hot (drift > +2°C) - Switch to cooling
+        # Only check when hvac_mode is 'off' or 'heat'
         - conditions:
             - condition: template
-              value_template: "{{ drift > 2 and preset_mode != 'none' }}"
+              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -294,9 +295,10 @@
                 preset_mode: boost
 
         # Drift check: Too cold (drift < -2°C) - Switch to heating
+        # Only check when hvac_mode is 'off' or 'cool'
         - conditions:
             - condition: template
-              value_template: "{{ drift < -2 and preset_mode != 'none' }}"
+              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -532,9 +534,10 @@
 
     - choose:
         # Drift check: Too hot (drift > +2°C) - Switch to cooling
+        # Only check when hvac_mode is 'off' or 'heat'
         - conditions:
             - condition: template
-              value_template: "{{ drift > 2 and preset_mode != 'none' }}"
+              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -548,9 +551,10 @@
                 preset_mode: boost
 
         # Drift check: Too cold (drift < -2°C) - Switch to heating
+        # Only check when hvac_mode is 'off' or 'cool'
         - conditions:
             - condition: template
-              value_template: "{{ drift < -2 and preset_mode != 'none' }}"
+              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -786,9 +790,10 @@
 
     - choose:
         # Drift check: Too hot (drift > +2°C) - Switch to cooling
+        # Only check when hvac_mode is 'off' or 'heat'
         - conditions:
             - condition: template
-              value_template: "{{ drift > 2 and preset_mode != 'none' }}"
+              value_template: "{{ drift > 2 and preset_mode != 'none' and hvac_mode in ['off', 'heat'] }}"
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -802,9 +807,10 @@
                 preset_mode: boost
 
         # Drift check: Too cold (drift < -2°C) - Switch to heating
+        # Only check when hvac_mode is 'off' or 'cool'
         - conditions:
             - condition: template
-              value_template: "{{ drift < -2 and preset_mode != 'none' }}"
+              value_template: "{{ drift < -2 and preset_mode != 'none' and hvac_mode in ['off', 'cool'] }}"
           sequence:
             - action: climate.set_hvac_mode
               target:
