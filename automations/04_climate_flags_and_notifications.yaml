@@ -1372,8 +1372,8 @@
       hvac_mode: 'off'
   mode: single
 - id: frost_protection_bedrooms_cool_nights
-  alias: Bedrooms - Overnight Frost Protection (No Hot Days)
-  description: 'Applies frost preset (17°C minimum) to all bedrooms on cool nights
+  alias: Bedrooms - Overnight Eco Protection (No Hot Days)
+  description: 'Applies eco preset (energy-efficient heating) to all bedrooms on cool nights
     when no hot day flags are active. Ensures minimum temperature protection during
     mild winter nights without heating trigger.
 
@@ -1419,8 +1419,8 @@
         target:
           entity_id: climate.masterbed_versatile_thermostat
         data:
-          preset_mode: frost
-        alias: Set Master Bedroom Frost (17°C minimum)
+          preset_mode: eco
+        alias: Set Master Bedroom Eco (energy-efficient heating)
       - service: climate.set_hvac_mode
         target:
           entity_id: climate.masterbed_versatile_thermostat
@@ -1439,8 +1439,8 @@
         target:
           entity_id: climate.otto_s_room
         data:
-          preset_mode: frost
-        alias: Set Otto's Room Frost (17°C minimum)
+          preset_mode: eco
+        alias: Set Otto's Room Eco (energy-efficient heating)
       - service: climate.set_hvac_mode
         target:
           entity_id: climate.otto_s_room
@@ -1459,8 +1459,8 @@
         target:
           entity_id: climate.henry_s_room_versatile_thermostat
         data:
-          preset_mode: frost
-        alias: Set Study Frost (17°C minimum)
+          preset_mode: eco
+        alias: Set Study Eco (energy-efficient heating)
       - service: climate.set_hvac_mode
         target:
           entity_id: climate.henry_s_room_versatile_thermostat

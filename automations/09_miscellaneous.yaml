@@ -36,6 +36,7 @@
       - condition: trigger
         id: heating_started
       sequence:
+      - delay: "01:00:00"
       - service: fan.turn_off
         target:
           entity_id: fan.masterbedroom_fan
@@ -43,6 +44,7 @@
       - condition: trigger
         id: climate_off
       sequence:
+      - delay: "01:00:00"
       - service: fan.turn_off
         target:
           entity_id: fan.masterbedroom_fan
