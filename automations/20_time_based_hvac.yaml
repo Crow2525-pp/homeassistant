@@ -45,7 +45,12 @@
       id: ha_start
     - trigger: state
       entity_id: climate.living_room_versatile_thermostat
-      id: climate_state_change
+      attribute: current_temperature
+      id: climate_current_temp_change
+    - trigger: state
+      entity_id: climate.living_room_versatile_thermostat
+      attribute: temperature
+      id: climate_target_temp_change
   conditions:
     # Gate: Manual override must be off
     - condition: state
@@ -154,7 +159,12 @@
       id: manual_override_cleared
     - trigger: state
       entity_id: climate.masterbed_versatile_thermostat
-      id: climate_state_change
+      attribute: current_temperature
+      id: climate_current_temp_change
+    - trigger: state
+      entity_id: climate.masterbed_versatile_thermostat
+      attribute: temperature
+      id: climate_target_temp_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -285,7 +295,12 @@
       id: manual_override_cleared
     - trigger: state
       entity_id: climate.masterbed_versatile_thermostat
-      id: climate_state_change
+      attribute: current_temperature
+      id: climate_current_temp_change
+    - trigger: state
+      entity_id: climate.masterbed_versatile_thermostat
+      attribute: temperature
+      id: climate_target_temp_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -447,7 +462,12 @@
       id: manual_override_cleared
     - trigger: state
       entity_id: climate.otto_s_room
-      id: climate_state_change
+      attribute: current_temperature
+      id: climate_current_temp_change
+    - trigger: state
+      entity_id: climate.otto_s_room
+      attribute: temperature
+      id: climate_target_temp_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -578,7 +598,12 @@
       id: manual_override_cleared
     - trigger: state
       entity_id: climate.otto_s_room
-      id: climate_state_change
+      attribute: current_temperature
+      id: climate_current_temp_change
+    - trigger: state
+      entity_id: climate.otto_s_room
+      attribute: temperature
+      id: climate_target_temp_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -740,7 +765,12 @@
       id: manual_override_cleared
     - trigger: state
       entity_id: climate.henry_s_room_versatile_thermostat
-      id: climate_state_change
+      attribute: current_temperature
+      id: climate_current_temp_change
+    - trigger: state
+      entity_id: climate.henry_s_room_versatile_thermostat
+      attribute: temperature
+      id: climate_target_temp_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
@@ -871,7 +901,12 @@
       id: manual_override_cleared
     - trigger: state
       entity_id: climate.henry_s_room_versatile_thermostat
-      id: climate_state_change
+      attribute: current_temperature
+      id: climate_current_temp_change
+    - trigger: state
+      entity_id: climate.henry_s_room_versatile_thermostat
+      attribute: temperature
+      id: climate_target_temp_change
   conditions:
     # Gate 1: Manual override must be off
     - condition: state
