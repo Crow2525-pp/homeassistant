@@ -324,7 +324,7 @@
               target:
                 entity_id: climate.masterbed_versatile_thermostat
               data:
-                preset_mode: frost
+                preset_mode: eco
 
         # Summer/Spring - Default to cooling
         - conditions:
@@ -572,7 +572,7 @@
               target:
                 entity_id: climate.otto_s_room
               data:
-                preset_mode: frost
+                preset_mode: eco
 
         # Summer/Spring - Default to cooling
         - conditions:
@@ -820,7 +820,7 @@
               target:
                 entity_id: climate.henry_s_room_versatile_thermostat
               data:
-                preset_mode: frost
+                preset_mode: eco
 
         # Summer/Spring - Default to cooling
         - conditions:
