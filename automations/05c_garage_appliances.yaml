@@ -640,13 +640,13 @@
           sequence:
           - action: light.turn_on
             target:
-              entity_id: light.lounge
+              entity_id: light.led_strip_office_light
             data:
               brightness_step_pct: 10
         default:
         - action: light.toggle
           target:
-            entity_id: light.lounge
+            entity_id: light.led_strip_office_light
         - action: light.toggle
           metadata: {}
           data: {}
@@ -662,7 +662,7 @@
           sequence:
           - action: light.turn_on
             target:
-              entity_id: light.lounge
+              entity_id: light.led_strip_office_light
             data:
               brightness_step_pct: -10
         - conditions:
