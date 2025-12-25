@@ -2,7 +2,8 @@
 - id: master_bedroom_fan_climate_control
   alias: HVAC - Master Bedroom Fan Sync with Climate
   description: 'Synchronizes master bedroom fan with versatile thermostat state. Fan
-    turns off when heating, adjusts speed when cooling.
+    turns off when heating, adjusts speed based on cooling temperature difference,
+    and stays on overnight during AC cooling between bedtime and wake.
 
     '
   triggers:
@@ -12,17 +13,83 @@
     id: cooling_started
   - platform: state
     entity_id: climate.masterbed_versatile_thermostat
+    attribute: current_temperature
+    id: cooling_temp_changed
+  - platform: state
+    entity_id: climate.masterbed_versatile_thermostat
+    attribute: temperature
+    id: cooling_target_changed
+  - platform: state
+    entity_id: climate.masterbed_versatile_thermostat
     to: heat
     id: heating_started
   - platform: state
     entity_id: climate.masterbed_versatile_thermostat
     to: 'off'
     id: climate_off
+  - platform: time
+    at: input_datetime.bedtime_master_bedroom
+    id: bedtime
+  - platform: state
+    entity_id: fan.masterbedroom_fan
+    to: 'off'
+    id: fan_turned_off
   actions:
   - choose:
     - conditions:
-      - condition: trigger
-        id: cooling_started
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: cooling_started
+        - condition: trigger
+          id: cooling_temp_changed
+        - condition: trigger
+          id: cooling_target_changed
+      - condition: state
+        entity_id: climate.masterbed_versatile_thermostat
+        state: cool
+      sequence:
+      - service: fan.set_percentage
+        target:
+          entity_id: fan.masterbedroom_fan
+        data:
+          percentage: >
+            {% set current = state_attr('climate.masterbed_versatile_thermostat', 'current_temperature') %}
+            {% set target = state_attr('climate.masterbed_versatile_thermostat', 'temperature') %}
+            {% if current is number and target is number %}
+              {% set diff = current - target %}
+              {% if diff <= 1 %}
+                16
+              {% elif diff <= 2 %}
+                33
+              {% elif diff <= 3 %}
+                50
+              {% elif diff <= 4 %}
+                66
+              {% elif diff <= 5 %}
+                83
+              {% else %}
+                100
+              {% endif %}
+            {% else %}
+              16
+            {% endif %}
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: bedtime
+        - condition: trigger
+          id: fan_turned_off
+      - condition: state
+        entity_id: climate.masterbed_versatile_thermostat
+        state: cool
+      - condition: template
+        value_template: >
+          {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
+          {% set bed = states('input_datetime.bedtime_master_bedroom') %}
+          {% set now_time = now().strftime('%H:%M:%S') %}
+          {{ now_time >= bed or now_time < wake }}
       - condition: state
         entity_id: fan.masterbedroom_fan
         state: 'off'
@@ -31,7 +98,27 @@
         target:
           entity_id: fan.masterbedroom_fan
         data:
-          percentage: 33
+          percentage: >
+            {% set current = state_attr('climate.masterbed_versatile_thermostat', 'current_temperature') %}
+            {% set target = state_attr('climate.masterbed_versatile_thermostat', 'temperature') %}
+            {% if current is number and target is number %}
+              {% set diff = current - target %}
+              {% if diff <= 1 %}
+                16
+              {% elif diff <= 2 %}
+                33
+              {% elif diff <= 3 %}
+                50
+              {% elif diff <= 4 %}
+                66
+              {% elif diff <= 5 %}
+                83
+              {% else %}
+                100
+              {% endif %}
+            {% else %}
+              16
+            {% endif %}
     - conditions:
       - condition: trigger
         id: heating_started
