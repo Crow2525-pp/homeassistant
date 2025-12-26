@@ -538,6 +538,13 @@
     at: '01:00:00'
     id: turn_off
   - trigger: state
+    entity_id: light.xmas_lights_plug_socket_1
+    to: 'off'
+    id: light_turned_off
+  - trigger: homeassistant
+    event: start
+    id: ha_start
+  - trigger: state
     entity_id: binary_sensor.holiday_season
     to: 'on'
     id: season_start
@@ -548,26 +555,31 @@
   actions:
   - choose:
     - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: turn_on
-        - condition: and
-          conditions:
-          - condition: trigger
-            id: season_start
-          - condition: time
-            after: '05:30:00'
-            before: '23:30:00'
-      sequence:
-      - action: light.turn_on
-        target:
-          entity_id: light.xmas_lights_plug_socket_1
-    - conditions:
       - condition: trigger
         id: turn_off
       sequence:
       - action: light.turn_off
+        target:
+          entity_id: light.xmas_lights_plug_socket_1
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: turn_on
+        - condition: trigger
+          id: light_turned_off
+        - condition: trigger
+          id: ha_start
+        - condition: and
+          conditions:
+          - condition: trigger
+            id: season_start
+      - condition: template
+        value_template: >
+          {% set now_time = now().strftime('%H:%M:%S') %}
+          {{ now_time >= '05:30:00' or now_time < '01:00:00' }}
+      sequence:
+      - action: light.turn_on
         target:
           entity_id: light.xmas_lights_plug_socket_1
   mode: single
