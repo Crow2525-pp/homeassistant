@@ -218,7 +218,7 @@
   mode: single
 - id: '1703583740639'
   alias: Front Entrance - Motion-Activated Light
-  description: Turns on the office LED lights when motion is detected and switches
+  description: Turns on the front entrance lights when motion is detected and switches
     them off after the timeout.
   triggers:
   - entity_id:
@@ -250,9 +250,11 @@
       - data: {}
         action: light.turn_on
         target:
-          entity_id:
-          - light.led_strip_office_light
-          - light.study_nook_lamp_socket_1
+          area_id: front_entrance
+      - data: {}
+        action: light.turn_on
+        target:
+          entity_id: light.study_nook_lamp_socket_1
     - conditions:
       - condition: state
         state: 'off'
@@ -261,9 +263,11 @@
       - data: {}
         action: light.turn_off
         target:
-          entity_id:
-          - light.led_strip_office_light
-          - light.study_nook_lamp_socket_1
+          area_id: front_entrance
+      - data: {}
+        action: light.turn_off
+        target:
+          entity_id: light.study_nook_lamp_socket_1
   mode: restart
 - id: '1752213080801'
   alias: Living Room - Motion Lighting
