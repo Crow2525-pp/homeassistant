@@ -135,4 +135,4 @@
       - service: fan.turn_off
         target:
           entity_id: fan.masterbedroom_fan
-  mode: single
+  mode: restart
