@@ -251,10 +251,6 @@
         action: light.turn_on
         target:
           area_id: front_entrance
-      - data: {}
-        action: light.turn_on
-        target:
-          entity_id: light.study_nook_lamp_socket_1
     - conditions:
       - condition: state
         state: 'off'
@@ -264,10 +260,6 @@
         action: light.turn_off
         target:
           area_id: front_entrance
-      - data: {}
-        action: light.turn_off
-        target:
-          entity_id: light.study_nook_lamp_socket_1
   mode: restart
 - id: '1752213080801'
   alias: Living Room - Motion Lighting
