@@ -24,6 +24,10 @@
       id: high_humidity
 
   condition:
+    # Killswitch not active
+    - condition: state
+      entity_id: input_boolean.automation_killswitch_living_room
+      state: "off"
     # Only when home
     - condition: state
       entity_id: input_select.occupancy

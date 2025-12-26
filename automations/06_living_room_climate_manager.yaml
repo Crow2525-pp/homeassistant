@@ -66,7 +66,10 @@
     id: frost_end
   - platform: homeassistant
     event: start
-  conditions: []
+  conditions:
+    - condition: state
+      entity_id: input_boolean.automation_killswitch_living_room
+      state: 'off'
   actions:
   - choose:
     - conditions:

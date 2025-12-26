@@ -9,6 +9,12 @@
     below: '5'
     trigger: numeric_state
   conditions:
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_living_room
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_kitchen
+    state: 'off'
   - condition: not
     conditions:
     - condition: state
@@ -43,6 +49,12 @@
     entity_id: calendar.early_to_bed
     trigger: calendar
   conditions:
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_living_room
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_kitchen
+    state: 'off'
   - condition: or
     conditions:
     - condition: state
@@ -100,6 +112,9 @@
   - at: 05:00:00
     trigger: time
   conditions:
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_living_room
+    state: 'off'
   - condition: sun
     before: sunrise
   - condition: state
@@ -124,7 +139,13 @@
   - event: sunrise
     offset: 00:15:00
     trigger: sun
-  conditions: []
+  conditions:
+    - condition: state
+      entity_id: input_boolean.automation_killswitch_living_room
+      state: 'off'
+    - condition: state
+      entity_id: input_boolean.automation_killswitch_kitchen
+      state: 'off'
   actions:
   - data: {}
     target:
@@ -284,6 +305,9 @@
     event: sunrise
     offset: 00:20:00
   conditions:
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_living_room
+    state: 'off'
   - condition: numeric_state
     entity_id: sensor.aqara_motion_and_light_sensor_p2_illuminance_lux
     below: 30
@@ -357,7 +381,10 @@
     entity_id: remote.tv_2
     to: 'off'
     id: 'Off'
-  condition: []
+  condition:
+    - condition: state
+      entity_id: input_boolean.automation_killswitch_living_room
+      state: 'off'
   action:
   - choose:
     - conditions:
@@ -426,6 +453,9 @@
       seconds: 0
     id: TurnedOff
   conditions:
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_living_room
+    state: 'off'
   - condition: sun
     after: sunset
     before: sunrise
@@ -471,6 +501,9 @@
   - at: '16:00:00'
     trigger: time
   conditions:
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_living_room
+    state: 'off'
   - condition: time
     after: 06:00:00
     before: '16:00:00'
@@ -757,6 +790,9 @@
       seconds: 0
     id: TurnedOff
   conditions:
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_living_room
+    state: 'off'
   - condition: sun
     after: sunset
     before: sunrise

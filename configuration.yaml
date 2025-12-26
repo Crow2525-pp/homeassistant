@@ -204,6 +204,15 @@ input_boolean:
   hvac_kids_room_should_be_on:
     name: Kids Room HVAC Should Be On
     icon: mdi:thermometer
+  # Room Automation Killswitches
+  automation_killswitch_living_room:
+    name: Living Room Automation Killswitch
+    icon: mdi:stop-circle
+    initial: false
+  automation_killswitch_kitchen:
+    name: Kitchen Automation Killswitch
+    icon: mdi:stop-circle
+    initial: false
 
 # Cover Control Automation Status Helpers
 input_text:
