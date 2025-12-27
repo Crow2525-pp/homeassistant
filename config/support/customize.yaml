@@ -224,6 +224,18 @@ input_boolean.wan_down_notify:
   category: notifications
   label: Killswitch
 
+input_boolean.automation_killswitch_living_room:
+  friendly_name: "Living Room Automations"
+  room: living_room
+  category: automation_control
+  label: Killswitch
+
+input_boolean.automation_killswitch_kitchen:
+  friendly_name: "Kitchen Automations"
+  room: kitchen
+  category: automation_control
+  label: Killswitch
+
 # Media
 remote.sony_kd_55x8500c:
   friendly_name: "Sony TV"
