@@ -5,6 +5,7 @@ badges: !include ../badges/standard.yaml
 cards:
   - !include ../cards/navbar.yaml
   - !include ../cards/climate/hvac.yaml
+  # - !include ../cards/climate/debug_status.yaml
   - !include ../cards/climate/principles_status.yaml
   - !include ../cards/climate/automation_trigger_history.yaml
   - !include ../cards/climate/automation_analytics.yaml
