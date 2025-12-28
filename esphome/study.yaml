@@ -1,5 +1,5 @@
 esphome:
-  name: study_esp32
+  name: studyesp32
   friendly_name: Study
   min_version: "2024.6.0"
   name_add_mac_suffix: false
@@ -15,7 +15,7 @@ logger:
 # Enable Home Assistant API
 api:
   encryption:
-    key: !secret esphome_study_esp32_api_key
+    key: !secret esphome_studyesp32_api_key
 
 ota:
   platform: esphome
@@ -27,7 +27,7 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Study Fallback Hotspot"
-    password: !secret esphome_study_esp32_fallback_password
+    password: !secret esphome_studyesp32_fallback_password
 
 captive_portal: {}
 
