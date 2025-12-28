@@ -1,0 +1,82 @@
+esphome:
+  name: study_esp32
+  friendly_name: Study
+  min_version: "2024.6.0"
+  name_add_mac_suffix: false
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret esphome_study_esp32_api_key
+
+ota:
+  platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid_iot
+  password: !secret wifi_password_iot
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Study Fallback Hotspot"
+    password: !secret esphome_study_esp32_fallback_password
+
+captive_portal: {}
+
+# required for sensor to get timestamp "last seen" for sensor
+time:
+  - platform: homeassistant
+    id: ha_time
+
+sensor:
+  - platform: xiaomi_lywsd03mmc
+    mac_address: !secret xiaomi_ble_mac_study
+    bindkey: !secret xiaomi_ble_bindkey_study
+    temperature:
+      name: "Study Temperature"
+      on_value:
+        then:
+          - lambda: |-
+              id(study_last_seen).publish_state(id(ha_time).now().timestamp);
+    humidity:
+      name: "Study Humidity"
+    battery_level:
+      name: "Study Battery Level"
+
+  - platform: template
+    id: study_last_seen
+    name: "Study Temperature Last Seen"
+    lambda: 'return 0;'
+    update_interval: never
+
+  - platform: xiaomi_lywsd03mmc
+    mac_address: !secret xiaomi_ble_mac_kidsroom
+    bindkey: !secret xiaomi_ble_bindkey_kidsroom
+    temperature:
+      name: "KidsRoom Temperature"
+      on_value:
+        then:
+          - lambda: |-
+              id(kidsroom_last_seen).publish_state(id(ha_time).now().timestamp);
+    humidity:
+      name: "KidsRoom Humidity"
+    battery_level:
+      name: "KidsRoom Battery Level"
+
+  - platform: template
+    id: kidsroom_last_seen
+    name: "KidsRoom Temperature Last Seen"
+    lambda: 'return 0;'
+    update_interval: never
+
+bluetooth_proxy: {}
+
+esp32_ble_tracker: {}
