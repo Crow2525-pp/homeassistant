@@ -26,7 +26,7 @@ input_boolean.climate_manual_control_master:
   label: override
 
 # Otto's Room
-sensor.study_esp32_kidsroom_temperature:
+sensor.studyesp32_kidsroom_temperature:
   friendly_name: "Otto's Room Temperature"
   device_class: temperature
   room: ottos_room
@@ -49,7 +49,7 @@ input_boolean.ottos_door_open:
   category: security
 
 # Henry's Room (Study)
-sensor.study_esp32_study_temperature:
+sensor.studyesp32_study_temperature:
   friendly_name: "Henry's Room Temperature"
   device_class: temperature
   room: henrys_room
