@@ -621,12 +621,12 @@
                     - condition: not
                       conditions:
                         - condition: state
-                          entity_id: climate.masterbed_versatile_thermostat
+                          entity_id: climate.masterbed_room_ac
                           state: 'off'
                   sequence:
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         hvac_mode: 'off'
             # Only turn off fan if currently on
@@ -661,13 +661,13 @@
                     - condition: not
                       conditions:
                         - condition: state
-                          entity_id: climate.masterbed_versatile_thermostat
+                          entity_id: climate.masterbed_room_ac
                           attribute: preset_mode
                           state: eco
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         preset_mode: eco
             # Only set hvac_mode if not already cool
@@ -676,12 +676,12 @@
                     - condition: not
                       conditions:
                         - condition: state
-                          entity_id: climate.masterbed_versatile_thermostat
+                          entity_id: climate.masterbed_room_ac
                           state: cool
                   sequence:
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         hvac_mode: cool
             # Only turn off fan if currently on
@@ -704,7 +704,7 @@
           sequence:
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.masterbed_versatile_thermostat
+                entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: 'off'
             - service: fan.turn_off
@@ -732,12 +732,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         hvac_mode: dry
 
@@ -757,12 +757,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         preset_mode: boost
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         hvac_mode: cool
                     - service: fan.set_percentage
@@ -782,12 +782,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         preset_mode: frost
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         hvac_mode: heat
                     - service: fan.turn_off
@@ -798,7 +798,7 @@
               default:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.masterbed_versatile_thermostat
+                    entity_id: climate.masterbed_room_ac
                   data:
                     hvac_mode: 'off'
                 - service: fan.turn_off
@@ -826,12 +826,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         hvac_mode: dry
 
@@ -848,12 +848,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         hvac_mode: cool
 
@@ -868,19 +868,19 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         hvac_mode: heat
 
               default:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.masterbed_versatile_thermostat
+                    entity_id: climate.masterbed_room_ac
                   data:
                     hvac_mode: 'off'
 
@@ -907,12 +907,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         hvac_mode: cool
                     - service: fan.set_percentage
@@ -923,7 +923,7 @@
               default:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.masterbed_versatile_thermostat
+                    entity_id: climate.masterbed_room_ac
                   data:
                     hvac_mode: 'off'
 
@@ -948,12 +948,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         hvac_mode: dry
 
@@ -968,12 +968,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         hvac_mode: cool
                     - service: fan.set_percentage
@@ -993,12 +993,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         hvac_mode: heat
                     - service: fan.turn_off
@@ -1016,12 +1016,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.masterbed_versatile_thermostat
+                        entity_id: climate.masterbed_room_ac
                       data:
                         hvac_mode: cool
                     - service: fan.set_percentage
@@ -1048,12 +1048,12 @@
                           sequence:
                             - service: climate.set_preset_mode
                               target:
-                                entity_id: climate.masterbed_versatile_thermostat
+                                entity_id: climate.masterbed_room_ac
                               data:
                                 preset_mode: comfort
                             - service: climate.set_hvac_mode
                               target:
-                                entity_id: climate.masterbed_versatile_thermostat
+                                entity_id: climate.masterbed_room_ac
                               data:
                                 hvac_mode: cool
                             - service: fan.set_percentage
@@ -1069,12 +1069,12 @@
                           sequence:
                             - service: climate.set_preset_mode
                               target:
-                                entity_id: climate.masterbed_versatile_thermostat
+                                entity_id: climate.masterbed_room_ac
                               data:
                                 preset_mode: comfort
                             - service: climate.set_hvac_mode
                               target:
-                                entity_id: climate.masterbed_versatile_thermostat
+                                entity_id: climate.masterbed_room_ac
                               data:
                                 hvac_mode: heat
                             - service: fan.turn_off
@@ -1083,14 +1083,14 @@
                       default:
                         - service: climate.set_hvac_mode
                           target:
-                            entity_id: climate.masterbed_versatile_thermostat
+                            entity_id: climate.masterbed_room_ac
                           data:
                             hvac_mode: 'off'
 
               default:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.masterbed_versatile_thermostat
+                    entity_id: climate.masterbed_room_ac
                   data:
                     hvac_mode: 'off'
 
@@ -1098,7 +1098,7 @@
       default:
         - service: climate.set_hvac_mode
           target:
-            entity_id: climate.masterbed_versatile_thermostat
+            entity_id: climate.masterbed_room_ac
           data:
             hvac_mode: 'off'
         - service: fan.turn_off
@@ -1193,7 +1193,7 @@
           sequence:
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.living_room_versatile_thermostat
+                entity_id: climate.living_room_ac_2
               data:
                 hvac_mode: 'off'
             - stop: "Holiday mode - climate disabled"
@@ -1214,12 +1214,12 @@
           sequence:
             - service: climate.set_preset_mode
               target:
-                entity_id: climate.living_room_versatile_thermostat
+                entity_id: climate.living_room_ac_2
               data:
                 preset_mode: eco
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.living_room_versatile_thermostat
+                entity_id: climate.living_room_ac_2
               data:
                 hvac_mode: cool
             - stop: "Away with hot day - eco cooling active"
@@ -1232,7 +1232,7 @@
           sequence:
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.living_room_versatile_thermostat
+                entity_id: climate.living_room_ac_2
               data:
                 hvac_mode: 'off'
             - stop: "Away mode - climate disabled"
@@ -1240,7 +1240,7 @@
         # SAFETY SHUTOFF - Turn off when target temp reached (after 30 min heating)
         - conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               state: heat
               for:
                 minutes: 30
@@ -1255,7 +1255,7 @@
           sequence:
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.living_room_versatile_thermostat
+                entity_id: climate.living_room_ac_2
               data:
                 hvac_mode: 'off'
             - stop: "Target temperature reached - shutting off"
@@ -1286,12 +1286,12 @@
           sequence:
             - service: climate.set_preset_mode
               target:
-                entity_id: climate.living_room_versatile_thermostat
+                entity_id: climate.living_room_ac_2
               data:
                 preset_mode: frost
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.living_room_versatile_thermostat
+                entity_id: climate.living_room_ac_2
               data:
                 hvac_mode: heat
 
@@ -1327,12 +1327,12 @@
           sequence:
             - service: climate.set_preset_mode
               target:
-                entity_id: climate.living_room_versatile_thermostat
+                entity_id: climate.living_room_ac_2
               data:
                 preset_mode: comfort
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.living_room_versatile_thermostat
+                entity_id: climate.living_room_ac_2
               data:
                 hvac_mode: heat
 
@@ -1364,12 +1364,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.living_room_versatile_thermostat
+                        entity_id: climate.living_room_ac_2
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.living_room_versatile_thermostat
+                        entity_id: climate.living_room_ac_2
                       data:
                         hvac_mode: dry
 
@@ -1393,18 +1393,18 @@
                           sequence:
                             - service: climate.set_preset_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 preset_mode: comfort
                             - service: climate.set_hvac_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 hvac_mode: heat
                       default:
                         - service: climate.set_hvac_mode
                           target:
-                            entity_id: climate.living_room_versatile_thermostat
+                            entity_id: climate.living_room_ac_2
                           data:
                             hvac_mode: 'off'
 
@@ -1445,12 +1445,12 @@
                           sequence:
                             - service: climate.set_preset_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 preset_mode: comfort
                             - service: climate.set_hvac_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 hvac_mode: cool
 
@@ -1463,18 +1463,18 @@
                           sequence:
                             - service: climate.set_preset_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 preset_mode: eco
                             - service: climate.set_hvac_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 hvac_mode: fan_only
                       default:
                         - service: climate.set_hvac_mode
                           target:
-                            entity_id: climate.living_room_versatile_thermostat
+                            entity_id: climate.living_room_ac_2
                           data:
                             hvac_mode: 'off'
 
@@ -1498,12 +1498,12 @@
                           sequence:
                             - service: climate.set_preset_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 preset_mode: comfort
                             - service: climate.set_hvac_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 hvac_mode: heat
 
@@ -1540,18 +1540,18 @@
                           sequence:
                             - service: climate.set_preset_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 preset_mode: comfort
                             - service: climate.set_hvac_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 hvac_mode: cool
                       default:
                         - service: climate.set_hvac_mode
                           target:
-                            entity_id: climate.living_room_versatile_thermostat
+                            entity_id: climate.living_room_ac_2
                           data:
                             hvac_mode: 'off'
 
@@ -1592,12 +1592,12 @@
                           sequence:
                             - service: climate.set_preset_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 preset_mode: comfort
                             - service: climate.set_hvac_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 hvac_mode: cool
 
@@ -1614,18 +1614,18 @@
                           sequence:
                             - service: climate.set_preset_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 preset_mode: comfort
                             - service: climate.set_hvac_mode
                               target:
-                                entity_id: climate.living_room_versatile_thermostat
+                                entity_id: climate.living_room_ac_2
                               data:
                                 hvac_mode: heat
                       default:
                         - service: climate.set_hvac_mode
                           target:
-                            entity_id: climate.living_room_versatile_thermostat
+                            entity_id: climate.living_room_ac_2
                           data:
                             hvac_mode: 'off'
 
@@ -1633,7 +1633,7 @@
               default:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.living_room_versatile_thermostat
+                    entity_id: climate.living_room_ac_2
                   data:
                     hvac_mode: 'off'
 
@@ -1641,7 +1641,7 @@
       default:
         - service: climate.set_hvac_mode
           target:
-            entity_id: climate.living_room_versatile_thermostat
+            entity_id: climate.living_room_ac_2
           data:
             hvac_mode: 'off'
   mode: single
@@ -1733,7 +1733,7 @@
           sequence:
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.henry_s_room_versatile_thermostat
+                entity_id: climate.study_room_ac
               data:
                 hvac_mode: 'off'
             - stop: "Holiday mode - climate disabled"
@@ -1754,12 +1754,12 @@
           sequence:
             - service: climate.set_preset_mode
               target:
-                entity_id: climate.henry_s_room_versatile_thermostat
+                entity_id: climate.study_room_ac
               data:
                 preset_mode: eco
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.henry_s_room_versatile_thermostat
+                entity_id: climate.study_room_ac
               data:
                 hvac_mode: cool
             - stop: "Away with hot day - eco cooling active"
@@ -1772,7 +1772,7 @@
           sequence:
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.henry_s_room_versatile_thermostat
+                entity_id: climate.study_room_ac
               data:
                 hvac_mode: 'off'
             - stop: "Away mode - climate disabled"
@@ -1801,18 +1801,18 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         preset_mode: boost
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         hvac_mode: cool
               default:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.henry_s_room_versatile_thermostat
+                    entity_id: climate.study_room_ac
                   data:
                     hvac_mode: 'off'
 
@@ -1836,12 +1836,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         hvac_mode: dry
                 # PRE-BEDTIME COOLING - NO solar requirement
@@ -1860,12 +1860,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         hvac_mode: cool
                 # PRE-BEDTIME HEATING - NO solar requirement
@@ -1884,18 +1884,18 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         hvac_mode: heat
               default:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.henry_s_room_versatile_thermostat
+                    entity_id: climate.study_room_ac
                   data:
                     hvac_mode: 'off'
 
@@ -1919,12 +1919,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         hvac_mode: dry
                 # NAPTIME COOLING - NO solar requirement
@@ -1946,12 +1946,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         hvac_mode: cool
                 # NAPTIME HEATING - NO solar requirement
@@ -1970,18 +1970,18 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         hvac_mode: heat
               default:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.henry_s_room_versatile_thermostat
+                    entity_id: climate.study_room_ac
                   data:
                     hvac_mode: 'off'
 
@@ -2005,12 +2005,12 @@
           sequence:
             - service: climate.set_preset_mode
               target:
-                entity_id: climate.henry_s_room_versatile_thermostat
+                entity_id: climate.study_room_ac
               data:
                 preset_mode: comfort
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.henry_s_room_versatile_thermostat
+                entity_id: climate.study_room_ac
               data:
                 hvac_mode: cool
 
@@ -2034,12 +2034,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         hvac_mode: dry
                 - conditions:
@@ -2063,12 +2063,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         hvac_mode: cool
                 - conditions:
@@ -2089,18 +2089,18 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.henry_s_room_versatile_thermostat
+                        entity_id: climate.study_room_ac
                       data:
                         hvac_mode: heat
               default:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.henry_s_room_versatile_thermostat
+                    entity_id: climate.study_room_ac
                   data:
                     hvac_mode: 'off'
 
@@ -2108,7 +2108,7 @@
       default:
         - service: climate.set_hvac_mode
           target:
-            entity_id: climate.henry_s_room_versatile_thermostat
+            entity_id: climate.study_room_ac
           data:
             hvac_mode: 'off'
   mode: single
@@ -2200,7 +2200,7 @@
           sequence:
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.otto_s_room
+                entity_id: climate.kids_room_ac
               data:
                 hvac_mode: 'off'
             - stop: "Holiday mode - climate disabled"
@@ -2221,12 +2221,12 @@
           sequence:
             - service: climate.set_preset_mode
               target:
-                entity_id: climate.otto_s_room
+                entity_id: climate.kids_room_ac
               data:
                 preset_mode: eco
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.otto_s_room
+                entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
             - stop: "Away with hot day - eco cooling active"
@@ -2239,7 +2239,7 @@
           sequence:
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.otto_s_room
+                entity_id: climate.kids_room_ac
               data:
                 hvac_mode: 'off'
             - stop: "Away mode - climate disabled"
@@ -2268,12 +2268,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         preset_mode: boost
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         hvac_mode: cool
 
@@ -2297,12 +2297,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         hvac_mode: dry
                 # PRE-BEDTIME COOLING - NO solar requirement
@@ -2321,12 +2321,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         hvac_mode: cool
                 # PRE-BEDTIME HEATING - NO solar requirement
@@ -2345,18 +2345,18 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         hvac_mode: heat
               default:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.otto_s_room
+                    entity_id: climate.kids_room_ac
                   data:
                     hvac_mode: 'off'
 
@@ -2380,12 +2380,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         hvac_mode: dry
                 # NAPTIME COOLING - NO solar requirement
@@ -2407,12 +2407,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         hvac_mode: cool
                 # NAPTIME HEATING - NO solar requirement
@@ -2431,18 +2431,18 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         hvac_mode: heat
               default:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.otto_s_room
+                    entity_id: climate.kids_room_ac
                   data:
                     hvac_mode: 'off'
 
@@ -2466,12 +2466,12 @@
          sequence:
             - service: climate.set_preset_mode
               target:
-                entity_id: climate.otto_s_room
+                entity_id: climate.kids_room_ac
               data:
                 preset_mode: comfort
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.otto_s_room
+                entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
 
@@ -2495,12 +2495,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         hvac_mode: dry
                 - conditions:
@@ -2524,12 +2524,12 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         hvac_mode: cool
                 - conditions:
@@ -2550,18 +2550,18 @@
                   sequence:
                     - service: climate.set_preset_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         preset_mode: comfort
                     - service: climate.set_hvac_mode
                       target:
-                        entity_id: climate.otto_s_room
+                        entity_id: climate.kids_room_ac
                       data:
                         hvac_mode: heat
               default:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.otto_s_room
+                    entity_id: climate.kids_room_ac
                   data:
                     hvac_mode: 'off'
 
@@ -2569,7 +2569,7 @@
       default:
         - service: climate.set_hvac_mode
           target:
-            entity_id: climate.otto_s_room
+            entity_id: climate.kids_room_ac
           data:
             hvac_mode: 'off'
   mode: single
@@ -2679,15 +2679,15 @@
     Fan turns off when heating, adjusts speed when cooling.
   triggers:
     - platform: state
-      entity_id: climate.masterbed_versatile_thermostat
+      entity_id: climate.masterbed_room_ac
       to: cool
       id: cooling_started
     - platform: state
-      entity_id: climate.masterbed_versatile_thermostat
+      entity_id: climate.masterbed_room_ac
       to: heat
       id: heating_started
     - platform: state
-      entity_id: climate.masterbed_versatile_thermostat
+      entity_id: climate.masterbed_room_ac
       to: 'off'
       id: climate_off
   conditions: []

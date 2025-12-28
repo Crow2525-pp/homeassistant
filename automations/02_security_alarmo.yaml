@@ -221,7 +221,7 @@
       message: "{% set issues = [] %}\n{% if is_state('cover.smart_garage_door_garage',
         'open') %}{% set issues = issues + ['\U0001F697 Garage door open'] %}{% endif
         %}\n{% if is_state('binary_sensor.downstairs_doors', 'on') %}{% set issues
-        = issues + ['\U0001F6AA Door open downstairs'] %}{% endif %}\n{% if states('climate.living_room_versatile_thermostat')
+        = issues + ['\U0001F6AA Door open downstairs'] %}{% endif %}\n{% if states('climate.living_room_ac_2')
         in ['cool', 'heat'] %}{% set issues = issues + ['❄️ Living room AC still on']
         %}{% endif %}\n{% if issues | length > 0 %}{{ issues | join('\\n') }}{% else
         %}✅ All secure - sleep well!{% endif %}\n"

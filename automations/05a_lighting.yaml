@@ -86,13 +86,13 @@
     - choose:
       - conditions:
         - condition: state
-          entity_id: climate.living_room_versatile_thermostat
+          entity_id: climate.living_room_ac_2
           attribute: is_on
           state: 'true'
         sequence:
         - data: {}
           target:
-            entity_id: climate.living_room_versatile_thermostat
+            entity_id: climate.living_room_ac_2
           action: climate.turn_off
   # Set occupancy to Sleeping - no killswitch check needed
   - data:
@@ -713,12 +713,12 @@
           preset_mode: comfort
         action: climate.set_preset_mode
         target:
-          entity_id: climate.henry_s_room_versatile_thermostat
+          entity_id: climate.study_room_ac
       - data:
           hvac_mode: cool
         action: climate.set_hvac_mode
         target:
-          entity_id: climate.henry_s_room_versatile_thermostat
+          entity_id: climate.study_room_ac
     - conditions:
       - condition: trigger
         id:
@@ -731,7 +731,7 @@
           hvac_mode: 'off'
         action: climate.set_hvac_mode
         target:
-          entity_id: climate.henry_s_room_versatile_thermostat
+          entity_id: climate.study_room_ac
   mode: single
 - id: '1684410637520'
   alias: Workday Desk Power Prompt

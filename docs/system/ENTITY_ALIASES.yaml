@@ -15,25 +15,25 @@ climate_deprecations:
   living_room_ac:
     deprecated: true
     current_entity_id: climate.living_room_ac
-    replacement_entity_id: climate.living_room_versatile_thermostat
+    replacement_entity_id: climate.living_room_ac_2
     reason: "Versatile Thermostat provides superior control and preset management"
     replaced_in_automations: true
     migration_status: complete
-    notes: "All automations using climate.living_room_ac should be updated to use climate.living_room_versatile_thermostat"
+    notes: "All automations using climate.living_room_ac should be updated to use climate.living_room_ac_2"
 
   masterbed_ac:
     deprecated: true
     current_entity_id: climate.masterbed_ac
-    replacement_entity_id: climate.masterbed_versatile_thermostat
+    replacement_entity_id: climate.masterbed_room_ac
     reason: "Versatile Thermostat provides superior control and preset management"
     replaced_in_automations: true
     migration_status: complete
-    notes: "All automations using climate.masterbed_ac should be updated to use climate.masterbed_versatile_thermostat"
+    notes: "All automations using climate.masterbed_ac should be updated to use climate.masterbed_room_ac"
 
   study_ac:
     deprecated: true
     current_entity_id: climate.study_ac
-    replacement_entity_id: climate.henry_s_room_versatile_thermostat
+    replacement_entity_id: climate.study_room_ac
     reason: "Versatile Thermostat provides superior control and preset management"
     replaced_in_automations: true
     migration_status: complete
@@ -42,13 +42,13 @@ climate_deprecations:
   otto_s_ac:
     deprecated: true
     current_entity_id: climate.otto_s_ac
-    replacement_entity_id: climate.otto_s_room
+    replacement_entity_id: climate.kids_room_ac
     reason: "Versatile Thermostat provides superior control and preset management"
     replaced_in_automations: true
     migration_status: complete
     notes: |
-      All automations using climate.otto_s_ac should be updated to use climate.otto_s_room
-      Note: Otto's room entity uses different naming convention (climate.otto_s_room not climate.otto_s_room_versatile_thermostat)
+      All automations using climate.otto_s_ac should be updated to use climate.kids_room_ac
+      Note: Otto's room entity uses different naming convention (climate.kids_room_ac not climate.kids_room_ac_versatile_thermostat)
 
 ---
 
@@ -58,7 +58,7 @@ climate_deprecations:
 room_aliases:
   study:
     primary_name: "Study"
-    entity_id: climate.henry_s_room_versatile_thermostat
+    entity_id: climate.study_room_ac
     aliases:
       - henry_s_room
       - henry's_room
@@ -68,12 +68,12 @@ room_aliases:
     notes: |
       The Study room has multiple naming conventions in different systems.
       - Door sensor: binary_sensor.henry_door_sensor_magnet_opening
-      - Thermostat: climate.henry_s_room_versatile_thermostat (display as "Study")
+      - Thermostat: climate.study_room_ac (display as "Study")
       - Display in all UIs as "Study" NOT "Henry's Room"
 
   otto:
     primary_name: "Otto's Room"
-    entity_id: climate.otto_s_room
+    entity_id: climate.kids_room_ac
     aliases:
       - otto_s_room
       - ottos_room
@@ -81,7 +81,7 @@ room_aliases:
 
   living_room:
     primary_name: "Living Room"
-    entity_id: climate.living_room_versatile_thermostat
+    entity_id: climate.living_room_ac_2
     aliases:
       - lounge
       - living_room_lounge
@@ -89,7 +89,7 @@ room_aliases:
 
   master_bedroom:
     primary_name: "Master Bedroom"
-    entity_id: climate.masterbed_versatile_thermostat
+    entity_id: climate.masterbed_room_ac
     aliases:
       - masterbed
       - master_bed
@@ -166,10 +166,10 @@ naming_conventions:
   climate_thermostats:
     pattern: "climate.{room}_versatile_thermostat OR climate.{room}"
     examples:
-      - climate.living_room_versatile_thermostat
-      - climate.masterbed_versatile_thermostat
-      - climate.henry_s_room_versatile_thermostat
-      - climate.otto_s_room
+      - climate.living_room_ac_2
+      - climate.masterbed_room_ac
+      - climate.study_room_ac
+      - climate.kids_room_ac
     notes: "Versatile Thermostat entities are preferred. Base AC entities deprecated."
 
   binary_sensors_doors:
@@ -203,10 +203,10 @@ migration_notes:
   climate_migration:
     status: complete
     changes:
-      - "Replaced climate.living_room_ac with climate.living_room_versatile_thermostat"
-      - "Replaced climate.masterbed_ac with climate.masterbed_versatile_thermostat"
-      - "Replaced climate.study_ac with climate.henry_s_room_versatile_thermostat"
-      - "Replaced climate.otto_s_ac with climate.otto_s_room"
+      - "Replaced climate.living_room_ac with climate.living_room_ac_2"
+      - "Replaced climate.masterbed_ac with climate.masterbed_room_ac"
+      - "Replaced climate.study_ac with climate.study_room_ac"
+      - "Replaced climate.otto_s_ac with climate.kids_room_ac"
     files_updated:
       - "lovelace/cards/alerts.yaml - Door-open HVAC alert buttons"
       - "config/domains/templates.yaml - HVAC door open alert template"

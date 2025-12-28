@@ -8,23 +8,23 @@
     '
   triggers:
   - platform: state
-    entity_id: climate.masterbed_versatile_thermostat
+    entity_id: climate.masterbed_room_ac
     to: cool
     id: cooling_started
   - platform: state
-    entity_id: climate.masterbed_versatile_thermostat
+    entity_id: climate.masterbed_room_ac
     attribute: current_temperature
     id: cooling_temp_changed
   - platform: state
-    entity_id: climate.masterbed_versatile_thermostat
+    entity_id: climate.masterbed_room_ac
     attribute: temperature
     id: cooling_target_changed
   - platform: state
-    entity_id: climate.masterbed_versatile_thermostat
+    entity_id: climate.masterbed_room_ac
     to: heat
     id: heating_started
   - platform: state
-    entity_id: climate.masterbed_versatile_thermostat
+    entity_id: climate.masterbed_room_ac
     to: 'off'
     id: climate_off
   - platform: time
@@ -46,7 +46,7 @@
         - condition: trigger
           id: cooling_target_changed
       - condition: state
-        entity_id: climate.masterbed_versatile_thermostat
+        entity_id: climate.masterbed_room_ac
         state: cool
       sequence:
       - service: fan.set_percentage
@@ -54,8 +54,8 @@
           entity_id: fan.masterbedroom_fan
         data:
           percentage: >
-            {% set current = state_attr('climate.masterbed_versatile_thermostat', 'current_temperature') %}
-            {% set target = state_attr('climate.masterbed_versatile_thermostat', 'temperature') %}
+            {% set current = state_attr('climate.masterbed_room_ac', 'current_temperature') %}
+            {% set target = state_attr('climate.masterbed_room_ac', 'temperature') %}
             {% if current is number and target is number %}
               {% set diff = current - target %}
               {% if diff <= 1 %}
@@ -82,7 +82,7 @@
         - condition: trigger
           id: fan_turned_off
       - condition: state
-        entity_id: climate.masterbed_versatile_thermostat
+        entity_id: climate.masterbed_room_ac
         state: cool
       - condition: template
         value_template: >
@@ -99,8 +99,8 @@
           entity_id: fan.masterbedroom_fan
         data:
           percentage: >
-            {% set current = state_attr('climate.masterbed_versatile_thermostat', 'current_temperature') %}
-            {% set target = state_attr('climate.masterbed_versatile_thermostat', 'temperature') %}
+            {% set current = state_attr('climate.masterbed_room_ac', 'current_temperature') %}
+            {% set target = state_attr('climate.masterbed_room_ac', 'temperature') %}
             {% if current is number and target is number %}
               {% set diff = current - target %}
               {% if diff <= 1 %}
