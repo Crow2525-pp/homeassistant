@@ -213,6 +213,10 @@ input_boolean:
     name: Kitchen Automation Killswitch
     icon: mdi:stop-circle
     initial: false
+  guest_mode:
+    name: Guest Mode (Parents/Babysitter)
+    icon: mdi:account-supervisor
+    initial: false
 
 # Cover Control Automation Status Helpers
 input_text:

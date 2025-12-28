@@ -18,7 +18,7 @@
       id: scheduled_comfort
 
   condition:
-    # Only run when home or sleeping (not away or holiday)
+    # Only run when home, sleeping, or guest mode active
     - condition: or
       conditions:
         - condition: state
@@ -27,6 +27,9 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
+        - condition: state
+          entity_id: input_boolean.guest_mode
+          state: "on"
     # Manual override not active
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
@@ -111,7 +114,7 @@
       id: exit_room_hot
 
   condition:
-    # Only run when home or sleeping
+    # Only run when home, sleeping, or guest mode active
     - condition: or
       conditions:
         - condition: state
@@ -120,6 +123,9 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
+        - condition: state
+          entity_id: input_boolean.guest_mode
+          state: "on"
     # Manual override not active
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
@@ -216,7 +222,7 @@
       id: high_humidity
 
   condition:
-    # Only run when home or sleeping
+    # Only run when home, sleeping, or guest mode active
     - condition: or
       conditions:
         - condition: state
@@ -225,6 +231,9 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
+        - condition: state
+          entity_id: input_boolean.guest_mode
+          state: "on"
     # Manual override not active
     - condition: state
       entity_id: input_boolean.climate_manual_control_master

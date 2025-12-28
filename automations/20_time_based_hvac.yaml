@@ -55,6 +55,9 @@
                 - condition: state
                   entity_id: input_select.occupancy
                   state: Sleeping
+                - condition: state
+                  entity_id: input_boolean.guest_mode
+                  state: "on"
             - condition: template
               value_template: >
                 {{ trigger.from_state is not none
@@ -76,6 +79,9 @@
                 - condition: state
                   entity_id: input_select.occupancy
                   state: Sleeping
+                - condition: state
+                  entity_id: input_boolean.guest_mode
+                  state: "on"
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -141,7 +147,7 @@
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
       state: "off"
-    # Gate 2: Occupancy must be Home or Sleeping
+    # Gate 2: Occupancy must be Home, Sleeping, or Guest Mode
     - condition: or
       conditions:
         - condition: state
@@ -150,6 +156,9 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
+        - condition: state
+          entity_id: input_boolean.guest_mode
+          state: "on"
     # Time must be within daytime (wake to bed)
     - condition: template
       value_template: >
@@ -215,7 +224,7 @@
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
       state: "off"
-    # Gate 2: Occupancy must be Home or Sleeping
+    # Gate 2: Occupancy must be Home, Sleeping, or Guest Mode
     - condition: or
       conditions:
         - condition: state
@@ -224,6 +233,9 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
+        - condition: state
+          entity_id: input_boolean.guest_mode
+          state: "on"
     # Time must be within nighttime (bed to wake, wraps midnight)
     - condition: template
       value_template: >
@@ -282,7 +294,7 @@
 
 - id: master_bedroom_away_mode
   alias: "HVAC - Master Bedroom - Occupancy On"
-  description: "Turn master bedroom on when arriving to Home/Sleeping."
+  description: "Turn master bedroom on when arriving to Home/Sleeping or guest mode activates."
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -290,11 +302,20 @@
         - Home
         - Sleeping
       id: home
+    - trigger: state
+      entity_id: input_boolean.guest_mode
+      to: "on"
+      id: guest_mode
   conditions:
-    - condition: template
-      value_template: >
-        {{ trigger.from_state is not none
-           and trigger.from_state.state not in ['Home', 'Sleeping'] }}
+    - condition: or
+      conditions:
+        - condition: template
+          value_template: >
+            {{ trigger.id == 'home'
+               and trigger.from_state is not none
+               and trigger.from_state.state not in ['Home', 'Sleeping'] }}
+        - condition: template
+          value_template: "{{ trigger.id == 'guest_mode' }}"
   actions:
     - action: climate.turn_on
       target:
@@ -317,7 +338,7 @@
     - condition: state
       entity_id: input_boolean.climate_manual_control_otto
       state: "off"
-    # Gate 2: Occupancy must be Home or Sleeping
+    # Gate 2: Occupancy must be Home, Sleeping, or Guest Mode
     - condition: or
       conditions:
         - condition: state
@@ -326,6 +347,9 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
+        - condition: state
+          entity_id: input_boolean.guest_mode
+          state: "on"
     # Time must be within daytime (wake to bed)
     - condition: template
       value_template: >
@@ -391,7 +415,7 @@
     - condition: state
       entity_id: input_boolean.climate_manual_control_otto
       state: "off"
-    # Gate 2: Occupancy must be Home or Sleeping
+    # Gate 2: Occupancy must be Home, Sleeping, or Guest Mode
     - condition: or
       conditions:
         - condition: state
@@ -400,6 +424,9 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
+        - condition: state
+          entity_id: input_boolean.guest_mode
+          state: "on"
     # Time must be within nighttime (bed to wake, wraps midnight)
     - condition: template
       value_template: >
@@ -458,7 +485,7 @@
 
 - id: ottos_room_away_mode
   alias: "HVAC - Otto's Room - Occupancy On"
-  description: "Turn Otto's room on when arriving to Home/Sleeping."
+  description: "Turn Otto's room on when arriving to Home/Sleeping or guest mode activates."
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -466,11 +493,20 @@
         - Home
         - Sleeping
       id: home
+    - trigger: state
+      entity_id: input_boolean.guest_mode
+      to: "on"
+      id: guest_mode
   conditions:
-    - condition: template
-      value_template: >
-        {{ trigger.from_state is not none
-           and trigger.from_state.state not in ['Home', 'Sleeping'] }}
+    - condition: or
+      conditions:
+        - condition: template
+          value_template: >
+            {{ trigger.id == 'home'
+               and trigger.from_state is not none
+               and trigger.from_state.state not in ['Home', 'Sleeping'] }}
+        - condition: template
+          value_template: "{{ trigger.id == 'guest_mode' }}"
   actions:
     - action: climate.turn_on
       target:
@@ -493,7 +529,7 @@
     - condition: state
       entity_id: input_boolean.climate_manual_control_study
       state: "off"
-    # Gate 2: Occupancy must be Home or Sleeping
+    # Gate 2: Occupancy must be Home, Sleeping, or Guest Mode
     - condition: or
       conditions:
         - condition: state
@@ -502,6 +538,9 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
+        - condition: state
+          entity_id: input_boolean.guest_mode
+          state: "on"
     # Time must be within daytime (wake to bed)
     - condition: template
       value_template: >
@@ -567,7 +606,7 @@
     - condition: state
       entity_id: input_boolean.climate_manual_control_study
       state: "off"
-    # Gate 2: Occupancy must be Home or Sleeping
+    # Gate 2: Occupancy must be Home, Sleeping, or Guest Mode
     - condition: or
       conditions:
         - condition: state
@@ -576,6 +615,9 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
+        - condition: state
+          entity_id: input_boolean.guest_mode
+          state: "on"
     # Time must be within nighttime (bed to wake, wraps midnight)
     - condition: template
       value_template: >
@@ -634,7 +676,7 @@
 
 - id: lucas_room_away_mode
   alias: "HVAC - Lucas's Room - Occupancy On"
-  description: "Turn Lucas's room on when arriving to Home/Sleeping."
+  description: "Turn Lucas's room on when arriving to Home/Sleeping or guest mode activates."
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -642,11 +684,20 @@
         - Home
         - Sleeping
       id: home
+    - trigger: state
+      entity_id: input_boolean.guest_mode
+      to: "on"
+      id: guest_mode
   conditions:
-    - condition: template
-      value_template: >
-        {{ trigger.from_state is not none
-           and trigger.from_state.state not in ['Home', 'Sleeping'] }}
+    - condition: or
+      conditions:
+        - condition: template
+          value_template: >
+            {{ trigger.id == 'home'
+               and trigger.from_state is not none
+               and trigger.from_state.state not in ['Home', 'Sleeping'] }}
+        - condition: template
+          value_template: "{{ trigger.id == 'guest_mode' }}"
   actions:
     - action: climate.turn_on
       target:

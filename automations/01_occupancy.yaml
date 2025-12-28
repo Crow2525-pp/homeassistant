@@ -175,3 +175,24 @@
     target:
       entity_id: input_select.occupancy
   mode: single
+
+- id: '1735600000001'
+  alias: Guest Mode - Reminder to Turn Off
+  description: Reminds to turn off guest mode when main residents return home
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.someone_home
+    to: "on"
+    for:
+      minutes: 5
+  conditions:
+  - condition: state
+    entity_id: input_boolean.guest_mode
+    state: "on"
+  actions:
+  - action: persistent_notification.create
+    data:
+      title: "Guest Mode Active"
+      message: "Main residents are home but guest mode is still active. Turn it off if no longer needed."
+      notification_id: guest_mode_reminder
+  mode: single
