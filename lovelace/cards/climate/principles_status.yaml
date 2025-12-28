@@ -238,25 +238,25 @@ cards:
     content: |
       ### Using Correct Versatile Thermostat Entities
 
-      ✅ **Master Bedroom:** `climate.masterbed_versatile_thermostat`
-      - Current Mode: {{ states('climate.masterbed_versatile_thermostat') }}
-      - Target: {{ state_attr('climate.masterbed_versatile_thermostat', 'temperature') }}°C
-      - Preset: {{ state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') }}
+      ✅ **Master Bedroom:** `climate.masterbed_room_ac`
+      - Current Mode: {{ states('climate.masterbed_room_ac') }}
+      - Target: {{ state_attr('climate.masterbed_room_ac', 'temperature') }}°C
+      - Preset: {{ state_attr('climate.masterbed_room_ac', 'preset_mode') }}
 
-      ✅ **Living Room:** `climate.living_room_versatile_thermostat`
-      - Current Mode: {{ states('climate.living_room_versatile_thermostat') }}
-      - Target: {{ state_attr('climate.living_room_versatile_thermostat', 'temperature') }}°C
-      - Preset: {{ state_attr('climate.living_room_versatile_thermostat', 'preset_mode') }}
+      ✅ **Living Room:** `climate.living_room_ac_2`
+      - Current Mode: {{ states('climate.living_room_ac_2') }}
+      - Target: {{ state_attr('climate.living_room_ac_2', 'temperature') }}°C
+      - Preset: {{ state_attr('climate.living_room_ac_2', 'preset_mode') }}
 
-      ✅ **Henry's Room/Study:** `climate.henry_s_room_versatile_thermostat`
-      - Current Mode: {{ states('climate.henry_s_room_versatile_thermostat') }}
-      - Target: {{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') }}°C
-      - Preset: {{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') }}
+      ✅ **Henry's Room/Study:** `climate.study_room_ac`
+      - Current Mode: {{ states('climate.study_room_ac') }}
+      - Target: {{ state_attr('climate.study_room_ac', 'temperature') }}°C
+      - Preset: {{ state_attr('climate.study_room_ac', 'preset_mode') }}
 
-      ✅ **Otto's Room:** `climate.otto_s_room`
-      - Current Mode: {{ states('climate.otto_s_room') }}
-      - Target: {{ state_attr('climate.otto_s_room', 'temperature') }}°C
-      - Preset: {{ state_attr('climate.otto_s_room', 'preset_mode') }}
+      ✅ **Otto's Room:** `climate.kids_room_ac`
+      - Current Mode: {{ states('climate.kids_room_ac') }}
+      - Target: {{ state_attr('climate.kids_room_ac', 'temperature') }}°C
+      - Preset: {{ state_attr('climate.kids_room_ac', 'preset_mode') }}
 
       **NO direct SmartIR entities are controlled** ⛔
       All control goes through Versatile Thermostat wrappers only.

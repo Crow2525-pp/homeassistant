@@ -36,7 +36,7 @@ entities:
     name: Outside Temperature
     icon: mdi:thermometer
 
-  - entity: climate.living_room_versatile_thermostat
+  - entity: climate.living_room_ac_2
     name: Downstairs Climate
     icon: mdi:thermostat
 
@@ -122,7 +122,7 @@ state_color: true
 #     entities:
 #       - entity: sensor.essendon_airport_temp
 #         secondary_info: last-changed
-#       - entity: climate.living_room_versatile_thermostat
+#       - entity: climate.living_room_ac_2
 #         secondary_info: last-changed
 #       - entity: sensor.living_room_temperature_offset
 #         name: Current Temp
@@ -162,7 +162,7 @@ state_color: true
 # - input_select.morning_preset_override
 # - input_select.morning_lights_rooms
 # - sensor.essendon_airport_temp (or your outside temp sensor)
-# - climate.living_room_versatile_thermostat (or your climate entity)
+# - climate.living_room_ac_2 (or your climate entity)
 # - automation.morning_preheat_downstairs
 # - automation.morning_lights_computer_room
 #

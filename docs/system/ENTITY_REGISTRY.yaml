@@ -23,7 +23,7 @@ climate:
   entities:
     # TIER 1 - PRIMARY (Always prefer these)
     living_room_versatile_thermostat:
-      entity_id: climate.living_room_versatile_thermostat
+      entity_id: climate.living_room_ac_2
       device: Living Room Versatile Thermostat
       room: living_room
       status: active
@@ -39,7 +39,7 @@ climate:
       uses_in_automations: 2
 
     masterbed_versatile_thermostat:
-      entity_id: climate.masterbed_versatile_thermostat
+      entity_id: climate.masterbed_room_ac
       device: Master Bedroom Versatile Thermostat
       room: masterbed
       status: active
@@ -55,7 +55,7 @@ climate:
       uses_in_automations: 2
 
     henry_s_room_versatile_thermostat:
-      entity_id: climate.henry_s_room_versatile_thermostat
+      entity_id: climate.study_room_ac
       device: Study/Henry's Room Versatile Thermostat
       room: study
       status: active
@@ -73,7 +73,7 @@ climate:
       uses_in_automations: 2
 
     otto_s_room_versatile_thermostat:
-      entity_id: climate.otto_s_room
+      entity_id: climate.kids_room_ac
       device: Otto's Room Versatile Thermostat
       room: otto
       status: active
@@ -98,7 +98,7 @@ climate:
       description: Living room climate control (base entity, DEPRECATED)
       manufacturer: Unknown
       reason_deprecated: "Superseded by Versatile Climate thermostats"
-      replacement: climate.living_room_versatile_thermostat
+      replacement: climate.living_room_ac_2
       notes: "Keep for backwards compatibility only. DO NOT use in new automations."
 
     masterbed_ac:
@@ -110,7 +110,7 @@ climate:
       description: Master bedroom climate control (base entity, DEPRECATED)
       manufacturer: Unknown
       reason_deprecated: "Superseded by Versatile Climate thermostats"
-      replacement: climate.masterbed_versatile_thermostat
+      replacement: climate.masterbed_room_ac
       notes: "Keep for backwards compatibility only. DO NOT use in new automations."
 
     study_ac:
@@ -122,7 +122,7 @@ climate:
       description: Study climate control (base entity, DEPRECATED)
       manufacturer: Unknown
       reason_deprecated: "Superseded by Versatile Climate thermostats"
-      replacement: climate.henry_s_room_versatile_thermostat
+      replacement: climate.study_room_ac
       notes: "Keep for backwards compatibility only. DO NOT use in new automations."
 
     otto_s_ac:
@@ -134,7 +134,7 @@ climate:
       description: Otto's room climate control (base entity, DEPRECATED)
       manufacturer: Unknown
       reason_deprecated: "Superseded by Versatile Climate thermostats"
-      replacement: climate.otto_s_room
+      replacement: climate.kids_room_ac
       notes: "Keep for backwards compatibility only. DO NOT use in new automations."
 
 ---

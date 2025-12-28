@@ -112,10 +112,10 @@ cards:
         }
     content: |
       ### Climate State
-      **HVAC Mode:** {{ states('climate.masterbed_versatile_thermostat') | upper }}
-      **Preset Mode:** {{ state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') | default('none') | title }}
-      - Available: {{ state_attr('climate.masterbed_versatile_thermostat', 'preset_modes') | join(', ') }}
-      **Target Temp:** {{ state_attr('climate.masterbed_versatile_thermostat', 'temperature') }}°C
+      **HVAC Mode:** {{ states('climate.masterbed_room_ac') | upper }}
+      **Preset Mode:** {{ state_attr('climate.masterbed_room_ac', 'preset_mode') | default('none') | title }}
+      - Available: {{ state_attr('climate.masterbed_room_ac', 'preset_modes') | join(', ') }}
+      **Target Temp:** {{ state_attr('climate.masterbed_room_ac', 'temperature') }}°C
       **Current Temp:** {{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}°C
       **Humidity:** {{ states('sensor.ble_humidity_masterbed_temp_humidity_sensor') }}%
       **Fan:** {{ states('fan.masterbedroom_fan') | title }}
@@ -138,8 +138,8 @@ cards:
       {% set humidity = states('sensor.ble_humidity_masterbed_temp_humidity_sensor') | float(0) %}
       {% set season = states('input_select.climate_season') %}
       {% set occupancy = states('input_select.occupancy') %}
-      {% set hvac = states('climate.masterbed_versatile_thermostat') %}
-      {% set preset = state_attr('climate.masterbed_versatile_thermostat', 'preset_mode') %}
+      {% set hvac = states('climate.masterbed_room_ac') %}
+      {% set preset = state_attr('climate.masterbed_room_ac', 'preset_mode') %}
       {% set door_open = is_state('binary_sensor.master_bedroom_door_sensor_opening', 'on') %}
       {% set climate_manual = is_state('input_boolean.climate_manual_control_master', 'on') %}
       {% set hot_day = is_state('input_boolean.hot_today_flag', 'on') %}
@@ -314,10 +314,10 @@ cards:
         }
     content: |
       ### Climate State
-      **HVAC Mode:** {{ states('climate.living_room_versatile_thermostat') | upper }}
-      **Preset Mode:** {{ state_attr('climate.living_room_versatile_thermostat', 'preset_mode') | default('none') | title }}
-      - Available: {{ state_attr('climate.living_room_versatile_thermostat', 'preset_modes') | join(', ') }}
-      **Target Temp:** {{ state_attr('climate.living_room_versatile_thermostat', 'temperature') }}°C
+      **HVAC Mode:** {{ states('climate.living_room_ac_2') | upper }}
+      **Preset Mode:** {{ state_attr('climate.living_room_ac_2', 'preset_mode') | default('none') | title }}
+      - Available: {{ state_attr('climate.living_room_ac_2', 'preset_modes') | join(', ') }}
+      **Target Temp:** {{ state_attr('climate.living_room_ac_2', 'temperature') }}°C
       **Current Temp:** {{ states('sensor.living_room_temperature_offset') }}°C
       **Kitchen Temp:** {{ states('sensor.ble_temperature_kitchen_temp_humidity_sensor') }}°C
 
@@ -336,8 +336,8 @@ cards:
       {% set kitchen_temp = states('sensor.ble_temperature_kitchen_temp_humidity_sensor') | float(0) %}
       {% set season = states('input_select.climate_season') %}
       {% set occupancy = states('input_select.occupancy') %}
-      {% set hvac = states('climate.living_room_versatile_thermostat') %}
-      {% set preset = state_attr('climate.living_room_versatile_thermostat', 'preset_mode') %}
+      {% set hvac = states('climate.living_room_ac_2') %}
+      {% set preset = state_attr('climate.living_room_ac_2', 'preset_mode') %}
       {% set manual = is_state('input_boolean.climate_manual_control_living', 'on') %}
       {% set any_door_open = is_state('binary_sensor.living_room_door_sensor_opening', 'on') or is_state('binary_sensor.interior_garage_door_sensor_magnet_opening', 'on') or is_state('binary_sensor.front_door_sensor_opening', 'on') %}
       {% set hot_day = is_state('input_boolean.hot_today_flag', 'on') %}
@@ -449,10 +449,10 @@ cards:
         }
     content: |
       ### Climate State
-      **HVAC Mode:** {{ states('climate.henry_s_room_versatile_thermostat') | upper }}
-      **Preset Mode:** {{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') | default('none') | title }}
-      - Available: {{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_modes') | join(', ') }}
-      **Target Temp:** {{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') }}°C
+      **HVAC Mode:** {{ states('climate.study_room_ac') | upper }}
+      **Preset Mode:** {{ state_attr('climate.study_room_ac', 'preset_mode') | default('none') | title }}
+      - Available: {{ state_attr('climate.study_room_ac', 'preset_modes') | join(', ') }}
+      **Target Temp:** {{ state_attr('climate.study_room_ac', 'temperature') }}°C
       **Current Temp:** {{ states('sensor.study_room_temp_humidity_sensor_temperature') }}°C
       **Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.henry_door_sensor_magnet_opening', 'on') else 'Closed ✅' }}
       **Manual Override:** {{ '🔴 ACTIVE' if is_state('input_boolean.climate_manual_control_study', 'on') else '✅ Off' }}
@@ -461,8 +461,8 @@ cards:
       {% set temp = states('sensor.study_room_temp_humidity_sensor_temperature') | float(0) %}
       {% set season = states('input_select.climate_season') %}
       {% set occupancy = states('input_select.occupancy') %}
-      {% set hvac = states('climate.henry_s_room_versatile_thermostat') %}
-      {% set preset = state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') %}
+      {% set hvac = states('climate.study_room_ac') %}
+      {% set preset = state_attr('climate.study_room_ac', 'preset_mode') %}
       {% set door_open = is_state('binary_sensor.henry_door_sensor_magnet_opening', 'on') %}
       {% set manual = is_state('input_boolean.climate_manual_control_study', 'on') %}
       {% set hot_day = is_state('input_boolean.hot_today_flag', 'on') %}
@@ -605,10 +605,10 @@ cards:
         }
     content: |
       ### Climate State
-      **HVAC Mode:** {{ states('climate.otto_s_room') | upper }}
-      **Preset Mode:** {{ state_attr('climate.otto_s_room', 'preset_mode') | default('none') | title }}
-      - Available: {{ state_attr('climate.otto_s_room', 'preset_modes') | join(', ') }}
-      **Target Temp:** {{ state_attr('climate.otto_s_room', 'temperature') }}°C
+      **HVAC Mode:** {{ states('climate.kids_room_ac') | upper }}
+      **Preset Mode:** {{ state_attr('climate.kids_room_ac', 'preset_mode') | default('none') | title }}
+      - Available: {{ state_attr('climate.kids_room_ac', 'preset_modes') | join(', ') }}
+      **Target Temp:** {{ state_attr('climate.kids_room_ac', 'temperature') }}°C
       **Current Temp:** {{ states('sensor.kids_room_temp_humidity_sensor_temperature') }}°C
       **Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.otto_room_door_sensor_opening', 'on') else 'Closed ✅' }}
       **Manual Override:** {{ '🔴 ACTIVE' if is_state('input_boolean.climate_manual_control_otto', 'on') else '✅ Off' }}
@@ -617,8 +617,8 @@ cards:
       {% set temp = states('sensor.kids_room_temp_humidity_sensor_temperature') | float(0) %}
       {% set season = states('input_select.climate_season') %}
       {% set occupancy = states('input_select.occupancy') %}
-      {% set hvac = states('climate.otto_s_room') %}
-      {% set preset = state_attr('climate.otto_s_room', 'preset_mode') %}
+      {% set hvac = states('climate.kids_room_ac') %}
+      {% set preset = state_attr('climate.kids_room_ac', 'preset_mode') %}
       {% set door_open = is_state('binary_sensor.otto_room_door_sensor_opening', 'on') %}
       {% set manual = is_state('input_boolean.climate_manual_control_otto', 'on') %}
       {% set hot_day = is_state('input_boolean.hot_today_flag', 'on') %}

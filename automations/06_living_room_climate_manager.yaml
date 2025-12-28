@@ -91,12 +91,12 @@
         entity_id: input_boolean.super_hot_today
         state: 'on'
       - condition: state
-        entity_id: climate.living_room_versatile_thermostat
+        entity_id: climate.living_room_ac_2
         state: heat
       sequence:
       - service: climate.set_hvac_mode
         target:
-          entity_id: climate.living_room_versatile_thermostat
+          entity_id: climate.living_room_ac_2
         data:
           hvac_mode: 'off'
       - stop: Super hot forecast - shutting off morning heating at 07:00
@@ -107,12 +107,12 @@
         entity_id: input_boolean.hot_today_flag
         state: 'on'
       - condition: state
-        entity_id: climate.living_room_versatile_thermostat
+        entity_id: climate.living_room_ac_2
         state: heat
       sequence:
       - service: climate.set_hvac_mode
         target:
-          entity_id: climate.living_room_versatile_thermostat
+          entity_id: climate.living_room_ac_2
         data:
           hvac_mode: 'off'
       - stop: Hot forecast - shutting off morning heating at 07:30
@@ -123,12 +123,12 @@
         entity_id: input_boolean.warm_today_flag
         state: 'on'
       - condition: state
-        entity_id: climate.living_room_versatile_thermostat
+        entity_id: climate.living_room_ac_2
         state: heat
       sequence:
       - service: climate.set_hvac_mode
         target:
-          entity_id: climate.living_room_versatile_thermostat
+          entity_id: climate.living_room_ac_2
         data:
           hvac_mode: 'off'
       - stop: Warm forecast - shutting off morning heating at 08:00
@@ -142,12 +142,12 @@
           - condition: not
             conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               state: 'off'
           sequence:
           - service: climate.set_hvac_mode
             target:
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
             data:
               hvac_mode: 'off'
       - stop: Holiday mode - climate disabled
@@ -169,13 +169,13 @@
           - condition: not
             conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               attribute: preset_mode
               state: eco
           sequence:
           - service: climate.set_preset_mode
             target:
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
             data:
               preset_mode: eco
       - choose:
@@ -183,12 +183,12 @@
           - condition: not
             conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               state: cool
           sequence:
           - service: climate.set_hvac_mode
             target:
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
             data:
               hvac_mode: cool
       - stop: Away with hot day - eco cooling active
@@ -202,18 +202,18 @@
           - condition: not
             conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               state: 'off'
           sequence:
           - service: climate.set_hvac_mode
             target:
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
             data:
               hvac_mode: 'off'
       - stop: Away mode - climate disabled
     - conditions:
       - condition: state
-        entity_id: climate.living_room_versatile_thermostat
+        entity_id: climate.living_room_ac_2
         state: heat
         for:
           minutes: 30
@@ -231,18 +231,18 @@
           - condition: not
             conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               state: 'off'
           sequence:
           - service: climate.set_hvac_mode
             target:
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
             data:
               hvac_mode: 'off'
       - stop: Target temperature reached - shutting off
     - conditions:
       - condition: state
-        entity_id: climate.living_room_versatile_thermostat
+        entity_id: climate.living_room_ac_2
         state: 'off'
       - condition: numeric_state
         entity_id: sensor.living_room_temperature_offset
@@ -277,13 +277,13 @@
           - condition: not
             conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               attribute: preset_mode
               state: eco
           sequence:
           - service: climate.set_preset_mode
             target:
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
             data:
               preset_mode: eco
       - choose:
@@ -291,12 +291,12 @@
           - condition: not
             conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               state: heat
           sequence:
           - service: climate.set_hvac_mode
             target:
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
             data:
               hvac_mode: heat
     - conditions:
@@ -332,13 +332,13 @@
           - condition: not
             conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               attribute: preset_mode
               state: comfort
           sequence:
           - service: climate.set_preset_mode
             target:
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
             data:
               preset_mode: comfort
       - choose:
@@ -346,12 +346,12 @@
           - condition: not
             conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               state: heat
           sequence:
           - service: climate.set_hvac_mode
             target:
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
             data:
               hvac_mode: heat
     - conditions:
@@ -387,13 +387,13 @@
           - condition: not
             conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               attribute: preset_mode
               state: comfort
           sequence:
           - service: climate.set_preset_mode
             target:
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
             data:
               preset_mode: comfort
       - choose:
@@ -401,12 +401,12 @@
           - condition: not
             conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               state: heat
           sequence:
           - service: climate.set_hvac_mode
             target:
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
             data:
               hvac_mode: heat
     - conditions:
@@ -442,13 +442,13 @@
           - condition: not
             conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               attribute: preset_mode
               state: comfort
           sequence:
           - service: climate.set_preset_mode
             target:
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
             data:
               preset_mode: comfort
       - choose:
@@ -456,12 +456,12 @@
           - condition: not
             conditions:
             - condition: state
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
               state: heat
           sequence:
           - service: climate.set_hvac_mode
             target:
-              entity_id: climate.living_room_versatile_thermostat
+              entity_id: climate.living_room_ac_2
             data:
               hvac_mode: heat
     - conditions:
@@ -492,13 +492,13 @@
               - condition: not
                 conditions:
                 - condition: state
-                  entity_id: climate.living_room_versatile_thermostat
+                  entity_id: climate.living_room_ac_2
                   attribute: preset_mode
                   state: comfort
               sequence:
               - service: climate.set_preset_mode
                 target:
-                  entity_id: climate.living_room_versatile_thermostat
+                  entity_id: climate.living_room_ac_2
                 data:
                   preset_mode: comfort
           - choose:
@@ -506,12 +506,12 @@
               - condition: not
                 conditions:
                 - condition: state
-                  entity_id: climate.living_room_versatile_thermostat
+                  entity_id: climate.living_room_ac_2
                   state: dry
               sequence:
               - service: climate.set_hvac_mode
                 target:
-                  entity_id: climate.living_room_versatile_thermostat
+                  entity_id: climate.living_room_ac_2
                 data:
                   hvac_mode: dry
         - conditions:
@@ -535,13 +535,13 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       attribute: preset_mode
                       state: comfort
                   sequence:
                   - service: climate.set_preset_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       preset_mode: comfort
               - choose:
@@ -549,12 +549,12 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       state: heat
                   sequence:
                   - service: climate.set_hvac_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       hvac_mode: heat
             default:
@@ -563,12 +563,12 @@
                 - condition: not
                   conditions:
                   - condition: state
-                    entity_id: climate.living_room_versatile_thermostat
+                    entity_id: climate.living_room_ac_2
                     state: 'off'
                 sequence:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.living_room_versatile_thermostat
+                    entity_id: climate.living_room_ac_2
                   data:
                     hvac_mode: 'off'
         - conditions:
@@ -595,13 +595,13 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       attribute: preset_mode
                       state: comfort
                   sequence:
                   - service: climate.set_preset_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       preset_mode: comfort
               - choose:
@@ -609,12 +609,12 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       state: heat
                   sequence:
                   - service: climate.set_hvac_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       hvac_mode: heat
             - conditions:
@@ -647,13 +647,13 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       attribute: preset_mode
                       state: comfort
                   sequence:
                   - service: climate.set_preset_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       preset_mode: comfort
               - choose:
@@ -661,12 +661,12 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       state: cool
                   sequence:
                   - service: climate.set_hvac_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       hvac_mode: cool
             - conditions:
@@ -680,13 +680,13 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       attribute: preset_mode
                       state: eco
                   sequence:
                   - service: climate.set_preset_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       preset_mode: eco
               - choose:
@@ -694,12 +694,12 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       state: fan_only
                   sequence:
                   - service: climate.set_hvac_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       hvac_mode: fan_only
             default:
@@ -708,12 +708,12 @@
                 - condition: not
                   conditions:
                   - condition: state
-                    entity_id: climate.living_room_versatile_thermostat
+                    entity_id: climate.living_room_ac_2
                     state: 'off'
                 sequence:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.living_room_versatile_thermostat
+                    entity_id: climate.living_room_ac_2
                   data:
                     hvac_mode: 'off'
         - conditions:
@@ -740,13 +740,13 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       attribute: preset_mode
                       state: comfort
                   sequence:
                   - service: climate.set_preset_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       preset_mode: comfort
               - choose:
@@ -754,12 +754,12 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       state: heat
                   sequence:
                   - service: climate.set_hvac_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       hvac_mode: heat
             - conditions:
@@ -777,13 +777,13 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       attribute: preset_mode
                       state: comfort
                   sequence:
                   - service: climate.set_preset_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       preset_mode: comfort
               - choose:
@@ -791,12 +791,12 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       state: heat
                   sequence:
                   - service: climate.set_hvac_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       hvac_mode: heat
             - conditions:
@@ -832,13 +832,13 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       attribute: preset_mode
                       state: comfort
                   sequence:
                   - service: climate.set_preset_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       preset_mode: comfort
               - choose:
@@ -846,12 +846,12 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       state: cool
                   sequence:
                   - service: climate.set_hvac_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       hvac_mode: cool
             default:
@@ -860,12 +860,12 @@
                 - condition: not
                   conditions:
                   - condition: state
-                    entity_id: climate.living_room_versatile_thermostat
+                    entity_id: climate.living_room_ac_2
                     state: 'off'
                 sequence:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.living_room_versatile_thermostat
+                    entity_id: climate.living_room_ac_2
                   data:
                     hvac_mode: 'off'
         - conditions:
@@ -904,13 +904,13 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       attribute: preset_mode
                       state: comfort
                   sequence:
                   - service: climate.set_preset_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       preset_mode: comfort
               - choose:
@@ -918,12 +918,12 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       state: cool
                   sequence:
                   - service: climate.set_hvac_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       hvac_mode: cool
             - conditions:
@@ -944,13 +944,13 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       attribute: preset_mode
                       state: comfort
                   sequence:
                   - service: climate.set_preset_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       preset_mode: comfort
               - choose:
@@ -958,12 +958,12 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       state: heat
                   sequence:
                   - service: climate.set_hvac_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       hvac_mode: heat
             - conditions:
@@ -981,13 +981,13 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       attribute: preset_mode
                       state: comfort
                   sequence:
                   - service: climate.set_preset_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       preset_mode: comfort
               - choose:
@@ -995,12 +995,12 @@
                   - condition: not
                     conditions:
                     - condition: state
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                       state: heat
                   sequence:
                   - service: climate.set_hvac_mode
                     target:
-                      entity_id: climate.living_room_versatile_thermostat
+                      entity_id: climate.living_room_ac_2
                     data:
                       hvac_mode: heat
             default:
@@ -1009,12 +1009,12 @@
                 - condition: not
                   conditions:
                   - condition: state
-                    entity_id: climate.living_room_versatile_thermostat
+                    entity_id: climate.living_room_ac_2
                     state: 'off'
                 sequence:
                 - service: climate.set_hvac_mode
                   target:
-                    entity_id: climate.living_room_versatile_thermostat
+                    entity_id: climate.living_room_ac_2
                   data:
                     hvac_mode: 'off'
         default:
@@ -1023,12 +1023,12 @@
             - condition: not
               conditions:
               - condition: state
-                entity_id: climate.living_room_versatile_thermostat
+                entity_id: climate.living_room_ac_2
                 state: 'off'
             sequence:
             - service: climate.set_hvac_mode
               target:
-                entity_id: climate.living_room_versatile_thermostat
+                entity_id: climate.living_room_ac_2
               data:
                 hvac_mode: 'off'
     default: []

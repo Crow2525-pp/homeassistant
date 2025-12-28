@@ -303,7 +303,7 @@ views:
   #         - type: heading
   #           heading: "Air Conditioning "
   #         - type: tile
-  #           entity: climate.living_room_versatile_thermostat
+  #           entity: climate.living_room_ac_2
   #           name: Living Room
   #           hide_state: false
   #           vertical: false
@@ -317,7 +317,7 @@ views:
   #               style: dropdown
   #             - type: target-temperature
   #         - type: tile
-  #           entity: climate.henry_s_room_versatile_thermostat
+  #           entity: climate.study_room_ac
   #           features:
   #             - type: climate-hvac-modes
   #             - type: climate-preset-modes
@@ -329,9 +329,9 @@ views:
   #               style: dropdown
   #             - type: target-temperature
   #           type: tile
-  #           entity: climate.masterbed_versatile_thermostat
+  #           entity: climate.masterbed_room_ac
   #         - type: tile
-  #           entity: climate.otto_s_room
+  #           entity: climate.kids_room_ac
   #           features:
   #             - type: climate-hvac-modes
   #             - type: climate-preset-modes
@@ -370,7 +370,7 @@ views:
   #             - type: climate-preset-modes
   #               style: dropdown
   #           type: tile
-  #           entity: climate.masterbed_versatile_thermostat
+  #           entity: climate.masterbed_room_ac
   #           name: Themostat
   #           state_content:
   #             - state
@@ -545,7 +545,7 @@ views:
   #             - type: climate-preset-modes
   #               style: dropdown
   #           type: tile
-  #           entity: climate.otto_s_room
+  #           entity: climate.kids_room_ac
   #           name: Themostat
   #           state_content:
   #             - state
@@ -574,7 +574,7 @@ views:
   #             - type: climate-preset-modes
   #               style: dropdown
   #           type: tile
-  #           entity: climate.living_room_versatile_thermostat
+  #           entity: climate.living_room_ac_2
   #           name: Themostat
   #           state_content:
   #             - state
@@ -836,7 +836,7 @@ views:
   #         - type: heading
   #           heading: HVAC
   #         - type: tile
-  #           entity: climate.living_room_versatile_thermostat
+  #           entity: climate.living_room_ac_2
   #           features:
   #             - type: climate-fan-modes
   #               style: dropdown
@@ -865,7 +865,7 @@ views:
   #                 - activity
   #             - type: target-temperature
   #         - type: tile
-  #           entity: climate.masterbed_versatile_thermostat
+  #           entity: climate.masterbed_room_ac
   #           features:
   #             - type: climate-fan-modes
   #               style: dropdown
@@ -899,7 +899,7 @@ views:
   #                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   #               }
   #         - type: tile
-  #           entity: climate.otto_s_room
+  #           entity: climate.kids_room_ac
   #           hide_state: false
   #           features:
   #             - type: climate-fan-modes
@@ -936,7 +936,7 @@ views:
   #                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   #               }
   #         - type: tile
-  #           entity: climate.henry_s_room_versatile_thermostat
+  #           entity: climate.study_room_ac
   #           features:
   #             - type: climate-fan-modes
   #               style: dropdown
@@ -985,7 +985,7 @@ views:
   #             - entity: sensor.essendon_airport_wind_speed_kilometre
   #           title: Outside Temp
   #         - type: tile
-  #           entity: climate.masterbed_versatile_thermostat
+  #           entity: climate.masterbed_room_ac
   #           features:
   #             - type: climate-fan-modes
   #               style: dropdown
@@ -1049,7 +1049,7 @@ views:
   #         - type: tile
   #           entity: climate.masterbed_ac
   #         - type: tile
-  #           entity: climate.masterbed_versatile_thermostat
+  #           entity: climate.masterbed_room_ac
   #         - type: thermostat
   #           entity: climate.masterbed_ac
   #           features:

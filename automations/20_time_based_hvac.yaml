@@ -62,7 +62,7 @@
           sequence:
             - action: climate.turn_on
               target:
-                entity_id: climate.living_room_versatile_thermostat
+                entity_id: climate.living_room_ac_2
 
         # Time gates - set comfort and choose heat/cool for the day
         - conditions:
@@ -79,7 +79,7 @@
           sequence:
             - action: climate.set_preset_mode
               target:
-                entity_id: climate.living_room_versatile_thermostat
+                entity_id: climate.living_room_ac_2
               data:
                 preset_mode: comfort
             # Determine heat or cool based on season only (no outside temp)
@@ -97,7 +97,7 @@
                   sequence:
                     - action: climate.set_hvac_mode
                       target:
-                        entity_id: climate.living_room_versatile_thermostat
+                        entity_id: climate.living_room_ac_2
                       data:
                         hvac_mode: heat
                 # Summer/Spring - Cool
@@ -113,14 +113,14 @@
                   sequence:
                     - action: climate.set_hvac_mode
                       target:
-                        entity_id: climate.living_room_versatile_thermostat
+                        entity_id: climate.living_room_ac_2
                       data:
                         hvac_mode: cool
               # Default - off if no season match
               default:
                 - action: climate.set_hvac_mode
                   target:
-                    entity_id: climate.living_room_versatile_thermostat
+                    entity_id: climate.living_room_ac_2
                   data:
                     hvac_mode: "off"
   mode: single
@@ -161,7 +161,7 @@
     # Step 1: Set comfort preset for daytime
     - action: climate.set_preset_mode
       target:
-        entity_id: climate.masterbed_versatile_thermostat
+        entity_id: climate.masterbed_room_ac
       data:
         preset_mode: comfort
 
@@ -180,7 +180,7 @@
           sequence:
             - action: climate.set_hvac_mode
               target:
-                entity_id: climate.masterbed_versatile_thermostat
+                entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
 
@@ -197,7 +197,7 @@
           sequence:
             - action: climate.set_hvac_mode
               target:
-                entity_id: climate.masterbed_versatile_thermostat
+                entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
 
@@ -247,12 +247,12 @@
           sequence:
             - action: climate.set_preset_mode
               target:
-                entity_id: climate.masterbed_versatile_thermostat
+                entity_id: climate.masterbed_room_ac
               data:
                 preset_mode: eco
             - action: climate.set_hvac_mode
               target:
-                entity_id: climate.masterbed_versatile_thermostat
+                entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
 
@@ -269,12 +269,12 @@
           sequence:
             - action: climate.set_preset_mode
               target:
-                entity_id: climate.masterbed_versatile_thermostat
+                entity_id: climate.masterbed_room_ac
               data:
                 preset_mode: boost
             - action: climate.set_hvac_mode
               target:
-                entity_id: climate.masterbed_versatile_thermostat
+                entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
 
@@ -298,7 +298,7 @@
   actions:
     - action: climate.turn_on
       target:
-        entity_id: climate.masterbed_versatile_thermostat
+        entity_id: climate.masterbed_room_ac
   mode: single
 
 # ============================================================================
@@ -337,7 +337,7 @@
     # Step 1: Set comfort preset for daytime
     - action: climate.set_preset_mode
       target:
-        entity_id: climate.otto_s_room
+        entity_id: climate.kids_room_ac
       data:
         preset_mode: comfort
 
@@ -356,7 +356,7 @@
           sequence:
             - action: climate.set_hvac_mode
               target:
-                entity_id: climate.otto_s_room
+                entity_id: climate.kids_room_ac
               data:
                 hvac_mode: heat
 
@@ -373,7 +373,7 @@
           sequence:
             - action: climate.set_hvac_mode
               target:
-                entity_id: climate.otto_s_room
+                entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
 
@@ -423,12 +423,12 @@
           sequence:
             - action: climate.set_preset_mode
               target:
-                entity_id: climate.otto_s_room
+                entity_id: climate.kids_room_ac
               data:
                 preset_mode: eco
             - action: climate.set_hvac_mode
               target:
-                entity_id: climate.otto_s_room
+                entity_id: climate.kids_room_ac
               data:
                 hvac_mode: heat
 
@@ -445,12 +445,12 @@
           sequence:
             - action: climate.set_preset_mode
               target:
-                entity_id: climate.otto_s_room
+                entity_id: climate.kids_room_ac
               data:
                 preset_mode: boost
             - action: climate.set_hvac_mode
               target:
-                entity_id: climate.otto_s_room
+                entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
 
@@ -474,7 +474,7 @@
   actions:
     - action: climate.turn_on
       target:
-        entity_id: climate.otto_s_room
+        entity_id: climate.kids_room_ac
   mode: single
 
 # ============================================================================
@@ -513,7 +513,7 @@
     # Step 1: Set comfort preset for daytime
     - action: climate.set_preset_mode
       target:
-        entity_id: climate.henry_s_room_versatile_thermostat
+        entity_id: climate.study_room_ac
       data:
         preset_mode: comfort
 
@@ -532,7 +532,7 @@
           sequence:
             - action: climate.set_hvac_mode
               target:
-                entity_id: climate.henry_s_room_versatile_thermostat
+                entity_id: climate.study_room_ac
               data:
                 hvac_mode: heat
 
@@ -549,7 +549,7 @@
           sequence:
             - action: climate.set_hvac_mode
               target:
-                entity_id: climate.henry_s_room_versatile_thermostat
+                entity_id: climate.study_room_ac
               data:
                 hvac_mode: cool
 
@@ -599,12 +599,12 @@
           sequence:
             - action: climate.set_preset_mode
               target:
-                entity_id: climate.henry_s_room_versatile_thermostat
+                entity_id: climate.study_room_ac
               data:
                 preset_mode: eco
             - action: climate.set_hvac_mode
               target:
-                entity_id: climate.henry_s_room_versatile_thermostat
+                entity_id: climate.study_room_ac
               data:
                 hvac_mode: heat
 
@@ -621,12 +621,12 @@
           sequence:
             - action: climate.set_preset_mode
               target:
-                entity_id: climate.henry_s_room_versatile_thermostat
+                entity_id: climate.study_room_ac
               data:
                 preset_mode: boost
             - action: climate.set_hvac_mode
               target:
-                entity_id: climate.henry_s_room_versatile_thermostat
+                entity_id: climate.study_room_ac
               data:
                 hvac_mode: cool
 
@@ -650,5 +650,5 @@
   actions:
     - action: climate.turn_on
       target:
-        entity_id: climate.henry_s_room_versatile_thermostat
+        entity_id: climate.study_room_ac
   mode: single

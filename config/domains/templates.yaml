@@ -1143,7 +1143,7 @@
             {% set master.open = master.open + [name] %}
           {% endif %}
         {% endfor %}
-        {% set master_climate = states('climate.masterbed_versatile_thermostat') %}
+        {% set master_climate = states('climate.masterbed_room_ac') %}
         {% if master_climate not in ['off', 'unavailable', 'unknown'] and master.open %}
           {% set mode = state_attr('climate.masterbed_ac', 'hvac_action') or 'running' %}
           {% if mode == 'cooling' %}
@@ -1163,7 +1163,7 @@
             {% set otto.open = otto.open + [name] %}
           {% endif %}
         {% endfor %}
-        {% set otto_climate = states('climate.otto_s_room') %}
+        {% set otto_climate = states('climate.kids_room_ac') %}
         {% if otto_climate not in ['off', 'unavailable', 'unknown'] and otto.open %}
           {% set mode = state_attr('climate.otto_s_ac', 'hvac_action') or 'running' %}
           {% if mode == 'cooling' %}
@@ -1183,7 +1183,7 @@
             {% set study.open = study.open + [name] %}
           {% endif %}
         {% endfor %}
-        {% set study_climate = states('climate.henry_s_room_versatile_thermostat') %}
+        {% set study_climate = states('climate.study_room_ac') %}
         {% if study_climate not in ['off', 'unavailable', 'unknown'] and study.open %}
           {% set mode = state_attr('climate.study_ac', 'hvac_action') or 'running' %}
           {% if mode == 'cooling' %}
