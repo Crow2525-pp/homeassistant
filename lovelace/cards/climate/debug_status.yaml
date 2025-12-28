@@ -453,12 +453,12 @@ cards:
       **Preset Mode:** {{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_mode') | default('none') | title }}
       - Available: {{ state_attr('climate.henry_s_room_versatile_thermostat', 'preset_modes') | join(', ') }}
       **Target Temp:** {{ state_attr('climate.henry_s_room_versatile_thermostat', 'temperature') }}°C
-      **Current Temp:** {{ states('sensor.study_esp32_henrysroom_temperature') }}°C
+      **Current Temp:** {{ states('sensor.study_esp32_study_temperature') }}°C
       **Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.henry_door_sensor_magnet_opening', 'on') else 'Closed ✅' }}
       **Manual Override:** {{ '🔴 ACTIVE' if is_state('input_boolean.climate_manual_control_study', 'on') else '✅ Off' }}
 
       ### Why Current State?
-      {% set temp = states('sensor.study_esp32_henrysroom_temperature') | float(0) %}
+      {% set temp = states('sensor.study_esp32_study_temperature') | float(0) %}
       {% set season = states('input_select.climate_season') %}
       {% set occupancy = states('input_select.occupancy') %}
       {% set hvac = states('climate.henry_s_room_versatile_thermostat') %}
@@ -609,12 +609,12 @@ cards:
       **Preset Mode:** {{ state_attr('climate.otto_s_room', 'preset_mode') | default('none') | title }}
       - Available: {{ state_attr('climate.otto_s_room', 'preset_modes') | join(', ') }}
       **Target Temp:** {{ state_attr('climate.otto_s_room', 'temperature') }}°C
-      **Current Temp:** {{ states('sensor.study_esp32_ottosroom_temperature') }}°C
+      **Current Temp:** {{ states('sensor.study_esp32_kidsroom_temperature') }}°C
       **Door:** {{ 'OPEN 🚪' if is_state('binary_sensor.otto_room_door_sensor_opening', 'on') else 'Closed ✅' }}
       **Manual Override:** {{ '🔴 ACTIVE' if is_state('input_boolean.climate_manual_control_otto', 'on') else '✅ Off' }}
 
       ### Why Current State?
-      {% set temp = states('sensor.study_esp32_ottosroom_temperature') | float(0) %}
+      {% set temp = states('sensor.study_esp32_kidsroom_temperature') | float(0) %}
       {% set season = states('input_select.climate_season') %}
       {% set occupancy = states('input_select.occupancy') %}
       {% set hvac = states('climate.otto_s_room') %}

@@ -124,7 +124,7 @@
 
   trigger:
     - platform: numeric_state
-      entity_id: sensor.study_esp32_henrysroom_humidity
+      entity_id: sensor.study_esp32_study_humidity
       above: 55
       for:
         minutes: 5
@@ -168,7 +168,7 @@
       data:
         name: "Study Humidity Control"
         message: >
-          Dry mode activated - humidity at {{ states('sensor.study_esp32_henrysroom_humidity') }}%
+          Dry mode activated - humidity at {{ states('sensor.study_esp32_study_humidity') }}%
 
   mode: single
 
@@ -182,7 +182,7 @@
 
   trigger:
     - platform: numeric_state
-      entity_id: sensor.study_esp32_ottosroom_humidity
+      entity_id: sensor.study_esp32_kidsroom_humidity
       above: 55
       for:
         minutes: 5
@@ -226,6 +226,6 @@
       data:
         name: "Kids Room Humidity Control"
         message: >
-          Dry mode activated - humidity at {{ states('sensor.study_esp32_ottosroom_humidity') }}%
+          Dry mode activated - humidity at {{ states('sensor.study_esp32_kidsroom_humidity') }}%
 
   mode: single
