@@ -106,6 +106,19 @@ cards:
                   border: 1px solid rgba(255, 255, 255, 0.1);
                   box-shadow: none;
                 }
+          - type: heading
+            heading_style: subtitle
+            badges:
+              - type: entity
+                entity: binary_sensor.master_bedroom_door_sensor_opening
+                show_state: true
+                name: "Master Bedroom Door"
+                state_content:
+                  - state
+                  - last_changed
+                color: state
+                tap_action:
+                  action: more-info
       # Otto's Room
       - type: vertical-stack
         card_mod:
@@ -203,6 +216,19 @@ cards:
                   border: 1px solid rgba(255, 255, 255, 0.1);
                   box-shadow: none;
                 }
+          - type: heading
+            heading_style: subtitle
+            badges:
+              - type: entity
+                entity: binary_sensor.otto_room_door_sensor_opening
+                name: "Otto's Room Door"
+                show_state: true
+                state_content:
+                  - state
+                  - last_changed
+                color: state
+                tap_action:
+                  action: more-info
   - type: grid
     columns: 2
     cards:
@@ -298,6 +324,19 @@ cards:
                   border: 1px solid rgba(255, 255, 255, 0.1);
                   box-shadow: none;
                 }
+          - type: heading
+            heading_style: subtitle
+            badges:
+              - type: entity
+                entity: binary_sensor.henry_door_sensor_magnet_opening
+                name: "Henry's Room Door"
+                show_state: true
+                state_content:
+                  - state
+                  - last_changed
+                color: state
+                tap_action:
+                  action: more-info
       # Living Room
       - type: vertical-stack
         cards:
@@ -390,6 +429,32 @@ cards:
                   border: 1px solid rgba(255, 255, 255, 0.1);
                   box-shadow: none;
                 }
+          - type: heading
+            heading_style: subtitle
+            badges:
+              - type: entity
+                entity: binary_sensor.living_room_door_sensor_opening
+                name: "Living Room Door"
+                show_state: true
+                state_content:
+                  - state
+                  - last_changed
+                color: state
+                tap_action:
+                  action: more-info
+          - type: heading
+            heading_style: subtitle
+            badges:
+              - type: entity
+                entity: binary_sensor.interior_garage_door_sensor_magnet_opening
+                name: "Interior Garage Door"
+                show_state: true
+                state_content:
+                  - state
+                  - last_changed
+                color: state
+                tap_action:
+                  action: more-info
   - type: grid
     columns: 2
     cards:
