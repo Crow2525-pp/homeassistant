@@ -2,13 +2,13 @@
 # Labels and room assignments for automatic organization
 
 # Master Bedroom
-sensor.ble_temperature_masterbed_temp_humidity_sensor:
+sensor.masterbedroom_masterbed_temperature:
   friendly_name: "Master Bedroom Temperature"
   device_class: temperature
   room: master_bedroom
   category: climate
 
-sensor.ble_humidity_masterbed_temp_humidity_sensor:
+sensor.masterbedroom_masterbed_humidity:
   friendly_name: "Master Bedroom Humidity"
   device_class: humidity
   room: master_bedroom

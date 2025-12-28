@@ -166,7 +166,7 @@
   - choose:
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        entity_id: sensor.masterbedroom_masterbed_temperature
         above: 26
         alias: Actual Temp >26°C (Super Hot)
       sequence:
@@ -182,7 +182,7 @@
         alias: Clear Hot and Warm (super hot takes priority)
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        entity_id: sensor.masterbedroom_masterbed_temperature
         above: 24
         below: 26
         alias: Actual Temp 24-26°C (Hot)
@@ -199,7 +199,7 @@
         alias: Clear Super Hot and Warm (hot takes priority)
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        entity_id: sensor.masterbedroom_masterbed_temperature
         above: 20
         below: 24
         alias: Actual Temp 20-24°C (Warm)
@@ -216,7 +216,7 @@
         alias: Clear Hot and Super Hot (warm takes priority)
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        entity_id: sensor.masterbedroom_masterbed_temperature
         below: 5
         alias: Actual Temp <5°C (Super Cold)
       sequence:
@@ -235,7 +235,7 @@
         alias: Clear all other flags (super cold takes priority)
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        entity_id: sensor.masterbedroom_masterbed_temperature
         above: 5
         below: 10
         alias: Actual Temp 5-10°C (Cold)
@@ -255,7 +255,7 @@
         alias: Clear all other flags (cold takes priority)
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        entity_id: sensor.masterbedroom_masterbed_temperature
         above: 10
         below: 15
         alias: Actual Temp 10-15°C (Cool)
@@ -275,7 +275,7 @@
         alias: Clear all other flags (cool takes priority)
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+        entity_id: sensor.masterbedroom_masterbed_temperature
         above: 15
         below: 20
         alias: Actual Temp 15-20°C (Mild)
@@ -699,19 +699,19 @@
     seasons. Respects manual overrides, door state, and working-from-home schedule.
   triggers:
   - platform: numeric_state
-    entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+    entity_id: sensor.masterbedroom_masterbed_temperature
     above: input_number.master_bedroom_temp_comfort_high
     for:
       minutes: 10
     id: temp_high
   - platform: numeric_state
-    entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+    entity_id: sensor.masterbedroom_masterbed_temperature
     below: input_number.master_bedroom_temp_comfort_low
     for:
       minutes: 10
     id: temp_low
   - platform: numeric_state
-    entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+    entity_id: sensor.masterbedroom_masterbed_humidity
     above: 20
     for:
       minutes: 5
@@ -801,7 +801,7 @@
             - alias: Very Hot (>26.5°C) - Aggressive Cooling
               conditions:
               - condition: numeric_state
-                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                entity_id: sensor.masterbedroom_masterbed_temperature
                 above: 26.5
               sequence:
               - if:
@@ -831,7 +831,7 @@
             - alias: Hot (25.5-26.5°C) - Moderate Cooling
               conditions:
               - condition: numeric_state
-                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                entity_id: sensor.masterbedroom_masterbed_temperature
                 above: 25.5
               sequence:
               - if:
@@ -861,7 +861,7 @@
             - alias: Warm (24-25.5°C) - Light Cooling
               conditions:
               - condition: numeric_state
-                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                entity_id: sensor.masterbedroom_masterbed_temperature
                 above: input_number.master_bedroom_temp_comfort_high
               sequence:
               - service: cover.close_cover
@@ -912,7 +912,7 @@
             - alias: Very Hot (>26°C) - Aggressive Cooling
               conditions:
               - condition: numeric_state
-                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                entity_id: sensor.masterbedroom_masterbed_temperature
                 above: 26
               sequence:
               - service: fan.set_percentage
@@ -938,7 +938,7 @@
             - alias: Hot (24-26°C) - Fan Only
               conditions:
               - condition: numeric_state
-                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                entity_id: sensor.masterbedroom_masterbed_temperature
                 above: input_number.master_bedroom_temp_comfort_high
               sequence:
               - service: fan.set_percentage
@@ -965,7 +965,7 @@
             - alias: Very Hot (>26°C) - Aggressive Cooling
               conditions:
               - condition: numeric_state
-                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                entity_id: sensor.masterbedroom_masterbed_temperature
                 above: 26
               sequence:
               - if:
@@ -1003,7 +1003,7 @@
             - alias: Hot (24-26°C) - Moderate Cooling
               conditions:
               - condition: numeric_state
-                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                entity_id: sensor.masterbedroom_masterbed_temperature
                 above: input_number.master_bedroom_temp_comfort_high
               sequence:
               - service: cover.close_cover
@@ -1032,7 +1032,7 @@
             - alias: High Humidity (>20%) - Ventilation
               conditions:
               - condition: numeric_state
-                entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+                entity_id: sensor.masterbedroom_masterbed_humidity
                 above: 20
               - condition: state
                 entity_id: binary_sensor.balcony_door_sensor_magnet_opening_2
@@ -1044,7 +1044,7 @@
                   entity_id: cover.roller_blinds_chan1
               - if:
                 - condition: numeric_state
-                  entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+                  entity_id: sensor.masterbedroom_masterbed_humidity
                   above: 24
                 then:
                 - service: climate.turn_on
@@ -1076,7 +1076,7 @@
             - alias: Very Hot Night (>26°C)
               conditions:
               - condition: numeric_state
-                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                entity_id: sensor.masterbedroom_masterbed_temperature
                 above: 26
               sequence:
               - service: fan.set_percentage
@@ -1110,7 +1110,7 @@
             - alias: Cold (<18�C) - Heating
               conditions:
               - condition: numeric_state
-                entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+                entity_id: sensor.masterbedroom_masterbed_temperature
                 below: input_number.master_bedroom_temp_comfort_low
               - condition: or
                 conditions:
@@ -1164,7 +1164,7 @@
         - alias: Very Hot (>26°C) - Cooling
           conditions:
           - condition: numeric_state
-            entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+            entity_id: sensor.masterbedroom_masterbed_temperature
             above: 26
           - condition: time
             after: 09:00:00
@@ -1181,7 +1181,7 @@
         - alias: Cold (<16°C) - Heating
           conditions:
           - condition: numeric_state
-            entity_id: sensor.ble_temperature_masterbed_temp_humidity_sensor
+            entity_id: sensor.masterbedroom_masterbed_temperature
             below: 16
           - condition: time
             after: '18:00:00'

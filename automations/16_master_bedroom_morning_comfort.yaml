@@ -106,7 +106,7 @@
     # Room temp exceeds outside temp - exit immediately
     - platform: template
       value_template: >
-        {{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)
+        {{ states('sensor.masterbedroom_masterbed_temperature') | float(0)
            > states('sensor.essendon_airport_temp') | float(0) + 2 }}
       id: exit_room_hot
 
@@ -191,7 +191,7 @@
               data:
                 name: "Master Bedroom Morning Comfort"
                 message: >
-                  Turned off - room temp ({{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}°C)
+                  Turned off - room temp ({{ states('sensor.masterbedroom_masterbed_temperature') }}°C)
                   exceeds outside temp ({{ states('sensor.essendon_airport_temp') }}°C)
 
   mode: single
@@ -209,7 +209,7 @@
 
   trigger:
     - platform: numeric_state
-      entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+      entity_id: sensor.masterbedroom_masterbed_humidity
       above: 55
       for:
         minutes: 5
@@ -250,6 +250,6 @@
       data:
         name: "Master Bedroom Humidity Control"
         message: >
-          Dry mode activated - humidity at {{ states('sensor.ble_humidity_masterbed_temp_humidity_sensor') }}%
+          Dry mode activated - humidity at {{ states('sensor.masterbedroom_masterbed_humidity') }}%
 
   mode: single
