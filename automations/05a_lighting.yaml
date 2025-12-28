@@ -18,13 +18,30 @@
     entity_id: binary_sensor.someone_home
     state: 'on'
   actions:
-  - action: scene.turn_on
-    target:
-      entity_id: scene.living_room_evening
+  # Living room scene - only if living room killswitch is off
+  - if:
+    - condition: state
+      entity_id: input_boolean.automation_killswitch_living_room
+      state: 'off'
+    then:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.living_room_evening
+  # Kitchen lights - only if kitchen killswitch is off
+  - if:
+    - condition: state
+      entity_id: input_boolean.automation_killswitch_kitchen
+      state: 'off'
+    then:
+    - action: light.turn_on
+      target:
+        area_id: kitchen
+      data:
+        brightness_pct: 100
+  # Other areas - no killswitch check needed
   - action: light.turn_on
     target:
       area_id:
-      - kitchen
       - front_entrance
       - master_bedroom
       - back_garden
@@ -52,36 +69,64 @@
       entity_id: input_select.occupancy
       state: Home
   actions:
-  - action: remote.turn_off
-    target:
-      entity_id: remote.sony_kd_55x8500c
-  - delay:
-      hours: 0
-      minutes: 2
-      seconds: 0
-      milliseconds: 0
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: climate.living_room_versatile_thermostat
-        attribute: is_on
-        state: 'true'
-      sequence:
-      - data: {}
-        target:
+  # Living room TV and climate - only if living room killswitch is off
+  - if:
+    - condition: state
+      entity_id: input_boolean.automation_killswitch_living_room
+      state: 'off'
+    then:
+    - action: remote.turn_off
+      target:
+        entity_id: remote.sony_kd_55x8500c
+    - delay:
+        hours: 0
+        minutes: 2
+        seconds: 0
+        milliseconds: 0
+    - choose:
+      - conditions:
+        - condition: state
           entity_id: climate.living_room_versatile_thermostat
-        action: climate.turn_off
+          attribute: is_on
+          state: 'true'
+        sequence:
+        - data: {}
+          target:
+            entity_id: climate.living_room_versatile_thermostat
+          action: climate.turn_off
+  # Set occupancy to Sleeping - no killswitch check needed
   - data:
       option: Sleeping
     target:
       entity_id: input_select.occupancy
     action: input_select.select_option
+  # Turn off living room lights - only if living room killswitch is off
+  - if:
+    - condition: state
+      entity_id: input_boolean.automation_killswitch_living_room
+      state: 'off'
+    then:
+    - data:
+        transition: 300
+      target:
+        area_id: living_room
+      action: light.turn_off
+  # Turn off kitchen lights - only if kitchen killswitch is off
+  - if:
+    - condition: state
+      entity_id: input_boolean.automation_killswitch_kitchen
+      state: 'off'
+    then:
+    - data:
+        transition: 300
+      target:
+        area_id: kitchen
+      action: light.turn_off
+  # Turn off other area lights - no killswitch check needed
   - data:
       transition: 300
     target:
       area_id:
-      - kitchen
-      - living_room
       - master_bedroom
       - back_garden
     action: light.turn_off
@@ -100,6 +145,9 @@
   - at: 05:00:00
     trigger: time
   conditions:
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_living_room
+    state: 'off'
   - condition: sun
     before: sunrise
   - condition: state
@@ -126,11 +174,30 @@
     trigger: sun
   conditions: []
   actions:
+  # Turn off living room lights - only if living room killswitch is off
+  - if:
+    - condition: state
+      entity_id: input_boolean.automation_killswitch_living_room
+      state: 'off'
+    then:
+    - data: {}
+      target:
+        area_id: living_room
+      action: light.turn_off
+  # Turn off kitchen lights - only if kitchen killswitch is off
+  - if:
+    - condition: state
+      entity_id: input_boolean.automation_killswitch_kitchen
+      state: 'off'
+    then:
+    - data: {}
+      target:
+        area_id: kitchen
+      action: light.turn_off
+  # Turn off other area lights - no killswitch check needed
   - data: {}
     target:
       area_id:
-      - living_room
-      - kitchen
       - master_bedroom
       - back_garden
       - front_entrance
@@ -284,6 +351,9 @@
     event: sunrise
     offset: 00:20:00
   conditions:
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_living_room
+    state: 'off'
   - condition: numeric_state
     entity_id: sensor.aqara_motion_and_light_sensor_p2_illuminance_lux
     below: 30
@@ -357,7 +427,10 @@
     entity_id: remote.tv_2
     to: 'off'
     id: 'Off'
-  condition: []
+  condition:
+    - condition: state
+      entity_id: input_boolean.automation_killswitch_living_room
+      state: 'off'
   action:
   - choose:
     - conditions:
@@ -426,6 +499,9 @@
       seconds: 0
     id: TurnedOff
   conditions:
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_living_room
+    state: 'off'
   - condition: sun
     after: sunset
     before: sunrise
@@ -471,6 +547,9 @@
   - at: '16:00:00'
     trigger: time
   conditions:
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_living_room
+    state: 'off'
   - condition: time
     after: 06:00:00
     before: '16:00:00'
@@ -757,6 +836,9 @@
       seconds: 0
     id: TurnedOff
   conditions:
+  - condition: state
+    entity_id: input_boolean.automation_killswitch_living_room
+    state: 'off'
   - condition: sun
     after: sunset
     before: sunrise
