@@ -1,5 +1,5 @@
 esphome:
-  name: front_entrance
+  name: frontentrance
   friendly_name: FrontEntrance
   min_version: "2024.6.0"
   name_add_mac_suffix: false
@@ -15,7 +15,7 @@ logger:
 # Enable Home Assistant API
 api:
   encryption:
-    key: !secret esphome_front_entrance_api_key
+    key: !secret esphome_frontentrance_api_key
 
 ota:
   platform: esphome
@@ -27,7 +27,7 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "FrontEntrance Fallback Hotspot"
-    password: !secret esphome_front_entrance_fallback_password
+    password: !secret esphome_frontentrance_fallback_password
 
 captive_portal: {}
 
