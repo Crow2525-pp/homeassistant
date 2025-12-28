@@ -37,7 +37,7 @@ cards:
             }
 
       # Henry's Room
-      - entity: sensor.study_esp32_henrysroom_humidity
+      - entity: sensor.study_esp32_study_humidity
         name: Lucas
         tap_action:
           action: more-info
@@ -45,9 +45,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.study_esp32_henrysroom_humidity') | float(0) < 40 %}
+                {% if states('sensor.study_esp32_study_humidity') | float(0) < 40 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.study_esp32_henrysroom_humidity') | float(0) > 60 %}
+                {% elif states('sensor.study_esp32_study_humidity') | float(0) > 60 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -55,7 +55,7 @@ cards:
             }
 
       # Otto's Room
-      - entity: sensor.study_esp32_ottosroom_humidity
+      - entity: sensor.study_esp32_kidsroom_humidity
         name: Otto
         tap_action:
           action: more-info
@@ -63,9 +63,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.study_esp32_ottosroom_humidity') | float(0) < 40 %}
+                {% if states('sensor.study_esp32_kidsroom_humidity') | float(0) < 40 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.study_esp32_ottosroom_humidity') | float(0) > 60 %}
+                {% elif states('sensor.study_esp32_kidsroom_humidity') | float(0) > 60 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -120,9 +120,9 @@ cards:
     entities:
       - entity: sensor.humiditysensor_humidity
         name: Master
-      - entity: sensor.study_esp32_ottosroom_humidity
+      - entity: sensor.study_esp32_kidsroom_humidity
         name: Otto
-      - entity: sensor.study_esp32_henrysroom_humidity
+      - entity: sensor.study_esp32_study_humidity
         name: Lucas
       - entity: sensor.livingroom_irblaster_humidity
         name: Living
