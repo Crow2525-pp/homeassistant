@@ -4,8 +4,8 @@
   device_code: 1003
   delay: 0.5
   controller_data: remote.ir_blaster_master_bedroom_remote
-  temperature_sensor: sensor.ble_temperature_masterbed_temp_humidity_sensor
-  humidity_sensor: sensor.ble_humidity_masterbed_temp_humidity_sensor
+  temperature_sensor: sensor.masterbedroom_masterbed_temperature
+  humidity_sensor: sensor.masterbedroom_masterbed_humidity
 
 - platform: smartir
   name: Kid's AC

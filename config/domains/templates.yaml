@@ -222,8 +222,8 @@
 - trigger:
     - platform: state
       entity_id:
-        - sensor.ble_temperature_masterbed_temp_humidity_sensor
-        - sensor.ble_humidity_masterbed_temp_humidity_sensor
+        - sensor.masterbedroom_masterbed_temperature
+        - sensor.masterbedroom_masterbed_humidity
         - sensor.ble_battery_masterbed_temp_humidity_sensor
   sensor:
     - name: "Masterbed Temp/Humidity Sensor Last Seen"
@@ -348,7 +348,7 @@
     - name: "Master Bedroom Climate Suggestion"
       unique_id: master_bedroom_climate_suggestion
       state: >
-        {% set temp = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+        {% set temp = states('sensor.masterbedroom_masterbed_temperature') | float(0) %}
         {% set month = now().month %}
         {% set is_winter = month in [5, 6, 7, 8, 9, 10] %}
         {% set is_summer = month in [11, 12, 1, 2, 3] %}
@@ -376,9 +376,9 @@
         {% endif %}
       icon: "mdi:bed-thermometer"
       attributes:
-        current_temp: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        current_temp: "{{ states('sensor.masterbedroom_masterbed_temperature') }}"
         message: >
-          {% set temp = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+          {% set temp = states('sensor.masterbedroom_masterbed_temperature') | float(0) %}
           {% set state = states('sensor.master_bedroom_climate_suggestion') %}
           {% if state == 'heat_now' %}
             🔥 Good time to heat! Excess solar available and room is {{ temp }}°C
@@ -551,15 +551,15 @@
       unique_id: living_room_temp_diff_from_master
       unit_of_measurement: "°C"
       state: >
-        {% set master = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+        {% set master = states('sensor.masterbedroom_masterbed_temperature') | float(0) %}
         {% set living = states('sensor.living_room_temperature_offset') | float(0) %}
         {{ (living - master) | round(1) }}
       icon: "mdi:thermometer-chevron-up"
       attributes:
-        master_temp: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        master_temp: "{{ states('sensor.masterbedroom_masterbed_temperature') }}"
         room_temp: "{{ states('sensor.living_room_temperature_offset') }}"
         status: >
-          {% set diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% set diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
           {% if diff > 3 %}
             significant
           {% elif diff > 2 %}
@@ -572,15 +572,15 @@
       unique_id: lucas_room_temp_diff_from_master
       unit_of_measurement: "°C"
       state: >
-        {% set master = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+        {% set master = states('sensor.masterbedroom_masterbed_temperature') | float(0) %}
         {% set lucas = states('sensor.study_study_temperature') | float(0) %}
         {{ (lucas - master) | round(1) }}
       icon: "mdi:thermometer-chevron-up"
       attributes:
-        master_temp: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        master_temp: "{{ states('sensor.masterbedroom_masterbed_temperature') }}"
         room_temp: "{{ states('sensor.study_study_temperature') }}"
         status: >
-          {% set diff = (states('sensor.study_study_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% set diff = (states('sensor.study_study_temperature') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
           {% if diff > 3 %}
             significant
           {% elif diff > 2 %}
@@ -593,15 +593,15 @@
       unique_id: otto_room_temp_diff_from_master
       unit_of_measurement: "°C"
       state: >
-        {% set master = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) %}
+        {% set master = states('sensor.masterbedroom_masterbed_temperature') | float(0) %}
         {% set otto = states('sensor.study_kidsroom_temperature') | float(0) %}
         {{ (otto - master) | round(1) }}
       icon: "mdi:thermometer-chevron-up"
       attributes:
-        master_temp: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        master_temp: "{{ states('sensor.masterbedroom_masterbed_temperature') }}"
         room_temp: "{{ states('sensor.study_kidsroom_temperature') }}"
         status: >
-          {% set diff = (states('sensor.study_kidsroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% set diff = (states('sensor.study_kidsroom_temperature') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
           {% if diff > 3 %}
             significant
           {% elif diff > 2 %}
@@ -680,7 +680,7 @@
       device_class: temperature
       icon: mdi:thermometer-auto
       state: >
-        {% set inside_state = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') %}
+        {% set inside_state = states('sensor.masterbedroom_masterbed_temperature') %}
         {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
         {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
           unknown
@@ -688,10 +688,10 @@
           {{ (inside_state | float(0) - outside_state | float(0)) | round(1) }}
         {% endif %}
       attributes:
-        inside_temperature: "{{ states('sensor.ble_temperature_masterbed_temp_humidity_sensor') }}"
+        inside_temperature: "{{ states('sensor.masterbedroom_masterbed_temperature') }}"
         outside_temperature: "{{ state_attr('weather.braybrook', 'temperature') }}"
         bias: >
-          {% set inside_state = states('sensor.ble_temperature_masterbed_temp_humidity_sensor') %}
+          {% set inside_state = states('sensor.masterbedroom_masterbed_temperature') %}
           {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
           {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
             unknown
@@ -871,9 +871,9 @@
     - name: "Room Climate Alert"
       unique_id: room_climate_alert
       state: >
-        {% set living_temp_diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
-        {% set lucas_temp_diff = (states('sensor.study_study_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
-        {% set otto_temp_diff = (states('sensor.study_kidsroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+        {% set living_temp_diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
+        {% set lucas_temp_diff = (states('sensor.study_study_temperature') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
+        {% set otto_temp_diff = (states('sensor.study_kidsroom_temperature') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
         {% set living_humid_diff = (states('sensor.livingroom_irblaster_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
         {% set lucas_humid_diff = (states('sensor.study_study_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
         {% set otto_humid_diff = (states('sensor.study_kidsroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
@@ -887,9 +887,9 @@
       attributes:
         rooms_with_issues: >
           {% set issues = namespace(rooms=[]) %}
-          {% set living_temp_diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
-          {% set lucas_temp_diff = (states('sensor.study_study_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
-          {% set otto_temp_diff = (states('sensor.study_kidsroom_temperature') | float(0) - states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0)) | abs %}
+          {% set living_temp_diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
+          {% set lucas_temp_diff = (states('sensor.study_study_temperature') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
+          {% set otto_temp_diff = (states('sensor.study_kidsroom_temperature') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
           {% set living_humid_diff = (states('sensor.livingroom_irblaster_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
           {% set lucas_humid_diff = (states('sensor.study_study_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
           {% set otto_humid_diff = (states('sensor.study_kidsroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}

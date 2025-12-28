@@ -74,7 +74,7 @@ cards:
             }
 
       # Master Bedroom
-      - entity: sensor.ble_temperature_masterbed_temp_humidity_sensor
+      - entity: sensor.masterbedroom_masterbed_temperature
         name: Master
         tap_action:
           action: more-info
@@ -82,9 +82,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) < 18 %}
+                {% if states('sensor.masterbedroom_masterbed_temperature') | float(0) < 18 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.ble_temperature_masterbed_temp_humidity_sensor') | float(0) > 24 %}
+                {% elif states('sensor.masterbedroom_masterbed_temperature') | float(0) > 24 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -116,7 +116,7 @@ cards:
 
   - type: history-graph
     entities:
-      - entity: sensor.ble_temperature_masterbed_temp_humidity_sensor
+      - entity: sensor.masterbedroom_masterbed_temperature
         name: Master
       - entity: sensor.study_esp32_ottosroom_temperature
         name: Otto

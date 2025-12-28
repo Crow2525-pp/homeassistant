@@ -65,7 +65,7 @@
 
   trigger:
     - platform: numeric_state
-      entity_id: sensor.ble_humidity_masterbed_temp_humidity_sensor
+      entity_id: sensor.masterbedroom_masterbed_humidity
       above: 55
       for:
         minutes: 5
@@ -110,7 +110,7 @@
       data:
         name: "Master Bedroom Humidity Control"
         message: >
-          Dry mode activated - humidity at {{ states('sensor.ble_humidity_masterbed_temp_humidity_sensor') }}%
+          Dry mode activated - humidity at {{ states('sensor.masterbedroom_masterbed_humidity') }}%
 
   mode: single
 

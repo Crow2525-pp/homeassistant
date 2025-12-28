@@ -78,11 +78,11 @@ cards:
                 }
           - type: custom:mini-graph-card
             entities:
-              - entity: sensor.ble_temperature_masterbed_temp_humidity_sensor
+              - entity: sensor.masterbedroom_masterbed_temperature
                 name: Temperature
                 color: '#3B82F6'
                 y_axis: primary
-              - entity: sensor.ble_humidity_masterbed_temp_humidity_sensor
+              - entity: sensor.masterbedroom_masterbed_humidity
                 name: Humidity
                 color: '#60A5FA'
                 y_axis: secondary
