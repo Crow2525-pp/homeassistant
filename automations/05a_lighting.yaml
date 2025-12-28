@@ -14,9 +14,14 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Holiday
-  - condition: state
-    entity_id: binary_sensor.someone_home
-    state: 'on'
+  - condition: or
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.someone_home
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.guest_mode
+        state: "on"
   actions:
   # Living room scene - only if living room killswitch is off
   - if:
@@ -68,6 +73,9 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Home
+    - condition: state
+      entity_id: input_boolean.guest_mode
+      state: "on"
   actions:
   # Living room TV and climate - only if living room killswitch is off
   - if:
@@ -150,10 +158,15 @@
     state: 'off'
   - condition: sun
     before: sunrise
-  - condition: state
-    entity_id: binary_sensor.someone_home
-    state: 'on'
-    alias: Someone Home
+  - condition: or
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.someone_home
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.guest_mode
+        state: "on"
+    alias: Someone Home or Guest Mode
   actions:
   - action: light.turn_on
     metadata: {}

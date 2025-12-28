@@ -259,9 +259,14 @@
       - condition: state
         entity_id: input_select.climate_season
         state: winter
-      - condition: state
-        entity_id: input_select.occupancy
-        state: Home
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: input_select.occupancy
+            state: Home
+          - condition: state
+            entity_id: input_boolean.guest_mode
+            state: "on"
       - condition: state
         entity_id: binary_sensor.living_room_door_sensor_opening
         state: 'off'
@@ -306,9 +311,14 @@
       - condition: state
         entity_id: input_select.climate_season
         state: winter
-      - condition: state
-        entity_id: input_select.occupancy
-        state: Home
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: input_select.occupancy
+            state: Home
+          - condition: state
+            entity_id: input_boolean.guest_mode
+            state: "on"
       - condition: state
         entity_id: binary_sensor.living_room_door_sensor_opening
         state: 'off'
@@ -361,9 +371,14 @@
       - condition: state
         entity_id: input_select.climate_season
         state: spring
-      - condition: state
-        entity_id: input_select.occupancy
-        state: Home
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: input_select.occupancy
+            state: Home
+          - condition: state
+            entity_id: input_boolean.guest_mode
+            state: "on"
       - condition: state
         entity_id: binary_sensor.living_room_door_sensor_opening
         state: 'off'
@@ -416,9 +431,14 @@
       - condition: state
         entity_id: input_select.climate_season
         state: autumn
-      - condition: state
-        entity_id: input_select.occupancy
-        state: Home
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: input_select.occupancy
+            state: Home
+          - condition: state
+            entity_id: input_boolean.guest_mode
+            state: "on"
       - condition: state
         entity_id: binary_sensor.living_room_door_sensor_opening
         state: 'off'
@@ -468,9 +488,14 @@
       - condition: time
         after: '06:00:00'
         before: '22:15:00'
-      - condition: state
-        entity_id: input_select.occupancy
-        state: Home
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: input_select.occupancy
+            state: Home
+          - condition: state
+            entity_id: input_boolean.guest_mode
+            state: "on"
       - condition: state
         entity_id: binary_sensor.living_room_door_sensor_opening
         state: 'off'

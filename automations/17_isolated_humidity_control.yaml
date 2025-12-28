@@ -28,10 +28,15 @@
     - condition: state
       entity_id: input_boolean.automation_killswitch_living_room
       state: "off"
-    # Only when home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
+    # Only when home or guest mode active
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_boolean.guest_mode
+          state: "on"
     # Manual override not active
     - condition: state
       entity_id: input_boolean.climate_manual_control_living
@@ -72,7 +77,7 @@
       id: high_humidity
 
   condition:
-    # Only when home or sleeping
+    # Only when home, sleeping, or guest mode active
     - condition: or
       conditions:
         - condition: state
@@ -81,6 +86,9 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
+        - condition: state
+          entity_id: input_boolean.guest_mode
+          state: "on"
     # Manual override not active
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
@@ -131,10 +139,15 @@
       id: high_humidity
 
   condition:
-    # Only when home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
+    # Only when home or guest mode active
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_boolean.guest_mode
+          state: "on"
     # Door must be closed
     - condition: state
       entity_id: binary_sensor.henry_door_sensor_magnet_opening
@@ -189,10 +202,15 @@
       id: high_humidity
 
   condition:
-    # Only when home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
+    # Only when home or guest mode active
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_boolean.guest_mode
+          state: "on"
     # Door must be closed
     - condition: state
       entity_id: binary_sensor.otto_room_door_sensor_opening
