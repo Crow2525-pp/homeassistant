@@ -127,3 +127,51 @@
     target:
       entity_id: input_select.occupancy
   mode: single
+
+- id: '1735500000001'
+  alias: Occupancy - Phil Garmin Home Tracking
+  description: Sets occupancy to Home when Phil's Garmin shows he's in the home area
+  triggers:
+  - trigger: state
+    entity_id: sensor.phil_s_garmin_area
+    to: home
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Home
+  actions:
+  - action: input_select.select_option
+    data:
+      option: Home
+    target:
+      entity_id: input_select.occupancy
+  mode: single
+
+- id: '1735500000002'
+  alias: Occupancy - Phil Garmin Away Tracking
+  description: Sets occupancy to Away when Phil's Garmin shows he's away from home for 10 minutes and no one else is home
+  triggers:
+  - trigger: state
+    entity_id: sensor.phil_s_garmin_area
+    from: home
+    for:
+      minutes: 10
+  conditions:
+  - condition: state
+    entity_id: input_select.occupancy
+    state: Home
+  - condition: template
+    value_template: "{{ states('sensor.phil_s_garmin_area') != 'home' }}"
+  # Only set to Away if no one else is home
+  - condition: state
+    entity_id: zone.home
+    state: '0'
+  actions:
+  - action: input_select.select_option
+    data:
+      option: Away
+    target:
+      entity_id: input_select.occupancy
+  mode: single
