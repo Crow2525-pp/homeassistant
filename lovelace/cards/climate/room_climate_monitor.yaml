@@ -256,7 +256,7 @@ cards:
     square: false
     cards:
       - type: tile
-        entity: sensor.study_esp32_henrysroom_temperature
+        entity: sensor.study_room_temp_humidity_sensor_temperature
         name: Lucas Temp
         icon: mdi:thermometer
         card_mod:
@@ -276,7 +276,7 @@ cards:
             }
 
       - type: tile
-        entity: sensor.study_esp32_henrysroom_humidity
+        entity: sensor.study_room_temp_humidity_sensor_humidity
         name: Lucas Humidity
         icon: mdi:water-percent
         card_mod:
@@ -369,7 +369,7 @@ cards:
     square: false
     cards:
       - type: tile
-        entity: sensor.study_esp32_ottosroom_temperature
+        entity: sensor.kids_room_temp_humidity_sensor_temperature
         name: Otto Temp
         icon: mdi:thermometer
         card_mod:
@@ -389,7 +389,7 @@ cards:
             }
 
       - type: tile
-        entity: sensor.study_esp32_ottosroom_humidity
+        entity: sensor.kids_room_temp_humidity_sensor_humidity
         name: Otto Humidity
         icon: mdi:water-percent
         card_mod:
@@ -484,9 +484,9 @@ cards:
         name: Master (Baseline)
       - entity: sensor.living_room_temperature_offset
         name: Living
-      - entity: sensor.study_esp32_henrysroom_temperature
+      - entity: sensor.study_room_temp_humidity_sensor_temperature
         name: Lucas
-      - entity: sensor.study_esp32_ottosroom_temperature
+      - entity: sensor.kids_room_temp_humidity_sensor_temperature
         name: Otto
     card_mod:
       style: |
@@ -507,9 +507,9 @@ cards:
         name: Master (Baseline)
       - entity: sensor.livingroom_irblaster_humidity
         name: Living
-      - entity: sensor.study_esp32_henrysroom_humidity
+      - entity: sensor.study_room_temp_humidity_sensor_humidity
         name: Lucas
-      - entity: sensor.study_esp32_ottosroom_humidity
+      - entity: sensor.kids_room_temp_humidity_sensor_humidity
         name: Otto
     card_mod:
       style: |
