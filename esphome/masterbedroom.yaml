@@ -31,32 +31,6 @@ wifi:
 
 captive_portal: {}
 
-# required for sensor to get timestamp "last seen" for sensor
-time:
-  - platform: homeassistant
-    id: ha_time
-
-sensor:
-  - platform: xiaomi_lywsd03mmc
-    mac_address: !secret xiaomi_ble_mac_masterbed
-    bindkey: !secret xiaomi_ble_bindkey_masterbed
-    temperature:
-      name: "Masterbed Temperature"
-      on_value:
-        then:
-          - lambda: |-
-              id(masterbed_last_seen).publish_state(id(ha_time).now().timestamp);
-    humidity:
-      name: "Masterbed Humidity"
-    battery_level:
-      name: "Masterbed Battery Level"
-
-  - platform: template
-    id: masterbed_last_seen
-    name: "Masterbed Temperature Last Seen"
-    lambda: 'return 0;'
-    update_interval: never
-
 bluetooth_proxy: {}
 
 esp32_ble_tracker: {}
