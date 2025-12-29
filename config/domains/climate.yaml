@@ -13,8 +13,8 @@
   device_code: 1003
   delay: 0.5
   controller_data: remote.otto_s_room_remote_control_remote
-  temperature_sensor: sensor.kids_room_temp_humidity_sensor_temperature
-  humidity_sensor: sensor.kids_room_temp_humidity_sensor_humidity
+  temperature_sensor: sensor.otto_s_room_temp_humidity_sensor_temperature
+  humidity_sensor: sensor.otto_s_room_temp_humidity_sensor_humidity
 
 - platform: smartir
   name: Study AC
@@ -22,8 +22,8 @@
   device_code: 1003
   delay: 0.5
   controller_data: remote.henrys_room_ir_blaster_remote
-  temperature_sensor: sensor.study_room_temp_humidity_sensor_temperature
-  humidity_sensor: sensor.study_room_temp_humidity_sensor_humidity
+  temperature_sensor: sensor.henry_s_room_temp_humidity_sensor_temperature
+  humidity_sensor: sensor.henry_s_room_temp_humidity_sensor_humidity
 
 - platform: smartir
   name: Living Room AC

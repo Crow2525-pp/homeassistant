@@ -188,11 +188,11 @@ cards:
                 }
           - type: custom:mini-graph-card
             entities:
-              - entity: sensor.kids_room_temp_humidity_sensor_temperature
+              - entity: sensor.otto_s_room_temp_humidity_sensor_temperature
                 name: Temperature
                 color: '#F59E0B'
                 y_axis: primary
-              - entity: sensor.kids_room_temp_humidity_sensor_humidity
+              - entity: sensor.otto_s_room_temp_humidity_sensor_humidity
                 name: Humidity
                 color: '#60A5FA'
                 y_axis: secondary
@@ -296,11 +296,11 @@ cards:
                 }
           - type: custom:mini-graph-card
             entities:
-              - entity: sensor.study_room_temp_humidity_sensor_temperature
+              - entity: sensor.henry_s_room_temp_humidity_sensor_temperature
                 name: Temperature
                 color: '#10B981'
                 y_axis: primary
-              - entity: sensor.study_room_temp_humidity_sensor_humidity
+              - entity: sensor.henry_s_room_temp_humidity_sensor_humidity
                 name: Humidity
                 color: '#60A5FA'
                 y_axis: secondary

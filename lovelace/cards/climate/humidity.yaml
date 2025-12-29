@@ -37,7 +37,7 @@ cards:
             }
 
       # Henry's Room
-      - entity: sensor.study_room_temp_humidity_sensor_humidity
+      - entity: sensor.henry_s_room_temp_humidity_sensor_humidity
         name: Lucas
         tap_action:
           action: more-info
@@ -45,9 +45,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.study_room_temp_humidity_sensor_humidity') | float(0) < 40 %}
+                {% if states('sensor.henry_s_room_temp_humidity_sensor_humidity') | float(0) < 40 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.study_room_temp_humidity_sensor_humidity') | float(0) > 60 %}
+                {% elif states('sensor.henry_s_room_temp_humidity_sensor_humidity') | float(0) > 60 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -55,7 +55,7 @@ cards:
             }
 
       # Otto's Room
-      - entity: sensor.kids_room_temp_humidity_sensor_humidity
+      - entity: sensor.otto_s_room_temp_humidity_sensor_humidity
         name: Otto
         tap_action:
           action: more-info
@@ -63,9 +63,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.kids_room_temp_humidity_sensor_humidity') | float(0) < 40 %}
+                {% if states('sensor.otto_s_room_temp_humidity_sensor_humidity') | float(0) < 40 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.kids_room_temp_humidity_sensor_humidity') | float(0) > 60 %}
+                {% elif states('sensor.otto_s_room_temp_humidity_sensor_humidity') | float(0) > 60 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -120,9 +120,9 @@ cards:
     entities:
       - entity: sensor.master_bedroom_temperature_humdity_sensor_humidity
         name: Master
-      - entity: sensor.kids_room_temp_humidity_sensor_humidity
+      - entity: sensor.otto_s_room_temp_humidity_sensor_humidity
         name: Otto
-      - entity: sensor.study_room_temp_humidity_sensor_humidity
+      - entity: sensor.henry_s_room_temp_humidity_sensor_humidity
         name: Lucas
       - entity: sensor.kitchen_humidity
         name: Kitchen
