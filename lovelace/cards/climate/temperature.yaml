@@ -123,6 +123,8 @@ cards:
       - entity: sensor.study_room_temp_humidity_sensor_temperature
         name: Lucas
       - entity: sensor.kitchen_temperature
+        name: Living Room
+      - entity: sensor.kitchen_temperature
         name: Kitchen
       - entity: sensor.essendon_airport_temp
         name: Essendon

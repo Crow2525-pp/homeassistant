@@ -125,6 +125,8 @@ cards:
       - entity: sensor.study_room_temp_humidity_sensor_humidity
         name: Lucas
       - entity: sensor.kitchen_humidity
+        name: Living Room
+      - entity: sensor.kitchen_humidity
         name: Kitchen
       - entity: sensor.essendon_airport_humidity
         name: Essendon
