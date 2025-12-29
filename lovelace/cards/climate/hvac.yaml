@@ -78,11 +78,13 @@ cards:
                 }
           - type: custom:mini-graph-card
             entities:
-              - entity: sensor.master_bedroom_temperature_humdity_sensor_temperature
+              - entity: climate.masterbed_room_ac
+                attribute: current_temperature
                 name: Temperature
                 color: '#3B82F6'
                 y_axis: primary
-              - entity: sensor.master_bedroom_temperature_humdity_sensor_humidity
+              - entity: climate.masterbed_room_ac
+                attribute: current_humidity
                 name: Humidity
                 color: '#60A5FA'
                 y_axis: secondary
@@ -188,11 +190,13 @@ cards:
                 }
           - type: custom:mini-graph-card
             entities:
-              - entity: sensor.kids_room_temp_humidity_sensor_temperature
+              - entity: climate.kids_room_ac
+                attribute: current_temperature
                 name: Temperature
                 color: '#F59E0B'
                 y_axis: primary
-              - entity: sensor.kids_room_temp_humidity_sensor_humidity
+              - entity: climate.kids_room_ac
+                attribute: current_humidity
                 name: Humidity
                 color: '#60A5FA'
                 y_axis: secondary
@@ -296,11 +300,13 @@ cards:
                 }
           - type: custom:mini-graph-card
             entities:
-              - entity: sensor.study_room_temp_humidity_sensor_temperature
+              - entity: climate.study_room_ac
+                attribute: current_temperature
                 name: Temperature
                 color: '#10B981'
                 y_axis: primary
-              - entity: sensor.study_room_temp_humidity_sensor_humidity
+              - entity: climate.study_room_ac
+                attribute: current_humidity
                 name: Humidity
                 color: '#60A5FA'
                 y_axis: secondary
@@ -401,11 +407,13 @@ cards:
                 }
           - type: custom:mini-graph-card
             entities:
-              - entity: sensor.kitchen_temperature
+              - entity: climate.living_room_ac_2
+                attribute: current_temperature
                 name: Temperature
                 color: '#EC4899'
                 y_axis: primary
-              - entity: sensor.kitchen_humidity
+              - entity: climate.living_room_ac_2
+                attribute: current_humidity
                 name: Humidity
                 color: '#60A5FA'
                 y_axis: secondary
