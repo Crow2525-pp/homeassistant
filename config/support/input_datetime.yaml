@@ -1,0 +1,124 @@
+# Per-room wake/bed times for HVAC scheduling
+# Master Bedroom (Steph & Phil)
+wakeup_time_master_bedroom:
+  name: Wake-up Time - Master Bedroom
+  has_date: false
+  has_time: true
+  initial: "06:30:00"
+  icon: mdi:weather-sunset-up
+bedtime_master_bedroom:
+  name: Bedtime - Master Bedroom
+  has_date: false
+  has_time: true
+  initial: "21:00:00"
+  icon: mdi:weather-night
+# Otto's Room (Henry & Otto)
+wakeup_time_ottos_room:
+  name: Wake-up Time - Otto's Room
+  has_date: false
+  has_time: true
+  initial: "06:30:00"
+  icon: mdi:weather-sunset-up
+bedtime_ottos_room:
+  name: Bedtime - Otto's Room
+  has_date: false
+  has_time: true
+  initial: "18:30:00"
+  icon: mdi:weather-night
+# Lucas's Room (formerly Study/Henry's Room)
+wakeup_time_lucas_room:
+  name: Wake-up Time - Lucas's Room
+  has_date: false
+  has_time: true
+  initial: "06:30:00"
+  icon: mdi:weather-sunset-up
+bedtime_lucas_room:
+  name: Bedtime - Lucas's Room
+  has_date: false
+  has_time: true
+  initial: "18:15:00"
+  icon: mdi:weather-night
+# Living Room (follows household-wide schedule)
+wakeup_time_living_room:
+  name: Wake-up Time - Living Room
+  has_date: false
+  has_time: true
+  initial: "06:00:00"
+  icon: mdi:weather-sunset-up
+bedtime_living_room:
+  name: Bedtime - Living Room
+  has_date: false
+  has_time: true
+  initial: "22:00:00"
+  icon: mdi:weather-night
+
+last_climate_notification_living:
+  name: Last Climate Notification - Living Room
+  has_date: true
+  has_time: true
+last_climate_notification_master:
+  name: Last Climate Notification - Master Bedroom
+  has_date: true
+  has_time: true
+ac_filter_living_room:
+  name: AC Filter Last Changed - Living Room
+  has_date: true
+  has_time: true
+ac_filter_master_bedroom:
+  name: AC Filter Last Changed - Master Bedroom
+  has_date: true
+  has_time: true
+ac_filter_otto_room:
+  name: AC Filter Last Changed - Otto's Room
+  has_date: true
+  has_time: true
+ac_filter_study_henry:
+  name: AC Filter Last Changed - Lucas's Room
+  has_date: true
+  has_time: true
+# Automation Trigger Tracking
+last_trigger_seasonal_climate_manager:
+  name: Last Trigger - Seasonal Climate Manager
+  has_date: true
+  has_time: true
+last_trigger_morning_blinds:
+  name: Last Trigger - Morning Blinds Controller
+  has_date: true
+  has_time: true
+last_trigger_preheat_530am:
+  name: Last Trigger - Living Room Preheat 5:30am
+  has_date: true
+  has_time: true
+last_trigger_evening_cooling:
+  name: Last Trigger - Evening Cooling Night
+  has_date: true
+  has_time: true
+last_trigger_frost_protection:
+  name: Last Trigger - Frost Protection Night
+  has_date: true
+  has_time: true
+last_trigger_afternoon_recheck:
+  name: Last Trigger - Afternoon Hot Flag Re-check
+  has_date: true
+  has_time: true
+# Additional automation tracking
+last_trigger_master_bedroom_cooling_night:
+  name: Last Trigger - Master Bedroom Cooling Night
+  has_date: true
+  has_time: true
+last_trigger_children_cooling_night:
+  name: Last Trigger - Children's Rooms Cooling Night
+  has_date: true
+  has_time: true
+last_trigger_master_bedroom_blinds_night:
+  name: Last Trigger - Master Bedroom Blinds Night
+  has_date: true
+  has_time: true
+last_trigger_master_bedroom_blinds_morning:
+  name: Last Trigger - Master Bedroom Blinds Morning
+  has_date: true
+  has_time: true
+last_trigger_climate_flags_mark_hot_day:
+  name: Last Trigger - Climate Flags Mark Hot Day
+  has_date: true
+  has_time: true

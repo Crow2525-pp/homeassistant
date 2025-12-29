@@ -1,0 +1,19 @@
+# ============================================================================
+# SHELL COMMANDS
+# ============================================================================
+# Shell commands allow running shell scripts/commands from automations
+# Uncomment and configure as needed
+
+# NAS Backup Command
+# Used by automation: System - Backup to NAS (automations/11_backup_to_nas.yaml)
+# Instructions:
+# 1. Mount your NAS in Home Assistant (Settings > System > Network Storage)
+# 2. Update the path below to match your NAS mount point
+# 3. Uncomment the line below
+# 4. Restart Home Assistant
+# 5. Test the automation manually
+backup_to_nas: "echo 'NAS backup not configured. Update path in configuration.yaml'"
+# Example for NAS mounted at /media/nas:
+# backup_to_nas: "cp /backup/*.tar /media/nas/ha_backups/"
+# Example for Samba share:
+# backup_to_nas: "cp /backup/*.tar /mnt/nas/homeassistant/backups/"

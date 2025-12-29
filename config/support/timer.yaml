@@ -1,0 +1,4 @@
+roller_blind_timer:
+  name: Roller Blind Movement Timer
+  icon: mdi:timer
+  restore: false

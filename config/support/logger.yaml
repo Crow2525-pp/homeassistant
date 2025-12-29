@@ -1,0 +1,12 @@
+default: warning
+logs:
+  # Suppress GoSungrow MQTT discovery schema validation errors
+  # These are caused by the GoSungrow app sending invalid unit/device_class combinations
+  # The errors don't affect functionality, just log noise
+  # Issue: https://github.com/MickMake/GoSungrow/issues
+  homeassistant.components.mqtt.entity: error
+  homeassistant.components.mqtt.models: error
+  # Uncomment to debug MQTT issues:
+  # custom_components.smartir.climate: debug
+  # custom_components.smartir.fan: debug
+  # custom_components.versatile_thermostat: debug

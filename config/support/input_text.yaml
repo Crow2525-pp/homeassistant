@@ -1,0 +1,11 @@
+# Cover Control Automation Status Helpers
+cover_status_helper:
+  name: Roller Blinds Cover Status Helper
+  max: 254
+  initial: "unknown"
+  icon: mdi:roller-shade
+cover_status_helper_curtains:
+  name: Curtains Cover Status Helper
+  max: 254
+  initial: "unknown"
+  icon: mdi:curtains

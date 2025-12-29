@@ -1,0 +1,44 @@
+climate_season:
+  name: Climate Season
+  options:
+    - summer
+    - autumn
+    - winter
+    - spring
+  initial: spring
+  icon: mdi:weather-partly-cloudy
+occupancy:
+  name: Occupancy Mode
+  options:
+    - Home
+    - Away
+    - Holiday
+    - Sleeping
+  initial: Home
+  icon: mdi:home-account
+news_room_selector:
+  name: News Room
+  options:
+    - Kitchen
+    - Study
+    - Master Bedroom
+    - All Rooms
+  initial: Kitchen
+  icon: mdi:home-sound-in
+roller_blind_state_simple:
+  name: Roller Blind State (Simple)
+  options:
+    - closed
+    - partial
+    - open
+  initial: closed
+  icon: mdi:blinds
+roller_blind_state:
+  name: Roller Blind State
+  options:
+    - opening
+    - closing
+    - open
+    - closed
+  initial: closed
+  icon: mdi:blinds
