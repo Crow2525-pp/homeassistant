@@ -78,11 +78,11 @@ cards:
                 }
           - type: custom:mini-graph-card
             entities:
-              - entity: sensor.masterbedroom_masterbed_temperature
+              - entity: sensor.master_bedroom_temperature_humdity_sensor_temperature
                 name: Temperature
                 color: '#3B82F6'
                 y_axis: primary
-              - entity: sensor.masterbedroom_masterbed_humidity
+              - entity: sensor.master_bedroom_temperature_humdity_sensor_humidity
                 name: Humidity
                 color: '#60A5FA'
                 y_axis: secondary
@@ -90,6 +90,7 @@ cards:
             points_per_hour: 4
             line_width: 2
             font_size: 75
+            height: 160
             animate: true
             show:
               name: false
@@ -111,7 +112,6 @@ cards:
               - type: entity
                 entity: binary_sensor.master_bedroom_door_sensor_opening
                 show_state: true
-
                 name: "Master Bedroom Door"
                 state_content:
                   - state
@@ -200,6 +200,7 @@ cards:
             points_per_hour: 4
             line_width: 2
             font_size: 75
+            height: 160
             animate: true
             show:
               name: false
@@ -220,7 +221,6 @@ cards:
             badges:
               - type: entity
                 entity: binary_sensor.otto_room_door_sensor_opening
-
                 name: "Otto's Room Door"
                 show_state: true
                 state_content:
@@ -308,6 +308,7 @@ cards:
             points_per_hour: 4
             line_width: 2
             font_size: 75
+            height: 160
             animate: true
             show:
               name: false
@@ -325,7 +326,6 @@ cards:
                 }
           - type: heading
             heading_style: subtitle
-
             badges:
               - type: entity
                 entity: binary_sensor.henry_door_sensor_magnet_opening
@@ -401,11 +401,11 @@ cards:
                 }
           - type: custom:mini-graph-card
             entities:
-              - entity: sensor.living_room_temperature_offset
+              - entity: sensor.kitchen_temperature
                 name: Temperature
                 color: '#EC4899'
                 y_axis: primary
-              - entity: sensor.livingroom_irblaster_humidity
+              - entity: sensor.kitchen_humidity
                 name: Humidity
                 color: '#60A5FA'
                 y_axis: secondary
@@ -413,6 +413,7 @@ cards:
             points_per_hour: 4
             line_width: 2
             font_size: 75
+            height: 160
             animate: true
             show:
               name: false
@@ -443,7 +444,6 @@ cards:
                   action: more-info
           - type: heading
             heading_style: subtitle
-
             badges:
               - type: entity
                 entity: binary_sensor.interior_garage_door_sensor_magnet_opening
@@ -455,5 +455,43 @@ cards:
                 color: state
                 tap_action:
                   action: more-info
-
-
+  - type: grid
+    columns: 2
+    cards:
+      # Kitchen
+      - type: vertical-stack
+        cards:
+          - type: heading
+            heading_style: subtitle
+            heading: "Kitchen"
+            icon: mdi:chef-hat
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.kitchen_temperature
+                name: Temperature
+                color: '#F97316'
+                y_axis: primary
+              - entity: sensor.kitchen_humidity
+                name: Humidity
+                color: '#60A5FA'
+                y_axis: secondary
+            hours_to_show: 6
+            points_per_hour: 4
+            line_width: 2
+            font_size: 75
+            height: 160
+            animate: true
+            show:
+              name: false
+              icon: false
+              state: false
+              legend: true
+              labels: secondary
+            card_mod:
+              style: |
+                ha-card {
+                  background: rgba(30, 41, 59, 0.5);
+                  border-radius: 8px;
+                  border: 1px solid rgba(255, 255, 255, 0.1);
+                  box-shadow: none;
+                }

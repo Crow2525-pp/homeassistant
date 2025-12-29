@@ -19,18 +19,18 @@ cards:
           box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
     entities:
-      # Living Room
-      - entity: sensor.living_room_temperature_offset
-        name: Living
+      # Living Room / Kitchen
+      - entity: sensor.kitchen_temperature
+        name: Kitchen
         tap_action:
           action: more-info
         card_mod:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.living_room_temperature_offset') | float(0) < 18 %}
+                {% if states('sensor.kitchen_temperature') | float(0) < 18 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.living_room_temperature_offset') | float(0) > 24 %}
+                {% elif states('sensor.kitchen_temperature') | float(0) > 24 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -74,7 +74,7 @@ cards:
             }
 
       # Master Bedroom
-      - entity: sensor.masterbedroom_masterbed_temperature
+      - entity: sensor.master_bedroom_temperature_humdity_sensor_temperature
         name: Master
         tap_action:
           action: more-info
@@ -82,9 +82,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.masterbedroom_masterbed_temperature') | float(0) < 18 %}
+                {% if states('sensor.master_bedroom_temperature_humdity_sensor_temperature') | float(0) < 18 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.masterbedroom_masterbed_temperature') | float(0) > 24 %}
+                {% elif states('sensor.master_bedroom_temperature_humdity_sensor_temperature') | float(0) > 24 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -116,17 +116,16 @@ cards:
 
   - type: history-graph
     entities:
-      - entity: sensor.masterbedroom_masterbed_temperature
+      - entity: sensor.master_bedroom_temperature_humdity_sensor_temperature
         name: Master
       - entity: sensor.kids_room_temp_humidity_sensor_temperature
         name: Otto
       - entity: sensor.study_room_temp_humidity_sensor_temperature
         name: Lucas
-      - entity: sensor.living_room_temperature_offset
-        name: Living
+      - entity: sensor.kitchen_temperature
+        name: Kitchen
       - entity: sensor.essendon_airport_temp
         name: Essendon
-      - entity: sensor.thermal_comfort_kitchen_heat_index
     hours_to_show: 24
     show_names: true
     card_mod:
