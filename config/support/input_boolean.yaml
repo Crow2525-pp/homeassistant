@@ -1,0 +1,88 @@
+# Garage Door Sensors
+garage_door_notify:
+  name: Garage Door Notify
+
+  icon: mdi:information
+local_network_access:
+  name: Local Network Access Mode
+  icon: mdi:network
+  initial: true
+network_device_down_notify:
+  name: Network Device Down Notify
+
+  icon: mdi:alert
+wan_down_notify:
+  name: WAN Down Notify
+  icon: mdi:alert
+blind_manual_control:
+  name: Blinds Manual Control Override
+  icon: mdi:blinds
+  initial: false
+climate_manual_control_living:
+  name: Living Room Climate Manual Override
+  icon: mdi:thermostat
+  initial: false
+climate_manual_control_master:
+  name: Master Bedroom Climate Manual Override
+  icon: mdi:thermostat
+  initial: false
+climate_manual_control_otto:
+  name: Otto's Room Climate Manual Override
+  icon: mdi:thermostat
+  initial: false
+climate_manual_control_study:
+  name: Lucas's Room Climate Manual Override
+  icon: mdi:thermostat
+  initial: false
+super_hot_today:
+  name: Super Hot Day Flag
+  icon: mdi:weather-sunny-alert
+  initial: false
+hot_today_flag:
+  name: Hot Day Flag
+  icon: mdi:weather-sunny
+  initial: false
+warm_today_flag:
+  name: Warm Day Flag
+  icon: mdi:weather-partly-sunny
+  initial: false
+cool_today_flag:
+  name: Cool Day Flag
+  icon: mdi:weather-cloudy
+  initial: false
+cold_today_flag:
+  name: Cold Day Flag
+  icon: mdi:snowflake
+  initial: false
+super_cold_today:
+  name: Super Cold Day Flag
+  icon: mdi:snowflake-alert
+  initial: false
+downstairs_doors_open:
+  name: Downstairs Doors Open
+  icon: mdi:door-open
+  initial: false
+# HVAC Master Switches - Track whether automation thinks HVAC should be on (Principle #11)
+hvac_master_bedroom_should_be_on:
+  name: Master Bedroom HVAC Should Be On
+  icon: mdi:thermometer
+  initial: false
+hvac_living_room_should_be_on:
+  name: Living Room HVAC Should Be On
+  icon: mdi:thermometer
+  initial: false
+hvac_study_should_be_on:
+  name: Lucas's Room HVAC Should Be On
+  icon: mdi:thermometer
+hvac_kids_room_should_be_on:
+  name: Kids Room HVAC Should Be On
+  icon: mdi:thermometer
+# Room Automation Killswitches
+automation_killswitch_living_room:
+  name: Living Room Automation Killswitch
+  icon: mdi:stop-circle
+  initial: false
+automation_killswitch_kitchen:
+  name: Kitchen Automation Killswitch
+  icon: mdi:stop-circle
+  initial: false

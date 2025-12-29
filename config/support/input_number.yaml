@@ -1,0 +1,282 @@
+# Roller Blind Position Tracking
+roller_blind_position:
+  name: Roller Blind Position
+  min: 0
+  max: 100
+  step: 1
+  initial: 0
+  mode: box
+  icon: mdi:blinds
+  unit_of_measurement: '%'
+roller_blind_target_position:
+  name: Roller Blind Target Position
+  min: 0
+  max: 100
+  step: 1
+  initial: 0
+  mode: box
+  icon: mdi:target
+  unit_of_measurement: '%'
+# Climate Control Helpers
+living_room_heat_lead_minutes:
+  name: Living Room Heat Lead Minutes
+  icon: mdi:timer-plus
+  min: 0
+  max: 120
+  step: 5
+  unit_of_measurement: min
+  initial: 30
+living_room_heat_comfort_minutes:
+  name: Living Room Heat Comfort Window
+  icon: mdi:timer-off
+  min: 10
+  max: 120
+  step: 5
+  unit_of_measurement: min
+  initial: 45
+# Master Bedroom Climate Thresholds
+master_bedroom_temp_summer_cool:
+  name: Master Bedroom Summer Cooling Threshold
+  min: 22
+  max: 28
+  step: 0.5
+  initial: 26
+  unit_of_measurement: "C"
+  icon: mdi:thermometer-chevron-up
+master_bedroom_temp_winter_heat:
+  name: Master Bedroom Winter Heating Threshold
+  min: 14
+  max: 20
+  step: 0.5
+  initial: 16
+  unit_of_measurement: "C"
+  icon: mdi:thermometer-chevron-down
+master_bedroom_temp_comfort_low:
+  name: Master Bedroom Comfort Low
+  min: 16
+  max: 22
+  step: 0.5
+  initial: 18
+  unit_of_measurement: "C"
+  icon: mdi:thermometer
+master_bedroom_temp_comfort_high:
+  name: Master Bedroom Comfort High
+  min: 20
+  max: 28
+  step: 0.5
+  initial: 22
+  unit_of_measurement: "C"
+  icon: mdi:thermometer
+# Living Room Climate Thresholds
+living_room_temp_summer_cool:
+  name: Living Room Summer Cooling Threshold
+  min: 24
+  max: 32
+  step: 0.5
+  initial: 28
+  unit_of_measurement: "C"
+  icon: mdi:thermometer-chevron-up
+living_room_temp_winter_heat:
+  name: Living Room Winter Heating Threshold
+  min: 16
+  max: 22
+  step: 0.5
+  initial: 19
+  unit_of_measurement: "C"
+  icon: mdi:thermometer-chevron-down
+living_room_temp_winter_morning:
+  name: Living Room Winter Morning Preheat Threshold
+  min: 16
+  max: 21
+  step: 0.5
+  initial: 19
+  unit_of_measurement: "C"
+  icon: mdi:thermometer-clock
+living_room_temp_comfort:
+  name: Living Room Comfort Temperature
+  min: 18
+  max: 24
+  step: 0.5
+  initial: 20
+  unit_of_measurement: "C"
+  icon: mdi:thermometer
+# Otto's Room Climate Thresholds
+ottos_room_temp_heating:
+  name: Otto's Room Winter Heating Threshold
+  min: 16
+  max: 21
+  step: 0.5
+  initial: 18.5
+  unit_of_measurement: "C"
+  icon: mdi:thermometer-chevron-down
+ottos_room_temp_comfort_low:
+  name: Otto's Room Comfort Low
+  min: 17
+  max: 21
+  step: 0.5
+  initial: 18.5
+  unit_of_measurement: "C"
+  icon: mdi:thermometer
+ottos_room_temp_comfort_high:
+  name: Otto's Room Comfort High
+  min: 19
+  max: 24
+  step: 0.5
+  initial: 19.5
+  unit_of_measurement: "C"
+  icon: mdi:thermometer
+ottos_room_temp_warm:
+  name: Otto's Room Warm Threshold
+  min: 21
+  max: 25
+  step: 0.5
+  initial: 22
+  unit_of_measurement: "C"
+  icon: mdi:thermometer-chevron-up
+ottos_room_temp_hot:
+  name: Otto's Room Hot Threshold
+  min: 22
+  max: 26
+  step: 0.5
+  initial: 23
+  unit_of_measurement: "C"
+  icon: mdi:thermometer-alert
+ottos_room_temp_very_hot:
+  name: Otto's Room Very Hot Threshold
+  min: 23
+  max: 28
+  step: 0.5
+  initial: 25
+  unit_of_measurement: "C"
+  icon: mdi:thermometer-high
+# Henry's Room / Study Climate Thresholds
+henrys_room_temp_heating:
+  name: Henry's Room Winter Heating Threshold
+  min: 16
+  max: 21
+  step: 0.5
+  initial: 21
+  unit_of_measurement: "C"
+  icon: mdi:thermometer-chevron-down
+henrys_room_temp_comfort_low:
+  name: Henry's Room Comfort Low
+  min: 20
+  max: 23
+  step: 0.5
+  initial: 21
+  unit_of_measurement: "C"
+  icon: mdi:thermometer
+henrys_room_temp_comfort_high:
+  name: Henry's Room Comfort High
+  min: 22
+  max: 25
+  step: 0.5
+  initial: 23
+  unit_of_measurement: "C"
+  icon: mdi:thermometer
+henrys_room_temp_warm:
+  name: Henry's Room Warm Threshold
+  min: 21
+  max: 25
+  step: 0.5
+  initial: 22
+  unit_of_measurement: "C"
+  icon: mdi:thermometer-chevron-up
+henrys_room_temp_hot:
+  name: Henry's Room Hot Threshold
+  min: 23
+  max: 26
+  step: 0.5
+  initial: 24
+  unit_of_measurement: "C"
+  icon: mdi:thermometer-alert
+# Automation Trigger Counters (daily, reset at midnight)
+seasonal_climate_triggers_today:
+  name: Seasonal Climate Manager Triggers Today
+  min: 0
+  max: 100
+  step: 1
+  initial: 0
+  unit_of_measurement: triggers
+  icon: mdi:counter
+morning_blinds_triggers_today:
+  name: Morning Blinds Triggers Today
+  min: 0
+  max: 100
+  step: 1
+  initial: 0
+  unit_of_measurement: triggers
+  icon: mdi:counter
+preheat_triggers_today:
+  name: Preheat (5:30am) Triggers Today
+  min: 0
+  max: 100
+  step: 1
+  initial: 0
+  unit_of_measurement: triggers
+  icon: mdi:counter
+evening_cooling_triggers_today:
+  name: Evening Cooling Triggers Today
+  min: 0
+  max: 100
+  step: 1
+  initial: 0
+  unit_of_measurement: triggers
+  icon: mdi:counter
+frost_protection_triggers_today:
+  name: Frost Protection Triggers Today
+  min: 0
+  max: 100
+  step: 1
+  initial: 0
+  unit_of_measurement: triggers
+  icon: mdi:counter
+afternoon_recheck_triggers_today:
+  name: Afternoon Re-check Triggers Today
+  min: 0
+  max: 100
+  step: 1
+  initial: 0
+  unit_of_measurement: triggers
+  icon: mdi:counter
+# Additional automations tracking
+master_bedroom_cooling_night_triggers_today:
+  name: Master Bedroom Cooling Night Triggers Today
+  min: 0
+  max: 100
+  step: 1
+  initial: 0
+  unit_of_measurement: triggers
+  icon: mdi:counter
+children_cooling_night_triggers_today:
+  name: Children's Rooms Cooling Night Triggers Today
+  min: 0
+  max: 100
+  step: 1
+  initial: 0
+  unit_of_measurement: triggers
+  icon: mdi:counter
+master_bedroom_blinds_night_triggers_today:
+  name: Master Bedroom Blinds Night Triggers Today
+  min: 0
+  max: 100
+  step: 1
+  initial: 0
+  unit_of_measurement: triggers
+  icon: mdi:counter
+master_bedroom_blinds_morning_triggers_today:
+  name: Master Bedroom Blinds Morning Triggers Today
+  min: 0
+  max: 100
+  step: 1
+  initial: 0
+  unit_of_measurement: triggers
+  icon: mdi:counter
+climate_flags_mark_hot_day_triggers_today:
+  name: Climate Flags - Mark Hot Day Triggers Today
+  min: 0
+  max: 100
+  step: 1
+  initial: 0
+  unit_of_measurement: triggers
+  icon: mdi:counter

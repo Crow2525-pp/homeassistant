@@ -1,0 +1,54 @@
+garage_door_info_alert_active:
+  name: Garage Door Alert Active
+  entity_id: binary_sensor.garage_door_alert_active
+  state: "on"
+  repeat:
+    - 180
+  can_acknowledge: true
+  skip_first: true
+  title: "7580 Info - Garage Door Open"
+  message: >
+    Garage Door open for {{ relative_time(states.binary_sensor.garage_door_alert_active.last_changed) }}.
+    Alerts on: {{ expand('entity_id.cover.smart_garage_door_garage') | selectattr('state', 'eq', 'open') | map(attribute='attributes.friendly_name') | list | join(', ') }}.
+    Triggered: {{ as_timestamp(states.binary_sensor.garage_door_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}
+  done_message: "Garage Door Alert RESOLVED at {{ as_timestamp(states.binary_sensor.garage_door_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}"
+  notifiers:
+    - STD_Information
+
+network_device_down_warn_alert_active:
+  name: Network Device Down Alert Active
+  entity_id: binary_sensor.network_device_down_alert_active
+  state: "on"
+  repeat:
+    - 3
+    - 10
+    - 30
+    - 60
+  can_acknowledge: true
+  skip_first: false
+  title: "7580 Warning - Network Device Down"
+  message: >
+    Network device down for {{ relative_time(states.binary_sensor.network_device_down_alert_active.last_changed) }}.
+    Alerts on: {{ expand('group.network_devices') | selectattr('state', 'eq', 'off') | map(attribute='attributes.friendly_name') | list | join(', ') }}.
+    Triggered: {{ as_timestamp(states.binary_sensor.network_device_down_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}
+  done_message: "Network Device Down Alert RESOLVED at {{ as_timestamp(states.binary_sensor.network_device_down_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}"
+  notifiers:
+    - STD_Warning
+wan_down_warn_alert_active:
+  name: WAN Down Alert Active
+  entity_id: binary_sensor.wan_down_alert_active
+  state: "on"
+  repeat:
+    - 3
+    - 10
+    - 30
+    - 60
+  can_acknowledge: true
+  skip_first: false
+  title: "WAN Down"
+  message: >
+    WAN has been down for {{ relative_time(states.binary_sensor.wan_down_alert_active.last_changed) }}.
+    Please check your WAN connection.
+  done_message: "WAN Down Alert RESOLVED at {{ as_timestamp(states.binary_sensor.wan_down_alert_active.last_changed) | timestamp_custom('%A %I:%M%p (%d-%b-%Y)') }}"
+  notifiers:
+    - STD_Warning
