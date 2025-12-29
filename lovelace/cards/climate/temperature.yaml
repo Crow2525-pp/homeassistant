@@ -19,18 +19,19 @@ cards:
           box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
     entities:
-      # Living Room / Kitchen
-      - entity: sensor.kitchen_temperature
-        name: Kitchen
+      # Living Room
+      - entity: climate.living_room_ac_2
+        attribute: current_temperature
+        name: Living Room
         tap_action:
           action: more-info
         card_mod:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.kitchen_temperature') | float(0) < 18 %}
+                {% if state_attr('climate.living_room_ac_2', 'current_temperature') | float(0) < 18 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.kitchen_temperature') | float(0) > 24 %}
+                {% elif state_attr('climate.living_room_ac_2', 'current_temperature') | float(0) > 24 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -38,7 +39,8 @@ cards:
             }
 
       # Henry's Room
-      - entity: sensor.study_room_temp_humidity_sensor_temperature
+      - entity: climate.study_room_ac
+        attribute: current_temperature
         name: Lucas
         tap_action:
           action: more-info
@@ -46,9 +48,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.study_room_temp_humidity_sensor_temperature') | float(0) < 18 %}
+                {% if state_attr('climate.study_room_ac', 'current_temperature') | float(0) < 18 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.study_room_temp_humidity_sensor_temperature') | float(0) > 24 %}
+                {% elif state_attr('climate.study_room_ac', 'current_temperature') | float(0) > 24 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -56,7 +58,8 @@ cards:
             }
 
       # Otto's Room
-      - entity: sensor.kids_room_temp_humidity_sensor_temperature
+      - entity: climate.kids_room_ac
+        attribute: current_temperature
         name: Otto
         tap_action:
           action: more-info
@@ -64,9 +67,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.kids_room_temp_humidity_sensor_temperature') | float(0) < 18 %}
+                {% if state_attr('climate.kids_room_ac', 'current_temperature') | float(0) < 18 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.kids_room_temp_humidity_sensor_temperature') | float(0) > 24 %}
+                {% elif state_attr('climate.kids_room_ac', 'current_temperature') | float(0) > 24 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -74,7 +77,8 @@ cards:
             }
 
       # Master Bedroom
-      - entity: sensor.master_bedroom_temperature_humdity_sensor_temperature
+      - entity: climate.masterbed_room_ac
+        attribute: current_temperature
         name: Master
         tap_action:
           action: more-info
@@ -82,9 +86,9 @@ cards:
           style: |
             :host {
               --paper-item-icon-color:
-                {% if states('sensor.master_bedroom_temperature_humdity_sensor_temperature') | float(0) < 18 %}
+                {% if state_attr('climate.masterbed_room_ac', 'current_temperature') | float(0) < 18 %}
                   linear-gradient(145deg, #4F46E5 0%, #3730A3 100%)
-                {% elif states('sensor.master_bedroom_temperature_humdity_sensor_temperature') | float(0) > 24 %}
+                {% elif state_attr('climate.masterbed_room_ac', 'current_temperature') | float(0) > 24 %}
                   linear-gradient(145deg, #E11D48 0%, #BE123C 100%)
                 {% else %}
                   linear-gradient(145deg, #0F766E 0%, #115E59 100%)
@@ -116,16 +120,18 @@ cards:
 
   - type: history-graph
     entities:
-      - entity: sensor.master_bedroom_temperature_humdity_sensor_temperature
+      - entity: climate.masterbed_room_ac
+        attribute: current_temperature
         name: Master
-      - entity: sensor.kids_room_temp_humidity_sensor_temperature
+      - entity: climate.kids_room_ac
+        attribute: current_temperature
         name: Otto
-      - entity: sensor.study_room_temp_humidity_sensor_temperature
+      - entity: climate.study_room_ac
+        attribute: current_temperature
         name: Lucas
-      - entity: sensor.kitchen_temperature
+      - entity: climate.living_room_ac_2
+        attribute: current_temperature
         name: Living Room
-      - entity: sensor.kitchen_temperature
-        name: Kitchen
       - entity: sensor.essendon_airport_temp
         name: Essendon
     hours_to_show: 24
