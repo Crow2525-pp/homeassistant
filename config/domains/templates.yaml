@@ -203,7 +203,7 @@
     - name: "Living Room Temperature (Offset)"
       unique_id: livingroom_irblaster_temperature_offset
       unit_of_measurement: "°C"
-      state: "{{ (states('sensor.livingroom_irblaster_temperature') | float(0) + 1.7) | round(1) }}"
+      state: "{{ state_attr('climate.living_room_ac_2', 'current_temperature') | float(0) | round(1) }}"
 
 # Removed orphaned trigger template - no entity was defined
 # This will become a validation error in HA Core 2026.5
