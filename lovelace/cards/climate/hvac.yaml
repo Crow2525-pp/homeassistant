@@ -407,13 +407,11 @@ cards:
                 }
           - type: custom:mini-graph-card
             entities:
-              - entity: climate.living_room_ac_2
-                attribute: current_temperature
+              - entity: sensor.kitchen_temperature
                 name: Temperature
                 color: '#EC4899'
                 y_axis: primary
-              - entity: climate.living_room_ac_2
-                attribute: current_humidity
+              - entity: sensor.kitchen_humidity
                 name: Humidity
                 color: '#60A5FA'
                 y_axis: secondary
