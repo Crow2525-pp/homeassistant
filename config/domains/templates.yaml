@@ -615,14 +615,14 @@
       unit_of_measurement: "%"
       state: >
         {% set master = states('sensor.humiditysensor_humidity') | float(0) %}
-        {% set living = states('sensor.livingroom_irblaster_humidity') | float(0) %}
+        {% set living = state_attr('climate.living_room_ac_2', 'current_humidity') | float(0) %}
         {{ (living - master) | round(1) }}
       icon: "mdi:water-percent"
       attributes:
         master_humidity: "{{ states('sensor.humiditysensor_humidity') }}"
-        room_humidity: "{{ states('sensor.livingroom_irblaster_humidity') }}"
+        room_humidity: "{{ state_attr('climate.living_room_ac_2', 'current_humidity') }}"
         status: >
-          {% set diff = (states('sensor.livingroom_irblaster_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% set diff = (state_attr('climate.living_room_ac_2', 'current_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
           {% if diff > 15 %}
             significant
           {% elif diff > 10 %}
@@ -874,7 +874,7 @@
         {% set living_temp_diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
         {% set lucas_temp_diff = (states('sensor.study_study_temperature') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
         {% set otto_temp_diff = (states('sensor.study_kidsroom_temperature') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
-        {% set living_humid_diff = (states('sensor.livingroom_irblaster_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+        {% set living_humid_diff = (state_attr('climate.living_room_ac_2', 'current_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
         {% set lucas_humid_diff = (states('sensor.study_study_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
         {% set otto_humid_diff = (states('sensor.study_kidsroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
         {{ living_temp_diff > 3 or lucas_temp_diff > 3 or otto_temp_diff > 3 or living_humid_diff > 15 or lucas_humid_diff > 15 or otto_humid_diff > 15 }}
@@ -890,7 +890,7 @@
           {% set living_temp_diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
           {% set lucas_temp_diff = (states('sensor.study_study_temperature') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
           {% set otto_temp_diff = (states('sensor.study_kidsroom_temperature') | float(0) - states('sensor.masterbedroom_masterbed_temperature') | float(0)) | abs %}
-          {% set living_humid_diff = (states('sensor.livingroom_irblaster_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
+          {% set living_humid_diff = (state_attr('climate.living_room_ac_2', 'current_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
           {% set lucas_humid_diff = (states('sensor.study_study_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
           {% set otto_humid_diff = (states('sensor.study_kidsroom_humidity') | float(0) - states('sensor.humiditysensor_humidity') | float(0)) | abs %}
           {% if living_temp_diff > 3 %}{% set issues.rooms = issues.rooms + ['Living Room (Temp)'] %}{% endif %}
