@@ -111,10 +111,8 @@
                 50
               {% elif diff <= 4 %}
                 66
-              {% elif diff <= 5 %}
-                83
               {% else %}
-                100
+                66
               {% endif %}
             {% else %}
               16
