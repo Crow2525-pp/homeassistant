@@ -1,10 +1,4 @@
 mode: yaml
-dashboards:
-  ui-dashboard:
-    mode: storage
-    title: UI Dashboard
-    icon: mdi:monitor-dashboard
-    show_in_sidebar: true
 resources:
   - url: /hacsfiles/lovelace-card-mod/card-mod.js
     type: module
