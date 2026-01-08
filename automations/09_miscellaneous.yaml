@@ -34,6 +34,14 @@
     entity_id: fan.masterbedroom_fan
     to: 'off'
     id: fan_turned_off
+  - platform: state
+    entity_id: input_boolean.fan_manual_control_master
+    to: 'off'
+    id: manual_control_disabled
+  conditions:
+  - condition: state
+    entity_id: input_boolean.fan_manual_control_master
+    state: 'off'
   actions:
   - choose:
     - conditions:
@@ -131,4 +139,52 @@
       - service: fan.turn_off
         target:
           entity_id: fan.masterbedroom_fan
+    - conditions:
+      - condition: trigger
+        id: manual_control_disabled
+      sequence:
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: climate.masterbed_room_ac
+            state: cool
+          sequence:
+          - service: fan.set_percentage
+            target:
+              entity_id: fan.masterbedroom_fan
+            data:
+              percentage: >
+                {% set current = state_attr('climate.masterbed_room_ac', 'current_temperature') %}
+                {% set target = state_attr('climate.masterbed_room_ac', 'temperature') %}
+                {% if current is number and target is number %}
+                  {% set diff = current - target %}
+                  {% if diff <= 1 %}
+                    16
+                  {% elif diff <= 2 %}
+                    33
+                  {% elif diff <= 3 %}
+                    50
+                  {% elif diff <= 4 %}
+                    66
+                  {% elif diff <= 5 %}
+                    83
+                  {% else %}
+                    100
+                  {% endif %}
+                {% else %}
+                  16
+                {% endif %}
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: climate.masterbed_room_ac
+              state: heat
+            - condition: state
+              entity_id: climate.masterbed_room_ac
+              state: 'off'
+          sequence:
+          - service: fan.turn_off
+            target:
+              entity_id: fan.masterbedroom_fan
   mode: restart
