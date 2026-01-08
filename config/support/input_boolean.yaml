@@ -34,6 +34,10 @@ climate_manual_control_study:
   name: Lucas's Room Climate Manual Override
   icon: mdi:thermostat
   initial: false
+fan_manual_control_master:
+  name: Master Bedroom Fan Manual Override
+  icon: mdi:fan
+  initial: false
 super_hot_today:
   name: Super Hot Day Flag
   icon: mdi:weather-sunny-alert

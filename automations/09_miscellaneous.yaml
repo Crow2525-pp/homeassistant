@@ -34,6 +34,10 @@
     entity_id: fan.masterbedroom_fan
     to: 'off'
     id: fan_turned_off
+  conditions:
+  - condition: state
+    entity_id: input_boolean.fan_manual_control_master
+    state: 'off'
   actions:
   - choose:
     - conditions:
