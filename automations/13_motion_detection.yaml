@@ -24,7 +24,7 @@
   - action: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
       title: Front Door Motion Detected
-      message: Motion detected at the front door
+      message: "{{ states('sensor.bi_front_door_memo') }}"
       data:
         image: /api/camera_proxy/camera.bi_front_door_camera
         clickAction: /lovelace/security
@@ -49,7 +49,7 @@
   - action: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
       title: Driveway Motion Detected
-      message: Motion detected in the driveway
+      message: "{{ states('sensor.bi_driveway_memo') }}"
       data:
         image: /api/camera_proxy/camera.driveway_cam_fluent
         clickAction: /lovelace/security
