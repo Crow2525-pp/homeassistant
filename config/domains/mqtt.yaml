@@ -2,17 +2,39 @@ binary_sensor:
   - name: "Blue Iris Cam Front Door"
     unique_id: bi_cam_front_door
     state_topic: "BlueIris/FrontDoor/Status"
+    device_class: motion
+    qos: 1
     payload_on: "ON"
     payload_off: "OFF"
-    device_class: "motion"
     value_template: "{{ value_json.trigger }}"
-    qos: 1
 
   - name: "Blue Iris Cam Driveway"
     unique_id: bi_cam_driveway
     state_topic: "BlueIris/Driveway/Status"
+    device_class: motion
+    qos: 1
     payload_on: "ON"
     payload_off: "OFF"
-    device_class: "motion"
     value_template: "{{ value_json.trigger }}"
-    qos: 1
+
+
+sensor:
+  - name: "BI Front Door Memo"
+    unique_id: bi_front_door_memo
+    state_topic: "BlueIris/FrontDoor/Status"
+    value_template: "{{ value_json.memo }}"
+
+  - name: "BI Front Door Alert Path"
+    unique_id: bi_front_door_alert_path
+    state_topic: "BlueIris/FrontDoor/Status"
+    value_template: "{{ value_json.alert_path }}"
+
+  - name: "BI Driveway Memo"
+    unique_id: bi_driveway_memo
+    state_topic: "BlueIris/Driveway/Status"
+    value_template: "{{ value_json.memo }}"
+
+  - name: "BI Driveway Alert Path"
+    unique_id: bi_driveway_alert_path
+    state_topic: "BlueIris/Driveway/Status"
+    value_template: "{{ value_json.alert_path }}"
