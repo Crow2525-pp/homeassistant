@@ -66,7 +66,7 @@ cards:
     - [Portainer]({% if local %}https://portainer.pspatt.net{% else %}https://{{ media }}:9443/#!/2/docker/containers{% endif %})
 
     ### Downloads
-    - [SABnzbd]({% if local %}https://sabnzbd.pspatt.net{% else %}http://{{ media }}:8080/sabnzbd/{% endif %})
+    - [SABnzbd]({% if local %}https://sabnzbd.pspatt.net{% else %}http://{{ media }}:8082/sabnzbd/{% endif %})
     - [qBitTorrent]({% if local %}https://qbittorrent.pspatt.net{% else %}http://{{ media }}:8070{% endif %})
     - [Prowlarr]({% if local %}https://prowlarr.pspatt.net{% else %}http://{{ media }}:9696{% endif %})
 
@@ -74,20 +74,20 @@ cards:
     - [Sonarr]({% if local %}https://sonarr.pspatt.net{% else %}http://{{ media }}:8989{% endif %})
     - [Radarr]({% if local %}https://radarr.pspatt.net{% else %}http://{{ media }}:7878{% endif %})
     - [Lidarr]({% if local %}https://lidarr.pspatt.net{% else %}http://{{ media }}:8686{% endif %})
-    - [Readarr]({% if local %}https://readarr.pspatt.net{% else %}http://{{ media }}:8787{% endif %})
-    - [Readarr Audiobooks]({% if local %}https://readarr-ab.pspatt.net{% else %}http://{{ media }}:8787{% endif %})
+    - [Readarr]({% if local %}https://readarr.pspatt.net{% else %}http://{{ media }}:8788{% endif %})
+    - [Readarr Audiobooks]({% if local %}https://readarr-ab.pspatt.net{% else %}http://{{ media }}:8789{% endif %})
     - [Bazarr]({% if local %}https://bazarr.pspatt.net{% else %}http://{{ media }}:6767{% endif %})
     - [Tdarr]({% if local %}https://tdarr.pspatt.net{% else %}http://{{ media }}:8265{% endif %})
 
     ### Books & Media
     - [Calibre Web]({% if local %}https://books.pspatt.net{% else %}http://{{ media }}:8083{% endif %})
-    - [Calibre]({% if local %}https://calibre.pspatt.net{% else %}http://{{ media }}:8080{% endif %})
+    - [Calibre]({% if local %}https://calibre.pspatt.net{% else %}http://{{ media }}:8060{% endif %})
     - [Audiobookshelf]({% if local %}https://audiobooks.pspatt.net{% else %}http://{{ media }}:13378{% endif %})
     - [Reader Audiobooks]({% if local %}https://reader.pspatt.net{% else %}http://{{ media }}:8789{% endif %})
 
     ### Utilities
     - [SyncThing]({% if local %}https://sync.pspatt.net{% else %}http://{{ media }}:8384{% endif %})
-    - [HomeBox]({% if local %}https://homebox.pspatt.net{% else %}http://{{ media }}:7745{% endif %})
+    - [HomeBox]({% if local %}https://homebox.pspatt.net{% else %}http://{{ media }}:3100{% endif %})
     - [Nginx Proxy Manager]({% if local %}https://npm.pspatt.net{% else %}http://{{ media }}:81{% endif %})
     - [Dagster Webserver](http://{{ media }}:3000/)
 
