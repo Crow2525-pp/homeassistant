@@ -1009,6 +1009,14 @@
         data:
           timestamp: '{{ now().timestamp() }}'
         service: input_datetime.set_datetime
+      - service: notify.mobile_app_samsung_galaxy_s22_ultra
+        data:
+          title: Downstairs toilet cleaned
+          message: Toilet marked as done
+      - service: notify.mobile_app_slvdh
+        data:
+          title: Downstairs toilet cleaned
+          message: Toilet marked as done
     - conditions:
       - condition: template
         value_template: '{{ trigger.id == ''masterbed_toilet'' }}'
@@ -1027,6 +1035,14 @@
         data:
           timestamp: '{{ now().timestamp() }}'
         service: input_datetime.set_datetime
+      - service: notify.mobile_app_samsung_galaxy_s22_ultra
+        data:
+          title: Oma's toilet cleaned
+          message: Toilet marked as done
+      - service: notify.mobile_app_slvdh
+        data:
+          title: Oma's toilet cleaned
+          message: Toilet marked as done
     - conditions:
       - condition: template
         value_template: '{{ trigger.id == ''kids_toilet'' }}'
@@ -1036,6 +1052,14 @@
         data:
           timestamp: '{{ now().timestamp() }}'
         service: input_datetime.set_datetime
+      - service: notify.mobile_app_samsung_galaxy_s22_ultra
+        data:
+          title: Kids toilet cleaned
+          message: Toilet marked as done
+      - service: notify.mobile_app_slvdh
+        data:
+          title: Kids toilet cleaned
+          message: Toilet marked as done
   mode: single
 - id: ac_filter_living_room_reminder
   alias: Maintenance - Living Room AC Filter Reminder
