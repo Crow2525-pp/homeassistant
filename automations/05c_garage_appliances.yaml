@@ -1442,7 +1442,7 @@
   description: Stops the irrigation run after ten minutes to prevent over-watering.
   triggers:
   - trigger: state
-    entity_id: switch.sprinklers_relay_switch
+    entity_id: switch.water_switch_switch
     to: 'on'
   conditions: []
   actions:
@@ -1453,7 +1453,7 @@
       milliseconds: 0
   - action: switch.turn_off
     target:
-      entity_id: switch.sprinklers_relay_switch
+      entity_id: switch.water_switch_switch
   mode: single
 - id: '1706063916168'
   alias: Leak Sensors - Notify on Water Detection
