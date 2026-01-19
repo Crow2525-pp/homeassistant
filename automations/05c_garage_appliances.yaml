@@ -1454,6 +1454,14 @@
   - action: switch.turn_off
     target:
       entity_id: switch.water_switch_switch
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: Water Shutoff
+      message: Irrigation automatically stopped after 10 minutes
+  - service: notify.mobile_app_slvdh
+    data:
+      title: Water Shutoff
+      message: Irrigation automatically stopped after 10 minutes
   mode: single
 - id: '1706063916168'
   alias: Leak Sensors - Notify on Water Detection
