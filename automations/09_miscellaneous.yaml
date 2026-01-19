@@ -72,12 +72,8 @@
                 33
               {% elif diff <= 3 %}
                 50
-              {% elif diff <= 4 %}
-                66
-              {% elif diff <= 5 %}
-                83
               {% else %}
-                100
+                66
               {% endif %}
             {% else %}
               16
@@ -164,12 +160,8 @@
                     33
                   {% elif diff <= 3 %}
                     50
-                  {% elif diff <= 4 %}
-                    66
-                  {% elif diff <= 5 %}
-                    83
                   {% else %}
-                    100
+                    66
                   {% endif %}
                 {% else %}
                   16
