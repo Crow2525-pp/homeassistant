@@ -1012,11 +1012,23 @@
       - service: notify.mobile_app_samsung_galaxy_s22_ultra
         data:
           title: Downstairs toilet cleaned
-          message: Toilet marked as done
+          message: Who cleaned the downstairs toilet?
+          data:
+            actions:
+            - action: downstairs_toilet_phil
+              title: Phil
+            - action: downstairs_toilet_steph
+              title: Steph
       - service: notify.mobile_app_slvdh
         data:
           title: Downstairs toilet cleaned
-          message: Toilet marked as done
+          message: Who cleaned the downstairs toilet?
+          data:
+            actions:
+            - action: downstairs_toilet_phil
+              title: Phil
+            - action: downstairs_toilet_steph
+              title: Steph
     - conditions:
       - condition: template
         value_template: '{{ trigger.id == ''masterbed_toilet'' }}'
@@ -1026,6 +1038,26 @@
         data:
           timestamp: '{{ now().timestamp() }}'
         service: input_datetime.set_datetime
+      - service: notify.mobile_app_samsung_galaxy_s22_ultra
+        data:
+          title: Master bedroom toilet cleaned
+          message: Who cleaned the master bedroom toilet?
+          data:
+            actions:
+            - action: masterbed_toilet_phil
+              title: Phil
+            - action: masterbed_toilet_steph
+              title: Steph
+      - service: notify.mobile_app_slvdh
+        data:
+          title: Master bedroom toilet cleaned
+          message: Who cleaned the master bedroom toilet?
+          data:
+            actions:
+            - action: masterbed_toilet_phil
+              title: Phil
+            - action: masterbed_toilet_steph
+              title: Steph
     - conditions:
       - condition: template
         value_template: '{{ trigger.id == ''omas_toilet'' }}'
@@ -1038,11 +1070,23 @@
       - service: notify.mobile_app_samsung_galaxy_s22_ultra
         data:
           title: Oma's toilet cleaned
-          message: Toilet marked as done
+          message: Who cleaned Oma's toilet?
+          data:
+            actions:
+            - action: omas_toilet_phil
+              title: Phil
+            - action: omas_toilet_steph
+              title: Steph
       - service: notify.mobile_app_slvdh
         data:
           title: Oma's toilet cleaned
-          message: Toilet marked as done
+          message: Who cleaned Oma's toilet?
+          data:
+            actions:
+            - action: omas_toilet_phil
+              title: Phil
+            - action: omas_toilet_steph
+              title: Steph
     - conditions:
       - condition: template
         value_template: '{{ trigger.id == ''kids_toilet'' }}'
@@ -1055,11 +1099,23 @@
       - service: notify.mobile_app_samsung_galaxy_s22_ultra
         data:
           title: Kids toilet cleaned
-          message: Toilet marked as done
+          message: Who cleaned the kids toilet?
+          data:
+            actions:
+            - action: kids_toilet_phil
+              title: Phil
+            - action: kids_toilet_steph
+              title: Steph
       - service: notify.mobile_app_slvdh
         data:
           title: Kids toilet cleaned
-          message: Toilet marked as done
+          message: Who cleaned the kids toilet?
+          data:
+            actions:
+            - action: kids_toilet_phil
+              title: Phil
+            - action: kids_toilet_steph
+              title: Steph
   mode: single
 - id: ac_filter_living_room_reminder
   alias: Maintenance - Living Room AC Filter Reminder
@@ -1729,3 +1785,203 @@
       media_content_id: https://www.soundjay.com/misc/sounds/magic-chime-02.mp3
       media_content_type: audio/mp3
   mode: single
+- id: '1742615500000'
+  alias: Maintenance - Toilet Cleaning Tracker with Passive-Aggressive Thanks
+  description: Tracks who cleaned which toilet and sends progressively passive-aggressive
+    thank you messages
+  triggers:
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: downstairs_toilet_phil
+    id: downstairs_phil
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: downstairs_toilet_steph
+    id: downstairs_steph
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: masterbed_toilet_phil
+    id: masterbed_phil
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: masterbed_toilet_steph
+    id: masterbed_steph
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: omas_toilet_phil
+    id: omas_phil
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: omas_toilet_steph
+    id: omas_steph
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: kids_toilet_phil
+    id: kids_phil
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: kids_toilet_steph
+    id: kids_steph
+  actions:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ ''phil'' in trigger.id }}'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ ''downstairs'' in trigger.id }}'
+          sequence:
+          - service: input_number.increment
+            target:
+              entity_id: input_number.downstairs_toilet_phil_count
+          - variables:
+              count: '{{ states(''input_number.downstairs_toilet_phil_count'') | int
+                }}'
+              toilet_name: downstairs
+              cleaner_name: Phil
+              other_name: Steph
+        - conditions:
+          - condition: template
+            value_template: '{{ ''masterbed'' in trigger.id }}'
+          sequence:
+          - service: input_number.increment
+            target:
+              entity_id: input_number.masterbed_toilet_phil_count
+          - variables:
+              count: '{{ states(''input_number.masterbed_toilet_phil_count'') | int
+                }}'
+              toilet_name: master bedroom
+              cleaner_name: Phil
+              other_name: Steph
+        - conditions:
+          - condition: template
+            value_template: '{{ ''omas'' in trigger.id }}'
+          sequence:
+          - service: input_number.increment
+            target:
+              entity_id: input_number.omas_toilet_phil_count
+          - variables:
+              count: '{{ states(''input_number.omas_toilet_phil_count'') | int }}'
+              toilet_name: Oma's
+              cleaner_name: Phil
+              other_name: Steph
+        - conditions:
+          - condition: template
+            value_template: '{{ ''kids'' in trigger.id }}'
+          sequence:
+          - service: input_number.increment
+            target:
+              entity_id: input_number.kids_toilet_phil_count
+          - variables:
+              count: '{{ states(''input_number.kids_toilet_phil_count'') | int }}'
+              toilet_name: kids
+              cleaner_name: Phil
+              other_name: Steph
+    - conditions:
+      - condition: template
+        value_template: '{{ ''steph'' in trigger.id }}'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ ''downstairs'' in trigger.id }}'
+          sequence:
+          - service: input_number.increment
+            target:
+              entity_id: input_number.downstairs_toilet_steph_count
+          - variables:
+              count: '{{ states(''input_number.downstairs_toilet_steph_count'') |
+                int }}'
+              toilet_name: downstairs
+              cleaner_name: Steph
+              other_name: Phil
+        - conditions:
+          - condition: template
+            value_template: '{{ ''masterbed'' in trigger.id }}'
+          sequence:
+          - service: input_number.increment
+            target:
+              entity_id: input_number.masterbed_toilet_steph_count
+          - variables:
+              count: '{{ states(''input_number.masterbed_toilet_steph_count'') | int
+                }}'
+              toilet_name: master bedroom
+              cleaner_name: Steph
+              other_name: Phil
+        - conditions:
+          - condition: template
+            value_template: '{{ ''omas'' in trigger.id }}'
+          sequence:
+          - service: input_number.increment
+            target:
+              entity_id: input_number.omas_toilet_steph_count
+          - variables:
+              count: '{{ states(''input_number.omas_toilet_steph_count'') | int }}'
+              toilet_name: Oma's
+              cleaner_name: Steph
+              other_name: Phil
+        - conditions:
+          - condition: template
+            value_template: '{{ ''kids'' in trigger.id }}'
+          sequence:
+          - service: input_number.increment
+            target:
+              entity_id: input_number.kids_toilet_steph_count
+          - variables:
+              count: '{{ states(''input_number.kids_toilet_steph_count'') | int }}'
+              toilet_name: kids
+              cleaner_name: Steph
+              other_name: Phil
+  - variables:
+      message: "{% set count = count | int %} {% if count == 1 %}\n  Great job, {{
+        cleaner_name }}! Thanks for cleaning the {{ toilet_name }} toilet. It's {{
+        other_name }}'s turn next time!\n{% elif count == 2 %}\n  Thanks again, {{
+        cleaner_name }}! That's {{ count }} times you've cleaned the {{ toilet_name
+        }} toilet. {{ other_name }}'s up next!\n{% elif count == 3 %}\n  Wow, {{
+        cleaner_name }}! {{ count }} times cleaning the {{ toilet_name }} toilet.
+        You're on a roll! Maybe {{ other_name }} can take the next one?\n{% elif count
+        == 4 %}\n  {{ cleaner_name }}, you've cleaned the {{ toilet_name }} toilet
+        {{ count }} times now. Not that anyone's counting... but {{ other_name }}'s
+        turn is definitely coming up!\n{% elif count == 5 %}\n  Hey {{ cleaner_name
+        }}, that's {{ count }} cleans for the {{ toilet_name }} toilet! You know {{
+        other_name }} still remembers how to use cleaning supplies, right?\n{% elif
+        count == 6 %}\n  {{ cleaner_name }}, {{ count }} times! At this rate we should
+        just put your name on the {{ toilet_name }} toilet. But seriously, {{ other_name
+        }}'s turn next.\n{% elif count == 7 %}\n  Lucky number {{ count }} for {{
+        cleaner_name }} and the {{ toilet_name }} toilet! Meanwhile, {{ other_name
+        }} is probably wondering where the cleaning supplies are kept...\n{% elif
+        count == 8 %}\n  {{ cleaner_name }}: {{ count }} cleanings. {{ other_name
+        }}: ...is {{ other_name }} even aware this toilet exists? Next one's on them!\n{%
+        elif count == 9 %}\n  {{ cleaner_name }}, {{ count }} times! We're considering
+        renaming the {{ toilet_name }} toilet to \"{{ cleaner_name }}'s Domain.\"
+        But hey, {{ other_name }}'s definitely going next!\n{% elif count == 10 %}\n  \U0001F3C6
+        DOUBLE DIGITS! {{ cleaner_name }} has cleaned the {{ toilet_name }} toilet
+        {{ count }} times! {{ other_name }}, buddy, we need to talk...\n{% elif count
+        > 10 and count <= 15 %}\n  {{ cleaner_name }}, this is clean #{{ count }}
+        for the {{ toilet_name }} toilet. Should we start a fan club? Or maybe just
+        remind {{ other_name }} that toilets don't clean themselves?\n{% elif count
+        > 15 and count <= 20 %}\n  \U0001F92F {{ count }} times, {{ cleaner_name
+        }}! The {{ toilet_name }} toilet has never looked better! {{ other_name }},
+        if you're reading this, it's time.\n{% else %}\n  \U0001F631 {{ cleaner_name
+        }}, you've cleaned the {{ toilet_name }} toilet {{ count }} times! This is
+        no longer passive-aggressive, this is just aggressive. {{ other_name }}, NEXT
+        TIME IS YOURS. No excuses. We're all watching.\n{% endif %}"
+  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+    data:
+      title: "\U0001F9F9 Thanks for cleaning!"
+      message: '{{ message }}'
+  - service: notify.mobile_app_slvdh
+    data:
+      title: "\U0001F9F9 Thanks for cleaning!"
+      message: '{{ message }}'
+  mode: queued

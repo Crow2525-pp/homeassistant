@@ -280,3 +280,68 @@ climate_flags_mark_hot_day_triggers_today:
   initial: 0
   unit_of_measurement: triggers
   icon: mdi:counter
+# Toilet Cleaning Counters
+downstairs_toilet_phil_count:
+  name: Downstairs Toilet - Phil's Cleaning Count
+  min: 0
+  max: 1000
+  step: 1
+  initial: 0
+  unit_of_measurement: cleans
+  icon: mdi:toilet
+downstairs_toilet_steph_count:
+  name: Downstairs Toilet - Steph's Cleaning Count
+  min: 0
+  max: 1000
+  step: 1
+  initial: 0
+  unit_of_measurement: cleans
+  icon: mdi:toilet
+masterbed_toilet_phil_count:
+  name: Master Bedroom Toilet - Phil's Cleaning Count
+  min: 0
+  max: 1000
+  step: 1
+  initial: 0
+  unit_of_measurement: cleans
+  icon: mdi:toilet
+masterbed_toilet_steph_count:
+  name: Master Bedroom Toilet - Steph's Cleaning Count
+  min: 0
+  max: 1000
+  step: 1
+  initial: 0
+  unit_of_measurement: cleans
+  icon: mdi:toilet
+omas_toilet_phil_count:
+  name: Oma's Toilet - Phil's Cleaning Count
+  min: 0
+  max: 1000
+  step: 1
+  initial: 0
+  unit_of_measurement: cleans
+  icon: mdi:toilet
+omas_toilet_steph_count:
+  name: Oma's Toilet - Steph's Cleaning Count
+  min: 0
+  max: 1000
+  step: 1
+  initial: 0
+  unit_of_measurement: cleans
+  icon: mdi:toilet
+kids_toilet_phil_count:
+  name: Kids Toilet - Phil's Cleaning Count
+  min: 0
+  max: 1000
+  step: 1
+  initial: 0
+  unit_of_measurement: cleans
+  icon: mdi:toilet
+kids_toilet_steph_count:
+  name: Kids Toilet - Steph's Cleaning Count
+  min: 0
+  max: 1000
+  step: 1
+  initial: 0
+  unit_of_measurement: cleans
+  icon: mdi:toilet
