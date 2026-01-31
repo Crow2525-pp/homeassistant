@@ -1,0 +1,5 @@
+- platform: smartir
+  name: Study Ceiling Light
+  unique_id: study_ceiling_light
+  device_code: 1000
+  controller_data: remote.study
