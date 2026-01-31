@@ -3,3 +3,9 @@
   unique_id: bedroom_fan
   device_code: 1001
   controller_data: remote.ir_blaster_master_bedroom_remote
+
+- platform: smartir
+  name: Study Fan
+  unique_id: study_fan
+  device_code: 1002
+  controller_data: remote.study
