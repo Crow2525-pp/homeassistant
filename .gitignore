@@ -20,6 +20,7 @@
 !media_player.yaml
 !mqtt.yaml
 !automations/*.yaml
+!/custom_components/smartir/fan.py
 
 # Dashboard
 !.storage/lovelace
@@ -39,6 +40,8 @@ custom_components/hacs/hacs_frontend/frontend_latest
 !custom_components/smartir/codes/climate/1002.json
 !custom_components/smartir/codes/climate/1003.json
 !custom_components/smartir/codes/fan/1001.json
+!custom_components/smartir/codes/**/**.json
+
 
 !broadlink_remote*
 
