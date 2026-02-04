@@ -20,6 +20,9 @@
 !media_player.yaml
 !mqtt.yaml
 !automations/*.yaml
+!/custom_components/smartir/__init__.py
+!/custom_components/smartir/esphome.py
+!/custom_components/smartir/controller.py
 !/custom_components/smartir/fan.py
 
 # Dashboard
