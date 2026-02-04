@@ -9,8 +9,6 @@ import voluptuous as vol
 from homeassistant.components.fan import (
     FanEntity, FanEntityFeature,
     PLATFORM_SCHEMA, DIRECTION_REVERSE, DIRECTION_FORWARD)
-from homeassistant.components.switch import SwitchEntity
-from homeassistant.components.light import LightEntity, ColorMode
 from homeassistant.const import (
     CONF_NAME, STATE_OFF, STATE_ON, STATE_UNKNOWN)
 from homeassistant.core import Event, EventStateChangedData, callback
@@ -21,7 +19,7 @@ from homeassistant.util.percentage import (
     ordered_list_item_to_percentage,
     percentage_to_ordered_list_item
 )
-from .esphome import COMPONENT_ABS_DIR, Helper
+from . import COMPONENT_ABS_DIR, Helper
 from .controller import get_controller
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,28 +34,6 @@ CONF_DELAY = "delay"
 CONF_POWER_SENSOR = 'power_sensor'
 
 SPEED_OFF = "off"
-
-# JSON schema for device codes (codes/fan/<device_code>.json):
-#
-# Required keys:
-#   "manufacturer": string
-#   "supportedModels": list of strings
-#   "supportedController": string (e.g., "Broadlink")
-#   "commandsEncoding": string (e.g., "Base64")
-#   "speed": list of speed level strings (e.g., ["1", "2", "3", "4", "5", "6"])
-#   "commands": {
-#       "off": "<command>",
-#       "default": { "<speed>": "<command>", ... }
-#   }
-#
-# Optional keys in "commands" for toggle-based accessories:
-#   "reverse_toggle": "<command>"     - RF toggle for reverse mode (stateless)
-#   "fan_light_toggle": "<command>"   - RF toggle for fan light (stateless)
-#   "light_toggle": "<command>"       - Alias for fan_light_toggle
-#
-# When reverse_toggle is present, a switch entity "<name> Reverse" is created.
-# When fan_light_toggle or light_toggle is present, a light entity "<name> Light" is created.
-# These toggle entities maintain state locally via RestoreEntity since RF is stateless.
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_UNIQUE_ID): cv.string,
@@ -107,25 +83,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         _LOGGER.error("The device JSON file is invalid")
         return
 
-    # Build list of entities to add
-    entities = []
-
-    # Always add the main fan entity
-    entities.append(SmartIRFan(hass, config, device_data))
-
-    commands = device_data.get('commands', {})
-
-    # Add reverse toggle switch if command exists
-    if 'reverse_toggle' in commands:
-        entities.append(SmartIRFanReverseSwitch(hass, config, device_data))
-        _LOGGER.debug(f"Adding reverse toggle switch for {config.get(CONF_NAME)}")
-
-    # Add light toggle entity if command exists (accept both key names)
-    if 'fan_light_toggle' in commands or 'light_toggle' in commands:
-        entities.append(SmartIRFanLight(hass, config, device_data))
-        _LOGGER.debug(f"Adding light toggle for {config.get(CONF_NAME)}")
-
-    async_add_entities(entities)
+    async_add_entities([SmartIRFan(
+        hass, config, device_data
+    )])
 
 class SmartIRFan(FanEntity, RestoreEntity):
     def __init__(self, hass, config, device_data):
@@ -143,7 +103,7 @@ class SmartIRFan(FanEntity, RestoreEntity):
         self._commands_encoding = device_data['commandsEncoding']
         self._speed_list = device_data['speed']
         self._commands = device_data['commands']
-
+        
         self._speed = SPEED_OFF
         self._direction = None
         self._last_on_speed = None
@@ -170,7 +130,7 @@ class SmartIRFan(FanEntity, RestoreEntity):
         #Init the IR/RF controller
         self._controller = get_controller(
             self.hass,
-            self._supported_controller,
+            self._supported_controller, 
             self._commands_encoding,
             self._controller_data,
             self._delay)
@@ -178,14 +138,14 @@ class SmartIRFan(FanEntity, RestoreEntity):
     async def async_added_to_hass(self):
         """Run when entity about to be added."""
         await super().async_added_to_hass()
-
+    
         last_state = await self.async_get_last_state()
 
         if last_state is not None:
             if 'speed' in last_state.attributes:
                 self._speed = last_state.attributes['speed']
 
-            #If _direction has a value the direction controls appears
+            #If _direction has a value the direction controls appears 
             #in UI even if SUPPORT_DIRECTION is not provided in the flags
             if ('direction' in last_state.attributes and \
                 self._support_flags & FanEntityFeature.DIRECTION):
@@ -195,7 +155,7 @@ class SmartIRFan(FanEntity, RestoreEntity):
                 self._last_on_speed = last_state.attributes['last_on_speed']
 
             if self._power_sensor:
-                async_track_state_change_event(self.hass, self._power_sensor,
+                async_track_state_change_event(self.hass, self._power_sensor, 
                                                self._async_power_sensor_changed)
 
     @property
@@ -315,7 +275,7 @@ class SmartIRFan(FanEntity, RestoreEntity):
             elif oscillating:
                 command = self._commands['oscillate']
             else:
-                command = self._commands[direction][speed]
+                command = self._commands[direction][speed] 
 
             try:
                 await self._controller.send(command)
@@ -345,206 +305,3 @@ class SmartIRFan(FanEntity, RestoreEntity):
             if self._speed != SPEED_OFF:
                 self._speed = SPEED_OFF
             self.async_write_ha_state()
-
-
-class SmartIRFanReverseSwitch(SwitchEntity, RestoreEntity):
-    """
-    Switch entity for fans with a toggle-based reverse command.
-
-    Since the RF remote sends a toggle command (not absolute forward/reverse),
-    we must track state locally. The RF command is only sent when the requested
-    state differs from the current stored state, because sending the toggle
-    command twice would revert the physical state.
-    """
-
-    def __init__(self, hass, config, device_data):
-        self.hass = hass
-        self._base_unique_id = config.get(CONF_UNIQUE_ID) or str(config.get(CONF_DEVICE_CODE))
-        self._base_name = config.get(CONF_NAME)
-        self._device_code = config.get(CONF_DEVICE_CODE)
-        self._controller_data = config.get(CONF_CONTROLLER_DATA)
-        self._delay = config.get(CONF_DELAY)
-
-        self._supported_controller = device_data['supportedController']
-        self._commands_encoding = device_data['commandsEncoding']
-        self._commands = device_data['commands']
-
-        # State is stored locally because RF toggle is stateless.
-        # True = reverse mode enabled, False = forward mode.
-        self._is_on = False
-
-        self._send_lock = asyncio.Lock()
-
-        # Init the IR/RF controller
-        self._controller = get_controller(
-            self.hass,
-            self._supported_controller,
-            self._commands_encoding,
-            self._controller_data,
-            self._delay)
-
-    async def async_added_to_hass(self):
-        """Restore last known state on startup."""
-        await super().async_added_to_hass()
-
-        last_state = await self.async_get_last_state()
-        if last_state is not None:
-            self._is_on = last_state.state == STATE_ON
-            _LOGGER.debug(f"Restored {self.name} state: {self._is_on}")
-
-    @property
-    def unique_id(self):
-        """Return a unique ID."""
-        return f"{self._base_unique_id}_reverse"
-
-    @property
-    def name(self):
-        """Return the display name."""
-        return f"{self._base_name} Reverse"
-
-    @property
-    def is_on(self):
-        """Return true if reverse mode is enabled."""
-        return self._is_on
-
-    @property
-    def icon(self):
-        """Return the icon."""
-        return "mdi:rotate-3d-variant" if self._is_on else "mdi:rotate-3d"
-
-    async def async_turn_on(self, **kwargs):
-        """Turn on reverse mode."""
-        await self._async_set_reverse(True)
-
-    async def async_turn_off(self, **kwargs):
-        """Turn off reverse mode (back to forward)."""
-        await self._async_set_reverse(False)
-
-    async def _async_set_reverse(self, target: bool):
-        """
-        Set the reverse state, sending toggle command only if state changes.
-
-        Because the RF command is a toggle, we must only send it when the
-        target state differs from current state. Sending it when already
-        in the target state would toggle back to the opposite state.
-        """
-        async with self._send_lock:
-            if self._is_on == target:
-                _LOGGER.debug(f"{self.name}: already in target state {target}, not sending toggle")
-                return
-
-            command = self._commands.get('reverse_toggle')
-            if not command:
-                _LOGGER.warning(f"{self.name}: reverse_toggle command not found")
-                return
-
-            try:
-                _LOGGER.debug(f"{self.name}: sending reverse_toggle to change state to {target}")
-                await self._controller.send(command)
-                self._is_on = target
-                self.async_write_ha_state()
-            except Exception as e:
-                _LOGGER.exception(e)
-
-
-class SmartIRFanLight(LightEntity, RestoreEntity):
-    """
-    Light entity for fans with a toggle-based light command.
-
-    Since the RF remote sends a toggle command (not absolute on/off),
-    we must track state locally. The RF command is only sent when the
-    requested state differs from the current stored state.
-    """
-
-    def __init__(self, hass, config, device_data):
-        self.hass = hass
-        self._base_unique_id = config.get(CONF_UNIQUE_ID) or str(config.get(CONF_DEVICE_CODE))
-        self._base_name = config.get(CONF_NAME)
-        self._device_code = config.get(CONF_DEVICE_CODE)
-        self._controller_data = config.get(CONF_CONTROLLER_DATA)
-        self._delay = config.get(CONF_DELAY)
-
-        self._supported_controller = device_data['supportedController']
-        self._commands_encoding = device_data['commandsEncoding']
-        self._commands = device_data['commands']
-
-        # Determine which command key to use (fan_light_toggle preferred, light_toggle as alias)
-        if 'fan_light_toggle' in self._commands:
-            self._toggle_command_key = 'fan_light_toggle'
-        else:
-            self._toggle_command_key = 'light_toggle'
-
-        # State is stored locally because RF toggle is stateless.
-        self._is_on = False
-
-        self._send_lock = asyncio.Lock()
-
-        # This is a simple on/off light with no brightness/color support
-        self._attr_color_mode = ColorMode.ONOFF
-        self._attr_supported_color_modes = {ColorMode.ONOFF}
-
-        # Init the IR/RF controller
-        self._controller = get_controller(
-            self.hass,
-            self._supported_controller,
-            self._commands_encoding,
-            self._controller_data,
-            self._delay)
-
-    async def async_added_to_hass(self):
-        """Restore last known state on startup."""
-        await super().async_added_to_hass()
-
-        last_state = await self.async_get_last_state()
-        if last_state is not None:
-            self._is_on = last_state.state == STATE_ON
-            _LOGGER.debug(f"Restored {self.name} state: {self._is_on}")
-
-    @property
-    def unique_id(self):
-        """Return a unique ID."""
-        return f"{self._base_unique_id}_light"
-
-    @property
-    def name(self):
-        """Return the display name."""
-        return f"{self._base_name} Light"
-
-    @property
-    def is_on(self):
-        """Return true if light is on."""
-        return self._is_on
-
-    async def async_turn_on(self, **kwargs):
-        """Turn on the light."""
-        await self._async_set_light(True)
-
-    async def async_turn_off(self, **kwargs):
-        """Turn off the light."""
-        await self._async_set_light(False)
-
-    async def _async_set_light(self, target: bool):
-        """
-        Set the light state, sending toggle command only if state changes.
-
-        Because the RF command is a toggle, we must only send it when the
-        target state differs from current state. Sending it when already
-        in the target state would toggle back to the opposite state.
-        """
-        async with self._send_lock:
-            if self._is_on == target:
-                _LOGGER.debug(f"{self.name}: already in target state {target}, not sending toggle")
-                return
-
-            command = self._commands.get(self._toggle_command_key)
-            if not command:
-                _LOGGER.warning(f"{self.name}: {self._toggle_command_key} command not found")
-                return
-
-            try:
-                _LOGGER.debug(f"{self.name}: sending {self._toggle_command_key} to change state to {target}")
-                await self._controller.send(command)
-                self._is_on = target
-                self.async_write_ha_state()
-            except Exception as e:
-                _LOGGER.exception(e)
