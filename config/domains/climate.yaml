@@ -34,3 +34,12 @@
   controller_data: remote.livingroom_irblaster_remote
   temperature_sensor: sensor.kitchen_temperature
   humidity_sensor: sensor.kitchen_humidity
+
+- platform: smartir
+  name: Rumpus AC
+  unique_id: rumpus_ac
+  device_code: 1004
+  delay: 0.5
+  controller_data: remote.rumpus_irblaster_remote
+  temperature_sensor: sensor.rumpus_temperature
+  humidity_sensor: sensor.rumpus_humidity
