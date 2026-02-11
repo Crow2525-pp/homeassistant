@@ -1,4 +1,4 @@
-mode: yaml
+resource_mode: yaml
 resources:
   - url: /hacsfiles/lovelace-card-mod/card-mod.js
     type: module
@@ -36,3 +36,10 @@ resources:
     type: module
   - url: /local/community/lovelace-layout-card/layout-card.js
     type: module
+dashboards:
+  lovelace:
+    mode: yaml
+    filename: ui-lovelace.yaml
+    title: Overview
+    icon: mdi:view-dashboard
+    show_in_sidebar: true
