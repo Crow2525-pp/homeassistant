@@ -41,3 +41,5 @@
   device_code: 1004
   delay: 0.5
   controller_data: remote.rumpus_irblaster_remote
+  temperature_sensor: sensor.rumpus_temperature
+  humidity_sensor: sensor.rumpus_humidity
