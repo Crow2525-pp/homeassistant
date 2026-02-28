@@ -1225,7 +1225,7 @@
   - choose:
     - conditions:
       - condition: template
-        value_template: '{{ now().month in [12, 1, 2] }}'
+        value_template: '{{ now().month in [12, 1, 2, 3] }}'
       sequence:
       - service: input_select.select_option
         target:
@@ -1234,7 +1234,7 @@
           option: summer
     - conditions:
       - condition: template
-        value_template: '{{ now().month in [3, 4, 5] }}'
+        value_template: '{{ now().month in [4, 5, 9, 10] }}'
       sequence:
       - service: input_select.select_option
         target:
@@ -1252,7 +1252,7 @@
           option: winter
     - conditions:
       - condition: template
-        value_template: '{{ now().month in [9, 10, 11] }}'
+        value_template: '{{ now().month in [11] }}'
       sequence:
       - service: input_select.select_option
         target:
