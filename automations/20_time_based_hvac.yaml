@@ -5,27 +5,41 @@
 # This file implements per-room climate control based on wake/bed times.
 #
 # Logic:
-# - Gates: manual override off; time-based actions require occupancy home/sleeping
-# - Living Room: Comfort at wake/bed when home/sleeping; off when away
-# - Bedrooms: Comfort during day (wake to bed), Eco/Boost during night (bed to wake)
-# - Night mode determines heat/cool based on season:
-#   - Heat mode uses Eco preset (energy-efficient heating)
-#   - Cool mode uses Boost preset (aggressive cooling)
+# - Gates: manual override off; occupancy must be Home or Sleeping
+# - Wake time: comfort preset; heat/cool decided by outside temperature
+# - Bed time: eco (heat) or boost (cool) preset; same outside-temp decision
+#
+# Heat/cool decision order (same for all rooms):
+#   1. Outside temp < 16°C  → heat  (cold regardless of season)
+#   2. Outside temp > 23°C  → cool  (warm regardless of season)
+#   3. Season winter/autumn → heat  (moderate temp, cold-bias season)
+#   4. Season summer/spring → cool  (moderate temp, warm-bias season)
+#   5. Default              → off   (no match)
+# Edit thresholds 16 / 23 to taste.
 #
 # Rooms:
-# - Living Room: Communal space
+# - Living Room:  communal space (also turns on when arriving home)
 # - Master Bedroom: Steph & Phil
-# - Otto's Room: Henry & Otto (shared)
-# - Lucas's Room: Lucas (formerly Henry's Room/Study)
+# - Otto's Room:    Henry & Otto
+# - Lucas's Room:   Lucas (formerly Study/Henry's Room)
+#
+# Related files:
+# - 16_master_bedroom_morning_comfort.yaml: humidity control only
+#   (morning-comfort and exit automations in that file are superseded by
+#    master_bedroom_time_based_day / master_bedroom_time_based_night here)
+# - 12_morning_preheat.yaml: superseded by living_room_time_based_comfort
 # ============================================================================
 
 # ============================================================================
-# LIVING ROOM - Comfort at wake/bed, off when away
+# LIVING ROOM - Comfort at wake/bed, turn on when arriving home
 # ============================================================================
 
 - id: living_room_time_based_comfort
-  alias: "HVAC - Living Room - Comfort (Home/Sleeping)"
-  description: "Set comfort at wake/bed when home or sleeping. Turn on when arriving."
+  alias: "HVAC - Living Room - Comfort (Wake/Bed Time)"
+  description: >
+    At wake and bed times, set comfort preset and decide heat/cool mode
+    based on outside temperature, with season as fallback. Also turns the
+    AC on when the household arrives home from away.
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -37,16 +51,16 @@
       at: input_datetime.bedtime_living_room
       id: bed_time
   conditions:
-    # Gate: Manual override must be off
+    # Gate: manual override must be off
     - condition: state
       entity_id: input_boolean.climate_manual_control_living
       state: "off"
   actions:
     - choose:
-        # Occupancy change - just turn on when arriving
+        # Occupancy change: turn on when arriving home/sleeping from away
         - conditions:
-            - condition: template
-              value_template: "{{ trigger.id == 'occupancy_change' }}"
+            - condition: trigger
+              id: occupancy_change
             - condition: or
               conditions:
                 - condition: state
@@ -64,10 +78,12 @@
               target:
                 entity_id: climate.living_room_ac_2
 
-        # Time gates - set comfort and choose heat/cool for the day
+        # Wake/bed time: set comfort and decide heat/cool
         - conditions:
-            - condition: template
-              value_template: "{{ trigger.id in ['wake_time', 'bed_time'] }}"
+            - condition: trigger
+              id:
+                - wake_time
+                - bed_time
             - condition: or
               conditions:
                 - condition: state
@@ -82,9 +98,31 @@
                 entity_id: climate.living_room_ac_2
               data:
                 preset_mode: comfort
-            # Determine heat or cool based on season only (no outside temp)
+            # Decide heat or cool: outside temp first, then season as fallback
             - choose:
-                # Winter/Autumn - Heat
+                # Cold (outside < 16°C) → heat
+                - conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_temp
+                      below: 16
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_ac_2
+                      data:
+                        hvac_mode: heat
+                # Warm (outside > 23°C) → cool
+                - conditions:
+                    - condition: numeric_state
+                      entity_id: sensor.essendon_airport_temp
+                      above: 23
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_ac_2
+                      data:
+                        hvac_mode: cool
+                # Moderate + winter/autumn → heat
                 - conditions:
                     - condition: or
                       conditions:
@@ -100,7 +138,7 @@
                         entity_id: climate.living_room_ac_2
                       data:
                         hvac_mode: heat
-                # Summer/Spring - Cool
+                # Moderate + summer/spring → cool
                 - conditions:
                     - condition: or
                       conditions:
@@ -116,7 +154,6 @@
                         entity_id: climate.living_room_ac_2
                       data:
                         hvac_mode: cool
-              # Default - off if no season match
               default:
                 - action: climate.set_hvac_mode
                   target:
@@ -126,12 +163,14 @@
   mode: single
 
 # ============================================================================
-# MASTER BEDROOM - Comfort day, Eco/Boost night
+# MASTER BEDROOM - Comfort at wake, Eco/Boost at bedtime
 # ============================================================================
 
 - id: master_bedroom_time_based_day
-  alias: "HVAC - Master Bedroom - Daytime Comfort"
-  description: "Set master bedroom to comfort during daytime (wake to bed)."
+  alias: "HVAC - Master Bedroom - Wake Up Comfort"
+  description: >
+    At wake time, set comfort preset and decide heat/cool based on outside
+    temperature (< 16°C heat, > 23°C cool, otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
@@ -150,24 +189,38 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-    # Time must be within daytime (wake to bed)
-    - condition: template
-      value_template: >
-        {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
-        {% set bed = states('input_datetime.bedtime_master_bedroom') %}
-        {% set now_time = now().strftime('%H:%M:%S') %}
-        {{ wake <= now_time < bed }}
   actions:
-    # Step 1: Set comfort preset for daytime
+    # Step 1: Set comfort preset for waking up
     - action: climate.set_preset_mode
       target:
         entity_id: climate.masterbed_room_ac
       data:
         preset_mode: comfort
-
-    # Step 2: Set initial hvac_mode based on season
+    # Step 2: Decide heat or cool
     - choose:
-        # Winter/Autumn - Start with heating
+        # Cold morning (outside < 16°C) → heat
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.essendon_airport_temp
+              below: 16
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: heat
+        # Warm morning (outside > 23°C) → cool
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.essendon_airport_temp
+              above: 23
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: cool
+        # Moderate + winter/autumn → heat
         - conditions:
             - condition: or
               conditions:
@@ -183,8 +236,7 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
-
-        # Summer/Spring - Start with cooling
+        # Moderate + summer/spring → cool
         - conditions:
             - condition: or
               conditions:
@@ -200,12 +252,19 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.masterbed_room_ac
+          data:
+            hvac_mode: "off"
   mode: single
 
 - id: master_bedroom_time_based_night
-  alias: "HVAC - Master Bedroom - Nighttime Eco/Boost"
-  description: "Set master bedroom to eco (heat) or boost (cool) during nighttime (bed to wake)."
+  alias: "HVAC - Master Bedroom - Bedtime Eco/Boost"
+  description: >
+    At bedtime, set eco preset (heat) or boost preset (cool) based on
+    outside temperature (< 16°C eco+heat, > 23°C boost+cool, otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
@@ -224,17 +283,42 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-    # Time must be within nighttime (bed to wake, wraps midnight)
-    - condition: template
-      value_template: >
-        {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
-        {% set bed = states('input_datetime.bedtime_master_bedroom') %}
-        {% set now_time = now().strftime('%H:%M:%S') %}
-        {{ now_time >= bed or now_time < wake }}
   actions:
-    # Step 1: Set the correct nighttime preset based on season
+    # Set nighttime preset and hvac_mode based on outside temp, then season
     - choose:
-        # Winter/Autumn - Use eco preset for energy-efficient heating
+        # Cold night (outside < 16°C) → eco + heat
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.essendon_airport_temp
+              below: 16
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: eco
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: heat
+        # Warm night (outside > 23°C) → boost + cool
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.essendon_airport_temp
+              above: 23
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: cool
+        # Moderate + winter/autumn → eco + heat
         - conditions:
             - condition: or
               conditions:
@@ -255,8 +339,7 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
-
-        # Summer/Spring - Use boost preset for aggressive cooling
+        # Moderate + summer/spring → boost + cool
         - conditions:
             - condition: or
               conditions:
@@ -277,7 +360,12 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.masterbed_room_ac
+          data:
+            hvac_mode: "off"
   mode: single
 
 - id: master_bedroom_away_mode
@@ -302,12 +390,14 @@
   mode: single
 
 # ============================================================================
-# OTTO'S ROOM (Henry & Otto) - Comfort day, Eco/Boost night
+# OTTO'S ROOM (Henry & Otto) - Comfort at wake, Eco/Boost at bedtime
 # ============================================================================
 
 - id: ottos_room_time_based_day
-  alias: "HVAC - Otto's Room - Daytime Comfort"
-  description: "Set Otto's room to comfort during daytime (wake to bed)."
+  alias: "HVAC - Otto's Room - Wake Up Comfort"
+  description: >
+    At wake time, set comfort preset and decide heat/cool based on outside
+    temperature (< 16°C heat, > 23°C cool, otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_ottos_room
@@ -326,24 +416,33 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-    # Time must be within daytime (wake to bed)
-    - condition: template
-      value_template: >
-        {% set wake = states('input_datetime.wakeup_time_ottos_room') %}
-        {% set bed = states('input_datetime.bedtime_ottos_room') %}
-        {% set now_time = now().strftime('%H:%M:%S') %}
-        {{ wake <= now_time < bed }}
   actions:
-    # Step 1: Set comfort preset for daytime
     - action: climate.set_preset_mode
       target:
         entity_id: climate.kids_room_ac
       data:
         preset_mode: comfort
-
-    # Step 2: Set initial hvac_mode based on season
     - choose:
-        # Winter/Autumn - Start with heating
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.essendon_airport_temp
+              below: 16
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.kids_room_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.essendon_airport_temp
+              above: 23
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.kids_room_ac
+              data:
+                hvac_mode: cool
         - conditions:
             - condition: or
               conditions:
@@ -359,8 +458,6 @@
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: heat
-
-        # Summer/Spring - Start with cooling
         - conditions:
             - condition: or
               conditions:
@@ -376,12 +473,19 @@
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
-
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.kids_room_ac
+          data:
+            hvac_mode: "off"
   mode: single
 
 - id: ottos_room_time_based_night
-  alias: "HVAC - Otto's Room - Nighttime Eco/Boost"
-  description: "Set Otto's room to eco (heat) or boost (cool) during nighttime (bed to wake)."
+  alias: "HVAC - Otto's Room - Bedtime Eco/Boost"
+  description: >
+    At bedtime, set eco preset (heat) or boost preset (cool) based on
+    outside temperature (< 16°C eco+heat, > 23°C boost+cool, otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.bedtime_ottos_room
@@ -400,17 +504,38 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-    # Time must be within nighttime (bed to wake, wraps midnight)
-    - condition: template
-      value_template: >
-        {% set wake = states('input_datetime.wakeup_time_ottos_room') %}
-        {% set bed = states('input_datetime.bedtime_ottos_room') %}
-        {% set now_time = now().strftime('%H:%M:%S') %}
-        {{ now_time >= bed or now_time < wake }}
   actions:
-    # Step 1: Set the correct nighttime preset based on season
     - choose:
-        # Winter/Autumn - Use eco preset for energy-efficient heating
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.essendon_airport_temp
+              below: 16
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.kids_room_ac
+              data:
+                preset_mode: eco
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.kids_room_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.essendon_airport_temp
+              above: 23
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.kids_room_ac
+              data:
+                preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.kids_room_ac
+              data:
+                hvac_mode: cool
         - conditions:
             - condition: or
               conditions:
@@ -431,8 +556,6 @@
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: heat
-
-        # Summer/Spring - Use boost preset for aggressive cooling
         - conditions:
             - condition: or
               conditions:
@@ -453,7 +576,12 @@
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
-
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.kids_room_ac
+          data:
+            hvac_mode: "off"
   mode: single
 
 - id: ottos_room_away_mode
@@ -478,12 +606,14 @@
   mode: single
 
 # ============================================================================
-# LUCAS'S ROOM (formerly Study/Henry's Room) - Comfort day, Eco/Boost night
+# LUCAS'S ROOM (formerly Study/Henry's Room) - Comfort at wake, Eco/Boost at bedtime
 # ============================================================================
 
 - id: lucas_room_time_based_day
-  alias: "HVAC - Lucas's Room - Daytime Comfort"
-  description: "Set Lucas's room to comfort during daytime (wake to bed)."
+  alias: "HVAC - Lucas's Room - Wake Up Comfort"
+  description: >
+    At wake time, set comfort preset and decide heat/cool based on outside
+    temperature (< 16°C heat, > 23°C cool, otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_lucas_room
@@ -502,24 +632,33 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-    # Time must be within daytime (wake to bed)
-    - condition: template
-      value_template: >
-        {% set wake = states('input_datetime.wakeup_time_lucas_room') %}
-        {% set bed = states('input_datetime.bedtime_lucas_room') %}
-        {% set now_time = now().strftime('%H:%M:%S') %}
-        {{ wake <= now_time < bed }}
   actions:
-    # Step 1: Set comfort preset for daytime
     - action: climate.set_preset_mode
       target:
         entity_id: climate.study_room_ac
       data:
         preset_mode: comfort
-
-    # Step 2: Set initial hvac_mode based on season
     - choose:
-        # Winter/Autumn - Start with heating
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.essendon_airport_temp
+              below: 16
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.study_room_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.essendon_airport_temp
+              above: 23
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.study_room_ac
+              data:
+                hvac_mode: cool
         - conditions:
             - condition: or
               conditions:
@@ -535,8 +674,6 @@
                 entity_id: climate.study_room_ac
               data:
                 hvac_mode: heat
-
-        # Summer/Spring - Start with cooling
         - conditions:
             - condition: or
               conditions:
@@ -552,12 +689,19 @@
                 entity_id: climate.study_room_ac
               data:
                 hvac_mode: cool
-
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.study_room_ac
+          data:
+            hvac_mode: "off"
   mode: single
 
 - id: lucas_room_time_based_night
-  alias: "HVAC - Lucas's Room - Nighttime Eco/Boost"
-  description: "Set Lucas's room to eco (heat) or boost (cool) during nighttime (bed to wake)."
+  alias: "HVAC - Lucas's Room - Bedtime Eco/Boost"
+  description: >
+    At bedtime, set eco preset (heat) or boost preset (cool) based on
+    outside temperature (< 16°C eco+heat, > 23°C boost+cool, otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.bedtime_lucas_room
@@ -576,17 +720,38 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-    # Time must be within nighttime (bed to wake, wraps midnight)
-    - condition: template
-      value_template: >
-        {% set wake = states('input_datetime.wakeup_time_lucas_room') %}
-        {% set bed = states('input_datetime.bedtime_lucas_room') %}
-        {% set now_time = now().strftime('%H:%M:%S') %}
-        {{ now_time >= bed or now_time < wake }}
   actions:
-    # Step 1: Set the correct nighttime preset based on season
     - choose:
-        # Winter/Autumn - Use eco preset for energy-efficient heating
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.essendon_airport_temp
+              below: 16
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.study_room_ac
+              data:
+                preset_mode: eco
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.study_room_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.essendon_airport_temp
+              above: 23
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.study_room_ac
+              data:
+                preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.study_room_ac
+              data:
+                hvac_mode: cool
         - conditions:
             - condition: or
               conditions:
@@ -607,8 +772,6 @@
                 entity_id: climate.study_room_ac
               data:
                 hvac_mode: heat
-
-        # Summer/Spring - Use boost preset for aggressive cooling
         - conditions:
             - condition: or
               conditions:
@@ -629,7 +792,12 @@
                 entity_id: climate.study_room_ac
               data:
                 hvac_mode: cool
-
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.study_room_ac
+          data:
+            hvac_mode: "off"
   mode: single
 
 - id: lucas_room_away_mode

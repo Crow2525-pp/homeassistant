@@ -1,48 +1,16 @@
 ---
 # ============================================================================
-# MORNING PREHEAT AUTOMATION
+# MORNING PREHEAT  [SUPERSEDED]
 # ============================================================================
-# Purpose: Intelligently preheat downstairs area before wake-up (5:30 AM)
-# Documentation: docs/setup/MORNING_ROUTINE_SETUP.md
+# This automation has been superseded by the living room wake-up automation
+# in 20_time_based_hvac.yaml (living_room_time_based_comfort).
+#
+# Differences from old approach:
+#   - Old: hardcoded 5:30 AM, comfort preset only, no heat/cool decision
+#   - New: uses input_datetime.wakeup_time_living_room (configurable in UI),
+#          sets comfort preset AND decides heat vs cool based on outside
+#          temperature and season
+#
+# To adjust the living room wake time: Settings → Helpers →
+#   Wake-up Time - Living Room  (input_datetime.wakeup_time_living_room)
 # ============================================================================
-
-- id: morning_preheat_downstairs
-  alias: "Morning Routine - Preheat Downstairs (5:30 AM)"
-  description: "Intelligent downstairs heating 30 minutes before wake-up"
-
-  trigger:
-    - platform: time
-      at: "05:30:00"
-      id: scheduled_preheat
-
-  condition:
-    # Killswitch not active
-    - condition: state
-      entity_id: input_boolean.automation_killswitch_living_room
-      state: "off"
-
-    # Home occupied
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-
-    # Only during morning window
-    - condition: time
-      after: "05:30:00"
-      before: "06:30:00"
-
-  action:
-    # Set thermostat to comfort mode
-    - service: climate.set_preset_mode
-      target:
-        entity_id: climate.living_room_ac_2
-      data:
-        preset_mode: comfort
-
-    # Log action
-    - service: logbook.log
-      data:
-        name: "Morning Preheat"
-        message: "Downstairs heating activated at 5:30 AM (comfort mode)"
-
-  mode: single
