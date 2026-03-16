@@ -12,7 +12,7 @@
   unique_id: kids_ac
   device_code: 1003
   delay: 0.5
-  controller_data: remote.otto_s_room_remote_control_remote
+  controller_data: remote.kids
   temperature_sensor: sensor.kids_room_temp_humidity_sensor_temperature
   humidity_sensor: sensor.kids_room_temp_humidity_sensor_humidity
 
@@ -31,7 +31,7 @@
   unique_id: living_room_ac
   device_code: 1002
   delay: 0.5
-  controller_data: remote.livingroom_irblaster_remote
+  controller_data: remote.living
   temperature_sensor: sensor.kitchen_temperature
   humidity_sensor: sensor.kitchen_humidity
 
@@ -40,6 +40,6 @@
   unique_id: rumpus_ac
   device_code: 1004
   delay: 0.5
-  controller_data: remote.rumpus_irblaster_remote
+  controller_data: remote.rumpus
   temperature_sensor: sensor.rumpus_temperature
   humidity_sensor: sensor.rumpus_humidity
