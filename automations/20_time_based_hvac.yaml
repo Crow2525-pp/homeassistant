@@ -6,16 +6,33 @@
 #
 # Logic:
 # - Gates: manual override off; occupancy must be Home or Sleeping
-# - Wake time: comfort preset; heat/cool decided by outside temperature
-# - Bed time: eco (heat) or boost (cool) preset; same outside-temp decision
+# - Wake time: comfort preset; heat/cool decided by FELT temperature (humidex)
+# - Bed time: eco (heat) or boost (cool) preset; same felt-temperature decision
 #
 # Heat/cool decision order (same for all rooms):
-#   1. Outside temp < 16°C  → heat  (cold regardless of season)
-#   2. Outside temp > 23°C  → cool  (warm regardless of season)
-#   3. Season winter/autumn → heat  (moderate temp, cold-bias season)
-#   4. Season summer/spring → cool  (moderate temp, warm-bias season)
+#   1. Humidex < 19°C  → heat  (feels cold regardless of season)
+#   2. Humidex > 23°C  → cool  (feels warm regardless of season)
+#   3. Season winter/autumn → heat  (moderate feel, cold-bias season)
+#   4. Season summer/spring → cool  (moderate feel, warm-bias season)
 #   5. Default              → off   (no match)
-# Edit thresholds 16 / 23 to taste.
+# Edit thresholds 19 / 23 to taste.
+#
+# WHY HUMIDEX INSTEAD OF RAW TEMPERATURE:
+# Humidity dramatically changes perceived warmth. A 21°C room at 70% humidity
+# feels noticeably warmer than 21°C at 40% humidity. Using the humidex
+# (heat index) means the automation responds to how the room actually feels
+# rather than the thermometer reading alone. This fixes the problem where
+# 21°C feels warm in the lounge (high humidity) but cold in the bedroom.
+#
+# Sensor sources:
+# - Master Bedroom: sensor.thermal_comfort_humidex  ← INDOOR (most accurate)
+# - Living Room:    sensor.essendon_thermal_comfort_humidex ← outdoor humidex
+#     → To improve: create a "Living Room Thermal Comfort" integration entry
+#       (Settings → Devices & Services → Thermal Comfort → Add entry)
+#       using sensor.living_room_temperature_sensor + sensor.living_room_humidity_sensor
+#       then change the entity to sensor.living_room_thermal_comfort_humidex
+# - Otto's Room:    sensor.essendon_thermal_comfort_humidex ← outdoor (no indoor humidity)
+# - Lucas's Room:   sensor.essendon_thermal_comfort_humidex ← outdoor (humidity unavailable)
 #
 # Rooms:
 # - Living Room:  communal space (also turns on when arriving home)
@@ -98,23 +115,26 @@
                 entity_id: climate.living_room_ac_2
               data:
                 preset_mode: comfort
-            # Decide heat or cool: outside temp first, then season as fallback
+            # Decide heat or cool: outdoor humidex first, then season as fallback.
+            # Using sensor.essendon_thermal_comfort_humidex (felt temperature outdoors).
+            # Once you create a "Living Room Thermal Comfort" integration entry, replace
+            # both occurrences below with sensor.living_room_thermal_comfort_humidex.
             - choose:
-                # Cold (outside < 16°C) → heat
+                # Feels cold (humidex < 19°C) → heat
                 - conditions:
                     - condition: numeric_state
-                      entity_id: sensor.essendon_airport_temp
-                      below: 16
+                      entity_id: sensor.essendon_thermal_comfort_humidex
+                      below: 19
                   sequence:
                     - action: climate.set_hvac_mode
                       target:
                         entity_id: climate.living_room_ac_2
                       data:
                         hvac_mode: heat
-                # Warm (outside > 23°C) → cool
+                # Feels warm (humidex > 23°C) → cool
                 - conditions:
                     - condition: numeric_state
-                      entity_id: sensor.essendon_airport_temp
+                      entity_id: sensor.essendon_thermal_comfort_humidex
                       above: 23
                   sequence:
                     - action: climate.set_hvac_mode
@@ -169,8 +189,10 @@
 - id: master_bedroom_time_based_day
   alias: "HVAC - Master Bedroom - Wake Up Comfort"
   description: >
-    At wake time, set comfort preset and decide heat/cool based on outside
-    temperature (< 16°C heat, > 23°C cool, otherwise season-based).
+    At wake time, set comfort preset and decide heat/cool based on indoor
+    felt temperature (humidex). Uses sensor.thermal_comfort_humidex which
+    accounts for room humidity, giving a more accurate sense of how warm
+    the room actually feels (< 19°C heat, > 23°C cool, otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
@@ -196,23 +218,24 @@
         entity_id: climate.masterbed_room_ac
       data:
         preset_mode: comfort
-    # Step 2: Decide heat or cool
+    # Step 2: Decide heat or cool using INDOOR humidex (felt temperature)
+    # sensor.thermal_comfort_humidex = Master Bedroom indoor thermal comfort humidex
     - choose:
-        # Cold morning (outside < 16°C) → heat
+        # Feels cold (indoor humidex < 19°C) → heat
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_airport_temp
-              below: 16
+              entity_id: sensor.thermal_comfort_humidex
+              below: 19
           sequence:
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
-        # Warm morning (outside > 23°C) → cool
+        # Feels warm (indoor humidex > 23°C) → cool
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_airport_temp
+              entity_id: sensor.thermal_comfort_humidex
               above: 23
           sequence:
             - action: climate.set_hvac_mode
@@ -264,7 +287,9 @@
   alias: "HVAC - Master Bedroom - Bedtime Eco/Boost"
   description: >
     At bedtime, set eco preset (heat) or boost preset (cool) based on
-    outside temperature (< 16°C eco+heat, > 23°C boost+cool, otherwise season-based).
+    indoor felt temperature (humidex). Uses sensor.thermal_comfort_humidex
+    which accounts for room humidity (< 19°C eco+heat, > 23°C boost+cool,
+    otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
@@ -284,13 +309,14 @@
           entity_id: input_select.occupancy
           state: Sleeping
   actions:
-    # Set nighttime preset and hvac_mode based on outside temp, then season
+    # Set nighttime preset and hvac_mode based on INDOOR humidex (felt temperature)
+    # sensor.thermal_comfort_humidex = Master Bedroom indoor thermal comfort humidex
     - choose:
-        # Cold night (outside < 16°C) → eco + heat
+        # Feels cold (indoor humidex < 19°C) → eco + heat
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_airport_temp
-              below: 16
+              entity_id: sensor.thermal_comfort_humidex
+              below: 19
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -302,10 +328,10 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
-        # Warm night (outside > 23°C) → boost + cool
+        # Feels warm (indoor humidex > 23°C) → boost + cool
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_airport_temp
+              entity_id: sensor.thermal_comfort_humidex
               above: 23
           sequence:
             - action: climate.set_preset_mode
@@ -396,8 +422,9 @@
 - id: ottos_room_time_based_day
   alias: "HVAC - Otto's Room - Wake Up Comfort"
   description: >
-    At wake time, set comfort preset and decide heat/cool based on outside
-    temperature (< 16°C heat, > 23°C cool, otherwise season-based).
+    At wake time, set comfort preset and decide heat/cool based on outdoor
+    felt temperature / humidex (< 19°C heat, > 23°C cool, otherwise season-based).
+    No indoor humidity sensor available for this room; using outdoor humidex.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_ottos_room
@@ -425,8 +452,8 @@
     - choose:
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_airport_temp
-              below: 16
+              entity_id: sensor.essendon_thermal_comfort_humidex
+              below: 19
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -435,7 +462,7 @@
                 hvac_mode: heat
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_airport_temp
+              entity_id: sensor.essendon_thermal_comfort_humidex
               above: 23
           sequence:
             - action: climate.set_hvac_mode
@@ -484,8 +511,9 @@
 - id: ottos_room_time_based_night
   alias: "HVAC - Otto's Room - Bedtime Eco/Boost"
   description: >
-    At bedtime, set eco preset (heat) or boost preset (cool) based on
-    outside temperature (< 16°C eco+heat, > 23°C boost+cool, otherwise season-based).
+    At bedtime, set eco preset (heat) or boost preset (cool) based on outdoor
+    felt temperature / humidex (< 19°C eco+heat, > 23°C boost+cool, otherwise
+    season-based). No indoor humidity sensor; using outdoor humidex.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_ottos_room
@@ -508,8 +536,8 @@
     - choose:
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_airport_temp
-              below: 16
+              entity_id: sensor.essendon_thermal_comfort_humidex
+              below: 19
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -523,7 +551,7 @@
                 hvac_mode: heat
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_airport_temp
+              entity_id: sensor.essendon_thermal_comfort_humidex
               above: 23
           sequence:
             - action: climate.set_preset_mode
@@ -612,8 +640,9 @@
 - id: lucas_room_time_based_day
   alias: "HVAC - Lucas's Room - Wake Up Comfort"
   description: >
-    At wake time, set comfort preset and decide heat/cool based on outside
-    temperature (< 16°C heat, > 23°C cool, otherwise season-based).
+    At wake time, set comfort preset and decide heat/cool based on outdoor
+    felt temperature / humidex (< 19°C heat, > 23°C cool, otherwise season-based).
+    Study humidity sensor currently unavailable; using outdoor humidex.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_lucas_room
@@ -641,8 +670,8 @@
     - choose:
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_airport_temp
-              below: 16
+              entity_id: sensor.essendon_thermal_comfort_humidex
+              below: 19
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -651,7 +680,7 @@
                 hvac_mode: heat
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_airport_temp
+              entity_id: sensor.essendon_thermal_comfort_humidex
               above: 23
           sequence:
             - action: climate.set_hvac_mode
@@ -700,8 +729,9 @@
 - id: lucas_room_time_based_night
   alias: "HVAC - Lucas's Room - Bedtime Eco/Boost"
   description: >
-    At bedtime, set eco preset (heat) or boost preset (cool) based on
-    outside temperature (< 16°C eco+heat, > 23°C boost+cool, otherwise season-based).
+    At bedtime, set eco preset (heat) or boost preset (cool) based on outdoor
+    felt temperature / humidex (< 19°C eco+heat, > 23°C boost+cool, otherwise
+    season-based). Study humidity sensor currently unavailable; using outdoor humidex.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_lucas_room
@@ -724,8 +754,8 @@
     - choose:
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_airport_temp
-              below: 16
+              entity_id: sensor.essendon_thermal_comfort_humidex
+              below: 19
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -739,7 +769,7 @@
                 hvac_mode: heat
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_airport_temp
+              entity_id: sensor.essendon_thermal_comfort_humidex
               above: 23
           sequence:
             - action: climate.set_preset_mode
