@@ -25,17 +25,20 @@
 # 21°C feels warm in the lounge (high humidity) but cold in the bedroom.
 #
 # Sensor sources:
-# - Master Bedroom: sensor.thermal_comfort_humidex  ← INDOOR (most accurate)
-# - Living Room:    sensor.essendon_thermal_comfort_humidex ← outdoor humidex
-#     → To improve: create a "Living Room Thermal Comfort" integration entry
-#       (Settings → Devices & Services → Thermal Comfort → Add entry)
-#       using sensor.living_room_temperature_sensor + sensor.living_room_humidity_sensor
-#       then change the entity to sensor.living_room_thermal_comfort_humidex
-# - Otto's Room:    sensor.essendon_thermal_comfort_humidex ← outdoor (no indoor humidity)
-# - Lucas's Room:   sensor.essendon_thermal_comfort_humidex ← outdoor (humidity unavailable)
+# - Master Bedroom: sensor.thermal_comfort_humidex         ← INDOOR
+# - Rumpus:         sensor.rumpus_thermal_comfort_humidex  ← INDOOR (cool-only AC)
+# - Living Room:    sensor.essendon_thermal_comfort_humidex ← outdoor (pending TC fix)
+# - Otto's Room:    sensor.essendon_thermal_comfort_humidex ← outdoor (pending TC fix)
+# - Lucas's Room:   sensor.essendon_thermal_comfort_humidex ← outdoor (pending TC fix)
+#     → Once Living Room / Kids Room / Study Room Thermal Comfort integration entries
+#       register entities, replace essendon references in each section below with:
+#       sensor.living_room_thermal_comfort_humidex
+#       sensor.kids_room_thermal_comfort_humidex
+#       sensor.study_room_thermal_comfort_humidex
 #
 # Rooms:
-# - Living Room:  communal space (also turns on when arriving home)
+# - Living Room:    communal space (also turns on when arriving home)
+# - Rumpus:         communal space (cool-only; also turns on when arriving home)
 # - Master Bedroom: Steph & Phil
 # - Otto's Room:    Henry & Otto
 # - Lucas's Room:   Lucas (formerly Study/Henry's Room)
@@ -849,4 +852,218 @@
     - action: climate.turn_on
       target:
         entity_id: climate.study_room_ac
+  mode: single
+
+# ============================================================================
+# RUMPUS - Comfort at wake, Eco/Boost at bedtime, turn on when arriving home
+# ============================================================================
+
+- id: rumpus_time_based_day
+  alias: "HVAC - Rumpus - Wake Up Comfort"
+  description: >
+    At wake time, set comfort preset and decide heat/cool based on indoor
+    felt temperature (humidex). Uses sensor.rumpus_thermal_comfort_humidex
+    (< 19°C heat, > 23°C cool, otherwise season-based).
+  triggers:
+    - trigger: time
+      at: input_datetime.wakeup_time_rumpus
+      id: wake_time
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_rumpus
+      state: "off"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+  actions:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.rumpus_ac
+      data:
+        preset_mode: comfort
+    - choose:
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.rumpus_thermal_comfort_humidex
+              below: 19
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.rumpus_thermal_comfort_humidex
+              above: 23
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: winter
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: autumn
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: summer
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: spring
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: cool
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.rumpus_ac
+          data:
+            hvac_mode: "off"
+  mode: single
+
+- id: rumpus_time_based_night
+  alias: "HVAC - Rumpus - Bedtime Eco/Boost"
+  description: >
+    At bedtime, set eco preset (heat) or boost preset (cool) based on indoor
+    felt temperature (humidex). Uses sensor.rumpus_thermal_comfort_humidex
+    (< 19°C eco+heat, > 23°C boost+cool, otherwise season-based).
+  triggers:
+    - trigger: time
+      at: input_datetime.bedtime_rumpus
+      id: bed_time
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_rumpus
+      state: "off"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+  actions:
+    - choose:
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.rumpus_thermal_comfort_humidex
+              below: 19
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                preset_mode: eco
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.rumpus_thermal_comfort_humidex
+              above: 23
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: winter
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: autumn
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                preset_mode: eco
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: summer
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: spring
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: cool
+      default:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.rumpus_ac
+          data:
+            hvac_mode: "off"
+  mode: single
+
+- id: rumpus_away_mode
+  alias: "HVAC - Rumpus - Occupancy On"
+  description: "Turn rumpus on when arriving to Home/Sleeping."
+  triggers:
+    - trigger: state
+      entity_id: input_select.occupancy
+      to:
+        - Home
+        - Sleeping
+      id: home
+  conditions:
+    - condition: template
+      value_template: >
+        {{ trigger.from_state is not none
+           and trigger.from_state.state not in ['Home', 'Sleeping'] }}
+  actions:
+    - action: climate.turn_on
+      target:
+        entity_id: climate.rumpus_ac
   mode: single
