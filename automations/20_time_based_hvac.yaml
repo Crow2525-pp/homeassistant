@@ -24,21 +24,16 @@
 # rather than the thermometer reading alone. This fixes the problem where
 # 21°C feels warm in the lounge (high humidity) but cold in the bedroom.
 #
-# Sensor sources:
-# - Master Bedroom: sensor.thermal_comfort_humidex         ← INDOOR
-# - Rumpus:         sensor.rumpus_thermal_comfort_humidex  ← INDOOR (cool-only AC)
-# - Living Room:    sensor.essendon_thermal_comfort_humidex ← outdoor (pending TC fix)
-# - Otto's Room:    sensor.essendon_thermal_comfort_humidex ← outdoor (pending TC fix)
-# - Lucas's Room:   sensor.essendon_thermal_comfort_humidex ← outdoor (pending TC fix)
-#     → Once Living Room / Kids Room / Study Room Thermal Comfort integration entries
-#       register entities, replace essendon references in each section below with:
-#       sensor.living_room_thermal_comfort_humidex
-#       sensor.kids_room_thermal_comfort_humidex
-#       sensor.study_room_thermal_comfort_humidex
+# Sensor sources (all INDOOR humidex):
+# - Living Room:    sensor.living_room_thermal_comfort_humidex
+# - Rumpus:         sensor.rumpus_thermal_comfort_humidex
+# - Master Bedroom: sensor.thermal_comfort_humidex
+# - Otto's Room:    sensor.kids_room_thermal_comfort_humidex
+# - Lucas's Room:   sensor.study_room_thermal_comfort_humidex
 #
 # Rooms:
 # - Living Room:    communal space (also turns on when arriving home)
-# - Rumpus:         communal space (cool-only; also turns on when arriving home)
+# - Rumpus:         communal space (also turns on when arriving home)
 # - Master Bedroom: Steph & Phil
 # - Otto's Room:    Henry & Otto
 # - Lucas's Room:   Lucas (formerly Study/Henry's Room)
@@ -118,15 +113,12 @@
                 entity_id: climate.living_room_ac_2
               data:
                 preset_mode: comfort
-            # Decide heat or cool: outdoor humidex first, then season as fallback.
-            # Using sensor.essendon_thermal_comfort_humidex (felt temperature outdoors).
-            # Once you create a "Living Room Thermal Comfort" integration entry, replace
-            # both occurrences below with sensor.living_room_thermal_comfort_humidex.
+            # Decide heat or cool based on indoor felt temperature (humidex).
             - choose:
                 # Feels cold (humidex < 19°C) → heat
                 - conditions:
                     - condition: numeric_state
-                      entity_id: sensor.essendon_thermal_comfort_humidex
+                      entity_id: sensor.living_room_thermal_comfort_humidex
                       below: 19
                   sequence:
                     - action: climate.set_hvac_mode
@@ -137,7 +129,7 @@
                 # Feels warm (humidex > 23°C) → cool
                 - conditions:
                     - condition: numeric_state
-                      entity_id: sensor.essendon_thermal_comfort_humidex
+                      entity_id: sensor.living_room_thermal_comfort_humidex
                       above: 23
                   sequence:
                     - action: climate.set_hvac_mode
@@ -455,7 +447,7 @@
     - choose:
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_thermal_comfort_humidex
+              entity_id: sensor.kids_room_thermal_comfort_humidex
               below: 19
           sequence:
             - action: climate.set_hvac_mode
@@ -465,7 +457,7 @@
                 hvac_mode: heat
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_thermal_comfort_humidex
+              entity_id: sensor.kids_room_thermal_comfort_humidex
               above: 23
           sequence:
             - action: climate.set_hvac_mode
@@ -539,7 +531,7 @@
     - choose:
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_thermal_comfort_humidex
+              entity_id: sensor.kids_room_thermal_comfort_humidex
               below: 19
           sequence:
             - action: climate.set_preset_mode
@@ -554,7 +546,7 @@
                 hvac_mode: heat
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_thermal_comfort_humidex
+              entity_id: sensor.kids_room_thermal_comfort_humidex
               above: 23
           sequence:
             - action: climate.set_preset_mode
@@ -673,7 +665,7 @@
     - choose:
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_thermal_comfort_humidex
+              entity_id: sensor.study_room_thermal_comfort_humidex
               below: 19
           sequence:
             - action: climate.set_hvac_mode
@@ -683,7 +675,7 @@
                 hvac_mode: heat
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_thermal_comfort_humidex
+              entity_id: sensor.study_room_thermal_comfort_humidex
               above: 23
           sequence:
             - action: climate.set_hvac_mode
@@ -757,7 +749,7 @@
     - choose:
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_thermal_comfort_humidex
+              entity_id: sensor.study_room_thermal_comfort_humidex
               below: 19
           sequence:
             - action: climate.set_preset_mode
@@ -772,7 +764,7 @@
                 hvac_mode: heat
         - conditions:
             - condition: numeric_state
-              entity_id: sensor.essendon_thermal_comfort_humidex
+              entity_id: sensor.study_room_thermal_comfort_humidex
               above: 23
           sequence:
             - action: climate.set_preset_mode
@@ -1066,4 +1058,394 @@
     - action: climate.turn_on
       target:
         entity_id: climate.rumpus_ac
+  mode: single
+
+# ============================================================================
+# HOURLY MODE RE-CHECK
+# ============================================================================
+# Every hour, if someone is home/sleeping, the AC is already running, and
+# manual override is off — re-evaluate heat vs cool based on current indoor
+# humidex. This handles conditions that shift during the day (e.g. morning
+# heat-mode switching to cool as the day warms up, or vice versa).
+# The preset is NOT changed — only the hvac_mode is updated.
+# ============================================================================
+
+- id: living_room_hourly_recheck
+  alias: "HVAC - Living Room - Hourly Mode Re-check"
+  triggers:
+    - trigger: time_pattern
+      minutes: "0"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: climate.living_room_ac_2
+          state: "off"
+  actions:
+    - choose:
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.living_room_thermal_comfort_humidex
+              below: 19
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_ac_2
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.living_room_thermal_comfort_humidex
+              above: 23
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_ac_2
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: winter
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: autumn
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_ac_2
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: summer
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: spring
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.living_room_ac_2
+              data:
+                hvac_mode: cool
+  mode: single
+
+- id: master_bedroom_hourly_recheck
+  alias: "HVAC - Master Bedroom - Hourly Mode Re-check"
+  triggers:
+    - trigger: time_pattern
+      minutes: "0"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: climate.masterbed_room_ac
+          state: "off"
+  actions:
+    - choose:
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.thermal_comfort_humidex
+              below: 19
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.thermal_comfort_humidex
+              above: 23
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: winter
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: autumn
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: summer
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: spring
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: cool
+  mode: single
+
+- id: ottos_room_hourly_recheck
+  alias: "HVAC - Otto's Room - Hourly Mode Re-check"
+  triggers:
+    - trigger: time_pattern
+      minutes: "0"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_otto
+      state: "off"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: climate.kids_room_ac
+          state: "off"
+  actions:
+    - choose:
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.kids_room_thermal_comfort_humidex
+              below: 19
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.kids_room_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.kids_room_thermal_comfort_humidex
+              above: 23
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.kids_room_ac
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: winter
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: autumn
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.kids_room_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: summer
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: spring
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.kids_room_ac
+              data:
+                hvac_mode: cool
+  mode: single
+
+- id: lucas_room_hourly_recheck
+  alias: "HVAC - Lucas's Room - Hourly Mode Re-check"
+  triggers:
+    - trigger: time_pattern
+      minutes: "0"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_study
+      state: "off"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: climate.study_room_ac
+          state: "off"
+  actions:
+    - choose:
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.study_room_thermal_comfort_humidex
+              below: 19
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.study_room_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.study_room_thermal_comfort_humidex
+              above: 23
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.study_room_ac
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: winter
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: autumn
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.study_room_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: summer
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: spring
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.study_room_ac
+              data:
+                hvac_mode: cool
+  mode: single
+
+- id: rumpus_hourly_recheck
+  alias: "HVAC - Rumpus - Hourly Mode Re-check"
+  triggers:
+    - trigger: time_pattern
+      minutes: "0"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_rumpus
+      state: "off"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: climate.rumpus_ac
+          state: "off"
+  actions:
+    - choose:
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.rumpus_thermal_comfort_humidex
+              below: 19
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.rumpus_thermal_comfort_humidex
+              above: 23
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: cool
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: winter
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: autumn
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: summer
+                - condition: state
+                  entity_id: input_select.climate_season
+                  state: spring
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: cool
   mode: single
