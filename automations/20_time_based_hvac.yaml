@@ -7,7 +7,8 @@
 # Logic:
 # - Gates: manual override off; occupancy must be Home or Sleeping
 # - Wake time: comfort preset; heat/cool decided by FELT temperature (humidex)
-# - Bed time: eco (heat) or boost (cool) preset; same felt-temperature decision
+# - Bed time (Sleeping): frost (heat) or boost (cool) based on humidex/season
+# - Bed time (Home, not sleeping): off
 #
 # Heat/cool decision order (same for all rooms):
 #   1. Humidex < 19°C  → heat  (feels cold regardless of season)
@@ -26,17 +27,17 @@
 #
 # Sensor sources (all INDOOR humidex):
 # - Living Room:    sensor.living_room_thermal_comfort_humidex
-# - Rumpus:         sensor.rumpus_thermal_comfort_humidex
+# - Wendy's Room:   sensor.rumpus_thermal_comfort_humidex
 # - Master Bedroom: sensor.thermal_comfort_humidex
-# - Otto's Room:    sensor.kids_room_thermal_comfort_humidex
-# - Lucas's Room:   sensor.study_room_thermal_comfort_humidex
+# - Kids Room:      sensor.kids_room_thermal_comfort_humidex
+# - Study Room:     sensor.study_room_thermal_comfort_humidex
 #
-# Rooms:
+# Room naming (alias → entity):
 # - Living Room:    communal space (also turns on when arriving home)
-# - Rumpus:         communal space (also turns on when arriving home)
+# - Wendy's Room:   communal space (also turns on when arriving home) [climate.rumpus_ac]
 # - Master Bedroom: Steph & Phil
-# - Otto's Room:    Henry & Otto
-# - Lucas's Room:   Lucas (formerly Study/Henry's Room)
+# - Kids Room:      Henry & Otto [climate.kids_room_ac]
+# - Study Room:     Lucas [climate.study_room_ac]
 #
 # Related files:
 # - 16_master_bedroom_morning_comfort.yaml: humidity control only
@@ -46,15 +47,15 @@
 # ============================================================================
 
 # ============================================================================
-# LIVING ROOM - Comfort at wake/bed, turn on when arriving home
+# LIVING ROOM - Comfort at wake, frost/boost at bedtime (if sleeping), off otherwise
 # ============================================================================
 
 - id: living_room_time_based_comfort
   alias: "HVAC - Living Room - Comfort (Wake/Bed Time)"
   description: >
-    At wake and bed times, set comfort preset and decide heat/cool mode
-    based on outside temperature, with season as fallback. Also turns the
-    AC on when the household arrives home from away.
+    At wake time, set comfort preset and decide heat/cool mode based on indoor
+    felt temperature (humidex). At bed time, set frost+heat or boost+cool if
+    sleeping, or turn off if just home. Also turns the AC on when arriving home.
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -66,7 +67,6 @@
       at: input_datetime.bedtime_living_room
       id: bed_time
   conditions:
-    # Gate: manual override must be off
     - condition: state
       entity_id: input_boolean.climate_manual_control_living
       state: "off"
@@ -93,12 +93,10 @@
               target:
                 entity_id: climate.living_room_ac_2
 
-        # Wake/bed time: set comfort and decide heat/cool
+        # Wake time: comfort preset + heat/cool decision
         - conditions:
             - condition: trigger
-              id:
-                - wake_time
-                - bed_time
+              id: wake_time
             - condition: or
               conditions:
                 - condition: state
@@ -113,9 +111,7 @@
                 entity_id: climate.living_room_ac_2
               data:
                 preset_mode: comfort
-            # Decide heat or cool based on indoor felt temperature (humidex).
             - choose:
-                # Feels cold (humidex < 19°C) → heat
                 - conditions:
                     - condition: numeric_state
                       entity_id: sensor.living_room_thermal_comfort_humidex
@@ -126,7 +122,6 @@
                         entity_id: climate.living_room_ac_2
                       data:
                         hvac_mode: heat
-                # Feels warm (humidex > 23°C) → cool
                 - conditions:
                     - condition: numeric_state
                       entity_id: sensor.living_room_thermal_comfort_humidex
@@ -137,7 +132,6 @@
                         entity_id: climate.living_room_ac_2
                       data:
                         hvac_mode: cool
-                # Moderate + winter/autumn → heat
                 - conditions:
                     - condition: or
                       conditions:
@@ -153,7 +147,6 @@
                         entity_id: climate.living_room_ac_2
                       data:
                         hvac_mode: heat
-                # Moderate + summer/spring → cool
                 - conditions:
                     - condition: or
                       conditions:
@@ -175,10 +168,103 @@
                     entity_id: climate.living_room_ac_2
                   data:
                     hvac_mode: "off"
+
+        # Bed time: frost/boost if sleeping, off if just home
+        - conditions:
+            - condition: trigger
+              id: bed_time
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Home
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Sleeping
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.occupancy
+                      state: Sleeping
+                    - condition: numeric_state
+                      entity_id: sensor.living_room_thermal_comfort_humidex
+                      below: 19
+                  sequence:
+                    - action: climate.set_preset_mode
+                      target:
+                        entity_id: climate.living_room_ac_2
+                      data:
+                        preset_mode: frost
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_ac_2
+                      data:
+                        hvac_mode: heat
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.occupancy
+                      state: Sleeping
+                    - condition: numeric_state
+                      entity_id: sensor.living_room_thermal_comfort_humidex
+                      above: 23
+                  sequence:
+                    - action: climate.set_preset_mode
+                      target:
+                        entity_id: climate.living_room_ac_2
+                      data:
+                        preset_mode: boost
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_ac_2
+                      data:
+                        hvac_mode: cool
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.occupancy
+                      state: Sleeping
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: winter
+                        - condition: state
+                          entity_id: input_select.climate_season
+                          state: autumn
+                  sequence:
+                    - action: climate.set_preset_mode
+                      target:
+                        entity_id: climate.living_room_ac_2
+                      data:
+                        preset_mode: frost
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_ac_2
+                      data:
+                        hvac_mode: heat
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.occupancy
+                      state: Sleeping
+                  sequence:
+                    - action: climate.set_preset_mode
+                      target:
+                        entity_id: climate.living_room_ac_2
+                      data:
+                        preset_mode: boost
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_ac_2
+                      data:
+                        hvac_mode: cool
+              default:
+                - action: climate.turn_off
+                  target:
+                    entity_id: climate.living_room_ac_2
   mode: single
 
 # ============================================================================
-# MASTER BEDROOM - Comfort at wake, Eco/Boost at bedtime
+# MASTER BEDROOM - Comfort at wake, frost/boost at bedtime (if sleeping)
 # ============================================================================
 
 - id: master_bedroom_time_based_day
@@ -186,18 +272,15 @@
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
     felt temperature (humidex). Uses sensor.thermal_comfort_humidex which
-    accounts for room humidity, giving a more accurate sense of how warm
-    the room actually feels (< 19°C heat, > 23°C cool, otherwise season-based).
+    accounts for room humidity (< 19°C heat, > 23°C cool, otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
       id: wake_time
   conditions:
-    # Gate 1: Manual override must be off
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
       state: "off"
-    # Gate 2: Occupancy must be Home or Sleeping
     - condition: or
       conditions:
         - condition: state
@@ -207,16 +290,12 @@
           entity_id: input_select.occupancy
           state: Sleeping
   actions:
-    # Step 1: Set comfort preset for waking up
     - action: climate.set_preset_mode
       target:
         entity_id: climate.masterbed_room_ac
       data:
         preset_mode: comfort
-    # Step 2: Decide heat or cool using INDOOR humidex (felt temperature)
-    # sensor.thermal_comfort_humidex = Master Bedroom indoor thermal comfort humidex
     - choose:
-        # Feels cold (indoor humidex < 19°C) → heat
         - conditions:
             - condition: numeric_state
               entity_id: sensor.thermal_comfort_humidex
@@ -227,7 +306,6 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
-        # Feels warm (indoor humidex > 23°C) → cool
         - conditions:
             - condition: numeric_state
               entity_id: sensor.thermal_comfort_humidex
@@ -238,7 +316,6 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-        # Moderate + winter/autumn → heat
         - conditions:
             - condition: or
               conditions:
@@ -254,7 +331,6 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
-        # Moderate + summer/spring → cool
         - conditions:
             - condition: or
               conditions:
@@ -279,22 +355,18 @@
   mode: single
 
 - id: master_bedroom_time_based_night
-  alias: "HVAC - Master Bedroom - Bedtime Eco/Boost"
+  alias: "HVAC - Master Bedroom - Bedtime"
   description: >
-    At bedtime, set eco preset (heat) or boost preset (cool) based on
-    indoor felt temperature (humidex). Uses sensor.thermal_comfort_humidex
-    which accounts for room humidity (< 19°C eco+heat, > 23°C boost+cool,
-    otherwise season-based).
+    At bedtime, if sleeping: set frost+heat or boost+cool based on indoor
+    humidex. If home but not sleeping: turn off.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
       id: bed_time
   conditions:
-    # Gate 1: Manual override must be off
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
       state: "off"
-    # Gate 2: Occupancy must be Home or Sleeping
     - condition: or
       conditions:
         - condition: state
@@ -304,11 +376,11 @@
           entity_id: input_select.occupancy
           state: Sleeping
   actions:
-    # Set nighttime preset and hvac_mode based on INDOOR humidex (felt temperature)
-    # sensor.thermal_comfort_humidex = Master Bedroom indoor thermal comfort humidex
     - choose:
-        # Feels cold (indoor humidex < 19°C) → eco + heat
         - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
             - condition: numeric_state
               entity_id: sensor.thermal_comfort_humidex
               below: 19
@@ -317,14 +389,16 @@
               target:
                 entity_id: climate.masterbed_room_ac
               data:
-                preset_mode: eco
+                preset_mode: frost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
-        # Feels warm (indoor humidex > 23°C) → boost + cool
         - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
             - condition: numeric_state
               entity_id: sensor.thermal_comfort_humidex
               above: 23
@@ -339,8 +413,10 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-        # Moderate + winter/autumn → eco + heat
         - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
             - condition: or
               conditions:
                 - condition: state
@@ -354,22 +430,16 @@
               target:
                 entity_id: climate.masterbed_room_ac
               data:
-                preset_mode: eco
+                preset_mode: frost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
-        # Moderate + summer/spring → boost + cool
         - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: summer
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: spring
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -382,11 +452,9 @@
               data:
                 hvac_mode: cool
       default:
-        - action: climate.set_hvac_mode
+        - action: climate.turn_off
           target:
             entity_id: climate.masterbed_room_ac
-          data:
-            hvac_mode: "off"
   mode: single
 
 - id: master_bedroom_away_mode
@@ -411,25 +479,23 @@
   mode: single
 
 # ============================================================================
-# OTTO'S ROOM (Henry & Otto) - Comfort at wake, Eco/Boost at bedtime
+# KIDS ROOM (Henry & Otto) - Comfort at wake, frost/boost at bedtime (if sleeping)
 # ============================================================================
 
 - id: ottos_room_time_based_day
-  alias: "HVAC - Otto's Room - Wake Up Comfort"
+  alias: "HVAC - Kids Room - Wake Up Comfort"
   description: >
-    At wake time, set comfort preset and decide heat/cool based on outdoor
-    felt temperature / humidex (< 19°C heat, > 23°C cool, otherwise season-based).
-    No indoor humidity sensor available for this room; using outdoor humidex.
+    At wake time, set comfort preset and decide heat/cool based on indoor
+    felt temperature (humidex). Uses sensor.kids_room_thermal_comfort_humidex
+    (< 19°C heat, > 23°C cool, otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_ottos_room
       id: wake_time
   conditions:
-    # Gate 1: Manual override must be off
     - condition: state
       entity_id: input_boolean.climate_manual_control_otto
       state: "off"
-    # Gate 2: Occupancy must be Home or Sleeping
     - condition: or
       conditions:
         - condition: state
@@ -504,21 +570,18 @@
   mode: single
 
 - id: ottos_room_time_based_night
-  alias: "HVAC - Otto's Room - Bedtime Eco/Boost"
+  alias: "HVAC - Kids Room - Bedtime"
   description: >
-    At bedtime, set eco preset (heat) or boost preset (cool) based on outdoor
-    felt temperature / humidex (< 19°C eco+heat, > 23°C boost+cool, otherwise
-    season-based). No indoor humidity sensor; using outdoor humidex.
+    At bedtime, if sleeping: set frost+heat or boost+cool based on indoor
+    humidex. If home but not sleeping: turn off.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_ottos_room
       id: bed_time
   conditions:
-    # Gate 1: Manual override must be off
     - condition: state
       entity_id: input_boolean.climate_manual_control_otto
       state: "off"
-    # Gate 2: Occupancy must be Home or Sleeping
     - condition: or
       conditions:
         - condition: state
@@ -530,6 +593,9 @@
   actions:
     - choose:
         - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
             - condition: numeric_state
               entity_id: sensor.kids_room_thermal_comfort_humidex
               below: 19
@@ -538,13 +604,16 @@
               target:
                 entity_id: climate.kids_room_ac
               data:
-                preset_mode: eco
+                preset_mode: frost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: heat
         - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
             - condition: numeric_state
               entity_id: sensor.kids_room_thermal_comfort_humidex
               above: 23
@@ -560,6 +629,9 @@
               data:
                 hvac_mode: cool
         - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
             - condition: or
               conditions:
                 - condition: state
@@ -573,21 +645,16 @@
               target:
                 entity_id: climate.kids_room_ac
               data:
-                preset_mode: eco
+                preset_mode: frost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: summer
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: spring
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -600,16 +667,14 @@
               data:
                 hvac_mode: cool
       default:
-        - action: climate.set_hvac_mode
+        - action: climate.turn_off
           target:
             entity_id: climate.kids_room_ac
-          data:
-            hvac_mode: "off"
   mode: single
 
 - id: ottos_room_away_mode
-  alias: "HVAC - Otto's Room - Occupancy On"
-  description: "Turn Otto's room on when arriving to Home/Sleeping."
+  alias: "HVAC - Kids Room - Occupancy On"
+  description: "Turn Kids Room on when arriving to Home/Sleeping."
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -629,25 +694,23 @@
   mode: single
 
 # ============================================================================
-# LUCAS'S ROOM (formerly Study/Henry's Room) - Comfort at wake, Eco/Boost at bedtime
+# STUDY ROOM (Lucas) - Comfort at wake, frost/boost at bedtime (if sleeping)
 # ============================================================================
 
 - id: lucas_room_time_based_day
-  alias: "HVAC - Lucas's Room - Wake Up Comfort"
+  alias: "HVAC - Study Room - Wake Up Comfort"
   description: >
-    At wake time, set comfort preset and decide heat/cool based on outdoor
-    felt temperature / humidex (< 19°C heat, > 23°C cool, otherwise season-based).
-    Study humidity sensor currently unavailable; using outdoor humidex.
+    At wake time, set comfort preset and decide heat/cool based on indoor
+    felt temperature (humidex). Uses sensor.study_room_thermal_comfort_humidex
+    (< 19°C heat, > 23°C cool, otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_lucas_room
       id: wake_time
   conditions:
-    # Gate 1: Manual override must be off
     - condition: state
       entity_id: input_boolean.climate_manual_control_study
       state: "off"
-    # Gate 2: Occupancy must be Home or Sleeping
     - condition: or
       conditions:
         - condition: state
@@ -722,21 +785,18 @@
   mode: single
 
 - id: lucas_room_time_based_night
-  alias: "HVAC - Lucas's Room - Bedtime Eco/Boost"
+  alias: "HVAC - Study Room - Bedtime"
   description: >
-    At bedtime, set eco preset (heat) or boost preset (cool) based on outdoor
-    felt temperature / humidex (< 19°C eco+heat, > 23°C boost+cool, otherwise
-    season-based). Study humidity sensor currently unavailable; using outdoor humidex.
+    At bedtime, if sleeping: set frost+heat or boost+cool based on indoor
+    humidex. If home but not sleeping: turn off.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_lucas_room
       id: bed_time
   conditions:
-    # Gate 1: Manual override must be off
     - condition: state
       entity_id: input_boolean.climate_manual_control_study
       state: "off"
-    # Gate 2: Occupancy must be Home or Sleeping
     - condition: or
       conditions:
         - condition: state
@@ -748,6 +808,9 @@
   actions:
     - choose:
         - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
             - condition: numeric_state
               entity_id: sensor.study_room_thermal_comfort_humidex
               below: 19
@@ -756,13 +819,16 @@
               target:
                 entity_id: climate.study_room_ac
               data:
-                preset_mode: eco
+                preset_mode: frost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.study_room_ac
               data:
                 hvac_mode: heat
         - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
             - condition: numeric_state
               entity_id: sensor.study_room_thermal_comfort_humidex
               above: 23
@@ -778,6 +844,9 @@
               data:
                 hvac_mode: cool
         - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
             - condition: or
               conditions:
                 - condition: state
@@ -791,21 +860,16 @@
               target:
                 entity_id: climate.study_room_ac
               data:
-                preset_mode: eco
+                preset_mode: frost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.study_room_ac
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: summer
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: spring
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -818,16 +882,14 @@
               data:
                 hvac_mode: cool
       default:
-        - action: climate.set_hvac_mode
+        - action: climate.turn_off
           target:
             entity_id: climate.study_room_ac
-          data:
-            hvac_mode: "off"
   mode: single
 
 - id: lucas_room_away_mode
-  alias: "HVAC - Lucas's Room - Occupancy On"
-  description: "Turn Lucas's room on when arriving to Home/Sleeping."
+  alias: "HVAC - Study Room - Occupancy On"
+  description: "Turn Study Room on when arriving to Home/Sleeping."
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -847,11 +909,11 @@
   mode: single
 
 # ============================================================================
-# RUMPUS - Comfort at wake, Eco/Boost at bedtime, turn on when arriving home
+# WENDY'S ROOM - Comfort at wake, frost/boost at bedtime (if sleeping)
 # ============================================================================
 
 - id: rumpus_time_based_day
-  alias: "HVAC - Rumpus - Wake Up Comfort"
+  alias: "HVAC - Wendy's Room - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
     felt temperature (humidex). Uses sensor.rumpus_thermal_comfort_humidex
@@ -938,11 +1000,10 @@
   mode: single
 
 - id: rumpus_time_based_night
-  alias: "HVAC - Rumpus - Bedtime Eco/Boost"
+  alias: "HVAC - Wendy's Room - Bedtime"
   description: >
-    At bedtime, set eco preset (heat) or boost preset (cool) based on indoor
-    felt temperature (humidex). Uses sensor.rumpus_thermal_comfort_humidex
-    (< 19°C eco+heat, > 23°C boost+cool, otherwise season-based).
+    At bedtime, if sleeping: set frost+heat or boost+cool based on indoor
+    humidex. If home but not sleeping: turn off.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_rumpus
@@ -962,6 +1023,9 @@
   actions:
     - choose:
         - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
             - condition: numeric_state
               entity_id: sensor.rumpus_thermal_comfort_humidex
               below: 19
@@ -970,13 +1034,16 @@
               target:
                 entity_id: climate.rumpus_ac
               data:
-                preset_mode: eco
+                preset_mode: frost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.rumpus_ac
               data:
                 hvac_mode: heat
         - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
             - condition: numeric_state
               entity_id: sensor.rumpus_thermal_comfort_humidex
               above: 23
@@ -992,6 +1059,9 @@
               data:
                 hvac_mode: cool
         - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
             - condition: or
               conditions:
                 - condition: state
@@ -1005,21 +1075,16 @@
               target:
                 entity_id: climate.rumpus_ac
               data:
-                preset_mode: eco
+                preset_mode: frost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.rumpus_ac
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: summer
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: spring
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -1032,16 +1097,14 @@
               data:
                 hvac_mode: cool
       default:
-        - action: climate.set_hvac_mode
+        - action: climate.turn_off
           target:
             entity_id: climate.rumpus_ac
-          data:
-            hvac_mode: "off"
   mode: single
 
 - id: rumpus_away_mode
-  alias: "HVAC - Rumpus - Occupancy On"
-  description: "Turn rumpus on when arriving to Home/Sleeping."
+  alias: "HVAC - Wendy's Room - Occupancy On"
+  description: "Turn Wendy's Room on when arriving to Home/Sleeping."
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -1223,7 +1286,7 @@
   mode: single
 
 - id: ottos_room_hourly_recheck
-  alias: "HVAC - Otto's Room - Hourly Mode Re-check"
+  alias: "HVAC - Kids Room - Hourly Mode Re-check"
   triggers:
     - trigger: time_pattern
       minutes: "0"
@@ -1299,7 +1362,7 @@
   mode: single
 
 - id: lucas_room_hourly_recheck
-  alias: "HVAC - Lucas's Room - Hourly Mode Re-check"
+  alias: "HVAC - Study Room - Hourly Mode Re-check"
   triggers:
     - trigger: time_pattern
       minutes: "0"
@@ -1375,7 +1438,7 @@
   mode: single
 
 - id: rumpus_hourly_recheck
-  alias: "HVAC - Rumpus - Hourly Mode Re-check"
+  alias: "HVAC - Wendy's Room - Hourly Mode Re-check"
   triggers:
     - trigger: time_pattern
       minutes: "0"
