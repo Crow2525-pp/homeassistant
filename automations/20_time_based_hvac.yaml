@@ -357,8 +357,8 @@
 - id: master_bedroom_time_based_night
   alias: "HVAC - Master Bedroom - Bedtime"
   description: >
-    At bedtime, if sleeping: set frost+heat or boost+cool based on indoor
-    humidex. If home but not sleeping: turn off.
+    At bedtime, if sleeping or home (someone still awake): set frost+heat or
+    boost+cool based on indoor humidex and season. Turn off only if away/holiday.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
@@ -378,9 +378,14 @@
   actions:
     - choose:
         - conditions:
-            - condition: state
-              entity_id: input_select.occupancy
-              state: Sleeping
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Sleeping
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Home
             - condition: numeric_state
               entity_id: sensor.thermal_comfort_humidex
               below: 19
@@ -396,9 +401,14 @@
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: state
-              entity_id: input_select.occupancy
-              state: Sleeping
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Sleeping
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Home
             - condition: numeric_state
               entity_id: sensor.thermal_comfort_humidex
               above: 23
@@ -414,9 +424,14 @@
               data:
                 hvac_mode: cool
         - conditions:
-            - condition: state
-              entity_id: input_select.occupancy
-              state: Sleeping
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Sleeping
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Home
             - condition: or
               conditions:
                 - condition: state
@@ -437,9 +452,14 @@
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: state
-              entity_id: input_select.occupancy
-              state: Sleeping
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Sleeping
+                - condition: state
+                  entity_id: input_select.occupancy
+                  state: Home
           sequence:
             - action: climate.set_preset_mode
               target:
