@@ -75,3 +75,5 @@ secrets.yaml
 
 # Pre-commit hooks
 !.pre-commit-config.yaml
+.storage/broadlink_remote_*
+.storage/broadlink_remote_*
