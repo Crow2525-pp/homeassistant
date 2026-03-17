@@ -35,7 +35,7 @@ climate_manual_control_study:
   icon: mdi:thermostat
   initial: false
 climate_manual_control_rumpus:
-  name: Wendy's Room Climate Manual Override
+  name: Rumpus Climate Manual Override
   icon: mdi:thermostat
   initial: false
 fan_manual_control_master:
