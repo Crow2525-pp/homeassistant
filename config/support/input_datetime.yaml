@@ -23,7 +23,7 @@ bedtime_ottos_room:
   name: Bedtime - Kids Room
   has_date: false
   has_time: true
-  initial: "18:30:00"
+  initial: "18:00:00"
   icon: mdi:weather-night
 # Study Room (Lucas)
 wakeup_time_lucas_room:
