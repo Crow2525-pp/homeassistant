@@ -27,15 +27,15 @@ climate_manual_control_master:
   icon: mdi:thermostat
   initial: false
 climate_manual_control_otto:
-  name: Otto's Room Climate Manual Override
+  name: Kids Room Climate Manual Override
   icon: mdi:thermostat
   initial: false
 climate_manual_control_study:
-  name: Lucas's Room Climate Manual Override
+  name: Study Room Climate Manual Override
   icon: mdi:thermostat
   initial: false
 climate_manual_control_rumpus:
-  name: Rumpus Climate Manual Override
+  name: Wendy's Room Climate Manual Override
   icon: mdi:thermostat
   initial: false
 fan_manual_control_master:
@@ -80,7 +80,7 @@ hvac_living_room_should_be_on:
   icon: mdi:thermometer
   initial: false
 hvac_study_should_be_on:
-  name: Lucas's Room HVAC Should Be On
+  name: Study Room HVAC Should Be On
   icon: mdi:thermometer
 hvac_kids_room_should_be_on:
   name: Kids Room HVAC Should Be On
