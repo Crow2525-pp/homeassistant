@@ -1,0 +1,134 @@
+---
+# ============================================================================
+# OCCUPANCY-BASED HVAC AUTOMATIONS
+# ============================================================================
+# Automatically turns all climate/HVAC entities on or off based on the
+# occupancy selector (input_select.occupancy).
+#
+# Away / Holiday → turn off ALL climate entities (energy saving)
+# Home / Sleeping (returning from Away or Holiday) → turn on climate entities
+#   per-room, respecting each room's manual override flag.
+#
+# Rooms and entities:
+#   Living Room   : climate.living_room_ac_2, climate.living_room_versatile_thermostat
+#   Master Bedroom: climate.masterbed_room_ac, climate.masterbed_versatile_thermostat
+#   Kids/Otto Room: climate.kids_room_ac, climate.otto_s_room
+#   Study/Lucas   : climate.study_room_ac, climate.henry_s_room_versatile_thermostat
+#   Rumpus        : climate.rumpus_ac
+#
+# Notes:
+#   - Away shutdown ignores manual overrides (energy safety when no one is home)
+#   - Return-home turn-on respects per-room manual override flags so that any
+#     room the user has manually controlled is left alone
+#   - Time-based automations (20_time_based_hvac.yaml) continue to handle
+#     preset/mode selection after power-on
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# AWAY / HOLIDAY  →  Turn off all HVAC
+# ----------------------------------------------------------------------------
+- id: occupancy_hvac_away_shutdown
+  alias: "Occupancy - HVAC Off When Away or Holiday"
+  description: >
+    Turns off every climate entity when the household becomes Away or goes on
+    Holiday. No manual-override gate — energy safety takes priority.
+  triggers:
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Away
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Holiday
+  conditions: []
+  actions:
+    - action: climate.turn_off
+      target:
+        entity_id:
+          - climate.living_room_ac_2
+          - climate.living_room_versatile_thermostat
+          - climate.masterbed_room_ac
+          - climate.masterbed_versatile_thermostat
+          - climate.kids_room_ac
+          - climate.otto_s_room
+          - climate.study_room_ac
+          - climate.henry_s_room_versatile_thermostat
+          - climate.rumpus_ac
+  mode: single
+
+# ----------------------------------------------------------------------------
+# RETURN HOME / SLEEPING (from Away or Holiday)  →  Turn on HVAC per-room
+# ----------------------------------------------------------------------------
+- id: occupancy_hvac_return_home
+  alias: "Occupancy - HVAC On When Returning Home"
+  description: >
+    Turns climate entities back on when occupancy changes from Away or Holiday
+    to Home or Sleeping. Each room's manual override flag is respected — rooms
+    under manual control are left untouched. Time-based automations then handle
+    preset and mode selection.
+  triggers:
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Home
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Sleeping
+  conditions:
+    # Only act when transitioning from Away or Holiday
+    - condition: template
+      value_template: >
+        {{ trigger.from_state is not none and
+           trigger.from_state.state in ['Away', 'Holiday'] }}
+  actions:
+    # Living Room
+    - if:
+        - condition: state
+          entity_id: input_boolean.climate_manual_control_living
+          state: "off"
+      then:
+        - action: climate.turn_on
+          target:
+            entity_id:
+              - climate.living_room_ac_2
+              - climate.living_room_versatile_thermostat
+
+    # Master Bedroom
+    - if:
+        - condition: state
+          entity_id: input_boolean.climate_manual_control_master
+          state: "off"
+      then:
+        - action: climate.turn_on
+          target:
+            entity_id:
+              - climate.masterbed_room_ac
+              - climate.masterbed_versatile_thermostat
+
+    # Kids / Otto's Room
+    - if:
+        - condition: state
+          entity_id: input_boolean.climate_manual_control_otto
+          state: "off"
+      then:
+        - action: climate.turn_on
+          target:
+            entity_id:
+              - climate.kids_room_ac
+              - climate.otto_s_room
+
+    # Study / Lucas's Room
+    - if:
+        - condition: state
+          entity_id: input_boolean.climate_manual_control_study
+          state: "off"
+      then:
+        - action: climate.turn_on
+          target:
+            entity_id:
+              - climate.study_room_ac
+              - climate.henry_s_room_versatile_thermostat
+
+    # Rumpus (no manual override flag defined)
+    - action: climate.turn_on
+      target:
+        entity_id: climate.rumpus_ac
+  mode: single
