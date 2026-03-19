@@ -52,6 +52,12 @@ bedtime_rumpus:
   initial: "22:00:00"
   icon: mdi:weather-night
 # Living Room (follows household-wide schedule)
+preheat_time_living_room:
+  name: Pre-heat Start Time - Living Room
+  has_date: false
+  has_time: true
+  initial: "05:30:00"
+  icon: mdi:radiator
 wakeup_time_living_room:
   name: Wake-up Time - Living Room
   has_date: false

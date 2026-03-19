@@ -803,6 +803,7 @@
 # ============================================================================
 
 - id: lucas_room_time_based_day
+  enabled: false
   alias: "HVAC - Study Room - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
@@ -898,6 +899,7 @@
   mode: single
 
 - id: lucas_room_time_based_night
+  enabled: false
   alias: "HVAC - Study Room - Bedtime"
   description: >
     At bedtime, if sleeping: set frost+heat or boost+cool based on indoor
@@ -1009,6 +1011,7 @@
   mode: single
 
 - id: lucas_room_away_mode
+  enabled: false
   alias: "HVAC - Study Room - Occupancy On"
   description: "Turn Study Room on when arriving to Home/Sleeping."
   triggers:
@@ -1034,6 +1037,7 @@
 # ============================================================================
 
 - id: rumpus_time_based_day
+  enabled: false
   alias: "HVAC - Rumpus - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
@@ -1129,6 +1133,7 @@
   mode: single
 
 - id: rumpus_time_based_night
+  enabled: false
   alias: "HVAC - Rumpus - Bedtime"
   description: >
     At bedtime, if sleeping: set frost+heat or boost+cool based on indoor
@@ -1240,6 +1245,7 @@
   mode: single
 
 - id: rumpus_away_mode
+  enabled: false
   alias: "HVAC - Rumpus - Occupancy On"
   description: "Turn Rumpus on when arriving to Home/Sleeping."
   triggers:
@@ -1523,6 +1529,7 @@
   mode: single
 
 - id: lucas_room_hourly_recheck
+  enabled: false
   alias: "HVAC - Study Room - Hourly Mode Re-check"
   triggers:
     - trigger: time_pattern
@@ -1607,6 +1614,7 @@
   mode: single
 
 - id: rumpus_hourly_recheck
+  enabled: false
   alias: "HVAC - Rumpus - Hourly Mode Re-check"
   triggers:
     - trigger: time_pattern
@@ -1690,19 +1698,22 @@
                 hvac_mode: cool
 
 # ============================================================================
-# LIVING ROOM - Pre-heat at 5:30 AM if cold (pre-wake comfort boost)
+# LIVING ROOM - Pre-heat if cold (configurable time, pre-wake comfort boost)
+# Adjust input_datetime.preheat_time_living_room earlier as winter deepens.
 # ============================================================================
 
 - id: living_room_preheat_530am
-  alias: "HVAC - Living Room - Pre-heat at 5:30 AM if Cold"
+  alias: "HVAC - Living Room - Pre-heat if Cold (Configurable Time)"
   description: >
-    At 5:30 AM, if the living room feels cold (summer_simmer_perception is cool
-    or outside_calculable_range) and it's not a super-hot day, set comfort preset
-    + heat so the room is warm before wake time.
+    At the configured pre-heat time (input_datetime.preheat_time_living_room,
+    default 05:30), if the living room feels cold (summer_simmer_perception is
+    cool or outside_calculable_range) and it's not a super-hot day, set comfort
+    preset + heat so the room is warm before wake time.
+    Adjust the helper earlier as winter deepens.
     Gates on manual override off and someone being home/sleeping.
   triggers:
     - trigger: time
-      at: "05:30:00"
+      at: input_datetime.preheat_time_living_room
   conditions:
     - condition: state
       entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
