@@ -43,7 +43,7 @@
 # - 16_master_bedroom_morning_comfort.yaml: humidity control only
 #   (morning-comfort and exit automations in that file are superseded by
 #    master_bedroom_time_based_day / master_bedroom_time_based_night here)
-# - 12_morning_preheat.yaml: superseded by living_room_time_based_comfort
+# - 12_morning_preheat.yaml: superseded; preheat reinstated as living_room_preheat_530am
 # ============================================================================
 
 # ============================================================================
@@ -1552,4 +1552,47 @@
                 entity_id: climate.rumpus_ac
               data:
                 hvac_mode: cool
+
+# ============================================================================
+# LIVING ROOM - Pre-heat at 5:30 AM if cold (pre-wake comfort boost)
+# ============================================================================
+
+- id: living_room_preheat_530am
+  alias: "HVAC - Living Room - Pre-heat at 5:30 AM if Cold"
+  description: >
+    At 5:30 AM, if the living room feels cold (humidex < 19°C) and it's not a
+    super-hot day, set comfort preset + heat so the room is warm before wake time.
+    Gates on manual override off and someone being home/sleeping.
+  triggers:
+    - trigger: time
+      at: "05:30:00"
+  conditions:
+    - condition: numeric_state
+      entity_id: sensor.living_room_thermal_comfort_humidex
+      below: 19
+    - condition: state
+      entity_id: input_boolean.super_hot_today
+      state: "off"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_living
+      state: "off"
+  actions:
+    - action: climate.set_preset_mode
+      target:
+        entity_id: climate.living_room_ac_2
+      data:
+        preset_mode: comfort
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: climate.living_room_ac_2
+      data:
+        hvac_mode: heat
   mode: single
