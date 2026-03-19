@@ -6,35 +6,49 @@
 #
 # Logic:
 # - Gates: manual override off; occupancy must be Home or Sleeping
-# - Wake time: comfort preset; heat/cool decided by FELT temperature (humidex)
-# - Bed time (Sleeping): frost (heat) or boost (cool) based on humidex/season
+# - Wake time: comfort preset; heat/cool decided by FELT temperature (summer simmer perception)
+# - Bed time (Sleeping): frost (heat) or boost (cool) based on simmer perception/season
 # - Bed time (Home, not sleeping): off
 #
 # Heat/cool decision order (same for all rooms):
-#   1. Humidex < 19°C  → heat  (feels cold regardless of season)
-#   2. Humidex > 23°C  → cool  (feels warm regardless of season)
-#   3. Season winter/autumn → heat  (moderate feel, cold-bias season)
-#   4. Season summer/spring → cool  (moderate feel, warm-bias season)
-#   5. Default              → off   (no match)
-# Edit thresholds 19 / 23 to taste.
+#   1. summer_simmer_perception == cool/outside_calculable_range
+#                              → heat  (feels cold, SSI < 21.1°C or below valid range)
+#   2. summer_simmer_perception in [slightly_warm, increasing_discomfort, ...]
+#                              → cool  (feels warm, SSI ≥ 28.3°C)
+#   3. Season winter/autumn    → heat  (moderate feel, cold-bias season)
+#   4. Season summer/spring    → cool  (moderate feel, warm-bias season)
+#   5. Default                 → off   (no match)
 #
-# WHY HUMIDEX INSTEAD OF RAW TEMPERATURE:
-# Humidity dramatically changes perceived warmth. A 21°C room at 70% humidity
-# feels noticeably warmer than 21°C at 40% humidity. Using the humidex
-# (heat index) means the automation responds to how the room actually feels
-# rather than the thermometer reading alone. This fixes the problem where
-# 21°C feels warm in the lounge (high humidity) but cold in the bedroom.
+# WHY SUMMER SIMMER PERCEPTION INSTEAD OF NUMERIC HUMIDEX:
+# The summer_simmer_perception sensor expresses calibrated human comfort
+# categories based on both temperature and humidity. Using categorical states
+# like "cool", "slightly_cool", "comfortable", "slightly_warm" makes the
+# heat/cool boundary explicit and human-readable, while still fully accounting
+# for humidity. "outside_calculable_range" (SSI < 14°C) is treated as "cool"
+# so very cold rooms always trigger heating.
 #
-# Sensor sources (all INDOOR humidex):
-# - Living Room:    sensor.living_room_thermal_comfort_humidex
-# - Rumpus:   sensor.rumpus_thermal_comfort_humidex
-# - Master Bedroom: sensor.thermal_comfort_humidex
-# - Kids Room:      sensor.kids_room_thermal_comfort_humidex
-# - Study Room:     sensor.study_room_thermal_comfort_humidex
+# Perception state thresholds (Summer Simmer Index):
+#   cool                         < 21.1°C  → heat
+#   slightly_cool            21.1–24.9°C  → season-based fallback
+#   comfortable              25.0–28.2°C  → season-based fallback
+#   slightly_warm            28.3–32.7°C  → cool
+#   increasing_discomfort    32.8–37.7°C  → cool
+#   extremely_warm           37.8–44.3°C  → cool
+#   danger_of_heatstroke     44.4–51.6°C  → cool
+#   extreme_danger_of_heatstroke 51.7–65.5°C → cool
+#   circulatory_collapse_imminent ≥ 65.6°C  → cool
+#   outside_calculable_range     < 14°C   → heat
+#
+# Sensor sources (all INDOOR summer simmer perception):
+# - Living Room:    sensor.living_room_thermal_comfort_summer_simmer_perception
+# - Rumpus:         sensor.rumpus_thermal_comfort_summer_simmer_perception
+# - Master Bedroom: sensor.thermal_comfort_summer_simmer_perception
+# - Kids Room:      sensor.kids_room_thermal_comfort_summer_simmer_perception
+# - Study Room:     sensor.study_room_thermal_comfort_summer_simmer_perception
 #
 # Room naming (alias → entity):
 # - Living Room:    communal space (also turns on when arriving home)
-# - Rumpus:   communal space (also turns on when arriving home) [climate.rumpus_ac]
+# - Rumpus:         communal space (also turns on when arriving home) [climate.rumpus_ac]
 # - Master Bedroom: Steph & Phil
 # - Kids Room:      Henry & Otto [climate.kids_room_ac]
 # - Study Room:     Lucas [climate.study_room_ac]
@@ -54,7 +68,7 @@
   alias: "HVAC - Living Room - Comfort (Wake/Bed Time)"
   description: >
     At wake time, set comfort preset and decide heat/cool mode based on indoor
-    felt temperature (humidex). At bed time, set frost+heat or boost+cool if
+    summer simmer perception. At bed time, set frost+heat or boost+cool if
     sleeping, or turn off if just home. Also turns the AC on when arriving home.
   triggers:
     - trigger: state
@@ -113,9 +127,11 @@
                 preset_mode: comfort
             - choose:
                 - conditions:
-                    - condition: numeric_state
-                      entity_id: sensor.living_room_thermal_comfort_humidex
-                      below: 19
+                    - condition: state
+                      entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+                      state:
+                        - cool
+                        - outside_calculable_range
                   sequence:
                     - action: climate.set_hvac_mode
                       target:
@@ -123,9 +139,15 @@
                       data:
                         hvac_mode: heat
                 - conditions:
-                    - condition: numeric_state
-                      entity_id: sensor.living_room_thermal_comfort_humidex
-                      above: 23
+                    - condition: state
+                      entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+                      state:
+                        - slightly_warm
+                        - increasing_discomfort
+                        - extremely_warm
+                        - danger_of_heatstroke
+                        - extreme_danger_of_heatstroke
+                        - circulatory_collapse_imminent
                   sequence:
                     - action: climate.set_hvac_mode
                       target:
@@ -187,9 +209,11 @@
                     - condition: state
                       entity_id: input_select.occupancy
                       state: Sleeping
-                    - condition: numeric_state
-                      entity_id: sensor.living_room_thermal_comfort_humidex
-                      below: 19
+                    - condition: state
+                      entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+                      state:
+                        - cool
+                        - outside_calculable_range
                   sequence:
                     - action: climate.set_preset_mode
                       target:
@@ -205,9 +229,15 @@
                     - condition: state
                       entity_id: input_select.occupancy
                       state: Sleeping
-                    - condition: numeric_state
-                      entity_id: sensor.living_room_thermal_comfort_humidex
-                      above: 23
+                    - condition: state
+                      entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+                      state:
+                        - slightly_warm
+                        - increasing_discomfort
+                        - extremely_warm
+                        - danger_of_heatstroke
+                        - extreme_danger_of_heatstroke
+                        - circulatory_collapse_imminent
                   sequence:
                     - action: climate.set_preset_mode
                       target:
@@ -271,8 +301,9 @@
   alias: "HVAC - Master Bedroom - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
-    felt temperature (humidex). Uses sensor.thermal_comfort_humidex which
-    accounts for room humidity (< 19°C heat, > 23°C cool, otherwise season-based).
+    summer simmer perception. Uses sensor.thermal_comfort_summer_simmer_perception
+    which accounts for room humidity (cool/out-of-range → heat, slightly_warm+ → cool,
+    otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
@@ -297,9 +328,11 @@
         preset_mode: comfort
     - choose:
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.thermal_comfort_humidex
-              below: 19
+            - condition: state
+              entity_id: sensor.thermal_comfort_summer_simmer_perception
+              state:
+                - cool
+                - outside_calculable_range
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -307,9 +340,15 @@
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.thermal_comfort_humidex
-              above: 23
+            - condition: state
+              entity_id: sensor.thermal_comfort_summer_simmer_perception
+              state:
+                - slightly_warm
+                - increasing_discomfort
+                - extremely_warm
+                - danger_of_heatstroke
+                - extreme_danger_of_heatstroke
+                - circulatory_collapse_imminent
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -358,7 +397,8 @@
   alias: "HVAC - Master Bedroom - Bedtime"
   description: >
     At bedtime, if sleeping or home (someone still awake): set frost+heat or
-    boost+cool based on indoor humidex and season. Turn off only if away/holiday.
+    boost+cool based on indoor summer simmer perception and season. Turn off only
+    if away/holiday.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
@@ -386,9 +426,11 @@
                 - condition: state
                   entity_id: input_select.occupancy
                   state: Home
-            - condition: numeric_state
-              entity_id: sensor.thermal_comfort_humidex
-              below: 19
+            - condition: state
+              entity_id: sensor.thermal_comfort_summer_simmer_perception
+              state:
+                - cool
+                - outside_calculable_range
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -409,9 +451,15 @@
                 - condition: state
                   entity_id: input_select.occupancy
                   state: Home
-            - condition: numeric_state
-              entity_id: sensor.thermal_comfort_humidex
-              above: 23
+            - condition: state
+              entity_id: sensor.thermal_comfort_summer_simmer_perception
+              state:
+                - slightly_warm
+                - increasing_discomfort
+                - extremely_warm
+                - danger_of_heatstroke
+                - extreme_danger_of_heatstroke
+                - circulatory_collapse_imminent
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -506,8 +554,8 @@
   alias: "HVAC - Kids Room - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
-    felt temperature (humidex). Uses sensor.kids_room_thermal_comfort_humidex
-    (< 19°C heat, > 23°C cool, otherwise season-based).
+    summer simmer perception. Uses sensor.kids_room_thermal_comfort_summer_simmer_perception
+    (cool/out-of-range → heat, slightly_warm+ → cool, otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_ottos_room
@@ -532,9 +580,11 @@
         preset_mode: comfort
     - choose:
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.kids_room_thermal_comfort_humidex
-              below: 19
+            - condition: state
+              entity_id: sensor.kids_room_thermal_comfort_summer_simmer_perception
+              state:
+                - cool
+                - outside_calculable_range
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -542,9 +592,15 @@
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.kids_room_thermal_comfort_humidex
-              above: 23
+            - condition: state
+              entity_id: sensor.kids_room_thermal_comfort_summer_simmer_perception
+              state:
+                - slightly_warm
+                - increasing_discomfort
+                - extremely_warm
+                - danger_of_heatstroke
+                - extreme_danger_of_heatstroke
+                - circulatory_collapse_imminent
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -593,8 +649,8 @@
   alias: "HVAC - Kids Room - Bedtime"
   description: >
     At bedtime, if sleeping or home (parents awake, kids sleeping): set
-    frost+heat or boost+cool based on indoor humidex and season. Turn off only
-    if away/holiday.
+    frost+heat or boost+cool based on indoor summer simmer perception and season.
+    Turn off only if away/holiday.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_ottos_room
@@ -622,9 +678,11 @@
                 - condition: state
                   entity_id: input_select.occupancy
                   state: Home
-            - condition: numeric_state
-              entity_id: sensor.kids_room_thermal_comfort_humidex
-              below: 19
+            - condition: state
+              entity_id: sensor.kids_room_thermal_comfort_summer_simmer_perception
+              state:
+                - cool
+                - outside_calculable_range
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -645,9 +703,15 @@
                 - condition: state
                   entity_id: input_select.occupancy
                   state: Home
-            - condition: numeric_state
-              entity_id: sensor.kids_room_thermal_comfort_humidex
-              above: 23
+            - condition: state
+              entity_id: sensor.kids_room_thermal_comfort_summer_simmer_perception
+              state:
+                - slightly_warm
+                - increasing_discomfort
+                - extremely_warm
+                - danger_of_heatstroke
+                - extreme_danger_of_heatstroke
+                - circulatory_collapse_imminent
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -742,8 +806,8 @@
   alias: "HVAC - Study Room - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
-    felt temperature (humidex). Uses sensor.study_room_thermal_comfort_humidex
-    (< 19°C heat, > 23°C cool, otherwise season-based).
+    summer simmer perception. Uses sensor.study_room_thermal_comfort_summer_simmer_perception
+    (cool/out-of-range → heat, slightly_warm+ → cool, otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_lucas_room
@@ -768,9 +832,11 @@
         preset_mode: comfort
     - choose:
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.study_room_thermal_comfort_humidex
-              below: 19
+            - condition: state
+              entity_id: sensor.study_room_thermal_comfort_summer_simmer_perception
+              state:
+                - cool
+                - outside_calculable_range
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -778,9 +844,15 @@
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.study_room_thermal_comfort_humidex
-              above: 23
+            - condition: state
+              entity_id: sensor.study_room_thermal_comfort_summer_simmer_perception
+              state:
+                - slightly_warm
+                - increasing_discomfort
+                - extremely_warm
+                - danger_of_heatstroke
+                - extreme_danger_of_heatstroke
+                - circulatory_collapse_imminent
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -829,7 +901,7 @@
   alias: "HVAC - Study Room - Bedtime"
   description: >
     At bedtime, if sleeping: set frost+heat or boost+cool based on indoor
-    humidex. If home but not sleeping: turn off.
+    summer simmer perception. If home but not sleeping: turn off.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_lucas_room
@@ -852,9 +924,11 @@
             - condition: state
               entity_id: input_select.occupancy
               state: Sleeping
-            - condition: numeric_state
-              entity_id: sensor.study_room_thermal_comfort_humidex
-              below: 19
+            - condition: state
+              entity_id: sensor.study_room_thermal_comfort_summer_simmer_perception
+              state:
+                - cool
+                - outside_calculable_range
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -870,9 +944,15 @@
             - condition: state
               entity_id: input_select.occupancy
               state: Sleeping
-            - condition: numeric_state
-              entity_id: sensor.study_room_thermal_comfort_humidex
-              above: 23
+            - condition: state
+              entity_id: sensor.study_room_thermal_comfort_summer_simmer_perception
+              state:
+                - slightly_warm
+                - increasing_discomfort
+                - extremely_warm
+                - danger_of_heatstroke
+                - extreme_danger_of_heatstroke
+                - circulatory_collapse_imminent
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -957,8 +1037,8 @@
   alias: "HVAC - Rumpus - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
-    felt temperature (humidex). Uses sensor.rumpus_thermal_comfort_humidex
-    (< 19°C heat, > 23°C cool, otherwise season-based).
+    summer simmer perception. Uses sensor.rumpus_thermal_comfort_summer_simmer_perception
+    (cool/out-of-range → heat, slightly_warm+ → cool, otherwise season-based).
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_rumpus
@@ -983,9 +1063,11 @@
         preset_mode: comfort
     - choose:
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.rumpus_thermal_comfort_humidex
-              below: 19
+            - condition: state
+              entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
+              state:
+                - cool
+                - outside_calculable_range
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -993,9 +1075,15 @@
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.rumpus_thermal_comfort_humidex
-              above: 23
+            - condition: state
+              entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
+              state:
+                - slightly_warm
+                - increasing_discomfort
+                - extremely_warm
+                - danger_of_heatstroke
+                - extreme_danger_of_heatstroke
+                - circulatory_collapse_imminent
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1044,7 +1132,7 @@
   alias: "HVAC - Rumpus - Bedtime"
   description: >
     At bedtime, if sleeping: set frost+heat or boost+cool based on indoor
-    humidex. If home but not sleeping: turn off.
+    summer simmer perception. If home but not sleeping: turn off.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_rumpus
@@ -1067,9 +1155,11 @@
             - condition: state
               entity_id: input_select.occupancy
               state: Sleeping
-            - condition: numeric_state
-              entity_id: sensor.rumpus_thermal_comfort_humidex
-              below: 19
+            - condition: state
+              entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
+              state:
+                - cool
+                - outside_calculable_range
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -1085,9 +1175,15 @@
             - condition: state
               entity_id: input_select.occupancy
               state: Sleeping
-            - condition: numeric_state
-              entity_id: sensor.rumpus_thermal_comfort_humidex
-              above: 23
+            - condition: state
+              entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
+              state:
+                - slightly_warm
+                - increasing_discomfort
+                - extremely_warm
+                - danger_of_heatstroke
+                - extreme_danger_of_heatstroke
+                - circulatory_collapse_imminent
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -1169,8 +1265,8 @@
 # ============================================================================
 # Every hour, if someone is home/sleeping, the AC is already running, and
 # manual override is off — re-evaluate heat vs cool based on current indoor
-# humidex. This handles conditions that shift during the day (e.g. morning
-# heat-mode switching to cool as the day warms up, or vice versa).
+# summer simmer perception. This handles conditions that shift during the day
+# (e.g. morning heat-mode switching to cool as the day warms up, or vice versa).
 # The preset is NOT changed — only the hvac_mode is updated.
 # ============================================================================
 
@@ -1199,9 +1295,11 @@
   actions:
     - choose:
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.living_room_thermal_comfort_humidex
-              below: 19
+            - condition: state
+              entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+              state:
+                - cool
+                - outside_calculable_range
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1209,9 +1307,15 @@
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.living_room_thermal_comfort_humidex
-              above: 23
+            - condition: state
+              entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+              state:
+                - slightly_warm
+                - increasing_discomfort
+                - extremely_warm
+                - danger_of_heatstroke
+                - extreme_danger_of_heatstroke
+                - circulatory_collapse_imminent
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1275,9 +1379,11 @@
   actions:
     - choose:
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.thermal_comfort_humidex
-              below: 19
+            - condition: state
+              entity_id: sensor.thermal_comfort_summer_simmer_perception
+              state:
+                - cool
+                - outside_calculable_range
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1285,9 +1391,15 @@
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.thermal_comfort_humidex
-              above: 23
+            - condition: state
+              entity_id: sensor.thermal_comfort_summer_simmer_perception
+              state:
+                - slightly_warm
+                - increasing_discomfort
+                - extremely_warm
+                - danger_of_heatstroke
+                - extreme_danger_of_heatstroke
+                - circulatory_collapse_imminent
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1351,9 +1463,11 @@
   actions:
     - choose:
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.kids_room_thermal_comfort_humidex
-              below: 19
+            - condition: state
+              entity_id: sensor.kids_room_thermal_comfort_summer_simmer_perception
+              state:
+                - cool
+                - outside_calculable_range
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1361,9 +1475,15 @@
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.kids_room_thermal_comfort_humidex
-              above: 23
+            - condition: state
+              entity_id: sensor.kids_room_thermal_comfort_summer_simmer_perception
+              state:
+                - slightly_warm
+                - increasing_discomfort
+                - extremely_warm
+                - danger_of_heatstroke
+                - extreme_danger_of_heatstroke
+                - circulatory_collapse_imminent
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1427,9 +1547,11 @@
   actions:
     - choose:
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.study_room_thermal_comfort_humidex
-              below: 19
+            - condition: state
+              entity_id: sensor.study_room_thermal_comfort_summer_simmer_perception
+              state:
+                - cool
+                - outside_calculable_range
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1437,9 +1559,15 @@
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.study_room_thermal_comfort_humidex
-              above: 23
+            - condition: state
+              entity_id: sensor.study_room_thermal_comfort_summer_simmer_perception
+              state:
+                - slightly_warm
+                - increasing_discomfort
+                - extremely_warm
+                - danger_of_heatstroke
+                - extreme_danger_of_heatstroke
+                - circulatory_collapse_imminent
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1503,9 +1631,11 @@
   actions:
     - choose:
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.rumpus_thermal_comfort_humidex
-              below: 19
+            - condition: state
+              entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
+              state:
+                - cool
+                - outside_calculable_range
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1513,9 +1643,15 @@
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: numeric_state
-              entity_id: sensor.rumpus_thermal_comfort_humidex
-              above: 23
+            - condition: state
+              entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
+              state:
+                - slightly_warm
+                - increasing_discomfort
+                - extremely_warm
+                - danger_of_heatstroke
+                - extreme_danger_of_heatstroke
+                - circulatory_collapse_imminent
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1560,16 +1696,19 @@
 - id: living_room_preheat_530am
   alias: "HVAC - Living Room - Pre-heat at 5:30 AM if Cold"
   description: >
-    At 5:30 AM, if the living room feels cold (humidex < 19°C) and it's not a
-    super-hot day, set comfort preset + heat so the room is warm before wake time.
+    At 5:30 AM, if the living room feels cold (summer_simmer_perception is cool
+    or outside_calculable_range) and it's not a super-hot day, set comfort preset
+    + heat so the room is warm before wake time.
     Gates on manual override off and someone being home/sleeping.
   triggers:
     - trigger: time
       at: "05:30:00"
   conditions:
-    - condition: numeric_state
-      entity_id: sensor.living_room_thermal_comfort_humidex
-      below: 19
+    - condition: state
+      entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+      state:
+        - cool
+        - outside_calculable_range
     - condition: state
       entity_id: input_boolean.super_hot_today
       state: "off"
