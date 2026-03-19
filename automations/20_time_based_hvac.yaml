@@ -912,6 +912,11 @@
                 entity_id: climate.living_room_ac_2
               data:
                 hvac_mode: cool
+      default:
+        # comfortable / slightly_cool — room is fine, stop the AC
+        - action: climate.turn_off
+          target:
+            entity_id: climate.living_room_ac_2
   mode: single
 
 - id: master_bedroom_hourly_recheck
@@ -966,6 +971,11 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
+      default:
+        # comfortable / slightly_cool — room is fine, stop the AC
+        - action: climate.turn_off
+          target:
+            entity_id: climate.masterbed_room_ac
   mode: single
 
 - id: ottos_room_hourly_recheck
@@ -1020,6 +1030,11 @@
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
+      default:
+        # comfortable / slightly_cool — room is fine, stop the AC
+        - action: climate.turn_off
+          target:
+            entity_id: climate.kids_room_ac
   mode: single
 
 - id: lucas_room_hourly_recheck

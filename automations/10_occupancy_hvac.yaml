@@ -6,22 +6,22 @@
 # occupancy selector (input_select.occupancy).
 #
 # Away / Holiday → turn off ALL climate entities (energy saving)
-# Home / Sleeping (returning from Away or Holiday) → turn on climate entities
+# Home / Sleeping (returning from Away or Holiday) → turn on active rooms only
 #   per-room, respecting each room's manual override flag.
 #
-# Rooms and entities:
+# Active rooms (return-home turn-on):
 #   Living Room   : climate.living_room_ac_2, climate.living_room_versatile_thermostat
 #   Master Bedroom: climate.masterbed_room_ac, climate.masterbed_versatile_thermostat
 #   Kids/Otto Room: climate.kids_room_ac, climate.otto_s_room
+#
+# Disabled rooms (away shutdown only — NOT turned on at return-home):
 #   Study/Lucas   : climate.study_room_ac, climate.henry_s_room_versatile_thermostat
 #   Rumpus        : climate.rumpus_ac
 #
 # Notes:
-#   - Away shutdown ignores manual overrides (energy safety when no one is home)
-#   - Return-home turn-on respects per-room manual override flags so that any
-#     room the user has manually controlled is left alone
-#   - Time-based automations (20_time_based_hvac.yaml) continue to handle
-#     preset/mode selection after power-on
+#   - Away shutdown includes all rooms regardless of disabled status (energy safety)
+#   - Return-home turn-on respects per-room manual override flags
+#   - Time-based automations (20_time_based_hvac.yaml) handle preset/mode after power-on
 # ============================================================================
 
 # ----------------------------------------------------------------------------
@@ -115,20 +115,6 @@
               - climate.kids_room_ac
               - climate.otto_s_room
 
-    # Study / Lucas's Room
-    - if:
-        - condition: state
-          entity_id: input_boolean.climate_manual_control_study
-          state: "off"
-      then:
-        - action: climate.turn_on
-          target:
-            entity_id:
-              - climate.study_room_ac
-              - climate.henry_s_room_versatile_thermostat
-
-    # Rumpus (no manual override flag defined)
-    - action: climate.turn_on
-      target:
-        entity_id: climate.rumpus_ac
+    # Study and Rumpus intentionally omitted — disabled rooms are not turned
+    # on at return-home. Away shutdown above still turns them off for energy safety.
   mode: single
