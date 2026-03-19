@@ -7,37 +7,20 @@
 # Logic:
 # - Gates: manual override off; occupancy must be Home or Sleeping
 # - Wake time: comfort preset; heat/cool decided by FELT temperature (summer simmer perception)
-# - Bed time (Sleeping): frost (heat) or boost (cool) based on simmer perception/season
+# - Bed time (Sleeping): frost+heat or boost+cool if cold/hot; off if comfortable
 # - Bed time (Home, not sleeping): off
 #
-# Heat/cool decision order (same for all rooms):
-#   1. summer_simmer_perception == cool/outside_calculable_range
-#                              → heat  (feels cold, SSI < 21.1°C or below valid range)
-#   2. summer_simmer_perception in [slightly_warm, increasing_discomfort, ...]
-#                              → cool  (feels warm, SSI ≥ 28.3°C)
-#   3. Season winter/autumn    → heat  (moderate feel, cold-bias season)
-#   4. Season summer/spring    → cool  (moderate feel, warm-bias season)
-#   5. Default                 → off   (no match)
+# Heat/cool decision (same for all rooms, no season fallback):
+#   summer_simmer_perception:
+#     cool / outside_calculable_range  → heat  (SSI < 21.1°C or below valid range)
+#     slightly_cool / comfortable      → off   (room is fine, no intervention)
+#     slightly_warm and above          → cool  (SSI ≥ 28.3°C)
 #
-# WHY SUMMER SIMMER PERCEPTION INSTEAD OF NUMERIC HUMIDEX:
-# The summer_simmer_perception sensor expresses calibrated human comfort
-# categories based on both temperature and humidity. Using categorical states
-# like "cool", "slightly_cool", "comfortable", "slightly_warm" makes the
-# heat/cool boundary explicit and human-readable, while still fully accounting
-# for humidity. "outside_calculable_range" (SSI < 14°C) is treated as "cool"
-# so very cold rooms always trigger heating.
-#
-# Perception state thresholds (Summer Simmer Index):
-#   cool                         < 21.1°C  → heat
-#   slightly_cool            21.1–24.9°C  → season-based fallback
-#   comfortable              25.0–28.2°C  → season-based fallback
-#   slightly_warm            28.3–32.7°C  → cool
-#   increasing_discomfort    32.8–37.7°C  → cool
-#   extremely_warm           37.8–44.3°C  → cool
-#   danger_of_heatstroke     44.4–51.6°C  → cool
-#   extreme_danger_of_heatstroke 51.7–65.5°C → cool
-#   circulatory_collapse_imminent ≥ 65.6°C  → cool
-#   outside_calculable_range     < 14°C   → heat
+# WHY NO SEASON FALLBACK:
+# The summer_simmer_perception sensor already encodes all the information needed.
+# In the comfortable/slightly_cool zone (18-25°C indoor), the room genuinely
+# doesn't need HVAC. Relying on our custom season helper would duplicate logic
+# already handled by the thermal comfort integration.
 #
 # Sensor sources (all INDOOR summer simmer perception):
 # - Living Room:    sensor.living_room_thermal_comfort_summer_simmer_perception
@@ -51,12 +34,10 @@
 # - Rumpus:         communal space (also turns on when arriving home) [climate.rumpus_ac]
 # - Master Bedroom: Steph & Phil
 # - Kids Room:      Henry & Otto [climate.kids_room_ac]
-# - Study Room:     Lucas [climate.study_room_ac]
+# - Study Room:     Lucas [climate.study_room_ac] — currently disabled
 #
 # Related files:
 # - 16_master_bedroom_morning_comfort.yaml: humidity control only
-#   (morning-comfort and exit automations in that file are superseded by
-#    master_bedroom_time_based_day / master_bedroom_time_based_night here)
 # - 12_morning_preheat.yaml: superseded; preheat reinstated as living_room_preheat_530am
 # ============================================================================
 
@@ -69,7 +50,7 @@
   description: >
     At wake time, set comfort preset and decide heat/cool mode based on indoor
     summer simmer perception. At bed time, set frost+heat or boost+cool if
-    sleeping, or turn off if just home. Also turns the AC on when arriving home.
+    cold/hot; off if comfortable or just home. Also turns AC on when arriving home.
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -154,44 +135,8 @@
                         entity_id: climate.living_room_ac_2
                       data:
                         hvac_mode: cool
-                - conditions:
-                    - condition: or
-                      conditions:
-                        - condition: state
-                          entity_id: input_select.climate_season
-                          state: winter
-                        - condition: state
-                          entity_id: input_select.climate_season
-                          state: autumn
-                  sequence:
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.living_room_ac_2
-                      data:
-                        hvac_mode: heat
-                - conditions:
-                    - condition: or
-                      conditions:
-                        - condition: state
-                          entity_id: input_select.climate_season
-                          state: summer
-                        - condition: state
-                          entity_id: input_select.climate_season
-                          state: spring
-                  sequence:
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.living_room_ac_2
-                      data:
-                        hvac_mode: cool
-              default:
-                - action: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.living_room_ac_2
-                  data:
-                    hvac_mode: "off"
 
-        # Bed time: frost/boost if sleeping, off if just home
+        # Bed time: frost/boost if cold/hot, off if comfortable or just home
         - conditions:
             - condition: trigger
               id: bed_time
@@ -249,44 +194,6 @@
                         entity_id: climate.living_room_ac_2
                       data:
                         hvac_mode: cool
-                - conditions:
-                    - condition: state
-                      entity_id: input_select.occupancy
-                      state: Sleeping
-                    - condition: or
-                      conditions:
-                        - condition: state
-                          entity_id: input_select.climate_season
-                          state: winter
-                        - condition: state
-                          entity_id: input_select.climate_season
-                          state: autumn
-                  sequence:
-                    - action: climate.set_preset_mode
-                      target:
-                        entity_id: climate.living_room_ac_2
-                      data:
-                        preset_mode: frost
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.living_room_ac_2
-                      data:
-                        hvac_mode: heat
-                - conditions:
-                    - condition: state
-                      entity_id: input_select.occupancy
-                      state: Sleeping
-                  sequence:
-                    - action: climate.set_preset_mode
-                      target:
-                        entity_id: climate.living_room_ac_2
-                      data:
-                        preset_mode: boost
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.living_room_ac_2
-                      data:
-                        hvac_mode: cool
               default:
                 - action: climate.turn_off
                   target:
@@ -301,9 +208,8 @@
   alias: "HVAC - Master Bedroom - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
-    summer simmer perception. Uses sensor.thermal_comfort_summer_simmer_perception
-    which accounts for room humidity (cool/out-of-range → heat, slightly_warm+ → cool,
-    otherwise season-based).
+    summer simmer perception. cool/out-of-range → heat, slightly_warm+ → cool,
+    comfortable/slightly_cool → no mode change.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
@@ -355,50 +261,13 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: winter
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: autumn
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: summer
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: spring
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                hvac_mode: cool
-      default:
-        - action: climate.set_hvac_mode
-          target:
-            entity_id: climate.masterbed_room_ac
-          data:
-            hvac_mode: "off"
   mode: single
 
 - id: master_bedroom_time_based_night
   alias: "HVAC - Master Bedroom - Bedtime"
   description: >
-    At bedtime, if sleeping or home (someone still awake): set frost+heat or
-    boost+cool based on indoor summer simmer perception and season. Turn off only
-    if away/holiday.
+    At bedtime, if sleeping or home: frost+heat if cold, boost+cool if hot,
+    off if comfortable. Turn off only if away/holiday.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
@@ -471,54 +340,6 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: winter
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: autumn
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                preset_mode: frost
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                preset_mode: boost
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                hvac_mode: cool
       default:
         - action: climate.turn_off
           target:
@@ -554,8 +375,8 @@
   alias: "HVAC - Kids Room - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
-    summer simmer perception. Uses sensor.kids_room_thermal_comfort_summer_simmer_perception
-    (cool/out-of-range → heat, slightly_warm+ → cool, otherwise season-based).
+    summer simmer perception. cool/out-of-range → heat, slightly_warm+ → cool,
+    comfortable/slightly_cool → no mode change.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_ottos_room
@@ -607,50 +428,13 @@
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: winter
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: autumn
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.kids_room_ac
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: summer
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: spring
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.kids_room_ac
-              data:
-                hvac_mode: cool
-      default:
-        - action: climate.set_hvac_mode
-          target:
-            entity_id: climate.kids_room_ac
-          data:
-            hvac_mode: "off"
   mode: single
 
 - id: ottos_room_time_based_night
   alias: "HVAC - Kids Room - Bedtime"
   description: >
-    At bedtime, if sleeping or home (parents awake, kids sleeping): set
-    frost+heat or boost+cool based on indoor summer simmer perception and season.
-    Turn off only if away/holiday.
+    At bedtime, if sleeping or home: frost+heat if cold, boost+cool if hot,
+    off if comfortable.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_ottos_room
@@ -723,54 +507,6 @@
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: winter
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: autumn
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.kids_room_ac
-              data:
-                preset_mode: frost
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.kids_room_ac
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.kids_room_ac
-              data:
-                preset_mode: boost
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.kids_room_ac
-              data:
-                hvac_mode: cool
       default:
         - action: climate.turn_off
           target:
@@ -799,7 +535,7 @@
   mode: single
 
 # ============================================================================
-# STUDY ROOM (Lucas) - Comfort at wake, frost/boost at bedtime (if sleeping)
+# STUDY ROOM (Lucas) - disabled (room unoccupied)
 # ============================================================================
 
 - id: lucas_room_time_based_day
@@ -807,8 +543,7 @@
   alias: "HVAC - Study Room - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
-    summer simmer perception. Uses sensor.study_room_thermal_comfort_summer_simmer_perception
-    (cool/out-of-range → heat, slightly_warm+ → cool, otherwise season-based).
+    summer simmer perception. cool/out-of-range → heat, slightly_warm+ → cool.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_lucas_room
@@ -860,50 +595,13 @@
                 entity_id: climate.study_room_ac
               data:
                 hvac_mode: cool
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: winter
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: autumn
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.study_room_ac
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: summer
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: spring
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.study_room_ac
-              data:
-                hvac_mode: cool
-      default:
-        - action: climate.set_hvac_mode
-          target:
-            entity_id: climate.study_room_ac
-          data:
-            hvac_mode: "off"
   mode: single
 
 - id: lucas_room_time_based_night
   enabled: false
   alias: "HVAC - Study Room - Bedtime"
   description: >
-    At bedtime, if sleeping: set frost+heat or boost+cool based on indoor
-    summer simmer perception. If home but not sleeping: turn off.
+    At bedtime, if sleeping: frost+heat if cold, boost+cool if hot, off if comfortable.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_lucas_room
@@ -966,44 +664,6 @@
                 entity_id: climate.study_room_ac
               data:
                 hvac_mode: cool
-        - conditions:
-            - condition: state
-              entity_id: input_select.occupancy
-              state: Sleeping
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: winter
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: autumn
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.study_room_ac
-              data:
-                preset_mode: frost
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.study_room_ac
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: state
-              entity_id: input_select.occupancy
-              state: Sleeping
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.study_room_ac
-              data:
-                preset_mode: boost
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.study_room_ac
-              data:
-                hvac_mode: cool
       default:
         - action: climate.turn_off
           target:
@@ -1033,7 +693,7 @@
   mode: single
 
 # ============================================================================
-# WENDY'S ROOM - Comfort at wake, frost/boost at bedtime (if sleeping)
+# RUMPUS - disabled (running fine without automation)
 # ============================================================================
 
 - id: rumpus_time_based_day
@@ -1041,8 +701,8 @@
   alias: "HVAC - Rumpus - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
-    summer simmer perception. Uses sensor.rumpus_thermal_comfort_summer_simmer_perception
-    (cool/out-of-range → heat, slightly_warm+ → cool, otherwise season-based).
+    summer simmer perception. cool/out-of-range → heat, slightly_warm+ → cool.
+    Note: climate.rumpus_ac only supports cool mode — heat branch will fail.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_rumpus
@@ -1094,50 +754,13 @@
                 entity_id: climate.rumpus_ac
               data:
                 hvac_mode: cool
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: winter
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: autumn
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: summer
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: spring
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                hvac_mode: cool
-      default:
-        - action: climate.set_hvac_mode
-          target:
-            entity_id: climate.rumpus_ac
-          data:
-            hvac_mode: "off"
   mode: single
 
 - id: rumpus_time_based_night
   enabled: false
   alias: "HVAC - Rumpus - Bedtime"
   description: >
-    At bedtime, if sleeping: set frost+heat or boost+cool based on indoor
-    summer simmer perception. If home but not sleeping: turn off.
+    At bedtime, if sleeping: frost+heat if cold, boost+cool if hot, off if comfortable.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_rumpus
@@ -1200,44 +823,6 @@
                 entity_id: climate.rumpus_ac
               data:
                 hvac_mode: cool
-        - conditions:
-            - condition: state
-              entity_id: input_select.occupancy
-              state: Sleeping
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: winter
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: autumn
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                preset_mode: frost
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: state
-              entity_id: input_select.occupancy
-              state: Sleeping
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                preset_mode: boost
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                hvac_mode: cool
       default:
         - action: climate.turn_off
           target:
@@ -1271,9 +856,8 @@
 # ============================================================================
 # Every hour, if someone is home/sleeping, the AC is already running, and
 # manual override is off — re-evaluate heat vs cool based on current indoor
-# summer simmer perception. This handles conditions that shift during the day
-# (e.g. morning heat-mode switching to cool as the day warms up, or vice versa).
-# The preset is NOT changed — only the hvac_mode is updated.
+# summer simmer perception. Only the hvac_mode is updated; preset is unchanged.
+# In the comfortable/slightly_cool zone, no action is taken.
 # ============================================================================
 
 - id: living_room_hourly_recheck
@@ -1322,36 +906,6 @@
                 - danger_of_heatstroke
                 - extreme_danger_of_heatstroke
                 - circulatory_collapse_imminent
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.living_room_ac_2
-              data:
-                hvac_mode: cool
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: winter
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: autumn
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.living_room_ac_2
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: summer
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: spring
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1412,36 +966,6 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: winter
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: autumn
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: summer
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: spring
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                hvac_mode: cool
   mode: single
 
 - id: ottos_room_hourly_recheck
@@ -1490,36 +1014,6 @@
                 - danger_of_heatstroke
                 - extreme_danger_of_heatstroke
                 - circulatory_collapse_imminent
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.kids_room_ac
-              data:
-                hvac_mode: cool
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: winter
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: autumn
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.kids_room_ac
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: summer
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: spring
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1581,36 +1075,6 @@
                 entity_id: climate.study_room_ac
               data:
                 hvac_mode: cool
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: winter
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: autumn
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.study_room_ac
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: summer
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: spring
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.study_room_ac
-              data:
-                hvac_mode: cool
   mode: single
 
 - id: rumpus_hourly_recheck
@@ -1666,36 +1130,7 @@
                 entity_id: climate.rumpus_ac
               data:
                 hvac_mode: cool
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: winter
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: autumn
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: summer
-                - condition: state
-                  entity_id: input_select.climate_season
-                  state: spring
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                hvac_mode: cool
+  mode: single
 
 # ============================================================================
 # LIVING ROOM - Pre-heat if cold (configurable time, pre-wake comfort boost)
@@ -1707,10 +1142,8 @@
   description: >
     At the configured pre-heat time (input_datetime.preheat_time_living_room,
     default 05:30), if the living room feels cold (summer_simmer_perception is
-    cool or outside_calculable_range) and it's not a super-hot day, set comfort
-    preset + heat so the room is warm before wake time.
-    Adjust the helper earlier as winter deepens.
-    Gates on manual override off and someone being home/sleeping.
+    cool or outside_calculable_range), set comfort preset + heat so the room is
+    warm before wake time. No custom flag gates — perception sensor is sufficient.
   triggers:
     - trigger: time
       at: input_datetime.preheat_time_living_room
@@ -1720,9 +1153,6 @@
       state:
         - cool
         - outside_calculable_range
-    - condition: state
-      entity_id: input_boolean.super_hot_today
-      state: "off"
     - condition: or
       conditions:
         - condition: state
