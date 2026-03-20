@@ -200,13 +200,13 @@ henrys_room_temp_hot:
 # Science: each -1°C offset shifts SSI by -1.61°C at typical indoor humidity.
 # The comfortable → cool threshold is at SSI 21.1°C.
 # Rule of thumb: -2°C offset shifts heat-on from ~18.6°C to ~20.6°C actual.
-# Tune via Lovelace to match felt comfort. Start at -2.0 for Master Bedroom.
+# Tune via Lovelace to match felt comfort. Default 0.0 (no offset) for all rooms.
 masterbed_temperature_offset:
   name: Master Bedroom Temperature Offset (Thermal Comfort)
   min: -5
   max: 5
   step: 0.5
-  initial: -2.0
+  initial: 0.0
   unit_of_measurement: "°C"
   icon: mdi:thermometer-plus
 living_room_temperature_offset:
