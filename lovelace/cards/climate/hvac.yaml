@@ -112,6 +112,13 @@ cards:
             heading_style: subtitle
             badges:
               - type: entity
+                entity: sensor.master_bedroom_indoor_comfort_ts
+                show_state: true
+                name: "Thermal Comfort"
+                color: state
+                tap_action:
+                  action: more-info
+              - type: entity
                 entity: binary_sensor.master_bedroom_door_sensor_opening
                 show_state: true
                 name: "Master Bedroom Door"
@@ -224,6 +231,13 @@ cards:
             heading_style: subtitle
             badges:
               - type: entity
+                entity: sensor.kids_room_indoor_comfort_ts
+                show_state: true
+                name: "Thermal Comfort"
+                color: state
+                tap_action:
+                  action: more-info
+              - type: entity
                 entity: binary_sensor.otto_room_door_sensor_opening
                 name: "Otto's Room Door"
                 show_state: true
@@ -334,6 +348,13 @@ cards:
             heading_style: subtitle
             badges:
               - type: entity
+                entity: sensor.study_room_indoor_comfort_ts
+                show_state: true
+                name: "Thermal Comfort"
+                color: state
+                tap_action:
+                  action: more-info
+              - type: entity
                 entity: binary_sensor.henry_door_sensor_magnet_opening
                 name: "Henry's Room Door"
                 show_state: true
@@ -440,6 +461,13 @@ cards:
           - type: heading
             heading_style: subtitle
             badges:
+              - type: entity
+                entity: sensor.living_room_indoor_comfort_ts
+                show_state: true
+                name: "Thermal Comfort"
+                color: state
+                tap_action:
+                  action: more-info
               - type: entity
                 entity: binary_sensor.living_room_door_sensor_opening
                 name: "Living Room Door"
