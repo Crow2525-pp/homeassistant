@@ -1,0 +1,123 @@
+---
+# ============================================================================
+# INDOOR THERMAL COMFORT — Helper Scheduling
+# ============================================================================
+# Keeps clothing insulation (clo) and metabolic rate (met) in sync with the
+# time of day and season so the ASHRAE 55 PMV/PPD sensors stay accurate.
+#
+# Helpers managed:
+#   input_number.clothing_insulation — clo (used by all room comfort instances)
+#   input_number.metabolic_rate      — met (used by all room comfort instances)
+#
+# The clothing_insulation helper is set to sleeping values at bedtime and
+# daytime values at wake time — all 5 room comfort instances point to it.
+#
+# Triggers:
+#   - Occupancy changes (Home ↔ Sleeping)
+#   - Season changes
+#   - Wake/bed time (master bedroom times used as household reference)
+#   - HA restart
+#
+# Clothing insulation (clo) reference:
+#   Daytime:  0.3 summer | 0.7 autumn/spring | 1.0 winter
+#   Sleeping: 0.5 summer | 1.0 autumn/spring | 1.5 winter
+#
+# Metabolic rate (met) reference:
+#   0.8 sleeping | 1.0 sedentary | 1.2 morning routine (first hour)
+# ============================================================================
+
+- id: comfort_helpers_schedule
+  alias: "Comfort Helpers - Clo & Met Schedule"
+  description: >
+    Updates clothing insulation and metabolic rate based on season, occupancy,
+    and time of day so the Indoor Thermal Comfort (ASHRAE 55) sensors reflect
+    realistic human factors.
+  triggers:
+    - trigger: state
+      entity_id: input_select.occupancy
+      to:
+        - Home
+        - Sleeping
+      id: occupancy_change
+    - trigger: state
+      entity_id: input_select.climate_season
+      id: season_change
+    - trigger: time
+      at: input_datetime.wakeup_time_master_bedroom
+      id: wake_time
+    - trigger: time
+      at: input_datetime.bedtime_master_bedroom
+      id: bed_time
+    - trigger: homeassistant
+      event: start
+      id: ha_start
+  conditions: []
+  actions:
+    - variables:
+        is_sleeping: >
+          {{ states('input_select.occupancy') == 'Sleeping' }}
+        season: >
+          {{ states('input_select.climate_season') }}
+        clo_day: >
+          {% if season == 'summer' %}0.3
+          {% elif season == 'winter' %}1.0
+          {% else %}0.7{% endif %}
+        clo_night: >
+          {% if season == 'summer' %}0.5
+          {% elif season == 'winter' %}1.5
+          {% else %}1.0{% endif %}
+
+    # -----------------------------------------------------------------------
+    # Metabolic rate
+    # -----------------------------------------------------------------------
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ is_sleeping }}"
+          sequence:
+            - action: input_number.set_value
+              target:
+                entity_id: input_number.metabolic_rate
+              data:
+                value: 0.8
+        - conditions:
+            - condition: trigger
+              id:
+                - wake_time
+          sequence:
+            # Morning routine — light activity for 1 hour, then sedentary
+            - action: input_number.set_value
+              target:
+                entity_id: input_number.metabolic_rate
+              data:
+                value: 1.2
+            - delay:
+                hours: 1
+            - action: input_number.set_value
+              target:
+                entity_id: input_number.metabolic_rate
+              data:
+                value: 1.0
+      default:
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.metabolic_rate
+          data:
+            value: 1.0
+
+    # -----------------------------------------------------------------------
+    # Clothing insulation
+    # -----------------------------------------------------------------------
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.clothing_insulation
+      data:
+        value: "{{ clo_night if is_sleeping else clo_day }}"
+
+    # Also keep the sleeping-specific helper in sync (for reference/dashboard)
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.clothing_index_sleeping
+      data:
+        value: "{{ clo_night }}"
+  mode: restart
