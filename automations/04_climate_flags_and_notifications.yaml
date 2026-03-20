@@ -652,6 +652,26 @@
     target:
       entity_id: input_boolean.climate_manual_control_study
   mode: restart
+- id: '1727826000006'
+  alias: Automation Tracker - Manual Climate Control (Rumpus)
+  description: Tracks manual climate changes in the rumpus to pause conflicting automations.
+  triggers:
+  - trigger: state
+    entity_id:
+    - climate.rumpus_ac
+  conditions:
+  - condition: template
+    value_template: '{{ trigger.to_state.context.user_id is not none }}'
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.climate_manual_control_rumpus
+  - delay:
+      hours: 4
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.climate_manual_control_rumpus
+  mode: restart
 - id: '1710137210171'
   alias: Climate - Track Downstairs Door State
   description: Maintains helper booleans based on the aggregated downstairs door contact

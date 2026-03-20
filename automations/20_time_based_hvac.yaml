@@ -357,6 +357,9 @@
         - Sleeping
       id: home
   conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
     - condition: template
       value_template: >
         {{ trigger.from_state is not none
@@ -524,6 +527,9 @@
         - Sleeping
       id: home
   conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_otto
+      state: "off"
     - condition: template
       value_template: >
         {{ trigger.from_state is not none
@@ -681,6 +687,9 @@
         - Sleeping
       id: home
   conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_study
+      state: "off"
     - condition: template
       value_template: >
         {{ trigger.from_state is not none
@@ -692,10 +701,10 @@
   mode: single
 
 - id: lucas_room_hourly_recheck
-  alias: "HVAC - Study Room - Hourly Mode Re-check"
+  alias: "HVAC - Study Room - Half-Hourly Mode Re-check"
   triggers:
     - trigger: time_pattern
-      minutes: "0"
+      minutes: "/30"
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_study
@@ -893,6 +902,9 @@
         - Sleeping
       id: home
   conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_rumpus
+      state: "off"
     - condition: template
       value_template: >
         {{ trigger.from_state is not none
@@ -904,10 +916,10 @@
   mode: single
 
 - id: rumpus_hourly_recheck
-  alias: "HVAC - Rumpus - Hourly Mode Re-check"
+  alias: "HVAC - Rumpus - Half-Hourly Mode Re-check"
   triggers:
     - trigger: time_pattern
-      minutes: "0"
+      minutes: "/30"
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_rumpus
@@ -958,19 +970,19 @@
   mode: single
 
 # ============================================================================
-# HOURLY MODE RE-CHECK
+# HALF-HOURLY MODE RE-CHECK
 # ============================================================================
-# Every hour, if someone is home/sleeping, the AC is already running, and
-# manual override is off — re-evaluate heat vs cool based on current indoor
-# summer simmer perception. Only the hvac_mode is updated; preset is unchanged.
-# In the comfortable/slightly_cool zone, no action is taken.
+# Every 30 minutes, if someone is home/sleeping, the AC is already running,
+# and manual override is off — re-evaluate heat vs cool based on current
+# indoor summer simmer perception. Only the hvac_mode is updated; preset is
+# unchanged. In the comfortable/slightly_cool zone, no action is taken.
 # ============================================================================
 
 - id: living_room_hourly_recheck
-  alias: "HVAC - Living Room - Hourly Mode Re-check"
+  alias: "HVAC - Living Room - Half-Hourly Mode Re-check"
   triggers:
     - trigger: time_pattern
-      minutes: "0"
+      minutes: "/30"
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_living
@@ -1026,10 +1038,10 @@
   mode: single
 
 - id: master_bedroom_hourly_recheck
-  alias: "HVAC - Master Bedroom - Hourly Mode Re-check"
+  alias: "HVAC - Master Bedroom - Half-Hourly Mode Re-check"
   triggers:
     - trigger: time_pattern
-      minutes: "0"
+      minutes: "/30"
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
@@ -1085,10 +1097,10 @@
   mode: single
 
 - id: ottos_room_hourly_recheck
-  alias: "HVAC - Kids Room - Hourly Mode Re-check"
+  alias: "HVAC - Kids Room - Half-Hourly Mode Re-check"
   triggers:
     - trigger: time_pattern
-      minutes: "0"
+      minutes: "/30"
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_otto
