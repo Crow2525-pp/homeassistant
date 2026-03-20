@@ -20,11 +20,13 @@
 #
 # Clothing insulation (clo) reference:
 #   Daytime:  0.3 summer | 0.7 autumn/spring | 1.0 winter
-#   Sleeping: 1.0 summer | 1.2 autumn/spring | 1.5 winter
-#   (Doona used year-round — summer value reflects lighter doona, not a sheet)
+#   Sleeping: 1.5 all seasons (doona year-round, capped at integration max)
 #
 # Metabolic rate (met) reference:
-#   0.8 sleeping | 1.0 sedentary | 1.2 morning routine (first hour)
+#   1.0 sleeping | 1.0 sedentary | 1.2 morning routine (first hour)
+#
+# Sleeping values tuned so master/kids bedrooms read Neutral (PMV ≈ -0.3)
+# at 17-19°C overnight — validated against live ASHRAE 55 sensors.
 # ============================================================================
 
 - id: comfort_helpers_schedule
@@ -63,10 +65,7 @@
           {% if season == 'summer' %}0.3
           {% elif season == 'winter' %}1.0
           {% else %}0.7{% endif %}
-        clo_night: >
-          {% if season == 'summer' %}1.0
-          {% elif season == 'winter' %}1.5
-          {% else %}1.2{% endif %}
+        clo_night: 1.5
 
     # -----------------------------------------------------------------------
     # Metabolic rate
@@ -80,7 +79,7 @@
               target:
                 entity_id: input_number.metabolic_rate
               data:
-                value: 0.8
+                value: 1.0
         - conditions:
             - condition: trigger
               id:
