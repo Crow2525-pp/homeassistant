@@ -226,6 +226,36 @@ kids_room_temperature_offset:
   unit_of_measurement: "°C"
   icon: mdi:thermometer-plus
 
+# Indoor Thermal Comfort (ASHRAE 55) — shared human-factor helpers
+# Used by all per-room Indoor Thermal Comfort integration instances.
+metabolic_rate:
+  name: Metabolic Rate
+  min: 0.8
+  max: 2.0
+  step: 0.1
+  initial: 1.0
+  unit_of_measurement: met
+  icon: mdi:run
+  mode: slider
+clothing_insulation:
+  name: Clothing Insulation
+  min: 0.0
+  max: 1.5
+  step: 0.1
+  initial: 0.7
+  unit_of_measurement: clo
+  icon: mdi:tshirt-crew
+  mode: slider
+clothing_index_sleeping:
+  name: Clothing Index (Sleeping)
+  min: 0.0
+  max: 1.5
+  step: 0.1
+  initial: 1.5
+  unit_of_measurement: clo
+  icon: mdi:bed
+  mode: slider
+
 # Automation Trigger Counters (daily, reset at midnight)
 seasonal_climate_triggers_today:
   name: Seasonal Climate Manager Triggers Today

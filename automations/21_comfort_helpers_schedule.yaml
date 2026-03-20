@@ -8,9 +8,7 @@
 # Helpers managed:
 #   input_number.clothing_insulation — clo (used by all room comfort instances)
 #   input_number.metabolic_rate      — met (used by all room comfort instances)
-#
-# The clothing_insulation helper is set to sleeping values at bedtime and
-# daytime values at wake time — all 5 room comfort instances point to it.
+#   input_number.clothing_index_sleeping — dashboard reference for night clo
 #
 # Triggers:
 #   - Occupancy changes (Home ↔ Sleeping)
@@ -23,10 +21,14 @@
 #   Sleeping: 1.5 all seasons (doona year-round, capped at integration max)
 #
 # Metabolic rate (met) reference:
-#   1.0 sleeping | 1.0 sedentary | 1.2 morning routine (first hour)
+#   1.0 sleeping/sedentary | 1.2 morning routine (on occupancy → Home)
 #
 # Sleeping values tuned so master/kids bedrooms read Neutral (PMV ≈ -0.3)
 # at 17-19°C overnight — validated against live ASHRAE 55 sensors.
+#
+# Night clo activates at bedtime (bed_time trigger) OR when occupancy is
+# Sleeping — whichever comes first. This avoids a gap between the configured
+# bedtime and the later occupancy transition to Sleeping.
 # ============================================================================
 
 - id: comfort_helpers_schedule
@@ -61,6 +63,16 @@
           {{ states('input_select.occupancy') == 'Sleeping' }}
         season: >
           {{ states('input_select.climate_season') }}
+        # Bedtime trigger or already Sleeping → use night clo.
+        # At HA start / season change, check current time vs bedtime.
+        use_night_clo: >
+          {% if trigger.id == 'bed_time' %}true
+          {% elif is_sleeping %}true
+          {% elif trigger.id in ['ha_start', 'season_change'] %}
+            {% set bed = states('input_datetime.bedtime_master_bedroom') %}
+            {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
+            {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
+          {% else %}false{% endif %}
         clo_day: >
           {% if season == 'summer' %}0.3
           {% elif season == 'winter' %}1.0
@@ -70,34 +82,22 @@
     # -----------------------------------------------------------------------
     # Metabolic rate
     # -----------------------------------------------------------------------
+    # Sleeping and sedentary are both 1.0. Morning routine (occupancy → Home)
+    # bumps to 1.2 briefly, but no delay — the next trigger resets it.
     - choose:
-        - conditions:
-            - condition: template
-              value_template: "{{ is_sleeping }}"
-          sequence:
-            - action: input_number.set_value
-              target:
-                entity_id: input_number.metabolic_rate
-              data:
-                value: 1.0
         - conditions:
             - condition: trigger
               id:
-                - wake_time
+                - occupancy_change
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
           sequence:
-            # Morning routine — light activity for 1 hour, then sedentary
             - action: input_number.set_value
               target:
                 entity_id: input_number.metabolic_rate
               data:
                 value: 1.2
-            - delay:
-                hours: 1
-            - action: input_number.set_value
-              target:
-                entity_id: input_number.metabolic_rate
-              data:
-                value: 1.0
       default:
         - action: input_number.set_value
           target:
@@ -112,7 +112,7 @@
       target:
         entity_id: input_number.clothing_insulation
       data:
-        value: "{{ clo_night if is_sleeping else clo_day }}"
+        value: "{{ clo_night if use_night_clo else clo_day }}"
 
     # Also keep the sleeping-specific helper in sync (for reference/dashboard)
     - action: input_number.set_value
