@@ -25,6 +25,11 @@
 # air temperature, humidity, clothing insulation, and metabolic rate — giving a
 # more accurate comfort assessment than the simpler Summer Simmer Index.
 #
+# DEPENDENCY: Indoor Thermal Comfort integration (UI-configured, not YAML).
+# The sensor entities below are created by this integration and exist in the
+# live HA instance but are not version-controlled. If missing, automations
+# will fail safe (no action on unknown/unavailable sensor states).
+#
 # Sensor sources (all Indoor Comfort Thermal Sensation):
 # - Living Room:    sensor.living_room_indoor_comfort_ts
 # - Rumpus:         sensor.rumpus_indoor_comfort_ts
@@ -262,8 +267,8 @@
   alias: "HVAC - Master Bedroom - Bedtime"
   description: >
     At bedtime, always set heat or cool — AC stays on all night. Cold/Cool →
-    frost+heat; everything else → boost+cool (favor cooling for sleep comfort).
-    Half-hourly rechecks may swap modes overnight but never turn off.
+    frost+heat; any other valid TS → boost+cool (favor cooling for sleep
+    comfort). If sensor is unknown/unavailable, no action (fail safe).
   triggers:
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
@@ -299,18 +304,27 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
-      default:
-        # Slightly Cool / Neutral / Slightly Warm / Warm / Hot → favor cool
-        - action: climate.set_preset_mode
-          target:
-            entity_id: climate.masterbed_room_ac
-          data:
-            preset_mode: boost
-        - action: climate.set_hvac_mode
-          target:
-            entity_id: climate.masterbed_room_ac
-          data:
-            hvac_mode: cool
+        - conditions:
+            - condition: state
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
+              state:
+                - Slightly Cool
+                - Neutral
+                - Slightly Warm
+                - Warm
+                - Hot
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: cool
+      # default: sensor unknown/unavailable — no action (fail safe)
   mode: single
 
 - id: master_bedroom_away_mode
@@ -401,8 +415,8 @@
   alias: "HVAC - Kids Room - Bedtime"
   description: >
     At bedtime, always set heat or cool — AC stays on all night. Cold/Cool →
-    frost+heat; everything else → boost+cool (favor cooling for sleep comfort).
-    Half-hourly rechecks may swap modes overnight but never turn off.
+    frost+heat; any other valid TS → boost+cool (favor cooling for sleep
+    comfort). If sensor is unknown/unavailable, no action (fail safe).
   triggers:
     - trigger: time
       at: input_datetime.bedtime_ottos_room
@@ -438,18 +452,27 @@
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: heat
-      default:
-        # Slightly Cool / Neutral / Slightly Warm / Warm / Hot → favor cool
-        - action: climate.set_preset_mode
-          target:
-            entity_id: climate.kids_room_ac
-          data:
-            preset_mode: boost
-        - action: climate.set_hvac_mode
-          target:
-            entity_id: climate.kids_room_ac
-          data:
-            hvac_mode: cool
+        - conditions:
+            - condition: state
+              entity_id: sensor.kids_room_indoor_comfort_ts
+              state:
+                - Slightly Cool
+                - Neutral
+                - Slightly Warm
+                - Warm
+                - Hot
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.kids_room_ac
+              data:
+                preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.kids_room_ac
+              data:
+                hvac_mode: cool
+      # default: sensor unknown/unavailable — no action (fail safe)
   mode: single
 
 - id: ottos_room_away_mode
@@ -942,6 +965,14 @@
         - condition: state
           entity_id: climate.masterbed_room_ac
           state: "off"
+    # Fail safe: skip if sensor is unknown/unavailable
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: sensor.master_bedroom_indoor_comfort_ts
+          state:
+            - unknown
+            - unavailable
   actions:
     - variables:
         is_nighttime: >
@@ -994,29 +1025,36 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-      default:
         # Slightly Cool / Neutral — comfortable zone
-        - choose:
-            # Night: favor cool, never turn off
-            - conditions:
-                - condition: template
-                  value_template: "{{ is_nighttime }}"
-              sequence:
-                - action: climate.set_preset_mode
+        - conditions:
+            - condition: state
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
+              state:
+                - Slightly Cool
+                - Neutral
+          sequence:
+            - choose:
+                # Night: favor cool, never turn off
+                - conditions:
+                    - condition: template
+                      value_template: "{{ is_nighttime }}"
+                  sequence:
+                    - action: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_room_ac
+                      data:
+                        preset_mode: boost
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_room_ac
+                      data:
+                        hvac_mode: cool
+              default:
+                # Day: room is comfortable, turn off
+                - action: climate.turn_off
                   target:
                     entity_id: climate.masterbed_room_ac
-                  data:
-                    preset_mode: boost
-                - action: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.masterbed_room_ac
-                  data:
-                    hvac_mode: cool
-          default:
-            # Day: room is comfortable, turn off
-            - action: climate.turn_off
-              target:
-                entity_id: climate.masterbed_room_ac
+      # default: unexpected sensor state — no action (fail safe)
   mode: single
 
 - id: ottos_room_hourly_recheck
@@ -1041,6 +1079,14 @@
         - condition: state
           entity_id: climate.kids_room_ac
           state: "off"
+    # Fail safe: skip if sensor is unknown/unavailable
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: sensor.kids_room_indoor_comfort_ts
+          state:
+            - unknown
+            - unavailable
   actions:
     - variables:
         is_nighttime: >
@@ -1093,29 +1139,36 @@
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
-      default:
         # Slightly Cool / Neutral — comfortable zone
-        - choose:
-            # Night: favor cool, never turn off
-            - conditions:
-                - condition: template
-                  value_template: "{{ is_nighttime }}"
-              sequence:
-                - action: climate.set_preset_mode
+        - conditions:
+            - condition: state
+              entity_id: sensor.kids_room_indoor_comfort_ts
+              state:
+                - Slightly Cool
+                - Neutral
+          sequence:
+            - choose:
+                # Night: favor cool, never turn off
+                - conditions:
+                    - condition: template
+                      value_template: "{{ is_nighttime }}"
+                  sequence:
+                    - action: climate.set_preset_mode
+                      target:
+                        entity_id: climate.kids_room_ac
+                      data:
+                        preset_mode: boost
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.kids_room_ac
+                      data:
+                        hvac_mode: cool
+              default:
+                # Day: room is comfortable, turn off
+                - action: climate.turn_off
                   target:
                     entity_id: climate.kids_room_ac
-                  data:
-                    preset_mode: boost
-                - action: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.kids_room_ac
-                  data:
-                    hvac_mode: cool
-          default:
-            # Day: room is comfortable, turn off
-            - action: climate.turn_off
-              target:
-                entity_id: climate.kids_room_ac
+      # default: unexpected sensor state — no action (fail safe)
   mode: single
 
 # ============================================================================
