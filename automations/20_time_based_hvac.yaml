@@ -6,28 +6,36 @@
 #
 # Logic:
 # - Gates: manual override off; occupancy must be Home or Sleeping
-# - Wake time: comfort preset; heat/cool decided by FELT temperature (summer simmer perception)
-# - Bed time (Sleeping): frost+heat or boost+cool if cold/hot; off if comfortable
-# - Bed time (Home, not sleeping): off
+# - Wake time: comfort preset; heat/cool decided by Indoor Comfort TS (ASHRAE 55)
+# - Bed time (bedrooms): always heat or cool — AC stays on all night
+#     Cold / Cool → frost+heat; everything else → boost+cool (favor cooling)
+# - Bed time (living/communal): frost/boost if cold/hot; off if comfortable
 #
-# Heat/cool decision (same for all rooms, no season fallback):
-#   summer_simmer_perception:
-#     cool / outside_calculable_range  → heat  (SSI < 21.1°C or below valid range)
-#     slightly_cool / comfortable      → off   (room is fine, no intervention)
-#     slightly_warm and above          → cool  (SSI ≥ 28.3°C)
+# Heat/cool decision — daytime (wake→bed):
+#   Indoor Comfort Thermal Sensation (TS):
+#     Cold / Cool            → heat
+#     Slightly Cool / Neutral → off   (room is comfortable, no intervention)
+#     Slightly Warm and above → cool
 #
-# WHY NO SEASON FALLBACK:
-# The summer_simmer_perception sensor already encodes all the information needed.
-# In the comfortable/slightly_cool zone (18-25°C indoor), the room genuinely
-# doesn't need HVAC. Relying on our custom season helper would duplicate logic
-# already handled by the thermal comfort integration.
+# Heat/cool decision — nighttime rechecks (bedrooms only, bed→wake):
+#   Same as bedtime: Cold/Cool → frost+heat; else → boost+cool
+#   Preset is set with mode to prevent stale preset mismatch.
 #
-# Sensor sources (all INDOOR summer simmer perception):
-# - Living Room:    sensor.living_room_thermal_comfort_summer_simmer_perception
-# - Rumpus:         sensor.rumpus_thermal_comfort_summer_simmer_perception
-# - Master Bedroom: sensor.thermal_comfort_summer_simmer_perception
-# - Kids Room:      sensor.kids_room_thermal_comfort_summer_simmer_perception
-# - Study Room:     sensor.study_room_thermal_comfort_summer_simmer_perception
+# The Indoor Comfort TS sensor uses ASHRAE 55 PMV calculations which factor in
+# air temperature, humidity, clothing insulation, and metabolic rate — giving a
+# more accurate comfort assessment than the simpler Summer Simmer Index.
+#
+# DEPENDENCY: Indoor Thermal Comfort integration (UI-configured, not YAML).
+# The sensor entities below are created by this integration and exist in the
+# live HA instance but are not version-controlled. If missing, automations
+# will fail safe (no action on unknown/unavailable sensor states).
+#
+# Sensor sources (all Indoor Comfort Thermal Sensation):
+# - Living Room:    sensor.living_room_indoor_comfort_ts
+# - Rumpus:         sensor.rumpus_indoor_comfort_ts
+# - Master Bedroom: sensor.master_bedroom_indoor_comfort_ts
+# - Kids Room:      sensor.kids_room_indoor_comfort_ts
+# - Study Room:     sensor.study_room_indoor_comfort_ts
 #
 # Room naming (alias → entity):
 # - Living Room:    communal space (also turns on when arriving home)
@@ -48,9 +56,10 @@
 - id: living_room_time_based_comfort
   alias: "HVAC - Living Room - Comfort (Wake/Bed Time)"
   description: >
-    At wake time, set comfort preset and decide heat/cool mode based on indoor
-    summer simmer perception. At bed time, set frost+heat or boost+cool if
-    cold/hot; off if comfortable or just home. Also turns AC on when arriving home.
+    At wake time, set comfort preset and decide heat/cool mode based on Indoor
+    Comfort thermal sensation (ASHRAE 55). At bed time, set frost+heat or
+    boost+cool if cold/hot; off if comfortable or just home. Also turns AC on
+    when arriving home.
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -109,10 +118,10 @@
             - choose:
                 - conditions:
                     - condition: state
-                      entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+                      entity_id: sensor.living_room_indoor_comfort_ts
                       state:
-                        - cool
-                        - outside_calculable_range
+                        - Cold
+                        - Cool
                   sequence:
                     - action: climate.set_hvac_mode
                       target:
@@ -121,14 +130,11 @@
                         hvac_mode: heat
                 - conditions:
                     - condition: state
-                      entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+                      entity_id: sensor.living_room_indoor_comfort_ts
                       state:
-                        - slightly_warm
-                        - increasing_discomfort
-                        - extremely_warm
-                        - danger_of_heatstroke
-                        - extreme_danger_of_heatstroke
-                        - circulatory_collapse_imminent
+                        - Slightly Warm
+                        - Warm
+                        - Hot
                   sequence:
                     - action: climate.set_hvac_mode
                       target:
@@ -155,10 +161,10 @@
                       entity_id: input_select.occupancy
                       state: Sleeping
                     - condition: state
-                      entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+                      entity_id: sensor.living_room_indoor_comfort_ts
                       state:
-                        - cool
-                        - outside_calculable_range
+                        - Cold
+                        - Cool
                   sequence:
                     - action: climate.set_preset_mode
                       target:
@@ -175,14 +181,11 @@
                       entity_id: input_select.occupancy
                       state: Sleeping
                     - condition: state
-                      entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+                      entity_id: sensor.living_room_indoor_comfort_ts
                       state:
-                        - slightly_warm
-                        - increasing_discomfort
-                        - extremely_warm
-                        - danger_of_heatstroke
-                        - extreme_danger_of_heatstroke
-                        - circulatory_collapse_imminent
+                        - Slightly Warm
+                        - Warm
+                        - Hot
                   sequence:
                     - action: climate.set_preset_mode
                       target:
@@ -208,8 +211,8 @@
   alias: "HVAC - Master Bedroom - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
-    summer simmer perception. cool/out-of-range → heat, slightly_warm+ → cool,
-    comfortable/slightly_cool → no mode change.
+    Indoor Comfort thermal sensation. Cold/Cool → heat, Slightly Warm+ → cool,
+    Slightly Cool/Neutral → no mode change.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
@@ -235,10 +238,10 @@
     - choose:
         - conditions:
             - condition: state
-              entity_id: sensor.thermal_comfort_summer_simmer_perception
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
               state:
-                - cool
-                - outside_calculable_range
+                - Cold
+                - Cool
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -247,14 +250,11 @@
                 hvac_mode: heat
         - conditions:
             - condition: state
-              entity_id: sensor.thermal_comfort_summer_simmer_perception
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
               state:
-                - slightly_warm
-                - increasing_discomfort
-                - extremely_warm
-                - danger_of_heatstroke
-                - extreme_danger_of_heatstroke
-                - circulatory_collapse_imminent
+                - Slightly Warm
+                - Warm
+                - Hot
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -266,8 +266,9 @@
 - id: master_bedroom_time_based_night
   alias: "HVAC - Master Bedroom - Bedtime"
   description: >
-    At bedtime, if sleeping or home: frost+heat if cold, boost+cool if hot,
-    off if comfortable. Turn off only if away/holiday.
+    At bedtime, always set heat or cool — AC stays on all night. Cold/Cool →
+    frost+heat; any other valid TS → boost+cool (favor cooling for sleep
+    comfort). If sensor is unknown/unavailable, no action (fail safe).
   triggers:
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
@@ -287,19 +288,11 @@
   actions:
     - choose:
         - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
             - condition: state
-              entity_id: sensor.thermal_comfort_summer_simmer_perception
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
               state:
-                - cool
-                - outside_calculable_range
+                - Cold
+                - Cool
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -312,23 +305,14 @@
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
             - condition: state
-              entity_id: sensor.thermal_comfort_summer_simmer_perception
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
               state:
-                - slightly_warm
-                - increasing_discomfort
-                - extremely_warm
-                - danger_of_heatstroke
-                - extreme_danger_of_heatstroke
-                - circulatory_collapse_imminent
+                - Slightly Cool
+                - Neutral
+                - Slightly Warm
+                - Warm
+                - Hot
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -340,10 +324,7 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-      default:
-        - action: climate.turn_off
-          target:
-            entity_id: climate.masterbed_room_ac
+      # default: sensor unknown/unavailable — no action (fail safe)
   mode: single
 
 - id: master_bedroom_away_mode
@@ -378,8 +359,8 @@
   alias: "HVAC - Kids Room - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
-    summer simmer perception. cool/out-of-range → heat, slightly_warm+ → cool,
-    comfortable/slightly_cool → no mode change.
+    Indoor Comfort thermal sensation. Cold/Cool → heat, Slightly Warm+ → cool,
+    Slightly Cool/Neutral → no mode change.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_ottos_room
@@ -405,10 +386,10 @@
     - choose:
         - conditions:
             - condition: state
-              entity_id: sensor.kids_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.kids_room_indoor_comfort_ts
               state:
-                - cool
-                - outside_calculable_range
+                - Cold
+                - Cool
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -417,14 +398,11 @@
                 hvac_mode: heat
         - conditions:
             - condition: state
-              entity_id: sensor.kids_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.kids_room_indoor_comfort_ts
               state:
-                - slightly_warm
-                - increasing_discomfort
-                - extremely_warm
-                - danger_of_heatstroke
-                - extreme_danger_of_heatstroke
-                - circulatory_collapse_imminent
+                - Slightly Warm
+                - Warm
+                - Hot
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -436,8 +414,9 @@
 - id: ottos_room_time_based_night
   alias: "HVAC - Kids Room - Bedtime"
   description: >
-    At bedtime, if sleeping or home: frost+heat if cold, boost+cool if hot,
-    off if comfortable.
+    At bedtime, always set heat or cool — AC stays on all night. Cold/Cool →
+    frost+heat; any other valid TS → boost+cool (favor cooling for sleep
+    comfort). If sensor is unknown/unavailable, no action (fail safe).
   triggers:
     - trigger: time
       at: input_datetime.bedtime_ottos_room
@@ -457,19 +436,11 @@
   actions:
     - choose:
         - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
             - condition: state
-              entity_id: sensor.kids_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.kids_room_indoor_comfort_ts
               state:
-                - cool
-                - outside_calculable_range
+                - Cold
+                - Cool
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -482,23 +453,14 @@
               data:
                 hvac_mode: heat
         - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
             - condition: state
-              entity_id: sensor.kids_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.kids_room_indoor_comfort_ts
               state:
-                - slightly_warm
-                - increasing_discomfort
-                - extremely_warm
-                - danger_of_heatstroke
-                - extreme_danger_of_heatstroke
-                - circulatory_collapse_imminent
+                - Slightly Cool
+                - Neutral
+                - Slightly Warm
+                - Warm
+                - Hot
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -510,10 +472,7 @@
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
-      default:
-        - action: climate.turn_off
-          target:
-            entity_id: climate.kids_room_ac
+      # default: sensor unknown/unavailable — no action (fail safe)
   mode: single
 
 - id: ottos_room_away_mode
@@ -550,7 +509,7 @@
   alias: "HVAC - Study Room - Wake Up Comfort"
   description: >
     At wake time, set comfort preset and decide heat/cool based on indoor
-    summer simmer perception. cool/out-of-range → heat, slightly_warm+ → cool.
+    Indoor Comfort thermal sensation. Cold/Cool → heat, Slightly Warm+ → cool.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_lucas_room
@@ -576,10 +535,10 @@
     - choose:
         - conditions:
             - condition: state
-              entity_id: sensor.study_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.study_room_indoor_comfort_ts
               state:
-                - cool
-                - outside_calculable_range
+                - Cold
+                - Cool
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -588,14 +547,11 @@
                 hvac_mode: heat
         - conditions:
             - condition: state
-              entity_id: sensor.study_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.study_room_indoor_comfort_ts
               state:
-                - slightly_warm
-                - increasing_discomfort
-                - extremely_warm
-                - danger_of_heatstroke
-                - extreme_danger_of_heatstroke
-                - circulatory_collapse_imminent
+                - Slightly Warm
+                - Warm
+                - Hot
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -631,10 +587,10 @@
               entity_id: input_select.occupancy
               state: Sleeping
             - condition: state
-              entity_id: sensor.study_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.study_room_indoor_comfort_ts
               state:
-                - cool
-                - outside_calculable_range
+                - Cold
+                - Cool
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -651,14 +607,11 @@
               entity_id: input_select.occupancy
               state: Sleeping
             - condition: state
-              entity_id: sensor.study_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.study_room_indoor_comfort_ts
               state:
-                - slightly_warm
-                - increasing_discomfort
-                - extremely_warm
-                - danger_of_heatstroke
-                - extreme_danger_of_heatstroke
-                - circulatory_collapse_imminent
+                - Slightly Warm
+                - Warm
+                - Hot
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -726,10 +679,10 @@
     - choose:
         - conditions:
             - condition: state
-              entity_id: sensor.study_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.study_room_indoor_comfort_ts
               state:
-                - cool
-                - outside_calculable_range
+                - Cold
+                - Cool
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -738,14 +691,11 @@
                 hvac_mode: heat
         - conditions:
             - condition: state
-              entity_id: sensor.study_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.study_room_indoor_comfort_ts
               state:
-                - slightly_warm
-                - increasing_discomfort
-                - extremely_warm
-                - danger_of_heatstroke
-                - extreme_danger_of_heatstroke
-                - circulatory_collapse_imminent
+                - Slightly Warm
+                - Warm
+                - Hot
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -785,14 +735,11 @@
     - choose:
         - conditions:
             - condition: state
-              entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.rumpus_indoor_comfort_ts
               state:
-                - slightly_warm
-                - increasing_discomfort
-                - extremely_warm
-                - danger_of_heatstroke
-                - extreme_danger_of_heatstroke
-                - circulatory_collapse_imminent
+                - Slightly Warm
+                - Warm
+                - Hot
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -805,7 +752,7 @@
               data:
                 hvac_mode: cool
       default:
-        # cool/comfortable/slightly_cool — AC can't heat, turn off
+        # Cold/Slightly Cool/Neutral — AC can't heat, turn off
         - action: climate.turn_off
           target:
             entity_id: climate.rumpus_ac
@@ -839,14 +786,11 @@
               entity_id: input_select.occupancy
               state: Sleeping
             - condition: state
-              entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.rumpus_indoor_comfort_ts
               state:
-                - slightly_warm
-                - increasing_discomfort
-                - extremely_warm
-                - danger_of_heatstroke
-                - extreme_danger_of_heatstroke
-                - circulatory_collapse_imminent
+                - Slightly Warm
+                - Warm
+                - Hot
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -915,14 +859,11 @@
         # cool-only AC: if warm, ensure cool mode; otherwise turn off
         - conditions:
             - condition: state
-              entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.rumpus_indoor_comfort_ts
               state:
-                - slightly_warm
-                - increasing_discomfort
-                - extremely_warm
-                - danger_of_heatstroke
-                - extreme_danger_of_heatstroke
-                - circulatory_collapse_imminent
+                - Slightly Warm
+                - Warm
+                - Hot
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -930,7 +871,7 @@
               data:
                 hvac_mode: cool
       default:
-        # cool/comfortable/slightly_cool — AC can't heat, turn off
+        # Cold/Slightly Cool/Neutral — AC can't heat, turn off
         - action: climate.turn_off
           target:
             entity_id: climate.rumpus_ac
@@ -941,8 +882,9 @@
 # ============================================================================
 # Every 30 minutes, if someone is home/sleeping, the AC is already running,
 # and manual override is off — re-evaluate heat vs cool based on current
-# indoor summer simmer perception. Only the hvac_mode is updated; preset is
-# unchanged. In the comfortable/slightly_cool zone, no action is taken.
+# Indoor Comfort thermal sensation (ASHRAE 55). Only the hvac_mode is
+# updated; preset is unchanged. In the Slightly Cool/Neutral zone, the AC
+# is turned off.
 # ============================================================================
 
 - id: living_room_hourly_recheck
@@ -971,10 +913,10 @@
     - choose:
         - conditions:
             - condition: state
-              entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.living_room_indoor_comfort_ts
               state:
-                - cool
-                - outside_calculable_range
+                - Cold
+                - Cool
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -983,14 +925,11 @@
                 hvac_mode: heat
         - conditions:
             - condition: state
-              entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.living_room_indoor_comfort_ts
               state:
-                - slightly_warm
-                - increasing_discomfort
-                - extremely_warm
-                - danger_of_heatstroke
-                - extreme_danger_of_heatstroke
-                - circulatory_collapse_imminent
+                - Slightly Warm
+                - Warm
+                - Hot
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -998,7 +937,7 @@
               data:
                 hvac_mode: cool
       default:
-        # comfortable / slightly_cool — room is fine, stop the AC
+        # Slightly Cool / Neutral — room is fine, stop the AC
         - action: climate.turn_off
           target:
             entity_id: climate.living_room_ac_2
@@ -1026,41 +965,96 @@
         - condition: state
           entity_id: climate.masterbed_room_ac
           state: "off"
+    # Fail safe: skip if sensor is unknown/unavailable
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: sensor.master_bedroom_indoor_comfort_ts
+          state:
+            - unknown
+            - unavailable
   actions:
+    - variables:
+        is_nighttime: >
+          {% set bed = states('input_datetime.bedtime_master_bedroom') %}
+          {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
+          {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
     - choose:
+        # Cold/Cool → heat (night: frost preset; day: no preset change)
         - conditions:
             - condition: state
-              entity_id: sensor.thermal_comfort_summer_simmer_perception
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
               state:
-                - cool
-                - outside_calculable_range
+                - Cold
+                - Cool
           sequence:
+            - if:
+                - condition: template
+                  value_template: "{{ is_nighttime }}"
+              then:
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.masterbed_room_ac
+                  data:
+                    preset_mode: frost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
+        # Slightly Warm+ → cool (night: boost preset; day: no preset change)
         - conditions:
             - condition: state
-              entity_id: sensor.thermal_comfort_summer_simmer_perception
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
               state:
-                - slightly_warm
-                - increasing_discomfort
-                - extremely_warm
-                - danger_of_heatstroke
-                - extreme_danger_of_heatstroke
-                - circulatory_collapse_imminent
+                - Slightly Warm
+                - Warm
+                - Hot
           sequence:
+            - if:
+                - condition: template
+                  value_template: "{{ is_nighttime }}"
+              then:
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.masterbed_room_ac
+                  data:
+                    preset_mode: boost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-      default:
-        # comfortable / slightly_cool — room is fine, stop the AC
-        - action: climate.turn_off
-          target:
-            entity_id: climate.masterbed_room_ac
+        # Slightly Cool / Neutral — comfortable zone
+        - conditions:
+            - condition: state
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
+              state:
+                - Slightly Cool
+                - Neutral
+          sequence:
+            - choose:
+                # Night: favor cool, never turn off
+                - conditions:
+                    - condition: template
+                      value_template: "{{ is_nighttime }}"
+                  sequence:
+                    - action: climate.set_preset_mode
+                      target:
+                        entity_id: climate.masterbed_room_ac
+                      data:
+                        preset_mode: boost
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_room_ac
+                      data:
+                        hvac_mode: cool
+              default:
+                # Day: room is comfortable, turn off
+                - action: climate.turn_off
+                  target:
+                    entity_id: climate.masterbed_room_ac
+      # default: unexpected sensor state — no action (fail safe)
   mode: single
 
 - id: ottos_room_hourly_recheck
@@ -1085,41 +1079,96 @@
         - condition: state
           entity_id: climate.kids_room_ac
           state: "off"
+    # Fail safe: skip if sensor is unknown/unavailable
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: sensor.kids_room_indoor_comfort_ts
+          state:
+            - unknown
+            - unavailable
   actions:
+    - variables:
+        is_nighttime: >
+          {% set bed = states('input_datetime.bedtime_ottos_room') %}
+          {% set wake = states('input_datetime.wakeup_time_ottos_room') %}
+          {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
     - choose:
+        # Cold/Cool → heat (night: frost preset; day: no preset change)
         - conditions:
             - condition: state
-              entity_id: sensor.kids_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.kids_room_indoor_comfort_ts
               state:
-                - cool
-                - outside_calculable_range
+                - Cold
+                - Cool
           sequence:
+            - if:
+                - condition: template
+                  value_template: "{{ is_nighttime }}"
+              then:
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.kids_room_ac
+                  data:
+                    preset_mode: frost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: heat
+        # Slightly Warm+ → cool (night: boost preset; day: no preset change)
         - conditions:
             - condition: state
-              entity_id: sensor.kids_room_thermal_comfort_summer_simmer_perception
+              entity_id: sensor.kids_room_indoor_comfort_ts
               state:
-                - slightly_warm
-                - increasing_discomfort
-                - extremely_warm
-                - danger_of_heatstroke
-                - extreme_danger_of_heatstroke
-                - circulatory_collapse_imminent
+                - Slightly Warm
+                - Warm
+                - Hot
           sequence:
+            - if:
+                - condition: template
+                  value_template: "{{ is_nighttime }}"
+              then:
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.kids_room_ac
+                  data:
+                    preset_mode: boost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
-      default:
-        # comfortable / slightly_cool — room is fine, stop the AC
-        - action: climate.turn_off
-          target:
-            entity_id: climate.kids_room_ac
+        # Slightly Cool / Neutral — comfortable zone
+        - conditions:
+            - condition: state
+              entity_id: sensor.kids_room_indoor_comfort_ts
+              state:
+                - Slightly Cool
+                - Neutral
+          sequence:
+            - choose:
+                # Night: favor cool, never turn off
+                - conditions:
+                    - condition: template
+                      value_template: "{{ is_nighttime }}"
+                  sequence:
+                    - action: climate.set_preset_mode
+                      target:
+                        entity_id: climate.kids_room_ac
+                      data:
+                        preset_mode: boost
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.kids_room_ac
+                      data:
+                        hvac_mode: cool
+              default:
+                # Day: room is comfortable, turn off
+                - action: climate.turn_off
+                  target:
+                    entity_id: climate.kids_room_ac
+      # default: unexpected sensor state — no action (fail safe)
   mode: single
 
 # ============================================================================
@@ -1131,18 +1180,17 @@
   alias: "HVAC - Living Room - Pre-heat if Cold (Configurable Time)"
   description: >
     At the configured pre-heat time (input_datetime.preheat_time_living_room,
-    default 05:30), if the living room feels cold (summer_simmer_perception is
-    cool or outside_calculable_range), set comfort preset + heat so the room is
-    warm before wake time. No custom flag gates — perception sensor is sufficient.
+    default 05:30), if the living room feels cold (Indoor Comfort TS is Cold
+    or Cool), set comfort preset + heat so the room is warm before wake time.
   triggers:
     - trigger: time
       at: input_datetime.preheat_time_living_room
   conditions:
     - condition: state
-      entity_id: sensor.living_room_thermal_comfort_summer_simmer_perception
+      entity_id: sensor.living_room_indoor_comfort_ts
       state:
-        - cool
-        - outside_calculable_range
+        - Cold
+        - Cool
     - condition: or
       conditions:
         - condition: state
