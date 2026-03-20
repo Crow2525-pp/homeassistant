@@ -1,4 +1,4 @@
-purge_keep_days: 730
+purge_keep_days: 30
 exclude:
   entity_globs:
     - sensor.*_rssi
@@ -6,4 +6,9 @@ exclude:
     - sensor.*_last_seen
     - sensor.*_last_boot
     - sensor.*_uptime
+    - sensor.*_rx
+    - sensor.*_tx
     - update.*
+  domains:
+    - button
+    - device_tracker
