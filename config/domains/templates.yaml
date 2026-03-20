@@ -1890,8 +1890,10 @@
 - sensor:
     - name: "Master Bedroom Temperature (TC Input)"
       unique_id: masterbed_temperature_tc_input
+      availability: >
+        {{ states('sensor.masterbed_temperature') not in ['unavailable', 'unknown', 'none'] }}
       state: >
-        {{ (states('sensor.masterbed_temperature') | float(0)
+        {{ (states('sensor.masterbed_temperature') | float
            + states('input_number.masterbed_temperature_offset') | float(0))
            | round(1) }}
       unit_of_measurement: "°C"
@@ -1901,8 +1903,10 @@
 
     - name: "Living Room Temperature (TC Input)"
       unique_id: living_room_temperature_tc_input
+      availability: >
+        {{ states('sensor.living_room_temperature') not in ['unavailable', 'unknown', 'none'] }}
       state: >
-        {{ (states('sensor.living_room_temperature') | float(0)
+        {{ (states('sensor.living_room_temperature') | float
            + states('input_number.living_room_temperature_offset') | float(0))
            | round(1) }}
       unit_of_measurement: "°C"
@@ -1912,8 +1916,10 @@
 
     - name: "Kids Room Temperature (TC Input)"
       unique_id: kids_room_temperature_tc_input
+      availability: >
+        {{ states('sensor.kids_temperature') not in ['unavailable', 'unknown', 'none'] }}
       state: >
-        {{ (states('sensor.kids_temperature') | float(0)
+        {{ (states('sensor.kids_temperature') | float
            + states('input_number.kids_room_temperature_offset') | float(0))
            | round(1) }}
       unit_of_measurement: "°C"
