@@ -1872,6 +1872,55 @@
 # LIGHT TEMPLATES
 # ============================================================================
 
+# ============================================================================
+# THERMAL COMFORT OFFSET SENSORS
+# ============================================================================
+# These sensors apply a per-room temperature offset to the raw sensor before
+# it reaches the Thermal Comfort integration. The offset is tunable via
+# input_number helpers (e.g. input_number.masterbed_temperature_offset).
+#
+# Usage: reconfigure the Thermal Comfort integration (Settings → Devices &
+# Services → Thermal Comfort → Configure) to use these sensors instead of
+# the raw hardware sensors. Then tune the offset from Lovelace.
+#
+# Effect at typical indoor humidity (~65%): each -1°C shifts SSI by -1.6°C.
+# -2°C offset → heat kicks in at ~20.6°C actual (was ~18.6°C)
+# -2°C offset → cool kicks in at ~25.0°C actual (was ~23.0°C)
+
+- sensor:
+    - name: "Master Bedroom Temperature (TC Input)"
+      unique_id: masterbed_temperature_tc_input
+      state: >
+        {{ (states('sensor.masterbed_temperature') | float(0)
+           + states('input_number.masterbed_temperature_offset') | float(0))
+           | round(1) }}
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer-lines
+
+    - name: "Living Room Temperature (TC Input)"
+      unique_id: living_room_temperature_tc_input
+      state: >
+        {{ (states('sensor.living_room_temperature') | float(0)
+           + states('input_number.living_room_temperature_offset') | float(0))
+           | round(1) }}
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer-lines
+
+    - name: "Kids Room Temperature (TC Input)"
+      unique_id: kids_room_temperature_tc_input
+      state: >
+        {{ (states('sensor.kids_temperature') | float(0)
+           + states('input_number.kids_room_temperature_offset') | float(0))
+           | round(1) }}
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer-lines
+
 - light:
     - unique_id: tv_backlight
       name: "TV Back Lightstrip"
