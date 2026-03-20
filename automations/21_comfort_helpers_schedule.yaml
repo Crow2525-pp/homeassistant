@@ -20,7 +20,8 @@
 #
 # Clothing insulation (clo) reference:
 #   Daytime:  0.3 summer | 0.7 autumn/spring | 1.0 winter
-#   Sleeping: 0.5 summer | 1.0 autumn/spring | 1.5 winter
+#   Sleeping: 1.0 summer | 1.2 autumn/spring | 1.5 winter
+#   (Doona used year-round — summer value reflects lighter doona, not a sheet)
 #
 # Metabolic rate (met) reference:
 #   0.8 sleeping | 1.0 sedentary | 1.2 morning routine (first hour)
@@ -63,9 +64,9 @@
           {% elif season == 'winter' %}1.0
           {% else %}0.7{% endif %}
         clo_night: >
-          {% if season == 'summer' %}0.5
+          {% if season == 'summer' %}1.0
           {% elif season == 'winter' %}1.5
-          {% else %}1.0{% endif %}
+          {% else %}1.2{% endif %}
 
     # -----------------------------------------------------------------------
     # Metabolic rate
