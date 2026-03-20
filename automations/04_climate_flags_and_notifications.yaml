@@ -1244,8 +1244,13 @@
   actions:
   - choose:
     - conditions:
+      # Australian equinox/solstice seasons (Southern Hemisphere)
+      # Summer: Dec 21 – Mar 19 | Autumn: Mar 20 – Jun 20
+      # Winter: Jun 21 – Sep 22 | Spring: Sep 23 – Dec 20
       - condition: template
-        value_template: '{{ now().month in [12, 1, 2, 3] }}'
+        value_template: >
+          {% set md = now().month * 100 + now().day %}
+          {{ md >= 1221 or md <= 319 }}
       sequence:
       - service: input_select.select_option
         target:
@@ -1254,7 +1259,9 @@
           option: summer
     - conditions:
       - condition: template
-        value_template: '{{ now().month in [4, 5, 9, 10] }}'
+        value_template: >
+          {% set md = now().month * 100 + now().day %}
+          {{ md >= 320 and md <= 620 }}
       sequence:
       - service: input_select.select_option
         target:
@@ -1263,7 +1270,9 @@
           option: autumn
     - conditions:
       - condition: template
-        value_template: '{{ now().month in [6, 7, 8] }}'
+        value_template: >
+          {% set md = now().month * 100 + now().day %}
+          {{ md >= 621 and md <= 922 }}
       sequence:
       - service: input_select.select_option
         target:
@@ -1272,7 +1281,9 @@
           option: winter
     - conditions:
       - condition: template
-        value_template: '{{ now().month in [11] }}'
+        value_template: >
+          {% set md = now().month * 100 + now().day %}
+          {{ md >= 923 and md <= 1220 }}
       sequence:
       - service: input_select.select_option
         target:
