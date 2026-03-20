@@ -763,9 +763,8 @@
 - id: rumpus_time_based_day
   alias: "HVAC - Rumpus - Wake Up Comfort"
   description: >
-    At wake time, set comfort preset and decide heat/cool based on indoor
-    summer simmer perception. cool/out-of-range → heat, slightly_warm+ → cool.
-    Note: climate.rumpus_ac only supports cool mode — heat branch will fail.
+    At wake time, set comfort+cool if warm, or turn off if cold/comfortable.
+    climate.rumpus_ac is cool-only — no heat mode available.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_rumpus
@@ -783,24 +782,7 @@
           entity_id: input_select.occupancy
           state: Sleeping
   actions:
-    - action: climate.set_preset_mode
-      target:
-        entity_id: climate.rumpus_ac
-      data:
-        preset_mode: comfort
     - choose:
-        - conditions:
-            - condition: state
-              entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
-              state:
-                - cool
-                - outside_calculable_range
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                hvac_mode: heat
         - conditions:
             - condition: state
               entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
@@ -812,17 +794,28 @@
                 - extreme_danger_of_heatstroke
                 - circulatory_collapse_imminent
           sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                preset_mode: comfort
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.rumpus_ac
               data:
                 hvac_mode: cool
+      default:
+        # cool/comfortable/slightly_cool — AC can't heat, turn off
+        - action: climate.turn_off
+          target:
+            entity_id: climate.rumpus_ac
   mode: single
 
 - id: rumpus_time_based_night
   alias: "HVAC - Rumpus - Bedtime"
   description: >
-    At bedtime, if sleeping: frost+heat if cold, boost+cool if hot, off if comfortable.
+    At bedtime, if sleeping and hot: boost+cool. Otherwise turn off.
+    climate.rumpus_ac is cool-only — no heat/frost mode available.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_rumpus
@@ -841,26 +834,6 @@
           state: Sleeping
   actions:
     - choose:
-        - conditions:
-            - condition: state
-              entity_id: input_select.occupancy
-              state: Sleeping
-            - condition: state
-              entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
-              state:
-                - cool
-                - outside_calculable_range
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                preset_mode: frost
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                hvac_mode: heat
         - conditions:
             - condition: state
               entity_id: input_select.occupancy
@@ -939,18 +912,7 @@
           state: "off"
   actions:
     - choose:
-        - conditions:
-            - condition: state
-              entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
-              state:
-                - cool
-                - outside_calculable_range
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                hvac_mode: heat
+        # cool-only AC: if warm, ensure cool mode; otherwise turn off
         - conditions:
             - condition: state
               entity_id: sensor.rumpus_thermal_comfort_summer_simmer_perception
@@ -967,6 +929,11 @@
                 entity_id: climate.rumpus_ac
               data:
                 hvac_mode: cool
+      default:
+        # cool/comfortable/slightly_cool — AC can't heat, turn off
+        - action: climate.turn_off
+          target:
+            entity_id: climate.rumpus_ac
   mode: single
 
 # ============================================================================
