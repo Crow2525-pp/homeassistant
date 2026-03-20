@@ -7,14 +7,19 @@
 # Logic:
 # - Gates: manual override off; occupancy must be Home or Sleeping
 # - Wake time: comfort preset; heat/cool decided by Indoor Comfort TS (ASHRAE 55)
-# - Bed time (Sleeping): frost+heat or boost+cool if cold/hot; off if comfortable
-# - Bed time (Home, not sleeping): off
+# - Bed time (bedrooms): always heat or cool — AC stays on all night
+#     Cold / Cool → frost+heat; everything else → boost+cool (favor cooling)
+# - Bed time (living/communal): frost/boost if cold/hot; off if comfortable
 #
-# Heat/cool decision (same for all rooms):
+# Heat/cool decision — daytime (wake→bed):
 #   Indoor Comfort Thermal Sensation (TS):
 #     Cold / Cool            → heat
 #     Slightly Cool / Neutral → off   (room is comfortable, no intervention)
 #     Slightly Warm and above → cool
+#
+# Heat/cool decision — nighttime rechecks (bedrooms only, bed→wake):
+#   Same as bedtime: Cold/Cool → frost+heat; else → boost+cool
+#   Preset is set with mode to prevent stale preset mismatch.
 #
 # The Indoor Comfort TS sensor uses ASHRAE 55 PMV calculations which factor in
 # air temperature, humidity, clothing insulation, and metabolic rate — giving a
@@ -256,8 +261,9 @@
 - id: master_bedroom_time_based_night
   alias: "HVAC - Master Bedroom - Bedtime"
   description: >
-    At bedtime, if sleeping or home: frost+heat if cold, boost+cool if hot,
-    off if comfortable. Turn off only if away/holiday.
+    At bedtime, always set heat or cool — AC stays on all night. Cold/Cool →
+    frost+heat; everything else → boost+cool (favor cooling for sleep comfort).
+    Half-hourly rechecks may swap modes overnight but never turn off.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
@@ -277,14 +283,6 @@
   actions:
     - choose:
         - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
               state:
@@ -301,36 +299,18 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
-            - condition: state
-              entity_id: sensor.master_bedroom_indoor_comfort_ts
-              state:
-                - Slightly Warm
-                - Warm
-                - Hot
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                preset_mode: boost
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                hvac_mode: cool
       default:
-        - action: climate.turn_off
+        # Slightly Cool / Neutral / Slightly Warm / Warm / Hot → favor cool
+        - action: climate.set_preset_mode
           target:
             entity_id: climate.masterbed_room_ac
+          data:
+            preset_mode: boost
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.masterbed_room_ac
+          data:
+            hvac_mode: cool
   mode: single
 
 - id: master_bedroom_away_mode
@@ -420,8 +400,9 @@
 - id: ottos_room_time_based_night
   alias: "HVAC - Kids Room - Bedtime"
   description: >
-    At bedtime, if sleeping or home: frost+heat if cold, boost+cool if hot,
-    off if comfortable.
+    At bedtime, always set heat or cool — AC stays on all night. Cold/Cool →
+    frost+heat; everything else → boost+cool (favor cooling for sleep comfort).
+    Half-hourly rechecks may swap modes overnight but never turn off.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_ottos_room
@@ -441,14 +422,6 @@
   actions:
     - choose:
         - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
             - condition: state
               entity_id: sensor.kids_room_indoor_comfort_ts
               state:
@@ -465,36 +438,18 @@
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: heat
-        - conditions:
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
-            - condition: state
-              entity_id: sensor.kids_room_indoor_comfort_ts
-              state:
-                - Slightly Warm
-                - Warm
-                - Hot
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.kids_room_ac
-              data:
-                preset_mode: boost
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.kids_room_ac
-              data:
-                hvac_mode: cool
       default:
-        - action: climate.turn_off
+        # Slightly Cool / Neutral / Slightly Warm / Warm / Hot → favor cool
+        - action: climate.set_preset_mode
           target:
             entity_id: climate.kids_room_ac
+          data:
+            preset_mode: boost
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.kids_room_ac
+          data:
+            hvac_mode: cool
   mode: single
 
 - id: ottos_room_away_mode
@@ -988,7 +943,13 @@
           entity_id: climate.masterbed_room_ac
           state: "off"
   actions:
+    - variables:
+        is_nighttime: >
+          {% set bed = states('input_datetime.bedtime_master_bedroom') %}
+          {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
+          {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
     - choose:
+        # Cold/Cool → heat (night: frost preset; day: no preset change)
         - conditions:
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
@@ -996,11 +957,21 @@
                 - Cold
                 - Cool
           sequence:
+            - if:
+                - condition: template
+                  value_template: "{{ is_nighttime }}"
+              then:
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.masterbed_room_ac
+                  data:
+                    preset_mode: frost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
+        # Slightly Warm+ → cool (night: boost preset; day: no preset change)
         - conditions:
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
@@ -1009,16 +980,43 @@
                 - Warm
                 - Hot
           sequence:
+            - if:
+                - condition: template
+                  value_template: "{{ is_nighttime }}"
+              then:
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.masterbed_room_ac
+                  data:
+                    preset_mode: boost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
       default:
-        # Slightly Cool / Neutral — room is fine, stop the AC
-        - action: climate.turn_off
-          target:
-            entity_id: climate.masterbed_room_ac
+        # Slightly Cool / Neutral — comfortable zone
+        - choose:
+            # Night: favor cool, never turn off
+            - conditions:
+                - condition: template
+                  value_template: "{{ is_nighttime }}"
+              sequence:
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.masterbed_room_ac
+                  data:
+                    preset_mode: boost
+                - action: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.masterbed_room_ac
+                  data:
+                    hvac_mode: cool
+          default:
+            # Day: room is comfortable, turn off
+            - action: climate.turn_off
+              target:
+                entity_id: climate.masterbed_room_ac
   mode: single
 
 - id: ottos_room_hourly_recheck
@@ -1044,7 +1042,13 @@
           entity_id: climate.kids_room_ac
           state: "off"
   actions:
+    - variables:
+        is_nighttime: >
+          {% set bed = states('input_datetime.bedtime_ottos_room') %}
+          {% set wake = states('input_datetime.wakeup_time_ottos_room') %}
+          {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
     - choose:
+        # Cold/Cool → heat (night: frost preset; day: no preset change)
         - conditions:
             - condition: state
               entity_id: sensor.kids_room_indoor_comfort_ts
@@ -1052,11 +1056,21 @@
                 - Cold
                 - Cool
           sequence:
+            - if:
+                - condition: template
+                  value_template: "{{ is_nighttime }}"
+              then:
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.kids_room_ac
+                  data:
+                    preset_mode: frost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: heat
+        # Slightly Warm+ → cool (night: boost preset; day: no preset change)
         - conditions:
             - condition: state
               entity_id: sensor.kids_room_indoor_comfort_ts
@@ -1065,16 +1079,43 @@
                 - Warm
                 - Hot
           sequence:
+            - if:
+                - condition: template
+                  value_template: "{{ is_nighttime }}"
+              then:
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.kids_room_ac
+                  data:
+                    preset_mode: boost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
       default:
-        # Slightly Cool / Neutral — room is fine, stop the AC
-        - action: climate.turn_off
-          target:
-            entity_id: climate.kids_room_ac
+        # Slightly Cool / Neutral — comfortable zone
+        - choose:
+            # Night: favor cool, never turn off
+            - conditions:
+                - condition: template
+                  value_template: "{{ is_nighttime }}"
+              sequence:
+                - action: climate.set_preset_mode
+                  target:
+                    entity_id: climate.kids_room_ac
+                  data:
+                    preset_mode: boost
+                - action: climate.set_hvac_mode
+                  target:
+                    entity_id: climate.kids_room_ac
+                  data:
+                    hvac_mode: cool
+          default:
+            # Day: room is comfortable, turn off
+            - action: climate.turn_off
+              target:
+                entity_id: climate.kids_room_ac
   mode: single
 
 # ============================================================================
