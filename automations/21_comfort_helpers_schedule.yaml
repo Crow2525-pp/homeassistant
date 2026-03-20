@@ -6,12 +6,14 @@
 # time of day and season so the ASHRAE 55 PMV/PPD sensors stay accurate.
 #
 # Helpers managed:
-#   input_number.clothing_insulation — clo (used by all room comfort instances)
-#   input_number.metabolic_rate      — met (used by all room comfort instances)
-#   input_number.clothing_index_sleeping — dashboard reference for night clo
+#   input_number.clothing_insulation      — adult rooms (master, living, study, rumpus)
+#   input_number.clothing_insulation_kids — kids room (earlier bedtime than adults)
+#   input_number.metabolic_rate           — all rooms (always 1.0)
+#   input_number.clothing_index_sleeping  — dashboard reference for night clo
 #
-# Bedtime/wake time (master bedroom helpers) define night vs day — no
-# dependency on occupancy state. Season affects daytime clo only.
+# Two independent schedules:
+#   Adult: master bedroom bed/wake times (21:00 / 06:30)
+#   Kids:  kids room bed/wake times (18:00 / 06:30)
 #
 # Clothing insulation (clo) reference:
 #   Daytime:  0.3 summer | 0.7 autumn/spring | 1.0 winter
@@ -27,52 +29,79 @@
   alias: "Comfort Helpers - Clo & Met Schedule"
   description: >
     Updates clothing insulation and metabolic rate based on bedtime/wake time
-    and season for Indoor Thermal Comfort (ASHRAE 55) sensors. Bedtime defines
-    the switch to sleeping values; wake time switches back to daytime values.
+    and season for Indoor Thermal Comfort (ASHRAE 55) sensors. Adult rooms
+    follow master bedroom schedule; kids room follows its own earlier bedtime.
   triggers:
+    # Adult schedule (master bedroom)
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
-      id: wake_time
+      id: adult_wake
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
-      id: bed_time
+      id: adult_bed
+    # Kids schedule
+    - trigger: time
+      at: input_datetime.wakeup_time_ottos_room
+      id: kids_wake
+    - trigger: time
+      at: input_datetime.bedtime_ottos_room
+      id: kids_bed
+    # Recalculate on season change or HA restart
     - trigger: state
       entity_id: input_select.climate_season
-      id: season_change
+      id: recalc
     - trigger: homeassistant
       event: start
-      id: ha_start
+      id: recalc
   conditions: []
   actions:
     - variables:
         season: >
           {{ states('input_select.climate_season') }}
-        is_night: >
-          {% if trigger.id == 'bed_time' %}true
-          {% elif trigger.id == 'wake_time' %}false
-          {% else %}
-            {% set bed = states('input_datetime.bedtime_master_bedroom') %}
-            {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
-            {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
-          {% endif %}
         clo_day: >
           {% if season == 'summer' %}0.3
           {% elif season == 'winter' %}1.0
           {% else %}0.7{% endif %}
         clo_night: 1.5
+        adult_is_night: >
+          {% if trigger.id == 'adult_bed' %}true
+          {% elif trigger.id == 'adult_wake' %}false
+          {% else %}
+            {% set bed = states('input_datetime.bedtime_master_bedroom') %}
+            {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
+            {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
+          {% endif %}
+        kids_is_night: >
+          {% if trigger.id == 'kids_bed' %}true
+          {% elif trigger.id == 'kids_wake' %}false
+          {% else %}
+            {% set bed = states('input_datetime.bedtime_ottos_room') %}
+            {% set wake = states('input_datetime.wakeup_time_ottos_room') %}
+            {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
+          {% endif %}
 
+    # Metabolic rate — always 1.0
     - action: input_number.set_value
       target:
         entity_id: input_number.metabolic_rate
       data:
         value: 1.0
 
+    # Adult clo (master bedroom, living room, study, rumpus)
     - action: input_number.set_value
       target:
         entity_id: input_number.clothing_insulation
       data:
-        value: "{{ clo_night if is_night else clo_day }}"
+        value: "{{ clo_night if adult_is_night else clo_day }}"
 
+    # Kids clo (independent schedule — earlier bedtime)
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.clothing_insulation_kids
+      data:
+        value: "{{ clo_night if kids_is_night else clo_day }}"
+
+    # Dashboard reference
     - action: input_number.set_value
       target:
         entity_id: input_number.clothing_index_sleeping

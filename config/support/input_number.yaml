@@ -226,8 +226,12 @@ kids_room_temperature_offset:
   unit_of_measurement: "°C"
   icon: mdi:thermometer-plus
 
-# Indoor Thermal Comfort (ASHRAE 55) — shared human-factor helpers
-# Used by all per-room Indoor Thermal Comfort integration instances.
+# Indoor Thermal Comfort (ASHRAE 55) — human-factor helpers
+# clothing_insulation: shared by master bedroom, living room, study, rumpus
+#   (all on adult schedule — switches at master bedroom bed/wake times)
+# clothing_insulation_kids: kids room only
+#   (switches at kids bed/wake times — earlier bedtime than adults)
+# metabolic_rate: shared by all rooms (always 1.0)
 metabolic_rate:
   name: Metabolic Rate
   min: 0.8
@@ -239,6 +243,15 @@ metabolic_rate:
   mode: slider
 clothing_insulation:
   name: Clothing Insulation
+  min: 0.0
+  max: 1.5
+  step: 0.1
+  initial: 0.7
+  unit_of_measurement: clo
+  icon: mdi:tshirt-crew
+  mode: slider
+clothing_insulation_kids:
+  name: Clothing Insulation (Kids Room)
   min: 0.0
   max: 1.5
   step: 0.1
