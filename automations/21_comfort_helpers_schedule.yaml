@@ -16,13 +16,13 @@
 #   Kids:  kids room bed/wake times (18:00 / 06:30)
 #
 # Clothing insulation (clo) reference:
-#   Daytime:  0.3 summer | 0.7 autumn/spring | 1.0 winter
+#   Daytime:  1.1 all seasons (tuned so 21-24°C reads Neutral, 25°C+ Slightly Warm)
 #   Sleeping: 1.5 all seasons (doona year-round, capped at integration max)
 #
 # Metabolic rate (met): always 1.0
 #
 # Sleeping values tuned so master/kids bedrooms read Neutral (PMV ≈ -0.3)
-# at 17-19°C overnight — validated against live ASHRAE 55 sensors.
+# at 18.5-22.5°C overnight — validated against live ASHRAE 55 sensors.
 # ============================================================================
 
 - id: comfort_helpers_schedule
@@ -46,22 +46,14 @@
     - trigger: time
       at: input_datetime.bedtime_ottos_room
       id: kids_bed
-    # Recalculate on season change or HA restart
-    - trigger: state
-      entity_id: input_select.climate_season
-      id: recalc
+    # Recalculate on HA restart
     - trigger: homeassistant
       event: start
       id: recalc
   conditions: []
   actions:
     - variables:
-        season: >
-          {{ states('input_select.climate_season') }}
-        clo_day: >
-          {% if season == 'summer' %}0.3
-          {% elif season == 'winter' %}1.0
-          {% else %}0.7{% endif %}
+        clo_day: "1.1"
         clo_night: 1.5
         adult_is_night: >
           {% if trigger.id == 'adult_bed' %}true
