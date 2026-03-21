@@ -1244,13 +1244,15 @@
   actions:
   - choose:
     - conditions:
-      # Australian equinox/solstice seasons (Southern Hemisphere)
-      # Summer: Dec 21 – Mar 19 | Autumn: Mar 20 – Jun 20
-      # Winter: Jun 21 – Sep 22 | Spring: Sep 23 – Dec 20
+      # Australian astronomical seasons (Southern Hemisphere)
+      # Dates approximate ±1 day per year; rounded to the later date
+      # so each season starts conservatively rather than prematurely.
+      # Summer: Dec 22 – Mar 20 | Autumn: Mar 21 – Jun 20
+      # Winter: Jun 21 – Sep 22 | Spring: Sep 23 – Dec 21
       - condition: template
         value_template: >
           {% set md = now().month * 100 + now().day %}
-          {{ md >= 1221 or md <= 319 }}
+          {{ md >= 1222 or md <= 320 }}
       sequence:
       - service: input_select.select_option
         target:
@@ -1261,7 +1263,7 @@
       - condition: template
         value_template: >
           {% set md = now().month * 100 + now().day %}
-          {{ md >= 320 and md <= 620 }}
+          {{ md >= 321 and md <= 620 }}
       sequence:
       - service: input_select.select_option
         target:
@@ -1283,7 +1285,7 @@
       - condition: template
         value_template: >
           {% set md = now().month * 100 + now().day %}
-          {{ md >= 923 and md <= 1220 }}
+          {{ md >= 923 and md <= 1221 }}
       sequence:
       - service: input_select.select_option
         target:
