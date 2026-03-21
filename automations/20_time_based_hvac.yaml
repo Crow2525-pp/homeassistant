@@ -713,8 +713,8 @@
 - id: rumpus_time_based_day
   alias: "HVAC - Rumpus - Wake Up Comfort"
   description: >
-    At wake time, set cool+quiet fan at 23°C if warm, or turn off if cold/comfortable.
-    climate.rumpus_ac is cool-only with fan modes auto/quiet — no heat or presets.
+    At wake time, set comfort+cool if warm, or turn off if cold/comfortable.
+    climate.rumpus_ac is cool-only — no heat mode available.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_rumpus
@@ -741,21 +741,16 @@
                 - Warm
                 - Hot
           sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                preset_mode: comfort
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.rumpus_ac
               data:
                 hvac_mode: cool
-            - action: climate.set_fan_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                fan_mode: quiet
-            - action: climate.set_temperature
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                temperature: 23
       default:
         # Cold/Slightly Cool/Neutral — AC can't heat, turn off
         - action: climate.turn_off
@@ -766,8 +761,8 @@
 - id: rumpus_time_based_night
   alias: "HVAC - Rumpus - Bedtime"
   description: >
-    At bedtime, if sleeping and warm: cool+auto fan at 20°C. Otherwise turn off.
-    climate.rumpus_ac is cool-only with fan modes auto/quiet — no heat or presets.
+    At bedtime, if sleeping and hot: boost+cool. Otherwise turn off.
+    climate.rumpus_ac is cool-only — no heat/frost mode available.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_rumpus
@@ -797,21 +792,16 @@
                 - Warm
                 - Hot
           sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                preset_mode: boost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.rumpus_ac
               data:
                 hvac_mode: cool
-            - action: climate.set_fan_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                fan_mode: auto
-            - action: climate.set_temperature
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                temperature: 20
       default:
         - action: climate.turn_off
           target:
