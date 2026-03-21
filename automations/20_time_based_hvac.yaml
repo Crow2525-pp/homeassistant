@@ -70,10 +70,6 @@
     - trigger: time
       at: input_datetime.bedtime_living_room
       id: bed_time
-  conditions:
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_living
-      state: "off"
   actions:
     - choose:
         # Occupancy change: turn on when arriving home/sleeping from away
@@ -274,9 +270,6 @@
       at: input_datetime.bedtime_master_bedroom
       id: bed_time
   conditions:
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_master
-      state: "off"
     - condition: or
       conditions:
         - condition: state
@@ -422,9 +415,6 @@
       at: input_datetime.bedtime_ottos_room
       id: bed_time
   conditions:
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_otto
-      state: "off"
     - condition: or
       conditions:
         - condition: state
@@ -569,9 +559,6 @@
       at: input_datetime.bedtime_lucas_room
       id: bed_time
   conditions:
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_study
-      state: "off"
     - condition: or
       conditions:
         - condition: state
@@ -768,9 +755,6 @@
       at: input_datetime.bedtime_rumpus
       id: bed_time
   conditions:
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_rumpus
-      state: "off"
     - condition: or
       conditions:
         - condition: state
