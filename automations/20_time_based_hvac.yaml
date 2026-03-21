@@ -880,11 +880,15 @@
 # ============================================================================
 # HALF-HOURLY MODE RE-CHECK
 # ============================================================================
-# Every 30 minutes, if someone is home/sleeping, the AC is already running,
-# and manual override is off — re-evaluate heat vs cool based on current
-# Indoor Comfort thermal sensation (ASHRAE 55). Only the hvac_mode is
-# updated; preset is unchanged. In the Slightly Cool/Neutral zone, the AC
-# is turned off.
+# Triggers:
+#   1. Every 30 minutes (time_pattern) — if AC is already running, re-evaluate
+#      heat vs cool based on current Indoor Comfort thermal sensation (ASHRAE 55).
+#   2. Occupancy changes to Home or Sleeping from Away/Holiday — immediately
+#      set the correct hvac_mode after return-home turn-on.
+#
+# Only the hvac_mode is updated; preset is unchanged (except bedrooms at night).
+# In the Slightly Cool/Neutral zone, the AC is turned off (daytime only for
+# bedrooms).
 # ============================================================================
 
 - id: living_room_hourly_recheck
@@ -892,6 +896,15 @@
   triggers:
     - trigger: time_pattern
       minutes: "/30"
+      id: time_trigger
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Home
+      id: occupancy_change
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Sleeping
+      id: occupancy_change
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_living
@@ -904,11 +917,24 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-    - condition: not
+    - condition: or
       conditions:
-        - condition: state
-          entity_id: climate.living_room_ac_2
-          state: "off"
+        # Occupancy change: skip AC-state check — AC was just turned on by return-home
+        # Only act when transitioning from Away or Holiday
+        - condition: and
+          conditions:
+            - condition: trigger
+              id: occupancy_change
+            - condition: template
+              value_template: >
+                {{ trigger.from_state is not none
+                   and trigger.from_state.state in ['Away', 'Holiday'] }}
+        # Time trigger: only re-check if AC is already running
+        - condition: not
+          conditions:
+            - condition: state
+              entity_id: climate.living_room_ac_2
+              state: "off"
   actions:
     - choose:
         - conditions:
@@ -948,6 +974,15 @@
   triggers:
     - trigger: time_pattern
       minutes: "/30"
+      id: time_trigger
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Home
+      id: occupancy_change
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Sleeping
+      id: occupancy_change
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
@@ -960,11 +995,24 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-    - condition: not
+    - condition: or
       conditions:
-        - condition: state
-          entity_id: climate.masterbed_room_ac
-          state: "off"
+        # Occupancy change: skip AC-state check — AC was just turned on by return-home
+        # Only act when transitioning from Away or Holiday
+        - condition: and
+          conditions:
+            - condition: trigger
+              id: occupancy_change
+            - condition: template
+              value_template: >
+                {{ trigger.from_state is not none
+                   and trigger.from_state.state in ['Away', 'Holiday'] }}
+        # Time trigger: only re-check if AC is already running
+        - condition: not
+          conditions:
+            - condition: state
+              entity_id: climate.masterbed_room_ac
+              state: "off"
     # Fail safe: skip if sensor is unknown/unavailable
     - condition: not
       conditions:
@@ -1062,6 +1110,15 @@
   triggers:
     - trigger: time_pattern
       minutes: "/30"
+      id: time_trigger
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Home
+      id: occupancy_change
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Sleeping
+      id: occupancy_change
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_otto
@@ -1074,11 +1131,24 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-    - condition: not
+    - condition: or
       conditions:
-        - condition: state
-          entity_id: climate.kids_room_ac
-          state: "off"
+        # Occupancy change: skip AC-state check — AC was just turned on by return-home
+        # Only act when transitioning from Away or Holiday
+        - condition: and
+          conditions:
+            - condition: trigger
+              id: occupancy_change
+            - condition: template
+              value_template: >
+                {{ trigger.from_state is not none
+                   and trigger.from_state.state in ['Away', 'Holiday'] }}
+        # Time trigger: only re-check if AC is already running
+        - condition: not
+          conditions:
+            - condition: state
+              entity_id: climate.kids_room_ac
+              state: "off"
     # Fail safe: skip if sensor is unknown/unavailable
     - condition: not
       conditions:
