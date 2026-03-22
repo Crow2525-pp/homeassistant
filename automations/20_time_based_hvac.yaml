@@ -692,16 +692,14 @@
   mode: single
 
 # ============================================================================
-# RUMPUS - disabled (running fine without automation)
-# Automations are turned off via HA (automation.turn_off) — code kept for
-# future re-activation. Do not add enabled: false here; use HA UI or API.
+# RUMPUS - communal space, heat+cool capable
 # ============================================================================
 
 - id: rumpus_time_based_day
   alias: "HVAC - Rumpus - Wake Up Comfort"
   description: >
-    At wake time, set comfort+cool if warm, or turn off if cold/comfortable.
-    climate.rumpus_ac is cool-only — no heat mode available.
+    At wake time, set comfort+heat if cold, comfort+cool if warm, or turn off
+    if comfortable.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_rumpus
@@ -724,6 +722,23 @@
             - condition: state
               entity_id: sensor.rumpus_indoor_comfort_ts
               state:
+                - Cold
+                - Cool
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                preset_mode: comfort
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: state
+              entity_id: sensor.rumpus_indoor_comfort_ts
+              state:
                 - Slightly Warm
                 - Warm
                 - Hot
@@ -739,7 +754,7 @@
               data:
                 hvac_mode: cool
       default:
-        # Cold/Slightly Cool/Neutral — AC can't heat, turn off
+        # Slightly Cool/Neutral — room is comfortable, turn off
         - action: climate.turn_off
           target:
             entity_id: climate.rumpus_ac
@@ -748,8 +763,8 @@
 - id: rumpus_time_based_night
   alias: "HVAC - Rumpus - Bedtime"
   description: >
-    At bedtime, if sleeping and hot: boost+cool. Otherwise turn off.
-    climate.rumpus_ac is cool-only — no heat/frost mode available.
+    At bedtime, if sleeping and cold: frost+heat; if sleeping and hot: boost+cool.
+    Otherwise turn off.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_rumpus
@@ -765,6 +780,26 @@
           state: Sleeping
   actions:
     - choose:
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
+            - condition: state
+              entity_id: sensor.rumpus_indoor_comfort_ts
+              state:
+                - Cold
+                - Cool
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                preset_mode: frost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: heat
         - conditions:
             - condition: state
               entity_id: input_select.occupancy
@@ -821,6 +856,15 @@
   triggers:
     - trigger: time_pattern
       minutes: "/30"
+      id: time_trigger
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Home
+      id: occupancy_change
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Sleeping
+      id: occupancy_change
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_rumpus
@@ -833,14 +877,38 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-    - condition: not
+    - condition: or
       conditions:
-        - condition: state
-          entity_id: climate.rumpus_ac
-          state: "off"
+        # Occupancy change: skip AC-state check — AC was just turned on by return-home
+        # Only act when transitioning from Away or Holiday
+        - condition: and
+          conditions:
+            - condition: trigger
+              id: occupancy_change
+            - condition: template
+              value_template: >
+                {{ trigger.from_state is not none
+                   and trigger.from_state.state in ['Away', 'Holiday'] }}
+        # Time trigger: only re-check if AC is already running
+        - condition: not
+          conditions:
+            - condition: state
+              entity_id: climate.rumpus_ac
+              state: "off"
   actions:
     - choose:
-        # cool-only AC: if warm, ensure cool mode; otherwise turn off
+        - conditions:
+            - condition: state
+              entity_id: sensor.rumpus_indoor_comfort_ts
+              state:
+                - Cold
+                - Cool
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.rumpus_ac
+              data:
+                hvac_mode: heat
         - conditions:
             - condition: state
               entity_id: sensor.rumpus_indoor_comfort_ts
@@ -855,7 +923,7 @@
               data:
                 hvac_mode: cool
       default:
-        # Cold/Slightly Cool/Neutral — AC can't heat, turn off
+        # Slightly Cool/Neutral — room is comfortable, turn off
         - action: climate.turn_off
           target:
             entity_id: climate.rumpus_ac
