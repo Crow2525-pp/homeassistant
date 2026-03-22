@@ -328,9 +328,6 @@
         - Sleeping
       id: home
   conditions:
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_master
-      state: "off"
     - condition: template
       value_template: >
         {{ trigger.from_state is not none
@@ -470,9 +467,6 @@
         - Sleeping
       id: home
   conditions:
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_otto
-      state: "off"
     - condition: template
       value_template: >
         {{ trigger.from_state is not none
@@ -618,9 +612,6 @@
         - Sleeping
       id: home
   conditions:
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_study
-      state: "off"
     - condition: template
       value_template: >
         {{ trigger.from_state is not none
@@ -791,9 +782,6 @@
         - Sleeping
       id: home
   conditions:
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_rumpus
-      state: "off"
     - condition: template
       value_template: >
         {{ trigger.from_state is not none
