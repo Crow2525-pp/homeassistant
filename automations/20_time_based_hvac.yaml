@@ -214,9 +214,6 @@
       at: input_datetime.wakeup_time_master_bedroom
       id: wake_time
   conditions:
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_master
-      state: "off"
     - condition: or
       conditions:
         - condition: state
@@ -226,6 +223,9 @@
           entity_id: input_select.occupancy
           state: Sleeping
   actions:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.climate_manual_control_master
     - action: climate.set_preset_mode
       target:
         entity_id: climate.masterbed_room_ac
@@ -359,9 +359,6 @@
       at: input_datetime.wakeup_time_ottos_room
       id: wake_time
   conditions:
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_otto
-      state: "off"
     - condition: or
       conditions:
         - condition: state
@@ -371,6 +368,9 @@
           entity_id: input_select.occupancy
           state: Sleeping
   actions:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.climate_manual_control_otto
     - action: climate.set_preset_mode
       target:
         entity_id: climate.kids_room_ac
@@ -505,9 +505,6 @@
       at: input_datetime.wakeup_time_lucas_room
       id: wake_time
   conditions:
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_study
-      state: "off"
     - condition: or
       conditions:
         - condition: state
@@ -517,6 +514,9 @@
           entity_id: input_select.occupancy
           state: Sleeping
   actions:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.climate_manual_control_study
     - action: climate.set_preset_mode
       target:
         entity_id: climate.study_room_ac
@@ -707,9 +707,6 @@
       at: input_datetime.wakeup_time_rumpus
       id: wake_time
   conditions:
-    - condition: state
-      entity_id: input_boolean.climate_manual_control_rumpus
-      state: "off"
     - condition: or
       conditions:
         - condition: state
@@ -719,6 +716,9 @@
           entity_id: input_select.occupancy
           state: Sleeping
   actions:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.climate_manual_control_rumpus
     - choose:
         - conditions:
             - condition: state
