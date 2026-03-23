@@ -1,0 +1,117 @@
+---
+# ============================================================================
+# CLIMATE OVERRIDE TIMER MANAGEMENT
+# ============================================================================
+# Implements 4-hour auto-expiry for climate manual overrides.
+#
+# When a climate_manual_control_* boolean is turned ON, the matching timer
+# starts counting down from 4 hours. When the timer finishes (or if the
+# override is turned OFF manually), the override is cleared and the room
+# returns to automatic control.
+#
+# This prevents "forgotten" overrides from blocking scheduled wake/bed
+# time automations indefinitely.
+# ============================================================================
+
+# --- Start timer when any override is turned ON ---
+
+- id: climate_override_timer_start
+  alias: "Climate Override - Start Expiry Timer"
+  description: >
+    When any climate manual override is turned on, start the corresponding
+    4-hour expiry timer. If the override is toggled off and on again, the
+    timer restarts from 4 hours.
+  triggers:
+    - trigger: state
+      entity_id:
+        - input_boolean.climate_manual_control_living
+        - input_boolean.climate_manual_control_master
+        - input_boolean.climate_manual_control_otto
+        - input_boolean.climate_manual_control_study
+        - input_boolean.climate_manual_control_rumpus
+      to: "on"
+  actions:
+    - variables:
+        timer_map:
+          input_boolean.climate_manual_control_living: timer.climate_override_living
+          input_boolean.climate_manual_control_master: timer.climate_override_master
+          input_boolean.climate_manual_control_otto: timer.climate_override_otto
+          input_boolean.climate_manual_control_study: timer.climate_override_study
+          input_boolean.climate_manual_control_rumpus: timer.climate_override_rumpus
+    - action: timer.start
+      target:
+        entity_id: "{{ timer_map[trigger.entity_id] }}"
+  mode: queued
+  max: 5
+
+# --- Cancel timer when override is turned OFF manually ---
+
+- id: climate_override_timer_cancel
+  alias: "Climate Override - Cancel Timer on Manual Clear"
+  description: >
+    When a climate manual override is turned off (by the user or by an
+    automation), cancel the corresponding expiry timer.
+  triggers:
+    - trigger: state
+      entity_id:
+        - input_boolean.climate_manual_control_living
+        - input_boolean.climate_manual_control_master
+        - input_boolean.climate_manual_control_otto
+        - input_boolean.climate_manual_control_study
+        - input_boolean.climate_manual_control_rumpus
+      to: "off"
+  actions:
+    - variables:
+        timer_map:
+          input_boolean.climate_manual_control_living: timer.climate_override_living
+          input_boolean.climate_manual_control_master: timer.climate_override_master
+          input_boolean.climate_manual_control_otto: timer.climate_override_otto
+          input_boolean.climate_manual_control_study: timer.climate_override_study
+          input_boolean.climate_manual_control_rumpus: timer.climate_override_rumpus
+    - action: timer.cancel
+      target:
+        entity_id: "{{ timer_map[trigger.entity_id] }}"
+  mode: queued
+  max: 5
+
+# --- Clear override when timer expires ---
+
+- id: climate_override_timer_expired
+  alias: "Climate Override - Auto-clear on Timer Expiry"
+  description: >
+    When a 4-hour override timer finishes, turn off the corresponding
+    manual override boolean so the room returns to automatic control.
+  triggers:
+    - trigger: event
+      event_type: timer.finished
+      event_data:
+        entity_id: timer.climate_override_living
+    - trigger: event
+      event_type: timer.finished
+      event_data:
+        entity_id: timer.climate_override_master
+    - trigger: event
+      event_type: timer.finished
+      event_data:
+        entity_id: timer.climate_override_otto
+    - trigger: event
+      event_type: timer.finished
+      event_data:
+        entity_id: timer.climate_override_study
+    - trigger: event
+      event_type: timer.finished
+      event_data:
+        entity_id: timer.climate_override_rumpus
+  actions:
+    - variables:
+        override_map:
+          timer.climate_override_living: input_boolean.climate_manual_control_living
+          timer.climate_override_master: input_boolean.climate_manual_control_master
+          timer.climate_override_otto: input_boolean.climate_manual_control_otto
+          timer.climate_override_study: input_boolean.climate_manual_control_study
+          timer.climate_override_rumpus: input_boolean.climate_manual_control_rumpus
+    - action: input_boolean.turn_off
+      target:
+        entity_id: "{{ override_map[trigger.event.data.entity_id] }}"
+  mode: queued
+  max: 5
