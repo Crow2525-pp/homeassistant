@@ -991,12 +991,23 @@
               value_template: >
                 {{ trigger.from_state is not none
                    and trigger.from_state.state in ['Away', 'Holiday'] }}
-        # Time trigger: only re-check if AC is already running
+        # Time trigger: re-check if AC is already running
         - condition: not
           conditions:
             - condition: state
               entity_id: climate.masterbed_room_ac
               state: "off"
+        # Time trigger during daytime: allow re-check even when AC is off,
+        # so cooling can restart if the room heats up after being turned off
+        - condition: and
+          conditions:
+            - condition: trigger
+              id: time_trigger
+            - condition: template
+              value_template: >
+                {% set bed = states('input_datetime.bedtime_master_bedroom') %}
+                {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
+                {{ not (now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake) }}
     # Fail safe: skip if sensor is unknown/unavailable
     - condition: not
       conditions:
