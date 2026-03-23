@@ -666,6 +666,17 @@
   triggers:
     - trigger: time_pattern
       minutes: "/30"
+      id: time_trigger
+    # React immediately when comfort leaves the neutral zone
+    - trigger: state
+      entity_id: sensor.study_room_indoor_comfort_ts
+      to:
+        - Cold
+        - Cool
+        - Slightly Warm
+        - Warm
+        - Hot
+      id: comfort_change
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_study
@@ -678,11 +689,17 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-    - condition: not
+    - condition: or
       conditions:
-        - condition: state
-          entity_id: climate.study_room_ac
-          state: "off"
+        # Comfort change: always allow — react immediately to discomfort
+        - condition: trigger
+          id: comfort_change
+        # Time trigger: only re-check if AC is already running
+        - condition: not
+          conditions:
+            - condition: state
+              entity_id: climate.study_room_ac
+              state: "off"
   actions:
     - choose:
         - conditions:
@@ -847,6 +864,17 @@
   triggers:
     - trigger: time_pattern
       minutes: "/30"
+      id: time_trigger
+    # React immediately when comfort leaves the neutral zone
+    - trigger: state
+      entity_id: sensor.rumpus_indoor_comfort_ts
+      to:
+        - Cold
+        - Cool
+        - Slightly Warm
+        - Warm
+        - Hot
+      id: comfort_change
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_rumpus
@@ -859,11 +887,17 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-    - condition: not
+    - condition: or
       conditions:
-        - condition: state
-          entity_id: climate.rumpus_ac
-          state: "off"
+        # Comfort change: always allow — react immediately to discomfort
+        - condition: trigger
+          id: comfort_change
+        # Time trigger: only re-check if AC is already running
+        - condition: not
+          conditions:
+            - condition: state
+              entity_id: climate.rumpus_ac
+              state: "off"
   actions:
     - choose:
         # cool-only AC: if warm, ensure cool mode; otherwise turn off
@@ -891,9 +925,11 @@
 # HALF-HOURLY MODE RE-CHECK
 # ============================================================================
 # Triggers:
-#   1. Every 30 minutes (time_pattern) — if AC is already running, re-evaluate
-#      heat vs cool based on current Indoor Comfort thermal sensation (ASHRAE 55).
-#   2. Occupancy changes to Home or Sleeping from Away/Holiday — immediately
+#   1. Comfort sensor changes to a non-neutral state (Cold, Cool, Slightly Warm,
+#      Warm, Hot) — reacts immediately, even if AC is off.
+#   2. Every 30 minutes (time_pattern) — fallback re-check if AC is already
+#      running.
+#   3. Occupancy changes to Home or Sleeping from Away/Holiday — immediately
 #      set the correct hvac_mode after return-home turn-on.
 #
 # Only the hvac_mode is updated; preset is unchanged (except bedrooms at night).
@@ -915,6 +951,16 @@
       entity_id: input_select.occupancy
       to: Sleeping
       id: occupancy_change
+    # React immediately when comfort leaves the neutral zone
+    - trigger: state
+      entity_id: sensor.living_room_indoor_comfort_ts
+      to:
+        - Cold
+        - Cool
+        - Slightly Warm
+        - Warm
+        - Hot
+      id: comfort_change
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_living
@@ -939,6 +985,9 @@
               value_template: >
                 {{ trigger.from_state is not none
                    and trigger.from_state.state in ['Away', 'Holiday'] }}
+        # Comfort change: always allow — react immediately to discomfort
+        - condition: trigger
+          id: comfort_change
         # Time trigger: only re-check if AC is already running
         - condition: not
           conditions:
@@ -993,6 +1042,16 @@
       entity_id: input_select.occupancy
       to: Sleeping
       id: occupancy_change
+    # React immediately when comfort leaves the neutral zone
+    - trigger: state
+      entity_id: sensor.master_bedroom_indoor_comfort_ts
+      to:
+        - Cold
+        - Cool
+        - Slightly Warm
+        - Warm
+        - Hot
+      id: comfort_change
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
@@ -1017,6 +1076,9 @@
               value_template: >
                 {{ trigger.from_state is not none
                    and trigger.from_state.state in ['Away', 'Holiday'] }}
+        # Comfort change: always allow — react immediately to discomfort
+        - condition: trigger
+          id: comfort_change
         # Time trigger: only re-check if AC is already running
         - condition: not
           conditions:
@@ -1129,6 +1191,16 @@
       entity_id: input_select.occupancy
       to: Sleeping
       id: occupancy_change
+    # React immediately when comfort leaves the neutral zone
+    - trigger: state
+      entity_id: sensor.kids_room_indoor_comfort_ts
+      to:
+        - Cold
+        - Cool
+        - Slightly Warm
+        - Warm
+        - Hot
+      id: comfort_change
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_otto
@@ -1153,6 +1225,9 @@
               value_template: >
                 {{ trigger.from_state is not none
                    and trigger.from_state.state in ['Away', 'Holiday'] }}
+        # Comfort change: always allow — react immediately to discomfort
+        - condition: trigger
+          id: comfort_change
         # Time trigger: only re-check if AC is already running
         - condition: not
           conditions:
