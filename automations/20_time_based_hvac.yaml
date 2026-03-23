@@ -967,6 +967,16 @@
       entity_id: input_select.occupancy
       to: Sleeping
       id: occupancy_change
+    # React immediately when comfort leaves the neutral zone
+    - trigger: state
+      entity_id: sensor.master_bedroom_indoor_comfort_ts
+      to:
+        - Cold
+        - Cool
+        - Slightly Warm
+        - Warm
+        - Hot
+      id: comfort_change
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
@@ -991,23 +1001,15 @@
               value_template: >
                 {{ trigger.from_state is not none
                    and trigger.from_state.state in ['Away', 'Holiday'] }}
-        # Time trigger: re-check if AC is already running
+        # Comfort change: always allow — react immediately to discomfort
+        - condition: trigger
+          id: comfort_change
+        # Time trigger: only re-check if AC is already running
         - condition: not
           conditions:
             - condition: state
               entity_id: climate.masterbed_room_ac
               state: "off"
-        # Time trigger during daytime: allow re-check even when AC is off,
-        # so cooling can restart if the room heats up after being turned off
-        - condition: and
-          conditions:
-            - condition: trigger
-              id: time_trigger
-            - condition: template
-              value_template: >
-                {% set bed = states('input_datetime.bedtime_master_bedroom') %}
-                {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
-                {{ not (now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake) }}
     # Fail safe: skip if sensor is unknown/unavailable
     - condition: not
       conditions:
