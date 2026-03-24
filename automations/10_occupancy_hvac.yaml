@@ -13,10 +13,10 @@
 #   Living Room   : climate.living_room_ac_2, climate.living_room_versatile_thermostat
 #   Master Bedroom: climate.masterbed_room_ac, climate.masterbed_versatile_thermostat
 #   Kids/Otto Room: climate.kids_room_ac, climate.otto_s_room
+#   Rumpus        : via rumpus_away_mode in 20_time_based_hvac.yaml (not listed below)
 #
 # Disabled rooms (away shutdown only — NOT turned on at return-home):
 #   Study/Lucas   : climate.study_room_ac, climate.henry_s_room_versatile_thermostat
-#   Rumpus        : climate.rumpus_ac
 #
 # Notes:
 #   - Away shutdown includes all rooms regardless of disabled status (energy safety)
@@ -115,6 +115,7 @@
               - climate.kids_room_ac
               - climate.otto_s_room
 
-    # Study and Rumpus intentionally omitted — disabled rooms are not turned
-    # on at return-home. Away shutdown above still turns them off for energy safety.
+    # Study intentionally omitted — disabled room not turned on at return-home.
+    # Rumpus handled by rumpus_away_mode in 20_time_based_hvac.yaml.
+    # Away shutdown above still turns all rooms off for energy safety.
   mode: single
