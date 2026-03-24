@@ -2,3 +2,42 @@ roller_blind_timer:
   name: Roller Blind Movement Timer
   icon: mdi:timer
   restore: false
+
+# ============================================================================
+# CLIMATE OVERRIDE EXPIRY TIMERS
+# ============================================================================
+# When a manual override is activated, the corresponding timer starts.
+# After 4 hours the timer fires and the override boolean is cleared,
+# returning the room to automatic control.
+# restore: true — survives HA restarts so the countdown isn't lost.
+# ============================================================================
+
+climate_override_living:
+  name: Living Room Climate Override Timer
+  icon: mdi:timer-alert
+  duration: "04:00:00"
+  restore: true
+
+climate_override_master:
+  name: Master Bedroom Climate Override Timer
+  icon: mdi:timer-alert
+  duration: "04:00:00"
+  restore: true
+
+climate_override_otto:
+  name: Kids Room Climate Override Timer
+  icon: mdi:timer-alert
+  duration: "04:00:00"
+  restore: true
+
+climate_override_study:
+  name: Study Room Climate Override Timer
+  icon: mdi:timer-alert
+  duration: "04:00:00"
+  restore: true
+
+climate_override_rumpus:
+  name: Rumpus Climate Override Timer
+  icon: mdi:timer-alert
+  duration: "04:00:00"
+  restore: true

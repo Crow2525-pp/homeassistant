@@ -1194,7 +1194,7 @@
   description: Updates the filter change date when NFC tag is scanned
   triggers:
   - trigger: tag
-    tag_id: REPLACE_WITH_YOUR_NFC_TAG_ID
+    tag_id: 3ebca478-9cfc-4707-8d0c-280dfd3cd383
   actions:
   - action: input_datetime.set_datetime
     target:
