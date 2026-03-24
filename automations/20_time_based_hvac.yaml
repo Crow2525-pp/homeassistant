@@ -801,8 +801,9 @@
 - id: rumpus_time_based_night
   alias: "HVAC - Rumpus - Bedtime"
   description: >
-    At bedtime, auto-clear manual override. If sleeping and cold: frost+heat;
-    if sleeping and hot: boost+cool. Otherwise turn off.
+    At bedtime, auto-clear manual override. If sleeping and cold: frost+heat
+    to prevent the room getting too cold. Otherwise turn off — no cooling
+    overnight in the rumpus.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_rumpus
@@ -841,27 +842,6 @@
                 entity_id: climate.rumpus_ac
               data:
                 hvac_mode: heat
-        - conditions:
-            - condition: state
-              entity_id: input_select.occupancy
-              state: Sleeping
-            - condition: state
-              entity_id: sensor.rumpus_indoor_comfort_ts
-              state:
-                - Slightly Warm
-                - Warm
-                - Hot
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                preset_mode: boost
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.rumpus_ac
-              data:
-                hvac_mode: cool
       default:
         - action: climate.turn_off
           target:
