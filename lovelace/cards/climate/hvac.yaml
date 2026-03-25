@@ -76,6 +76,28 @@ cards:
                 .mdc-menu-surface mwc-list-item::part(text) {
                   color: rgba(255, 255, 255, 0.95) !important;
                 }
+          - type: button
+            entity: script.activate_masterbed_powerful_fan
+            name: Powerful 20m
+            icon: mdi:fan
+            show_state: false
+            tap_action:
+              action: call-service
+              service: script.activate_masterbed_powerful_fan
+            hold_action:
+              action: more-info
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, #c2410c 0%, #9a3412 100%);
+                  color: white;
+                  border-radius: 10px;
+                  box-shadow: 0 6px 12px rgba(154, 52, 18, 0.35);
+                  border: none;
+                }
+                ha-card:hover {
+                  box-shadow: 0 10px 18px rgba(154, 52, 18, 0.45);
+                }
           - type: custom:mini-graph-card
             entities:
               - entity: climate.masterbed_room_ac
@@ -188,6 +210,28 @@ cards:
                 .mdc-menu-surface mwc-list-item::part(text) {
                   color: rgba(255, 255, 255, 0.95) !important;
                 }
+          - type: button
+            entity: script.activate_kids_powerful_fan
+            name: Powerful 20m
+            icon: mdi:fan
+            show_state: false
+            tap_action:
+              action: call-service
+              service: script.activate_kids_powerful_fan
+            hold_action:
+              action: more-info
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, #c2410c 0%, #9a3412 100%);
+                  color: white;
+                  border-radius: 10px;
+                  box-shadow: 0 6px 12px rgba(154, 52, 18, 0.35);
+                  border: none;
+                }
+                ha-card:hover {
+                  box-shadow: 0 10px 18px rgba(154, 52, 18, 0.45);
+                }
           - type: custom:mini-graph-card
             entities:
               - entity: climate.kids_room_ac
@@ -297,6 +341,28 @@ cards:
                 }
                 .mdc-menu-surface mwc-list-item::part(text) {
                   color: rgba(255, 255, 255, 0.95) !important;
+                }
+          - type: button
+            entity: script.activate_study_powerful_fan
+            name: Powerful 20m
+            icon: mdi:fan
+            show_state: false
+            tap_action:
+              action: call-service
+              service: script.activate_study_powerful_fan
+            hold_action:
+              action: more-info
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(145deg, #c2410c 0%, #9a3412 100%);
+                  color: white;
+                  border-radius: 10px;
+                  box-shadow: 0 6px 12px rgba(154, 52, 18, 0.35);
+                  border: none;
+                }
+                ha-card:hover {
+                  box-shadow: 0 10px 18px rgba(154, 52, 18, 0.45);
                 }
           - type: custom:mini-graph-card
             entities:
