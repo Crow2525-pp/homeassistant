@@ -115,3 +115,55 @@
         entity_id: "{{ override_map[trigger.event.data.entity_id] }}"
   mode: queued
   max: 5
+
+# ============================================================================
+# POWERFUL FAN MODE AUTO-REVERT
+# ============================================================================
+# The "powerful" fan mode on Mitsubishi (1003) and Daikin (1004) units is a
+# temporary boost that the physical AC automatically cancels after 20 minutes,
+# reverting to whatever fan speed was set before. SmartIR doesn't know about
+# this hardware-side revert, so its state goes stale.
+#
+# This automation captures the previous fan_mode when powerful is activated,
+# waits 20 minutes, then sends a set_fan_mode call to resync SmartIR with
+# the physical unit's actual state.
+#
+# Excludes living room AC (per owner preference).
+# ============================================================================
+
+- id: powerful_fan_mode_auto_revert
+  alias: "Climate Override - Powerful Fan Mode Auto-Revert"
+  description: >
+    When any non-living-room AC fan_mode changes to "powerful", wait 20 minutes
+    then revert to the previous fan_mode. This keeps SmartIR in sync with the
+    physical unit which auto-cancels powerful mode after 20 minutes.
+  triggers:
+    - trigger: state
+      entity_id:
+        - climate.masterbed_ac
+        - climate.kids_ac
+        - climate.study_ac
+        - climate.rumpus_ac
+      attribute: fan_mode
+      to: "powerful"
+  conditions:
+    - condition: template
+      value_template: >
+        {{ trigger.from_state.attributes.fan_mode is defined
+           and trigger.from_state.attributes.fan_mode != 'powerful' }}
+  actions:
+    - variables:
+        previous_fan_mode: "{{ trigger.from_state.attributes.fan_mode }}"
+        target_entity: "{{ trigger.entity_id }}"
+    - delay:
+        minutes: 20
+    - condition: template
+      value_template: >
+        {{ state_attr(target_entity, 'fan_mode') == 'powerful' }}
+    - action: climate.set_fan_mode
+      target:
+        entity_id: "{{ target_entity }}"
+      data:
+        fan_mode: "{{ previous_fan_mode }}"
+  mode: parallel
+  max: 4
