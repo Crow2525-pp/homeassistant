@@ -1089,6 +1089,16 @@ activate_rumpus_powerful_fan:
         fan_mode: powerful
   mode: single
 
+activate_rumpus_quiet_fan:
+  alias: "Rumpus Quiet Fan"
+  description: "Trigger the hidden quiet fan mode while the rumpus AC is already running"
+  sequence:
+    - action: script.set_hidden_smartir_fan_mode
+      data:
+        climate_entity: climate.rumpus_ac
+        fan_mode: quiet
+  mode: single
+
 deactivate_climate:
   alias: "Deactivate Climate"
   description: "Helper to turn off climate device safely"
