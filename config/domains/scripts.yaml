@@ -1028,6 +1028,67 @@ activate_fan_only:
         preset_mode: "{{ preset_mode | default('eco') }}"
   mode: single
 
+set_hidden_smartir_fan_mode:
+  alias: "Set Hidden SmartIR Fan Mode"
+  description: "Send a SmartIR fan mode such as powerful without exposing it in the standard fan mode dropdown"
+  fields:
+    climate_entity:
+      description: "Climate entity to control"
+      example: "climate.masterbed_room_ac"
+    fan_mode:
+      description: "Hidden SmartIR fan mode to send"
+      example: "powerful"
+  sequence:
+    - condition: template
+      value_template: >
+        {{ states(climate_entity) not in ['off', 'unavailable', 'unknown'] }}
+    - action: climate.set_fan_mode
+      target:
+        entity_id: "{{ climate_entity }}"
+      data:
+        fan_mode: "{{ fan_mode }}"
+  mode: single
+
+activate_masterbed_powerful_fan:
+  alias: "Master Bedroom Powerful Fan (20m)"
+  description: "Trigger the hidden 20-minute powerful fan mode while the master bedroom AC is already running"
+  sequence:
+    - action: script.set_hidden_smartir_fan_mode
+      data:
+        climate_entity: climate.masterbed_room_ac
+        fan_mode: powerful
+  mode: single
+
+activate_kids_powerful_fan:
+  alias: "Otto and Henry's Room Powerful Fan (20m)"
+  description: "Trigger the hidden 20-minute powerful fan mode while the kids room AC is already running"
+  sequence:
+    - action: script.set_hidden_smartir_fan_mode
+      data:
+        climate_entity: climate.kids_room_ac
+        fan_mode: powerful
+  mode: single
+
+activate_study_powerful_fan:
+  alias: "Lucas's Room Powerful Fan (20m)"
+  description: "Trigger the hidden 20-minute powerful fan mode while the study AC is already running"
+  sequence:
+    - action: script.set_hidden_smartir_fan_mode
+      data:
+        climate_entity: climate.study_room_ac
+        fan_mode: powerful
+  mode: single
+
+activate_rumpus_powerful_fan:
+  alias: "Rumpus Powerful Fan (20m)"
+  description: "Trigger the hidden 20-minute powerful fan mode while the rumpus AC is already running"
+  sequence:
+    - action: script.set_hidden_smartir_fan_mode
+      data:
+        climate_entity: climate.rumpus_ac
+        fan_mode: powerful
+  mode: single
+
 deactivate_climate:
   alias: "Deactivate Climate"
   description: "Helper to turn off climate device safely"
