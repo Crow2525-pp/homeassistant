@@ -870,6 +870,10 @@
     # Room climate alert - triggers when any room is significantly different from master
     - name: "Room Climate Alert"
       unique_id: room_climate_alert
+      delay_on:
+        minutes: 5
+      delay_off:
+        minutes: 5
       state: >
         {% set living_temp_diff = (states('sensor.living_room_temperature_offset') | float(0) - states('sensor.masterbed_temperature') | float(0)) | abs %}
         {% set lucas_temp_diff = (states('sensor.study_temperature') | float(0) - states('sensor.masterbed_temperature') | float(0)) | abs %}
