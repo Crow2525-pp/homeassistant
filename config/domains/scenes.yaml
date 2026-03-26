@@ -107,7 +107,7 @@
 - id: '1659861038863'
   name: OttoSleep(heat)
   entities:
-    climate.otto_s_ac:
+    climate.kid_s_ac:
       hvac_modes:
       - 'off'
       - cool
@@ -132,16 +132,16 @@
       - SRK25ZSX-SRC25ZSX
       supported_controller: Broadlink
       commands_encoding: Base64
-      friendly_name: Otto's AC
+      friendly_name: Kids Room AC
       supported_features: 9
       state: heat
   metadata:
-    climate.otto_s_ac:
+    climate.kid_s_ac:
       entity_only: true
 - id: '1659861088889'
   name: OttoSleep(Cool)
   entities:
-    climate.otto_s_ac:
+    climate.kid_s_ac:
       hvac_modes:
       - 'off'
       - cool
@@ -166,11 +166,11 @@
       - SRK25ZSX-SRC25ZSX
       supported_controller: Broadlink
       commands_encoding: Base64
-      friendly_name: Otto's AC
+      friendly_name: Kids Room AC
       supported_features: 9
       state: cool
   metadata:
-    climate.otto_s_ac:
+    climate.kid_s_ac:
       entity_only: true
 - id: '1736526000006'
   name: Living Room Evening
