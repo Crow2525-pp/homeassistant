@@ -3,12 +3,12 @@
 # INDOOR THERMAL COMFORT — Helper Scheduling
 # ============================================================================
 # Keeps clothing insulation (clo) and metabolic rate (met) in sync with the
-# time of day and season so the ASHRAE 55 PMV/PPD sensors stay accurate.
+# time of day so the ASHRAE 55 PMV/PPD sensors stay accurate.
 #
 # Helpers managed:
 #   input_number.clothing_insulation      — adult rooms (master, living, study, rumpus)
 #   input_number.clothing_insulation_kids — kids room (earlier bedtime than adults)
-#   input_number.metabolic_rate           — all rooms (always 1.0)
+#   input_number.metabolic_rate           — all rooms (1.0 day / 0.8 sleeping)
 #   input_number.clothing_index_sleeping  — dashboard reference for night clo
 #
 # Two independent schedules:
@@ -19,79 +19,82 @@
 #   Daytime:  1.1 all seasons (tuned so 21-24°C reads Neutral, 25°C+ Slightly Warm)
 #   Sleeping: 1.5 all seasons (doona year-round, capped at integration max)
 #
-# Metabolic rate (met): always 1.0
+# Metabolic rate (met):
+#   Daytime:  1.0 (seated, quiet activity)
+#   Sleeping: 0.8 (reclining/sleeping)
+#
+# Night is defined as bedtime → wakeup (adult schedule for met rate).
 #
 # Sleeping values tuned so master/kids bedrooms read Neutral (PMV ≈ -0.3)
 # at 18.5-22.5°C overnight — validated against live ASHRAE 55 sensors.
+#
+# NOTE: Time-based logic is used for all decisions (no trigger.id dependency)
+# so results are correct regardless of which trigger fires or restarts.
+# Night detection handles both bed < wake (same day) and bed >= wake (midnight
+# wrap) so bedtimes past 00:00 work correctly.
 # ============================================================================
 
 - id: comfort_helpers_schedule
   alias: "Comfort Helpers - Clo & Met Schedule"
   description: >
     Updates clothing insulation and metabolic rate based on bedtime/wake time
-    and season for Indoor Thermal Comfort (ASHRAE 55) sensors. Adult rooms
-    follow master bedroom schedule; kids room follows its own earlier bedtime.
+    for Indoor Thermal Comfort (ASHRAE 55) sensors. Adult rooms follow master
+    bedroom schedule; kids room follows its own earlier bedtime.
   triggers:
-    # Adult schedule (master bedroom)
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
-      id: adult_wake
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
-      id: adult_bed
-    # Kids schedule
     - trigger: time
       at: input_datetime.wakeup_time_ottos_room
-      id: kids_wake
     - trigger: time
       at: input_datetime.bedtime_ottos_room
-      id: kids_bed
-    # Recalculate on HA restart
     - trigger: homeassistant
       event: start
-      id: recalc
   conditions: []
   actions:
     - variables:
-        clo_day: "1.1"
+        clo_day: 1.1
         clo_night: 1.5
+        met_day: 1.0
+        met_night: 0.8
         adult_is_night: >
-          {% if trigger.id == 'adult_bed' %}true
-          {% elif trigger.id == 'adult_wake' %}false
+          {% set bed = today_at(states('input_datetime.bedtime_master_bedroom')) %}
+          {% set wake = today_at(states('input_datetime.wakeup_time_master_bedroom')) %}
+          {% if bed < wake %}
+            {{ bed <= now() < wake }}
           {% else %}
-            {% set bed = states('input_datetime.bedtime_master_bedroom') %}
-            {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
-            {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
+            {{ now() >= bed or now() < wake }}
           {% endif %}
         kids_is_night: >
-          {% if trigger.id == 'kids_bed' %}true
-          {% elif trigger.id == 'kids_wake' %}false
+          {% set bed = today_at(states('input_datetime.bedtime_ottos_room')) %}
+          {% set wake = today_at(states('input_datetime.wakeup_time_ottos_room')) %}
+          {% if bed < wake %}
+            {{ bed <= now() < wake }}
           {% else %}
-            {% set bed = states('input_datetime.bedtime_ottos_room') %}
-            {% set wake = states('input_datetime.wakeup_time_ottos_room') %}
-            {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
+            {{ now() >= bed or now() < wake }}
           {% endif %}
 
-    # Metabolic rate — always 1.0
+    # Metabolic rate — 0.8 sleeping, 1.0 awake (follows adult schedule)
     - action: input_number.set_value
       target:
         entity_id: input_number.metabolic_rate
       data:
-        value: 1.0
+        value: "{{ met_night if adult_is_night | bool else met_day }}"
 
     # Adult clo (master bedroom, living room, study, rumpus)
     - action: input_number.set_value
       target:
         entity_id: input_number.clothing_insulation
       data:
-        value: "{{ clo_night if adult_is_night else clo_day }}"
+        value: "{{ clo_night if adult_is_night | bool else clo_day }}"
 
     # Kids clo (independent schedule — earlier bedtime)
     - action: input_number.set_value
       target:
         entity_id: input_number.clothing_insulation_kids
       data:
-        value: "{{ clo_night if kids_is_night else clo_day }}"
+        value: "{{ clo_night if kids_is_night | bool else clo_day }}"
 
     # Dashboard reference
     - action: input_number.set_value
