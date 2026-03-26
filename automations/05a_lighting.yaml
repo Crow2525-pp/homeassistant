@@ -779,17 +779,10 @@
         target:
           entity_id: light.living_room_light_socket_1
     - conditions:
-      - condition: or
-        conditions:
-        - condition: time
-          after: 00:00:00
-          before: '20:30:00'
-        - condition: trigger
-          id:
-          - Paused
-        - condition: trigger
-          id:
-          - TurnedOff
+      - condition: trigger
+        id:
+        - Paused
+        - TurnedOff
       sequence:
       - action: scene.turn_on
         target:
