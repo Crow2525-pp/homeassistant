@@ -1185,7 +1185,7 @@
         {% endfor %}
         {% set study_climate = states('climate.study_room_ac') %}
         {% if study_climate not in ['off', 'unavailable', 'unknown'] and study.open %}
-          {% set mode = state_attr('climate.study_ac', 'hvac_action') or 'running' %}
+          {% set mode = state_attr('climate.study_ac_2', 'hvac_action') or 'running' %}
           {% if mode == 'cooling' %}
             {% set alerts.items = alerts.items + ["- Study AC: " ~ (study.open | join(', '))] %}
           {% elif mode == 'heating' %}
