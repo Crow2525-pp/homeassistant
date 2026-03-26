@@ -30,6 +30,8 @@
 #
 # NOTE: Time-based logic is used for all decisions (no trigger.id dependency)
 # so results are correct regardless of which trigger fires or restarts.
+# Night detection handles both bed < wake (same day) and bed >= wake (midnight
+# wrap) so bedtimes past 00:00 work correctly.
 # ============================================================================
 
 - id: comfort_helpers_schedule
@@ -57,11 +59,21 @@
         met_day: 1.0
         met_night: 0.8
         adult_is_night: >
-          {{ now().strftime('%H:%M:%S') >= states('input_datetime.bedtime_master_bedroom')
-             or now().strftime('%H:%M:%S') < states('input_datetime.wakeup_time_master_bedroom') }}
+          {% set bed = today_at(states('input_datetime.bedtime_master_bedroom')) %}
+          {% set wake = today_at(states('input_datetime.wakeup_time_master_bedroom')) %}
+          {% if bed < wake %}
+            {{ bed <= now() < wake }}
+          {% else %}
+            {{ now() >= bed or now() < wake }}
+          {% endif %}
         kids_is_night: >
-          {{ now().strftime('%H:%M:%S') >= states('input_datetime.bedtime_ottos_room')
-             or now().strftime('%H:%M:%S') < states('input_datetime.wakeup_time_ottos_room') }}
+          {% set bed = today_at(states('input_datetime.bedtime_ottos_room')) %}
+          {% set wake = today_at(states('input_datetime.wakeup_time_ottos_room')) %}
+          {% if bed < wake %}
+            {{ bed <= now() < wake }}
+          {% else %}
+            {{ now() >= bed or now() < wake }}
+          {% endif %}
 
     # Metabolic rate — 0.8 sleeping, 1.0 awake (follows adult schedule)
     - action: input_number.set_value
