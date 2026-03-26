@@ -1197,7 +1197,7 @@
         {% if alerts.items %}
           {{ alerts.items | join('\n') }}
         {% else %}
-          None
+          No open doors
         {% endif %}
 
 - binary_sensor:
