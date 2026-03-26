@@ -1040,7 +1040,7 @@ set_hidden_smartir_fan_mode:
       example: "powerful"
   sequence:
     - variables:
-        device_commands: !include config/domains/smartir_hidden_mode_commands.yaml
+        device_commands: !include smartir_hidden_mode_commands.yaml
         hvac_mode: "{{ states(climate_entity) }}"
         device_code: >-
           {% if climate_entity in ['climate.masterbed_room_ac', 'climate.kids_room_ac', 'climate.study_room_ac'] %}
