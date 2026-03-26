@@ -520,6 +520,7 @@
     trigger: state
   - event: sunset
     offset: 0
+    id: sunset
     trigger: sun
   - entity_id: remote.sony_kd_55x8500c
     to: unavailable
@@ -553,6 +554,17 @@
         id: tv_unavailable
       sequence:
       - action: light.turn_off
+        target:
+          entity_id: light.tv_backlight
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: sunset
+      - condition: state
+        entity_id: remote.sony_kd_55x8500c
+        state: 'on'
+      sequence:
+      - action: light.turn_on
         target:
           entity_id: light.tv_backlight
         data: {}
