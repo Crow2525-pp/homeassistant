@@ -31,52 +31,6 @@ wifi:
 
 captive_portal: {}
 
-# required for sensor to get timestamp "last seen" for sensor
-time:
-  - platform: homeassistant
-    id: ha_time
-
-sensor:
-  - platform: xiaomi_lywsd03mmc
-    mac_address: !secret xiaomi_ble_mac_study
-    bindkey: !secret xiaomi_ble_bindkey_study
-    temperature:
-      name: "Study Temperature"
-      on_value:
-        then:
-          - lambda: |-
-              id(study_last_seen).publish_state(id(ha_time).now().timestamp);
-    humidity:
-      name: "Study Humidity"
-    battery_level:
-      name: "Study Battery Level"
-
-  - platform: template
-    id: study_last_seen
-    name: "Study Temperature Last Seen"
-    lambda: 'return 0;'
-    update_interval: never
-
-  - platform: xiaomi_lywsd03mmc
-    mac_address: !secret xiaomi_ble_mac_kidsroom
-    bindkey: !secret xiaomi_ble_bindkey_kidsroom
-    temperature:
-      name: "KidsRoom Temperature"
-      on_value:
-        then:
-          - lambda: |-
-              id(kidsroom_last_seen).publish_state(id(ha_time).now().timestamp);
-    humidity:
-      name: "KidsRoom Humidity"
-    battery_level:
-      name: "KidsRoom Battery Level"
-
-  - platform: template
-    id: kidsroom_last_seen
-    name: "KidsRoom Temperature Last Seen"
-    lambda: 'return 0;'
-    update_interval: never
-
 bluetooth_proxy: {}
 
 esp32_ble_tracker: {}
