@@ -86,8 +86,9 @@
     - name: Internet Connection
       state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float(0) > 0) or (states('sensor.ucg_ultra_port_5_rx') | float(0) > 0)) }}"
 
-    ## WAN Down Alert Active with 250-second delay
-    - name: WAN Down Alert Active
+    ## WAN Down Alert Active (UCG) with 250-second delay
+    - name: WAN Down Alert Active UCG
+      unique_id: wan_down_alert_active_ucg
       state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float(0) == 0) and (states('sensor.ucg_ultra_port_5_rx') | float(0) == 0) and ((as_timestamp(now()) - as_timestamp(states.sensor.ucg_ultra_port_5_tx.last_changed)) | int(0) > 250)) }}"
 
 - binary_sensor:
