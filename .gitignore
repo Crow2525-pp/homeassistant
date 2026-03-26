@@ -22,8 +22,8 @@
 !automations/*.yaml
 !/custom_components/smartir/fan.py
 
-# Dashboard
-!.storage/lovelace
+# Home Assistant runtime state
+.storage/
 
 # Blueprints
 !blueprints/
@@ -73,5 +73,3 @@ secrets.yaml
 
 # Pre-commit hooks
 !.pre-commit-config.yaml
-.storage/broadlink_remote_*
-.storage/broadlink_remote_*
