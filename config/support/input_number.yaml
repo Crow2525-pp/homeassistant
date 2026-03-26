@@ -231,7 +231,7 @@ kids_room_temperature_offset:
 #   (all on adult schedule — switches at master bedroom bed/wake times)
 # clothing_insulation_kids: kids room only
 #   (switches at kids bed/wake times — earlier bedtime than adults)
-# metabolic_rate: shared by all rooms (always 1.0)
+# metabolic_rate: shared by all rooms (1.0 day / 0.8 sleeping, follows adult schedule)
 metabolic_rate:
   name: Metabolic Rate
   min: 0.8
