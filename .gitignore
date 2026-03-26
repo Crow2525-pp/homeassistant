@@ -24,8 +24,6 @@
 
 # Dashboard
 !.storage/lovelace
-!ui-lovelace.yaml
-!lovelace/**
 
 # Blueprints
 !blueprints/
