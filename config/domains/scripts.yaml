@@ -1030,7 +1030,7 @@ activate_fan_only:
 
 set_hidden_smartir_fan_mode:
   alias: "Set Hidden SmartIR Fan Mode"
-  description: "Send a SmartIR fan mode such as powerful without exposing it in the standard fan mode dropdown"
+  description: "Send a hidden SmartIR fan mode by dispatching the recorded IR packet directly to the room remote"
   fields:
     climate_entity:
       description: "Climate entity to control"
@@ -1039,14 +1039,63 @@ set_hidden_smartir_fan_mode:
       description: "Hidden SmartIR fan mode to send"
       example: "powerful"
   sequence:
-    - condition: template
-      value_template: >
-        {{ states(climate_entity) not in ['off', 'unavailable', 'unknown'] }}
-    - action: climate.set_fan_mode
-      target:
-        entity_id: "{{ climate_entity }}"
-      data:
-        fan_mode: "{{ fan_mode }}"
+    - variables:
+        device_commands: !include config/domains/smartir_hidden_mode_commands.yaml
+        hvac_mode: "{{ states(climate_entity) }}"
+        device_code: >-
+          {% if climate_entity in ['climate.masterbed_room_ac', 'climate.kids_room_ac', 'climate.study_room_ac'] %}
+            1003
+          {% elif climate_entity == 'climate.rumpus_ac' %}
+            1004
+          {% endif %}
+        remote_entity: >-
+          {% if climate_entity == 'climate.masterbed_room_ac' %}
+            remote.ir_blaster_master_bedroom_remote
+          {% elif climate_entity == 'climate.kids_room_ac' %}
+            remote.kids
+          {% elif climate_entity == 'climate.study_room_ac' %}
+            remote.study
+          {% elif climate_entity == 'climate.rumpus_ac' %}
+            remote.rumpus
+          {% endif %}
+        target_temperature: >-
+          {% set temp = state_attr(climate_entity, 'temperature') | float(default=none) %}
+          {% if temp is not none %}
+            {% if temp == temp | round(0) %}
+              {{ temp | round(0) | int }}
+            {% else %}
+              {{ temp | round(1) }}
+            {% endif %}
+          {% endif %}
+        selected_command: >-
+          {% set normalized_device_code = device_code | trim %}
+          {% set normalized_target_temperature = target_temperature | trim %}
+          {% set fan_commands = device_commands.get(normalized_device_code, {}).get(fan_mode, {}) %}
+          {% set mode_commands = fan_commands.get(hvac_mode) %}
+          {% if mode_commands is mapping %}
+            {{ mode_commands.get(normalized_target_temperature, '') }}
+          {% elif mode_commands %}
+            {{ mode_commands }}
+          {% endif %}
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >-
+                {{
+                  hvac_mode not in ['off', 'unavailable', 'unknown']
+                  and remote_entity | trim != ''
+                  and selected_command | trim != ''
+                }}
+          sequence:
+            - action: remote.send_command
+              target:
+                entity_id: "{{ remote_entity | trim }}"
+              data:
+                command: "{{ selected_command | trim }}"
+      default:
+        - stop: >-
+            Hidden fan mode {{ fan_mode }} is unavailable for {{ climate_entity }}
+            while the HVAC mode is {{ hvac_mode }} at target {{ target_temperature | default('n/a', true) }}.
   mode: single
 
 activate_masterbed_powerful_fan:
