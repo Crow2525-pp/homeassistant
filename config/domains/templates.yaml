@@ -82,14 +82,14 @@
       state: "{{ (is_state('group.wan_devices', 'off') and ((as_timestamp(now()) - as_timestamp(states.group.wan_devices.last_changed)) | int(0) > 250 )) and is_state('input_boolean.wan_down_notify', 'on') }}"
 
 - binary_sensor:
-    ## Internet Connection Status based on TX and RX
+    ## Internet Connection Status based on UCG Ultra gateway state
     - name: Internet Connection
-      state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float(0) > 0) or (states('sensor.ucg_ultra_port_5_rx') | float(0) > 0)) }}"
+      state: "{{ is_state('sensor.ucg_ultra_state', 'connected') }}"
 
     ## WAN Down Alert Active (UCG) with 250-second delay
     - name: WAN Down Alert Active UCG
       unique_id: wan_down_alert_active_ucg
-      state: "{{ ((states('sensor.ucg_ultra_port_5_tx') | float(0) == 0) and (states('sensor.ucg_ultra_port_5_rx') | float(0) == 0) and ((as_timestamp(now()) - as_timestamp(states.sensor.ucg_ultra_port_5_tx.last_changed)) | int(0) > 250)) }}"
+      state: "{{ not is_state('sensor.ucg_ultra_state', 'connected') and ((as_timestamp(now()) - as_timestamp(states.sensor.ucg_ultra_state.last_changed)) | int(0) > 250) }}"
 
 - binary_sensor:
     - name: "Holiday Season"
