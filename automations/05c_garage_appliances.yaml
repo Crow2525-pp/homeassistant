@@ -864,8 +864,10 @@
   mode: single
 - id: '1724225427107'
   alias: Master Bedroom - Update Sleeping Status
-  description: Updates the master sleeping helper using sleep confidence metrics.
-    false
+  description: >-
+    Updates the master sleeping helper using sleep confidence metrics.
+    Phil: Android sleep confidence sensor. Steph: phone charging state
+    combined with a nighttime time window to avoid false positives.
   trigger:
   - platform: numeric_state
     entity_id:
@@ -879,27 +881,17 @@
     - sensor.samsung_galaxy_s22_ultra_sleep_confidence
     below: 85
     id: Phil Not Sleeping
-  - platform: numeric_state
-    entity_id:
-    - sensor.slvdh_battery_level
-    for:
-      minutes: 15
-    above: 80
-    id: Steph Sleeping
-  - platform: numeric_state
-    entity_id:
-    - sensor.slvdh_floors_ascended
-    above: 1
-    enabled: false
   - platform: state
     entity_id:
     - sensor.slvdh_battery_state
     to: Charging
-    enabled: false
-  - platform: numeric_state
+    for:
+      minutes: 15
+    id: Steph Sleeping
+  - platform: state
     entity_id:
-    - sensor.slvdh_battery_level
-    below: 90
+    - sensor.slvdh_battery_state
+    to: Not Charging
     for:
       minutes: 15
     id: Steph Not Sleeping
@@ -910,9 +902,12 @@
       - condition: numeric_state
         entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
         above: 85
-      - condition: numeric_state
-        entity_id: sensor.slvdh_battery_level
-        above: 80
+      - condition: state
+        entity_id: sensor.slvdh_battery_state
+        state: Charging
+      - condition: time
+        after: '21:00:00'
+        before: '09:00:00'
       sequence:
       - target:
           entity_id: input_boolean.masterbed_sleeping

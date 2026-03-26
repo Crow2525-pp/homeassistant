@@ -42,6 +42,18 @@
   - condition: state
     entity_id: input_boolean.fan_manual_control_master
     state: 'off'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: climate.masterbed_room_ac
+      state: cool
+    - condition: trigger
+      id:
+      - heating_started
+      - climate_off
+      - bedtime
+      - fan_turned_off
+      - manual_control_disabled
   actions:
   - choose:
     - conditions:

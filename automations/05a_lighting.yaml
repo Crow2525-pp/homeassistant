@@ -734,27 +734,21 @@
     - media_player.tv
     to: paused
     for:
-      hours: 0
-      minutes: 0
-      seconds: 0
+      minutes: 2
     id: Paused
   - trigger: state
     entity_id:
     - media_player.tv
     to: 'off'
     for:
-      hours: 0
-      minutes: 0
-      seconds: 0
+      seconds: 30
     id: TurnedOff
   - trigger: state
     entity_id:
     - media_player.tv
     to: idle
     for:
-      hours: 0
-      minutes: 0
-      seconds: 0
+      seconds: 30
     id: TurnedOff
   conditions:
   - condition: state

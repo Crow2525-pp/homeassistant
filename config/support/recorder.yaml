@@ -8,6 +8,8 @@ exclude:
     - sensor.*_uptime
     - sensor.*_rx
     - sensor.*_tx
+    - sensor.*_last_temperature_date
+    - sensor.*_last_external_temperature_date
     - update.*
   domains:
     - button
