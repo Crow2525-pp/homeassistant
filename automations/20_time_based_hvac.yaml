@@ -866,6 +866,17 @@
       value_template: >
         {{ trigger.from_state is not none
            and trigger.from_state.state not in ['Home', 'Sleeping'] }}
+    # Only turn on if the room actually needs heating or cooling —
+    # avoids a race with the Re-check automation which would immediately
+    # turn the AC off again when comfort is Slightly Cool or Neutral.
+    - condition: state
+      entity_id: sensor.rumpus_indoor_comfort_ts
+      state:
+        - Cold
+        - Cool
+        - Slightly Warm
+        - Warm
+        - Hot
   actions:
     - action: climate.turn_on
       target:
