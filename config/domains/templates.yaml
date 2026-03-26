@@ -1165,7 +1165,7 @@
         {% endfor %}
         {% set otto_climate = states('climate.kids_room_ac') %}
         {% if otto_climate not in ['off', 'unavailable', 'unknown'] and otto.open %}
-          {% set mode = state_attr('climate.otto_s_ac', 'hvac_action') or 'running' %}
+          {% set mode = state_attr('climate.kid_s_ac', 'hvac_action') or 'running' %}
           {% if mode == 'cooling' %}
             {% set alerts.items = alerts.items + ["- Otto's Room AC: " ~ (otto.open | join(', '))] %}
           {% elif mode == 'heating' %}
