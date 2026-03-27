@@ -63,8 +63,9 @@
   description: >
     Turns climate entities back on when occupancy changes from Away or Holiday
     to Home or Sleeping. Each room's manual override flag is respected — rooms
-    under manual control are left untouched. Time-based automations then handle
-    preset and mode selection.
+    under manual control are left untouched. The living room only resumes when
+    occupancy returns to Home so Sleeping keeps it off overnight. Time-based
+    automations then handle preset and mode selection.
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -84,6 +85,9 @@
         - condition: state
           entity_id: input_boolean.climate_manual_control_living
           state: "off"
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
       then:
         - action: climate.turn_on
           target:

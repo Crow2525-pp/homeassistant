@@ -52,11 +52,12 @@
 - id: living_room_time_based_comfort
   alias: "HVAC - Living Room - Comfort (Wake/Bed Time)"
   description: >
-    At wake time, set comfort preset and decide heat/cool mode based on Indoor
-    Comfort thermal sensation (ASHRAE 55). At bed time, set frost+heat or
-    boost+cool if sleeping and uncomfortable; off if neutral or just home.
-    Also turns AC on when arriving home. Wake/bed triggers auto-clear manual
-    overrides.
+    At wake time, when occupancy is Home, set comfort preset and decide
+    heat/cool mode based on Indoor Comfort thermal sensation (ASHRAE 55). At
+    bed time, turn the living room AC off for the night. Also turns AC on when
+    occupancy returns to Home so daytime comfort logic can resume. The separate
+    living_room_preheat_530am automation still handles early-morning pre-heat.
+    Wake/bed triggers auto-clear manual overrides.
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -69,39 +70,30 @@
       id: bed_time
   actions:
     - choose:
-        # Occupancy change: turn on when arriving home/sleeping from away
+        # Occupancy change: turn on when entering Home from any non-Home state
         - conditions:
             - condition: trigger
               id: occupancy_change
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
             - condition: template
               value_template: >
                 {{ trigger.from_state is not none
-                   and trigger.from_state.state not in ['Home', 'Sleeping'] }}
+                   and trigger.from_state.state != 'Home' }}
           sequence:
             - action: climate.turn_on
               target:
                 entity_id: climate.living_room_ac_2
 
         # Wake time: auto-clear override, presence-gated comfort preset + heat/cool
+        # only after the house is back in Home mode
         - conditions:
             - condition: trigger
               id: wake_time
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Home
-                - condition: state
-                  entity_id: input_select.occupancy
-                  state: Sleeping
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Home
           sequence:
             - action: input_boolean.turn_off
               target:
@@ -147,7 +139,8 @@
                   target:
                     entity_id: climate.living_room_ac_2
 
-        # Bed time: auto-clear override, frost/boost if cold/hot, off if comfortable or just home
+        # Bed time: auto-clear override, then turn off overnight.
+        # Early-morning heat is handled separately by living_room_preheat_530am.
         - conditions:
             - condition: trigger
               id: bed_time
@@ -163,52 +156,9 @@
             - action: input_boolean.turn_off
               target:
                 entity_id: input_boolean.climate_manual_control_living
-            - choose:
-                - conditions:
-                    - condition: state
-                      entity_id: input_select.occupancy
-                      state: Sleeping
-                    - condition: state
-                      entity_id: sensor.living_room_indoor_comfort_ts
-                      state:
-                        - Cold
-                        - Cool
-                  sequence:
-                    - action: climate.set_preset_mode
-                      target:
-                        entity_id: climate.living_room_ac_2
-                      data:
-                        preset_mode: frost
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.living_room_ac_2
-                      data:
-                        hvac_mode: heat
-                - conditions:
-                    - condition: state
-                      entity_id: input_select.occupancy
-                      state: Sleeping
-                    - condition: state
-                      entity_id: sensor.living_room_indoor_comfort_ts
-                      state:
-                        - Slightly Warm
-                        - Warm
-                        - Hot
-                  sequence:
-                    - action: climate.set_preset_mode
-                      target:
-                        entity_id: climate.living_room_ac_2
-                      data:
-                        preset_mode: boost
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.living_room_ac_2
-                      data:
-                        hvac_mode: cool
-              default:
-                - action: climate.turn_off
-                  target:
-                    entity_id: climate.living_room_ac_2
+            - action: climate.turn_off
+              target:
+                entity_id: climate.living_room_ac_2
   mode: single
 
 # ============================================================================
@@ -1358,7 +1308,26 @@
           {% set bed = states('input_datetime.bedtime_living_room') %}
           {% set wake = states('input_datetime.wakeup_time_living_room') %}
           {{ not (now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake) }}
+        is_preheat_window: >
+          {% set preheat = states('input_datetime.preheat_time_living_room') %}
+          {% set wake = states('input_datetime.wakeup_time_living_room') %}
+          {% set now_time = now().strftime('%H:%M:%S') %}
+          {% if preheat in ['unknown', 'unavailable', ''] or wake in ['unknown', 'unavailable', ''] %}
+            false
+          {% else %}
+            {{ preheat <= now_time and now_time < wake }}
+          {% endif %}
     - choose:
+        - conditions:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
+            - condition: template
+              value_template: "{{ is_preheat_window | trim != 'True' }}"
+          sequence:
+            - action: climate.turn_off
+              target:
+                entity_id: climate.living_room_ac_2
         - conditions:
             - condition: template
               value_template: "{{ is_daytime }}"
