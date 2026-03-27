@@ -110,7 +110,6 @@
                 - condition: state
                   entity_id: binary_sensor.living_room_presence_active
                   state: "on"
-                  for: "00:30:00"
               then:
                 - action: climate.set_preset_mode
                   target:
@@ -1300,7 +1299,6 @@
     - trigger: state
       entity_id: binary_sensor.living_room_presence_active
       to: "on"
-      for: "00:30:00"
       id: presence_established
     - trigger: state
       entity_id: binary_sensor.living_room_presence_active
@@ -1371,7 +1369,6 @@
             - condition: state
               entity_id: binary_sensor.living_room_presence_active
               state: "on"
-              for: "00:30:00"
           sequence:
             - choose:
                 - conditions:

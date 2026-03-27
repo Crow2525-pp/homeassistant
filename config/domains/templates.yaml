@@ -1708,11 +1708,13 @@
       state_class: measurement
       icon: mdi:thermometer-lines
 
-# Living room presence — ON when any activity detected in living/kitchen area.
-# Used with for: "00:30:00" in HVAC automations to gate daytime climate control.
+# Living room presence — turns on immediately when any activity is detected in
+# the living/kitchen area, then stays on for 30 minutes after the last signal.
 - binary_sensor:
     - name: "Living Room Presence Active"
       unique_id: living_room_presence_active
+      delay_off:
+        minutes: 30
       state: >
         {{ is_state('binary_sensor.aqara_motion_and_light_sensor_p2_occupancy', 'on')
            or (not is_state('media_player.sony_kd_55x8500c', 'off')
