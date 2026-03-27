@@ -1804,17 +1804,23 @@
   description: >
     At the configured pre-heat time (input_datetime.preheat_time_living_room,
     default 05:30), if the living room feels cold (Indoor Comfort TS is Cold
-    or Cool), auto-clear manual override and set comfort preset + heat so the
-    room is warm before wake time.
+    or Cool) or the raw living room temperature is below 17°C, auto-clear
+    manual override and set comfort preset + heat so the room is warm before
+    wake time.
   triggers:
     - trigger: time
       at: input_datetime.preheat_time_living_room
   conditions:
-    - condition: state
-      entity_id: sensor.living_room_indoor_comfort_ts
-      state:
-        - Cold
-        - Cool
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: sensor.living_room_indoor_comfort_ts
+          state:
+            - Cold
+            - Cool
+        - condition: numeric_state
+          entity_id: sensor.living_room_temperature_offset
+          below: 17
     - condition: or
       conditions:
         - condition: state
