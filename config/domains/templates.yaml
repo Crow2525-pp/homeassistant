@@ -1708,6 +1708,23 @@
       state_class: measurement
       icon: mdi:thermometer-lines
 
+# Living room presence — turns on immediately when any activity is detected in
+# the living/kitchen area, then stays on for 30 minutes after the last signal.
+- binary_sensor:
+    - name: "Living Room Presence Active"
+      unique_id: living_room_presence_active
+      delay_off:
+        minutes: 30
+      state: >
+        {{ is_state('binary_sensor.aqara_motion_and_light_sensor_p2_occupancy', 'on')
+           or (not is_state('media_player.sony_kd_55x8500c', 'off')
+               and not is_state('media_player.sony_kd_55x8500c', 'unavailable'))
+           or is_state('media_player.spotify_philip_patterson', 'playing')
+           or is_state('input_boolean.dishwasher_on', 'on')
+           or is_state('input_boolean.washing_machine_on', 'on')
+           or is_state('binary_sensor.front_door_sensor_opening', 'on') }}
+      icon: "mdi:home-account"
+
 - light:
     - unique_id: tv_backlight
       name: "TV Back Lightstrip"
