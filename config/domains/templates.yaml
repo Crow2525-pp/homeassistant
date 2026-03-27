@@ -1725,6 +1725,38 @@
            or is_state('binary_sensor.front_door_sensor_opening', 'on') }}
       icon: "mdi:home-account"
 
+# ============================================================================
+# BEDTIME HVAC RECOMMENDATION
+# ============================================================================
+# Predictive recommendation based on last overnight low (Essendon Airport BOM).
+# If the prior night's min temp was at or below the threshold → Heat,
+# otherwise → Cool. Shown on dashboard alongside the manual selector so the
+# user can compare and decide whether to trust Auto.
+
+- sensor:
+    - unique_id: bedtime_hvac_recommendation
+      name: "Bedtime HVAC Recommendation"
+      icon: >
+        {% set min_temp = states('sensor.essendon_airport_min_temp') | float(99) %}
+        {% set threshold = states('input_number.bedtime_hvac_heat_threshold') | float(5) %}
+        {% if min_temp == 99 %}
+          mdi:help-circle-outline
+        {% elif min_temp <= threshold %}
+          mdi:radiator
+        {% else %}
+          mdi:snowflake
+        {% endif %}
+      state: >
+        {% set min_temp = states('sensor.essendon_airport_min_temp') | float(99) %}
+        {% set threshold = states('input_number.bedtime_hvac_heat_threshold') | float(5) %}
+        {% if min_temp == 99 %}
+          Unknown
+        {% elif min_temp <= threshold %}
+          Heat
+        {% else %}
+          Cool
+        {% endif %}
+
 - light:
     - unique_id: tv_backlight
       name: "TV Back Lightstrip"
