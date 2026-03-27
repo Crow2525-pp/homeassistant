@@ -1012,7 +1012,7 @@
         value_template: '{{ trigger.id == ''downstairs_toilet'' }}'
       sequence:
       - target:
-          entity_id: input_datetime.downstairs_toilet_last_cleaned
+          entity_id: input_datetime.main_toilet_last_cleaned
         data:
           timestamp: '{{ now().timestamp() }}'
         service: input_datetime.set_datetime
@@ -1344,7 +1344,7 @@
         entity: input_datetime.masterbed_toilet_last_cleaned
         interval: 7
       - name: Downstairs Toilet
-        entity: input_datetime.downstairs_toilet_last_cleaned
+        entity: input_datetime.main_toilet_last_cleaned
         interval: 7
       - name: Oma's Toilet
         entity: input_datetime.omas_toilet_last_cleaned

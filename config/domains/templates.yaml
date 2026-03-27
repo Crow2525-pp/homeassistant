@@ -1433,7 +1433,7 @@
 
     - name: "Downstairs Toilet Last Cleaned Date"
       unique_id: downstairs_toilet_last_cleaned_date
-      state: "{{ states('input_datetime.downstairs_toilet_last_cleaned') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.downstairs_toilet_last_cleaned') not in ['unknown', 'unavailable'] else 'Never' }}"
+      state: "{{ states('input_datetime.main_toilet_last_cleaned') | as_datetime | as_local | string | regex_replace(' .*', '') if states('input_datetime.main_toilet_last_cleaned') not in ['unknown', 'unavailable'] else 'Never' }}"
       icon: mdi:toilet
 
     - name: "Oma's Toilet Last Cleaned Date"
