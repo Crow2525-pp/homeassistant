@@ -2,9 +2,35 @@
 - id: master_bedroom_fan_climate_control
   alias: HVAC - Master Bedroom Fan Sync with Climate
   description: >
-    Syncs master bedroom fan with AC state. Fan speed scales with how far room
-    temp is above the cooling target. Overnight (bedtime→wakeup), the fan stays
-    on at low speed even when the AC cycles off, until wakeup.
+    Syncs the master bedroom ceiling fan with the AC (climate.masterbed_room_ac).
+
+    Fan speed scaling (based on current temp minus target temp):
+      <= 1°  → 16%  (lowest)
+      <= 2°  → 33%
+      <= 3°  → 50%
+      >  3°  → 66%
+    Speed updates live as temperatures change.
+
+    Overnight behaviour (bedtime → wakeup):
+      - If the AC is cooling at bedtime and the fan is off, the fan starts at
+        the scaled speed above.
+      - If the AC cycles off (or switches to heat) during the night, the fan
+        drops to 16% instead of turning off, keeping airflow until morning.
+      - At wakeup the fan turns off — unless the AC is still actively cooling,
+        in which case normal daytime speed-scaling takes over.
+
+    Daytime behaviour:
+      - Fan tracks cooling speed while AC is in cool mode.
+      - Fan turns off when AC switches to heat or off.
+
+    Manual override:
+      - When input_boolean.fan_manual_control_master is on, this automation is
+        blocked. When it is turned back off, the fan re-syncs to the current
+        AC state.
+
+    Note: The choose branches are evaluated in order. The overnight
+    cooling_stopped branch is checked before the daytime cooling_stopped
+    branch so that nighttime gets priority.
   triggers:
     - trigger: state
       entity_id: climate.masterbed_room_ac
@@ -30,10 +56,6 @@
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
       id: wakeup
-    - trigger: state
-      entity_id: fan.masterbedroom_fan
-      to: "off"
-      id: fan_turned_off
     - trigger: state
       entity_id: input_boolean.fan_manual_control_master
       to: "off"
@@ -107,12 +129,10 @@
               target:
                 entity_id: fan.masterbedroom_fan
 
-        # Bedtime or fan turned off overnight while AC cooling → restart fan
+        # Bedtime: if AC is cooling and fan is off, start the fan
         - conditions:
             - condition: trigger
-              id:
-                - bedtime
-                - fan_turned_off
+              id: bedtime
             - condition: state
               entity_id: climate.masterbed_room_ac
               state: cool
