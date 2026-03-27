@@ -1749,9 +1749,9 @@
   alias: "HVAC - Living Room - Pre-heat if Cold (Configurable Time)"
   description: >
     At the configured pre-heat time (input_datetime.preheat_time_living_room,
-    default 05:30), if the living room feels cold (Indoor Comfort TS is Cold
-    or Cool), auto-clear manual override and set comfort preset + heat so the
-    room is warm before wake time.
+    default 05:30), if the living room feels at least slightly cool (Indoor
+    Comfort TS is Slightly Cool, Cool, or Cold), auto-clear manual override
+    and set comfort preset + heat so the room is warm before wake time.
   triggers:
     - trigger: time
       at: input_datetime.preheat_time_living_room
@@ -1759,8 +1759,9 @@
     - condition: state
       entity_id: sensor.living_room_indoor_comfort_ts
       state:
-        - Cold
+        - Slightly Cool
         - Cool
+        - Cold
     - condition: or
       conditions:
         - condition: state
