@@ -215,8 +215,8 @@
   alias: "HVAC - Master Bedroom - Wake Up Comfort"
   description: >
     At wake time, auto-clear manual override, set comfort preset and decide
-    heat/cool based on Indoor Comfort thermal sensation. Cold/Cool → heat,
-    Slightly Warm+ → cool, Slightly Cool/Neutral → no mode change.
+    heat/cool based on Indoor Comfort thermal sensation. Cold/Cool/Slightly
+    Cool → heat, Slightly Warm+ → cool, Neutral → no mode change.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
@@ -246,6 +246,7 @@
               state:
                 - Cold
                 - Cool
+                - Slightly Cool
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -271,9 +272,9 @@
   alias: "HVAC - Master Bedroom - Bedtime"
   description: >
     At bedtime, auto-clear manual override, always set heat or cool — AC stays
-    on all night. Cold/Cool → frost+heat; any other valid TS → boost+cool
-    (favor cooling for sleep comfort). If sensor is unknown/unavailable, no
-    action (fail safe).
+    on all night. Cold/Cool/Slightly Cool → frost+heat; any warmer valid TS
+    → boost+cool (favor cooling for sleep comfort). If sensor is
+    unknown/unavailable, no action (fail safe).
   triggers:
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
@@ -298,6 +299,7 @@
               state:
                 - Cold
                 - Cool
+                - Slightly Cool
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -313,7 +315,6 @@
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
               state:
-                - Slightly Cool
                 - Neutral
                 - Slightly Warm
                 - Warm
@@ -1101,6 +1102,7 @@
       to:
         - Cold
         - Cool
+        - Slightly Cool
         - Slightly Warm
         - Warm
         - Hot
@@ -1132,12 +1134,24 @@
         # Comfort change: always allow — react immediately to discomfort
         - condition: trigger
           id: comfort_change
-        # Time trigger: only re-check if AC is already running
-        - condition: not
+        # Time trigger: re-check while running, or recover from off when
+        # comfort has drifted away from Neutral
+        - condition: and
           conditions:
-            - condition: state
-              entity_id: climate.masterbed_room_ac
-              state: "off"
+            - condition: trigger
+              id: time_trigger
+            - condition: or
+              conditions:
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: climate.masterbed_room_ac
+                      state: "off"
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: sensor.master_bedroom_indoor_comfort_ts
+                      state: Neutral
     # Fail safe: skip if sensor is unknown/unavailable
     - condition: not
       conditions:
@@ -1153,13 +1167,14 @@
           {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
           {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
     - choose:
-        # Cold/Cool → heat (night: frost preset; day: no preset change)
+        # Cold/Cool/Slightly Cool → heat (night: frost preset; day: no preset change)
         - conditions:
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
               state:
                 - Cold
                 - Cool
+                - Slightly Cool
           sequence:
             - if:
                 - condition: template
@@ -1198,12 +1213,11 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-        # Slightly Cool / Neutral — comfortable zone
+        # Neutral — comfortable zone
         - conditions:
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
               state:
-                - Slightly Cool
                 - Neutral
           sequence:
             - choose:
@@ -1223,13 +1237,12 @@
                       data:
                         hvac_mode: cool
               default:
-                # Day: only turn off if comfort has been stable 15+ min
-                # (prevents rapid on/off cycling near the Neutral boundary)
+                # Day: only turn off if Neutral has been stable 15+ min
+                # (prevents rapid on/off cycling near the comfort boundary)
                 - if:
                     - condition: state
                       entity_id: sensor.master_bedroom_indoor_comfort_ts
                       state:
-                        - Slightly Cool
                         - Neutral
                       for: "00:15:00"
                   then:
