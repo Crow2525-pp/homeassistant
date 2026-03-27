@@ -19,8 +19,10 @@
   alias: "Climate Override - Start Expiry Timer"
   description: >
     When any climate manual override is turned on, start the corresponding
-    4-hour expiry timer. If the override is toggled off and on again, the
-    timer restarts from 4 hours.
+    expiry timer. During nighttime (after bedtime, before wake time) the timer
+    is extended to last until wake time so it does not expire mid-sleep.
+    Outside nighttime the timer runs for the default 4 hours (14400 seconds).
+    If the override is toggled off and on again, the timer restarts.
   triggers:
     - trigger: state
       entity_id:
@@ -38,9 +40,40 @@
           input_boolean.climate_manual_control_otto: timer.climate_override_otto
           input_boolean.climate_manual_control_study: timer.climate_override_study
           input_boolean.climate_manual_control_rumpus: timer.climate_override_rumpus
+        bedtime_map:
+          input_boolean.climate_manual_control_living: input_datetime.bedtime_living_room
+          input_boolean.climate_manual_control_master: input_datetime.bedtime_master_bedroom
+          input_boolean.climate_manual_control_otto: input_datetime.bedtime_ottos_room
+          input_boolean.climate_manual_control_study: input_datetime.bedtime_ottos_room
+          input_boolean.climate_manual_control_rumpus: input_datetime.bedtime_rumpus
+        waketime_map:
+          input_boolean.climate_manual_control_living: input_datetime.wakeup_time_living_room
+          input_boolean.climate_manual_control_master: input_datetime.wakeup_time_master_bedroom
+          input_boolean.climate_manual_control_otto: input_datetime.wakeup_time_ottos_room
+          input_boolean.climate_manual_control_study: input_datetime.wakeup_time_ottos_room
+          input_boolean.climate_manual_control_rumpus: input_datetime.wakeup_time_rumpus
+        bed_entity: "{{ bedtime_map[trigger.entity_id] }}"
+        wake_entity: "{{ waketime_map[trigger.entity_id] }}"
+        bed_secs: >
+          {% set t = states(bed_entity) %}
+          {{ t[0:2] | int * 3600 + t[3:5] | int * 60 }}
+        wake_secs: >
+          {% set t = states(wake_entity) %}
+          {{ t[0:2] | int * 3600 + t[3:5] | int * 60 }}
+        now_secs: "{{ now().hour * 3600 + now().minute * 60 + now().second }}"
+        is_nighttime: "{{ now_secs >= bed_secs or now_secs < wake_secs }}"
+        secs_until_wake: >
+          {% if now_secs >= bed_secs %}
+            {{ (86400 - now_secs) + wake_secs }}
+          {% else %}
+            {{ wake_secs - now_secs }}
+          {% endif %}
+        override_secs: "{{ secs_until_wake | int if is_nighttime else 14400 }}"
     - action: timer.start
       target:
         entity_id: "{{ timer_map[trigger.entity_id] }}"
+      data:
+        duration: "{{ override_secs | int }}"
   mode: queued
   max: 5
 

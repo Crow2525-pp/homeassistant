@@ -583,8 +583,24 @@
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.climate_manual_control_living
+  - variables:
+      bed_secs: >
+        {% set t = states('input_datetime.bedtime_living_room') %}
+        {{ t[0:2] | int * 3600 + t[3:5] | int * 60 }}
+      wake_secs: >
+        {% set t = states('input_datetime.wakeup_time_living_room') %}
+        {{ t[0:2] | int * 3600 + t[3:5] | int * 60 }}
+      now_secs: "{{ now().hour * 3600 + now().minute * 60 + now().second }}"
+      is_nighttime: "{{ now_secs >= bed_secs or now_secs < wake_secs }}"
+      secs_until_wake: >
+        {% if now_secs >= bed_secs %}
+          {{ (86400 - now_secs) + wake_secs }}
+        {% else %}
+          {{ wake_secs - now_secs }}
+        {% endif %}
+      override_secs: "{{ secs_until_wake | int if is_nighttime else 14400 }}"
   - delay:
-      hours: 4
+      seconds: "{{ override_secs }}"
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.climate_manual_control_living
@@ -604,8 +620,24 @@
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.climate_manual_control_master
+  - variables:
+      bed_secs: >
+        {% set t = states('input_datetime.bedtime_master_bedroom') %}
+        {{ t[0:2] | int * 3600 + t[3:5] | int * 60 }}
+      wake_secs: >
+        {% set t = states('input_datetime.wakeup_time_master_bedroom') %}
+        {{ t[0:2] | int * 3600 + t[3:5] | int * 60 }}
+      now_secs: "{{ now().hour * 3600 + now().minute * 60 + now().second }}"
+      is_nighttime: "{{ now_secs >= bed_secs or now_secs < wake_secs }}"
+      secs_until_wake: >
+        {% if now_secs >= bed_secs %}
+          {{ (86400 - now_secs) + wake_secs }}
+        {% else %}
+          {{ wake_secs - now_secs }}
+        {% endif %}
+      override_secs: "{{ secs_until_wake | int if is_nighttime else 14400 }}"
   - delay:
-      hours: 4
+      seconds: "{{ override_secs }}"
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.climate_manual_control_master
@@ -625,8 +657,24 @@
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.climate_manual_control_otto
+  - variables:
+      bed_secs: >
+        {% set t = states('input_datetime.bedtime_ottos_room') %}
+        {{ t[0:2] | int * 3600 + t[3:5] | int * 60 }}
+      wake_secs: >
+        {% set t = states('input_datetime.wakeup_time_ottos_room') %}
+        {{ t[0:2] | int * 3600 + t[3:5] | int * 60 }}
+      now_secs: "{{ now().hour * 3600 + now().minute * 60 + now().second }}"
+      is_nighttime: "{{ now_secs >= bed_secs or now_secs < wake_secs }}"
+      secs_until_wake: >
+        {% if now_secs >= bed_secs %}
+          {{ (86400 - now_secs) + wake_secs }}
+        {% else %}
+          {{ wake_secs - now_secs }}
+        {% endif %}
+      override_secs: "{{ secs_until_wake | int if is_nighttime else 14400 }}"
   - delay:
-      hours: 4
+      seconds: "{{ override_secs }}"
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.climate_manual_control_otto
@@ -646,8 +694,24 @@
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.climate_manual_control_study
+  - variables:
+      bed_secs: >
+        {% set t = states('input_datetime.bedtime_ottos_room') %}
+        {{ t[0:2] | int * 3600 + t[3:5] | int * 60 }}
+      wake_secs: >
+        {% set t = states('input_datetime.wakeup_time_ottos_room') %}
+        {{ t[0:2] | int * 3600 + t[3:5] | int * 60 }}
+      now_secs: "{{ now().hour * 3600 + now().minute * 60 + now().second }}"
+      is_nighttime: "{{ now_secs >= bed_secs or now_secs < wake_secs }}"
+      secs_until_wake: >
+        {% if now_secs >= bed_secs %}
+          {{ (86400 - now_secs) + wake_secs }}
+        {% else %}
+          {{ wake_secs - now_secs }}
+        {% endif %}
+      override_secs: "{{ secs_until_wake | int if is_nighttime else 14400 }}"
   - delay:
-      hours: 4
+      seconds: "{{ override_secs }}"
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.climate_manual_control_study
@@ -666,8 +730,24 @@
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.climate_manual_control_rumpus
+  - variables:
+      bed_secs: >
+        {% set t = states('input_datetime.bedtime_rumpus') %}
+        {{ t[0:2] | int * 3600 + t[3:5] | int * 60 }}
+      wake_secs: >
+        {% set t = states('input_datetime.wakeup_time_rumpus') %}
+        {{ t[0:2] | int * 3600 + t[3:5] | int * 60 }}
+      now_secs: "{{ now().hour * 3600 + now().minute * 60 + now().second }}"
+      is_nighttime: "{{ now_secs >= bed_secs or now_secs < wake_secs }}"
+      secs_until_wake: >
+        {% if now_secs >= bed_secs %}
+          {{ (86400 - now_secs) + wake_secs }}
+        {% else %}
+          {{ wake_secs - now_secs }}
+        {% endif %}
+      override_secs: "{{ secs_until_wake | int if is_nighttime else 14400 }}"
   - delay:
-      hours: 4
+      seconds: "{{ override_secs }}"
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.climate_manual_control_rumpus
