@@ -15,7 +15,7 @@
     Overnight fan control for the master bedroom. While the AC is cooling,
     fan speed scales with the temperature difference. If the AC cycles off
     overnight the fan drops to 16% to keep airflow going. At wakeup the
-    fan turns off unless the AC is still actively cooling.
+    fan turns off unconditionally — daytime automation takes over.
   triggers:
     - trigger: state
       entity_id: climate.masterbed_room_ac
@@ -51,15 +51,10 @@
           id: wakeup
   actions:
     - choose:
-        # Wakeup: turn fan off unless AC is still cooling
+        # Wakeup: turn fan off
         - conditions:
             - condition: trigger
               id: wakeup
-            - condition: not
-              conditions:
-                - condition: state
-                  entity_id: climate.masterbed_room_ac
-                  state: cool
           sequence:
             - action: fan.turn_off
               target:
