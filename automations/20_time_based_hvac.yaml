@@ -225,9 +225,10 @@
   alias: "HVAC - Master Bedroom - Bedtime"
   description: >
     At bedtime, auto-clear manual override, always set heat or cool — AC stays
-    on all night. Cold/Cool → frost+heat; Slightly Cool/Neutral+ → boost+cool
-    (favor cooling for sleep comfort). If sensor is
-    unknown/unavailable, no action (fail safe).
+    on all night. User selects Heat/Cool/Auto via
+    input_select.bedtime_hvac_mode_master_bedroom. Heat → frost+heat,
+    Cool → boost+cool, Auto → sensor-based fallback. If sensor is
+    unknown/unavailable in Auto mode, no action (fail safe).
   triggers:
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
@@ -246,7 +247,43 @@
       target:
         entity_id: input_boolean.climate_manual_control_master
     - choose:
+        # --- User forced Heat ---
         - conditions:
+            - condition: state
+              entity_id: input_select.bedtime_hvac_mode_master_bedroom
+              state: Heat
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: frost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: heat
+        # --- User forced Cool ---
+        - conditions:
+            - condition: state
+              entity_id: input_select.bedtime_hvac_mode_master_bedroom
+              state: Cool
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: cool
+        # --- Auto: fall back to comfort sensor ---
+        - conditions:
+            - condition: state
+              entity_id: input_select.bedtime_hvac_mode_master_bedroom
+              state: Auto
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
               state:
@@ -264,6 +301,9 @@
               data:
                 hvac_mode: heat
         - conditions:
+            - condition: state
+              entity_id: input_select.bedtime_hvac_mode_master_bedroom
+              state: Auto
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
               state:
@@ -283,7 +323,7 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-      # default: sensor unknown/unavailable — no action (fail safe)
+      # default: Auto + sensor unknown/unavailable — no action (fail safe)
   mode: single
 
 - id: master_bedroom_away_mode
@@ -1497,8 +1537,39 @@
           {% set bed = states('input_datetime.bedtime_master_bedroom') %}
           {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
           {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
+        bedtime_mode: "{{ states('input_select.bedtime_hvac_mode_master_bedroom') }}"
     - choose:
-        # Cold/Cool → heat (night: frost preset; day: no preset change)
+        # --- Nighttime + user forced Heat: maintain heat, ignore comfort sensor ---
+        - conditions:
+            - condition: template
+              value_template: "{{ is_nighttime and bedtime_mode == 'Heat' }}"
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: frost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: heat
+        # --- Nighttime + user forced Cool: maintain cool, ignore comfort sensor ---
+        - conditions:
+            - condition: template
+              value_template: "{{ is_nighttime and bedtime_mode == 'Cool' }}"
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: cool
+        # --- Cold/Cool → heat (night Auto: frost preset; day: no preset change) ---
         - conditions:
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
@@ -1520,7 +1591,7 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
-        # Slightly Warm+ → cool (night: boost preset; day: no preset change)
+        # --- Slightly Warm+ → cool (night Auto: boost preset; day: no preset change) ---
         - conditions:
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
@@ -1543,7 +1614,7 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-        # Slightly Cool / Neutral — comfortable zone
+        # --- Slightly Cool / Neutral — comfortable zone ---
         - conditions:
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts

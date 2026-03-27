@@ -1725,6 +1725,34 @@
            or is_state('binary_sensor.front_door_sensor_opening', 'on') }}
       icon: "mdi:home-account"
 
+# ============================================================================
+# BEDTIME HVAC RECOMMENDATION
+# ============================================================================
+# Shows what the Auto logic would recommend for the master bedroom bedtime
+# HVAC mode, so the user can compare against their manual selection.
+
+- sensor:
+    - unique_id: master_bedroom_bedtime_hvac_recommendation
+      name: "Master Bedroom Bedtime HVAC Recommendation"
+      icon: >
+        {% set comfort = states('sensor.master_bedroom_indoor_comfort_ts') %}
+        {% if comfort in ['Cold', 'Cool'] %}
+          mdi:radiator
+        {% elif comfort in ['unknown', 'unavailable'] %}
+          mdi:help-circle-outline
+        {% else %}
+          mdi:snowflake
+        {% endif %}
+      state: >
+        {% set comfort = states('sensor.master_bedroom_indoor_comfort_ts') %}
+        {% if comfort in ['Cold', 'Cool'] %}
+          Heat
+        {% elif comfort in ['Slightly Cool', 'Neutral', 'Slightly Warm', 'Warm', 'Hot'] %}
+          Cool
+        {% else %}
+          Unknown
+        {% endif %}
+
 - light:
     - unique_id: tv_backlight
       name: "TV Back Lightstrip"
