@@ -1,194 +1,151 @@
 ---
 - id: master_bedroom_fan_climate_control
   alias: HVAC - Master Bedroom Fan Sync with Climate
-  description: 'Synchronizes master bedroom fan with versatile thermostat state. Fan
-    turns off when heating, adjusts speed based on cooling temperature difference,
-    and stays on overnight during AC cooling between bedtime and wake.
-
-    '
+  description: >
+    Syncs master bedroom fan with AC state. Fan speed scales with how far room
+    temp is above the cooling target. Overnight (bedtime→wakeup), the fan stays
+    on at low speed even when the AC cycles off, until wakeup.
   triggers:
-  - platform: state
-    entity_id: climate.masterbed_room_ac
-    to: cool
-    id: cooling_started
-  - platform: state
-    entity_id: climate.masterbed_room_ac
-    attribute: current_temperature
-    id: cooling_temp_changed
-  - platform: state
-    entity_id: climate.masterbed_room_ac
-    attribute: temperature
-    id: cooling_target_changed
-  - platform: state
-    entity_id: climate.masterbed_room_ac
-    to: heat
-    id: heating_started
-  - platform: state
-    entity_id: climate.masterbed_room_ac
-    to: 'off'
-    id: climate_off
-  - platform: time
-    at: input_datetime.bedtime_master_bedroom
-    id: bedtime
-  - platform: state
-    entity_id: fan.masterbedroom_fan
-    to: 'off'
-    id: fan_turned_off
-  - platform: state
-    entity_id: input_boolean.fan_manual_control_master
-    to: 'off'
-    id: manual_control_disabled
-  conditions:
-  - condition: state
-    entity_id: input_boolean.fan_manual_control_master
-    state: 'off'
-  - condition: or
-    conditions:
-    - condition: state
+    - trigger: state
       entity_id: climate.masterbed_room_ac
-      state: cool
-    - condition: trigger
-      id:
-      - heating_started
-      - climate_off
-      - bedtime
-      - fan_turned_off
-      - manual_control_disabled
+      to: cool
+      id: cooling_active
+    - trigger: state
+      entity_id: climate.masterbed_room_ac
+      attribute: current_temperature
+      id: cooling_active
+    - trigger: state
+      entity_id: climate.masterbed_room_ac
+      attribute: temperature
+      id: cooling_active
+    - trigger: state
+      entity_id: climate.masterbed_room_ac
+      to:
+        - heat
+        - "off"
+      id: cooling_stopped
+    - trigger: time
+      at: input_datetime.bedtime_master_bedroom
+      id: bedtime
+    - trigger: time
+      at: input_datetime.wakeup_time_master_bedroom
+      id: wakeup
+    - trigger: state
+      entity_id: fan.masterbedroom_fan
+      to: "off"
+      id: fan_turned_off
+    - trigger: state
+      entity_id: input_boolean.fan_manual_control_master
+      to: "off"
+      id: manual_control_disabled
+  conditions:
+    - condition: state
+      entity_id: input_boolean.fan_manual_control_master
+      state: "off"
   actions:
-  - choose:
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: cooling_started
-        - condition: trigger
-          id: cooling_temp_changed
-        - condition: trigger
-          id: cooling_target_changed
-      - condition: state
-        entity_id: climate.masterbed_room_ac
-        state: cool
-      sequence:
-      - service: fan.set_percentage
-        target:
-          entity_id: fan.masterbedroom_fan
-        data:
-          percentage: >
-            {% set current = state_attr('climate.masterbed_room_ac', 'current_temperature') %}
-            {% set target = state_attr('climate.masterbed_room_ac', 'temperature') %}
-            {% if current is number and target is number %}
-              {% set diff = current - target %}
-              {% if diff <= 1 %}
-                16
-              {% elif diff <= 2 %}
-                33
-              {% elif diff <= 3 %}
-                50
-              {% else %}
-                66
-              {% endif %}
-            {% else %}
-              16
-            {% endif %}
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: bedtime
-        - condition: trigger
-          id: fan_turned_off
-      - condition: state
-        entity_id: climate.masterbed_room_ac
-        state: cool
-      - condition: template
-        value_template: >
-          {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
-          {% set bed = states('input_datetime.bedtime_master_bedroom') %}
-          {% set now_time = now().strftime('%H:%M:%S') %}
-          {{ now_time >= bed or now_time < wake }}
-      - condition: state
-        entity_id: fan.masterbedroom_fan
-        state: 'off'
-      sequence:
-      - service: fan.set_percentage
-        target:
-          entity_id: fan.masterbedroom_fan
-        data:
-          percentage: >
-            {% set current = state_attr('climate.masterbed_room_ac', 'current_temperature') %}
-            {% set target = state_attr('climate.masterbed_room_ac', 'temperature') %}
-            {% if current is number and target is number %}
-              {% set diff = current - target %}
-              {% if diff <= 1 %}
-                16
-              {% elif diff <= 2 %}
-                33
-              {% elif diff <= 3 %}
-                50
-              {% elif diff <= 4 %}
-                66
-              {% else %}
-                66
-              {% endif %}
-            {% else %}
-              16
-            {% endif %}
-    - conditions:
-      - condition: trigger
-        id: heating_started
-      sequence:
-      - service: fan.turn_off
-        target:
-          entity_id: fan.masterbedroom_fan
-    - conditions:
-      - condition: trigger
-        id: climate_off
-      sequence:
-      - service: fan.turn_off
-        target:
-          entity_id: fan.masterbedroom_fan
-    - conditions:
-      - condition: trigger
-        id: manual_control_disabled
-      sequence:
-      - choose:
+    - choose:
+        # Wakeup: turn fan off unless AC is actively cooling
         - conditions:
-          - condition: state
-            entity_id: climate.masterbed_room_ac
-            state: cool
+            - condition: trigger
+              id: wakeup
+            - condition: not
+              conditions:
+                - condition: state
+                  entity_id: climate.masterbed_room_ac
+                  state: cool
           sequence:
-          - service: fan.set_percentage
-            target:
-              entity_id: fan.masterbedroom_fan
-            data:
-              percentage: >
-                {% set current = state_attr('climate.masterbed_room_ac', 'current_temperature') %}
-                {% set target = state_attr('climate.masterbed_room_ac', 'temperature') %}
-                {% if current is number and target is number %}
-                  {% set diff = current - target %}
-                  {% if diff <= 1 %}
-                    16
-                  {% elif diff <= 2 %}
-                    33
-                  {% elif diff <= 3 %}
-                    50
-                  {% else %}
-                    66
+            - action: fan.turn_off
+              target:
+                entity_id: fan.masterbedroom_fan
+
+        # AC cooling (or temp changed while cooling): scale fan speed
+        - conditions:
+            - condition: trigger
+              id: cooling_active
+            - condition: state
+              entity_id: climate.masterbed_room_ac
+              state: cool
+          sequence:
+            - action: fan.set_percentage
+              target:
+                entity_id: fan.masterbedroom_fan
+              data:
+                percentage: &fan_speed >
+                  {% set current = state_attr('climate.masterbed_room_ac',
+                  'current_temperature') %} {% set target =
+                  state_attr('climate.masterbed_room_ac', 'temperature') %} {% if
+                  current is number and target is number %}
+                    {% set diff = current - target %}
+                    {% if diff <= 1 %} 16
+                    {% elif diff <= 2 %} 33
+                    {% elif diff <= 3 %} 50
+                    {% else %} 66
+                    {% endif %}
+                  {% else %} 16
                   {% endif %}
-                {% else %}
-                  16
-                {% endif %}
+
+        # Overnight: AC stopped cooling → drop to low speed instead of off
         - conditions:
-          - condition: or
-            conditions:
-            - condition: state
-              entity_id: climate.masterbed_room_ac
-              state: heat
-            - condition: state
-              entity_id: climate.masterbed_room_ac
-              state: 'off'
+            - condition: trigger
+              id: cooling_stopped
+            - condition: time
+              after: input_datetime.bedtime_master_bedroom
+              before: input_datetime.wakeup_time_master_bedroom
           sequence:
-          - service: fan.turn_off
-            target:
+            - action: fan.set_percentage
+              target:
+                entity_id: fan.masterbedroom_fan
+              data:
+                percentage: 16
+
+        # Daytime: AC stopped cooling → turn fan off
+        - conditions:
+            - condition: trigger
+              id: cooling_stopped
+          sequence:
+            - action: fan.turn_off
+              target:
+                entity_id: fan.masterbedroom_fan
+
+        # Bedtime or fan turned off overnight while AC cooling → restart fan
+        - conditions:
+            - condition: trigger
+              id:
+                - bedtime
+                - fan_turned_off
+            - condition: state
+              entity_id: climate.masterbed_room_ac
+              state: cool
+            - condition: time
+              after: input_datetime.bedtime_master_bedroom
+              before: input_datetime.wakeup_time_master_bedroom
+            - condition: state
               entity_id: fan.masterbedroom_fan
+              state: "off"
+          sequence:
+            - action: fan.set_percentage
+              target:
+                entity_id: fan.masterbedroom_fan
+              data:
+                percentage: *fan_speed
+
+        # Manual control re-disabled → re-sync to current AC state
+        - conditions:
+            - condition: trigger
+              id: manual_control_disabled
+          sequence:
+            - if:
+                - condition: state
+                  entity_id: climate.masterbed_room_ac
+                  state: cool
+              then:
+                - action: fan.set_percentage
+                  target:
+                    entity_id: fan.masterbedroom_fan
+                  data:
+                    percentage: *fan_speed
+              else:
+                - action: fan.turn_off
+                  target:
+                    entity_id: fan.masterbedroom_fan
   mode: restart
