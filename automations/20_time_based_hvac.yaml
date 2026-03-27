@@ -15,12 +15,12 @@
 #
 # Heat/cool decision — daytime (wake→bed):
 #   Indoor Comfort Thermal Sensation (TS):
-#     Cold / Cool            → heat
-#     Slightly Cool / Neutral → off   (room is comfortable, no intervention)
+#     Cold / Cool / Slightly Cool → heat
+#     Neutral                    → off / no intervention
 #     Slightly Warm and above → cool
 #
 # Heat/cool decision — nighttime rechecks (bedrooms only, bed→wake):
-#   Same as bedtime: Cold/Cool → frost+heat; else → boost+cool
+#   Same as bedtime: Cold/Cool/Slightly Cool → frost+heat; else → boost+cool
 #   Preset is set with mode to prevent stale preset mismatch.
 #
 # The Indoor Comfort TS sensor uses ASHRAE 55 PMV calculations which factor in
@@ -60,8 +60,9 @@
   description: >
     At wake time, set comfort preset and decide heat/cool mode based on Indoor
     Comfort thermal sensation (ASHRAE 55). At bed time, set frost+heat or
-    boost+cool if cold/hot; off if comfortable or just home. Also turns AC on
-    when arriving home. Wake/bed triggers auto-clear manual overrides.
+    boost+cool if sleeping and uncomfortable; off if neutral or just home.
+    Also turns AC on when arriving home. Wake/bed triggers auto-clear manual
+    overrides.
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -123,6 +124,7 @@
                       state:
                         - Cold
                         - Cool
+                        - Slightly Cool
                   sequence:
                     - action: climate.set_hvac_mode
                       target:
@@ -169,6 +171,7 @@
                       state:
                         - Cold
                         - Cool
+                        - Slightly Cool
                   sequence:
                     - action: climate.set_preset_mode
                       target:
@@ -365,8 +368,8 @@
   alias: "HVAC - Kids Room - Wake Up Comfort"
   description: >
     At wake time, auto-clear manual override, set comfort preset and decide
-    heat/cool based on Indoor Comfort thermal sensation. Cold/Cool → heat,
-    Slightly Warm+ → cool, Slightly Cool/Neutral → no mode change.
+    heat/cool based on Indoor Comfort thermal sensation. Cold/Cool/Slightly
+    Cool → heat, Slightly Warm+ → cool, Neutral → no mode change.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_ottos_room
@@ -396,6 +399,7 @@
               state:
                 - Cold
                 - Cool
+                - Slightly Cool
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -421,9 +425,9 @@
   alias: "HVAC - Kids Room - Bedtime"
   description: >
     At bedtime, auto-clear manual override, always set heat or cool — AC stays
-    on all night. Cold/Cool → frost+heat; any other valid TS → boost+cool
-    (favor cooling for sleep comfort). If sensor is unknown/unavailable, no
-    action (fail safe).
+    on all night. Cold/Cool/Slightly Cool → frost+heat; any warmer valid TS
+    → boost+cool (favor cooling for sleep comfort). If sensor is
+    unknown/unavailable, no action (fail safe).
   triggers:
     - trigger: time
       at: input_datetime.bedtime_ottos_room
@@ -448,6 +452,7 @@
               state:
                 - Cold
                 - Cool
+                - Slightly Cool
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -463,7 +468,6 @@
             - condition: state
               entity_id: sensor.kids_room_indoor_comfort_ts
               state:
-                - Slightly Cool
                 - Neutral
                 - Slightly Warm
                 - Warm
@@ -516,8 +520,8 @@
   alias: "HVAC - Study Room - Wake Up Comfort"
   description: >
     At wake time, auto-clear manual override, set comfort preset and decide
-    heat/cool based on Indoor Comfort thermal sensation. Cold/Cool → heat,
-    Slightly Warm+ → cool.
+    heat/cool based on Indoor Comfort thermal sensation. Cold/Cool/Slightly
+    Cool → heat, Slightly Warm+ → cool.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_lucas_room
@@ -547,6 +551,7 @@
               state:
                 - Cold
                 - Cool
+                - Slightly Cool
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -571,8 +576,8 @@
 - id: lucas_room_time_based_night
   alias: "HVAC - Study Room - Bedtime"
   description: >
-    At bedtime, auto-clear manual override. If sleeping: frost+heat if cold,
-    boost+cool if hot, off if comfortable.
+    At bedtime, auto-clear manual override. If sleeping: frost+heat if
+    slightly cool or colder, boost+cool if hot, off if neutral.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_lucas_room
@@ -600,6 +605,7 @@
               state:
                 - Cold
                 - Cool
+                - Slightly Cool
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -674,6 +680,7 @@
       to:
         - Cold
         - Cool
+        - Slightly Cool
         - Slightly Warm
         - Warm
         - Hot
@@ -695,12 +702,24 @@
         # Comfort change: always allow — react immediately to discomfort
         - condition: trigger
           id: comfort_change
-        # Time trigger: only re-check if AC is already running
-        - condition: not
+        # Time trigger: re-check while running, or recover from off when
+        # comfort has drifted away from Neutral
+        - condition: and
           conditions:
-            - condition: state
-              entity_id: climate.study_room_ac
-              state: "off"
+            - condition: trigger
+              id: time_trigger
+            - condition: or
+              conditions:
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: climate.study_room_ac
+                      state: "off"
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: sensor.study_room_indoor_comfort_ts
+                      state: Neutral
   actions:
     - choose:
         - conditions:
@@ -737,8 +756,8 @@
 - id: rumpus_time_based_day
   alias: "HVAC - Rumpus - Wake Up Comfort"
   description: >
-    At wake time, auto-clear manual override, set comfort+heat if cold,
-    comfort+cool if warm, or turn off if comfortable.
+    At wake time, auto-clear manual override, set comfort+heat if slightly
+    cool or colder, comfort+cool if warm, or turn off if neutral.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_rumpus
@@ -763,6 +782,7 @@
               state:
                 - Cold
                 - Cool
+                - Slightly Cool
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -793,7 +813,7 @@
               data:
                 hvac_mode: cool
       default:
-        # Slightly Cool/Neutral — room is comfortable, turn off
+        # Neutral — room is comfortable, turn off
         - action: climate.turn_off
           target:
             entity_id: climate.rumpus_ac
@@ -802,9 +822,9 @@
 - id: rumpus_time_based_night
   alias: "HVAC - Rumpus - Bedtime"
   description: >
-    At bedtime, auto-clear manual override. If sleeping and cold: frost+heat
-    to prevent the room getting too cold. Otherwise turn off — no cooling
-    overnight in the rumpus.
+    At bedtime, auto-clear manual override. If sleeping and slightly cool or
+    colder: frost+heat to prevent the room getting too cold. Otherwise turn
+    off — no cooling overnight in the rumpus.
   triggers:
     - trigger: time
       at: input_datetime.bedtime_rumpus
@@ -832,6 +852,7 @@
               state:
                 - Cold
                 - Cool
+                - Slightly Cool
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -869,12 +890,13 @@
            and trigger.from_state.state not in ['Home', 'Sleeping'] }}
     # Only turn on if the room actually needs heating or cooling —
     # avoids a race with the Re-check automation which would immediately
-    # turn the AC off again when comfort is Slightly Cool or Neutral.
+    # turn the AC off again when comfort is Neutral.
     - condition: state
       entity_id: sensor.rumpus_indoor_comfort_ts
       state:
         - Cold
         - Cool
+        - Slightly Cool
         - Slightly Warm
         - Warm
         - Hot
@@ -904,6 +926,7 @@
       to:
         - Cold
         - Cool
+        - Slightly Cool
         - Slightly Warm
         - Warm
         - Hot
@@ -935,12 +958,24 @@
         # Comfort change: always allow — react immediately to discomfort
         - condition: trigger
           id: comfort_change
-        # Time trigger: only re-check if AC is already running
-        - condition: not
+        # Time trigger: re-check while running, or recover from off when
+        # comfort has drifted away from Neutral
+        - condition: and
           conditions:
-            - condition: state
-              entity_id: climate.rumpus_ac
-              state: "off"
+            - condition: trigger
+              id: time_trigger
+            - condition: or
+              conditions:
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: climate.rumpus_ac
+                      state: "off"
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: sensor.rumpus_indoor_comfort_ts
+                      state: Neutral
   actions:
     - choose:
         - conditions:
@@ -949,6 +984,7 @@
               state:
                 - Cold
                 - Cool
+                - Slightly Cool
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -969,7 +1005,7 @@
               data:
                 hvac_mode: cool
       default:
-        # Slightly Cool/Neutral — room is comfortable, turn off
+        # Neutral — room is comfortable, turn off
         - action: climate.turn_off
           target:
             entity_id: climate.rumpus_ac
@@ -979,16 +1015,15 @@
 # HALF-HOURLY MODE RE-CHECK
 # ============================================================================
 # Triggers:
-#   1. Comfort sensor changes to a non-neutral state (Cold, Cool, Slightly Warm,
-#      Warm, Hot) — reacts immediately, even if AC is off.
+#   1. Comfort sensor changes to a non-neutral state (Cold, Cool, Slightly Cool,
+#      Slightly Warm, Warm, Hot) — reacts immediately, even if AC is off.
 #   2. Every 30 minutes (time_pattern) — fallback re-check if AC is already
 #      running.
 #   3. Occupancy changes to Home or Sleeping from Away/Holiday — immediately
 #      set the correct hvac_mode after return-home turn-on.
 #
 # Only the hvac_mode is updated; preset is unchanged (except bedrooms at night).
-# In the Slightly Cool/Neutral zone, the AC is turned off (daytime only for
-# bedrooms).
+# In the Neutral zone, the AC is turned off (daytime only for bedrooms).
 # ============================================================================
 
 - id: living_room_hourly_recheck
@@ -1011,6 +1046,7 @@
       to:
         - Cold
         - Cool
+        - Slightly Cool
         - Slightly Warm
         - Warm
         - Hot
@@ -1042,12 +1078,24 @@
         # Comfort change: always allow — react immediately to discomfort
         - condition: trigger
           id: comfort_change
-        # Time trigger: only re-check if AC is already running
-        - condition: not
+        # Time trigger: re-check while running, or recover from off when
+        # comfort has drifted away from Neutral
+        - condition: and
           conditions:
-            - condition: state
-              entity_id: climate.living_room_ac_2
-              state: "off"
+            - condition: trigger
+              id: time_trigger
+            - condition: or
+              conditions:
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: climate.living_room_ac_2
+                      state: "off"
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: sensor.living_room_indoor_comfort_ts
+                      state: Neutral
   actions:
     - choose:
         - conditions:
@@ -1056,6 +1104,7 @@
               state:
                 - Cold
                 - Cool
+                - Slightly Cool
           sequence:
             - action: climate.set_hvac_mode
               target:
@@ -1076,7 +1125,7 @@
               data:
                 hvac_mode: cool
       default:
-        # Slightly Cool / Neutral — room is fine, stop the AC
+        # Neutral — room is fine, stop the AC
         - action: climate.turn_off
           target:
             entity_id: climate.living_room_ac_2
@@ -1272,6 +1321,7 @@
       to:
         - Cold
         - Cool
+        - Slightly Cool
         - Slightly Warm
         - Warm
         - Hot
@@ -1303,12 +1353,24 @@
         # Comfort change: always allow — react immediately to discomfort
         - condition: trigger
           id: comfort_change
-        # Time trigger: only re-check if AC is already running
-        - condition: not
+        # Time trigger: re-check while running, or recover from off when
+        # comfort has drifted away from Neutral
+        - condition: and
           conditions:
-            - condition: state
-              entity_id: climate.kids_room_ac
-              state: "off"
+            - condition: trigger
+              id: time_trigger
+            - condition: or
+              conditions:
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: climate.kids_room_ac
+                      state: "off"
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: sensor.kids_room_indoor_comfort_ts
+                      state: Neutral
     # Fail safe: skip if sensor is unknown/unavailable
     - condition: not
       conditions:
@@ -1324,13 +1386,14 @@
           {% set wake = states('input_datetime.wakeup_time_ottos_room') %}
           {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
     - choose:
-        # Cold/Cool → heat (night: frost preset; day: no preset change)
+        # Cold/Cool/Slightly Cool → heat (night: frost preset; day: no preset change)
         - conditions:
             - condition: state
               entity_id: sensor.kids_room_indoor_comfort_ts
               state:
                 - Cold
                 - Cool
+                - Slightly Cool
           sequence:
             - if:
                 - condition: template
@@ -1369,12 +1432,11 @@
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
-        # Slightly Cool / Neutral — comfortable zone
+        # Neutral — comfortable zone
         - conditions:
             - condition: state
               entity_id: sensor.kids_room_indoor_comfort_ts
               state:
-                - Slightly Cool
                 - Neutral
           sequence:
             - choose:
@@ -1394,13 +1456,12 @@
                       data:
                         hvac_mode: cool
               default:
-                # Day: only turn off if comfort has been stable 15+ min
-                # (prevents rapid on/off cycling near the Neutral boundary)
+                # Day: only turn off if Neutral has been stable 15+ min
+                # (prevents rapid on/off cycling near the comfort boundary)
                 - if:
                     - condition: state
                       entity_id: sensor.kids_room_indoor_comfort_ts
                       state:
-                        - Slightly Cool
                         - Neutral
                       for: "00:15:00"
                   then:
