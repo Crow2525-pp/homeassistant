@@ -1708,6 +1708,21 @@
       state_class: measurement
       icon: mdi:thermometer-lines
 
+# Living room presence — ON when any activity detected in living/kitchen area.
+# Used with for: "00:30:00" in HVAC automations to gate daytime climate control.
+- binary_sensor:
+    - name: "Living Room Presence Active"
+      unique_id: living_room_presence_active
+      state: >
+        {{ is_state('binary_sensor.aqara_motion_and_light_sensor_p2_occupancy', 'on')
+           or (not is_state('media_player.sony_kd_55x8500c', 'off')
+               and not is_state('media_player.sony_kd_55x8500c', 'unavailable'))
+           or is_state('media_player.spotify_philip_patterson', 'playing')
+           or is_state('input_boolean.dishwasher_on', 'on')
+           or is_state('input_boolean.washing_machine_on', 'on')
+           or is_state('binary_sensor.front_door_sensor_opening', 'on') }}
+      icon: "mdi:home-account"
+
 - light:
     - unique_id: tv_backlight
       name: "TV Back Lightstrip"
