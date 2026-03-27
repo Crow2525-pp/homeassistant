@@ -885,11 +885,11 @@
 - id: rumpus_time_based_night
   alias: "HVAC - Rumpus - Bedtime"
   description: >
-    Uses the rumpus bedtime normally. When Guest Staying is on, it follows the
-    master bedroom bedtime so the rumpus behaves like an adult guest room:
-    Cold/Cool → frost+heat; Slightly Cool/Neutral+ → boost+cool (favor
-    cooling for sleep comfort). If sensor is unknown/unavailable, no action
-    (fail safe).
+    When Guest Staying is on, the rumpus follows the master bedroom bedtime and
+    behaves like an adult guest room: Cold/Cool → frost+heat; Slightly
+    Cool/Neutral+ → boost+cool (favor cooling for sleep comfort). Otherwise,
+    bedtime forces the rumpus off. If sensor is unknown/unavailable, no action
+    is taken (fail safe).
   triggers:
     - trigger: time
       at: input_datetime.bedtime_rumpus
@@ -966,38 +966,16 @@
             - action: input_boolean.turn_off
               target:
                 entity_id: input_boolean.climate_manual_control_rumpus
-            - choose:
-                - conditions:
-                    - condition: state
-                      entity_id: input_select.occupancy
-                      state: Sleeping
-                    - condition: state
-                      entity_id: sensor.rumpus_indoor_comfort_ts
-                      state:
-                        - Cold
-                        - Cool
-                  sequence:
-                    - action: climate.set_preset_mode
-                      target:
-                        entity_id: climate.rumpus_ac
-                      data:
-                        preset_mode: frost
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.rumpus_ac
-                      data:
-                        hvac_mode: heat
-              default:
-                - action: climate.turn_off
-                  target:
-                    entity_id: climate.rumpus_ac
+            - action: climate.turn_off
+              target:
+                entity_id: climate.rumpus_ac
   mode: single
 
 - id: rumpus_away_mode
   alias: "HVAC - Rumpus - Occupancy On"
   description: >
-    Turn Rumpus on when arriving to Home/Sleeping, but only during the active
-    nighttime schedule.
+    Turn Rumpus on when arriving to Home/Sleeping during guest stays, but only
+    during the active guest nighttime schedule.
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -1009,19 +987,17 @@
     - condition: state
       entity_id: input_boolean.climate_manual_control_rumpus
       state: "off"
+    - condition: state
+      entity_id: input_boolean.study_occupied
+      state: "on"
     - condition: template
       value_template: >
         {{ trigger.from_state is not none
            and trigger.from_state.state not in ['Home', 'Sleeping'] }}
     - condition: template
       value_template: >
-        {% if is_state('input_boolean.study_occupied', 'on') %}
-          {% set bed = states('input_datetime.bedtime_master_bedroom') %}
-          {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
-        {% else %}
-          {% set bed = states('input_datetime.bedtime_rumpus') %}
-          {% set wake = states('input_datetime.wakeup_time_rumpus') %}
-        {% endif %}
+        {% set bed = states('input_datetime.bedtime_master_bedroom') %}
+        {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
         {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
     # Only turn on if the room actually needs heating or cooling —
     # avoids a race with the Re-check automation which would immediately
@@ -1133,10 +1109,6 @@
           {% set bed = states('input_datetime.bedtime_master_bedroom') %}
           {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
           {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
-        is_rumpus_nighttime: >
-          {% set bed = states('input_datetime.bedtime_rumpus') %}
-          {% set wake = states('input_datetime.wakeup_time_rumpus') %}
-          {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
     - choose:
         - conditions:
             - condition: state
@@ -1205,44 +1177,9 @@
                   target:
                     entity_id: climate.rumpus_ac
       default:
-        - if:
-            - condition: template
-              value_template: "{{ is_rumpus_nighttime }}"
-          then:
-            - choose:
-                - conditions:
-                    - condition: state
-                      entity_id: sensor.rumpus_indoor_comfort_ts
-                      state:
-                        - Cold
-                        - Cool
-                  sequence:
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.rumpus_ac
-                      data:
-                        hvac_mode: heat
-                - conditions:
-                    - condition: state
-                      entity_id: sensor.rumpus_indoor_comfort_ts
-                      state:
-                        - Slightly Warm
-                        - Warm
-                        - Hot
-                  sequence:
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.rumpus_ac
-                      data:
-                        hvac_mode: cool
-              default:
-                - action: climate.turn_off
-                  target:
-                    entity_id: climate.rumpus_ac
-          else:
-            - action: climate.turn_off
-              target:
-                entity_id: climate.rumpus_ac
+        - action: climate.turn_off
+          target:
+            entity_id: climate.rumpus_ac
   mode: single
 
 # ============================================================================
@@ -1404,33 +1341,42 @@
               target:
                 entity_id: climate.living_room_ac_2
       default:
-        - choose:
-            - conditions:
-                - condition: state
-                  entity_id: sensor.living_room_indoor_comfort_ts
-                  state:
-                    - Cold
-                    - Cool
-              sequence:
-                - action: climate.set_hvac_mode
+        - if:
+            - condition: state
+              entity_id: input_select.occupancy
+              state: Sleeping
+          then:
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: sensor.living_room_indoor_comfort_ts
+                      state:
+                        - Cold
+                        - Cool
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_ac_2
+                      data:
+                        hvac_mode: heat
+                - conditions:
+                    - condition: state
+                      entity_id: sensor.living_room_indoor_comfort_ts
+                      state:
+                        - Slightly Warm
+                        - Warm
+                        - Hot
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.living_room_ac_2
+                      data:
+                        hvac_mode: cool
+              default:
+                - action: climate.turn_off
                   target:
                     entity_id: climate.living_room_ac_2
-                  data:
-                    hvac_mode: heat
-            - conditions:
-                - condition: state
-                  entity_id: sensor.living_room_indoor_comfort_ts
-                  state:
-                    - Slightly Warm
-                    - Warm
-                    - Hot
-              sequence:
-                - action: climate.set_hvac_mode
-                  target:
-                    entity_id: climate.living_room_ac_2
-                  data:
-                    hvac_mode: cool
-          default:
+          else:
             - action: climate.turn_off
               target:
                 entity_id: climate.living_room_ac_2
