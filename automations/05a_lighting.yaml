@@ -298,26 +298,23 @@
     for:
       minutes: 2
     trigger: state
-  conditions:
-  - condition: numeric_state
-    entity_id: sun.sun
-    attribute: elevation
-    below: 5
-    enabled: false
-  - condition: numeric_state
-    entity_id: sensor.motion_sensor_illuminance_lux
-    below: 10
+  conditions: []
   actions:
   - choose:
     - conditions:
       - condition: state
         state: 'on'
         entity_id: binary_sensor.motion_sensor_motion
+      - condition: numeric_state
+        entity_id: sensor.motion_sensor_illuminance
+        below: 10
       sequence:
       - data: {}
         action: light.turn_on
         target:
-          area_id: front_entrance
+          entity_id:
+          - light.led_strip_office_light
+          - light.study_nook_lamp_socket_1_2
     - conditions:
       - condition: state
         state: 'off'
@@ -326,7 +323,9 @@
       - data: {}
         action: light.turn_off
         target:
-          area_id: front_entrance
+          entity_id:
+          - light.led_strip_office_light
+          - light.study_nook_lamp_socket_1_2
   mode: restart
 - id: '1752213080801'
   alias: Living Room - Motion Lighting
