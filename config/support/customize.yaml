@@ -38,8 +38,8 @@ climate.ottos_room_ac:
   category: climate
 
 input_boolean.climate_manual_control_otto:
-  friendly_name: "Otto's Room Climate Override"
-  room: ottos_room
+  friendly_name: "Kids Room Climate Override"
+  room: kids_room
   category: automation_control
   label: override
 
@@ -56,8 +56,14 @@ sensor.study_temperature:
   category: climate
 
 input_boolean.climate_manual_control_study:
-  friendly_name: "Henry's Room Climate Override"
-  room: henrys_room
+  friendly_name: "Study Room Climate Override"
+  room: study
+  category: automation_control
+  label: override
+
+input_boolean.climate_manual_control_rumpus:
+  friendly_name: "Rumpus Climate Override"
+  room: rumpus
   category: automation_control
   label: override
 
