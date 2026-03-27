@@ -674,6 +674,11 @@
     - trigger: time_pattern
       minutes: "/30"
       id: time_trigger
+    - trigger: state
+      entity_id: input_boolean.climate_manual_control_study
+      from: "on"
+      to: "off"
+      id: override_cleared
     # React immediately when comfort leaves the neutral zone
     - trigger: state
       entity_id: sensor.study_room_indoor_comfort_ts
@@ -702,6 +707,9 @@
         # Comfort change: always allow — react immediately to discomfort
         - condition: trigger
           id: comfort_change
+        # Manual override cleared: resume auto control immediately
+        - condition: trigger
+          id: override_cleared
         # Time trigger: re-check while running, or recover from off when
         # comfort has drifted away from Neutral
         - condition: and
@@ -913,6 +921,11 @@
       minutes: "/30"
       id: time_trigger
     - trigger: state
+      entity_id: input_boolean.climate_manual_control_rumpus
+      from: "on"
+      to: "off"
+      id: override_cleared
+    - trigger: state
       entity_id: input_select.occupancy
       to: Home
       id: occupancy_change
@@ -958,6 +971,9 @@
         # Comfort change: always allow — react immediately to discomfort
         - condition: trigger
           id: comfort_change
+        # Manual override cleared: resume auto control immediately
+        - condition: trigger
+          id: override_cleared
         # Time trigger: re-check while running, or recover from off when
         # comfort has drifted away from Neutral
         - condition: and
@@ -1021,6 +1037,8 @@
 #      running.
 #   3. Occupancy changes to Home or Sleeping from Away/Holiday — immediately
 #      set the correct hvac_mode after return-home turn-on.
+#   4. Manual override changes from on to off — immediately resume automatic
+#      control for that room.
 #
 # Only the hvac_mode is updated; preset is unchanged (except bedrooms at night).
 # In the Neutral zone, the AC is turned off (daytime only for bedrooms).
@@ -1032,6 +1050,11 @@
     - trigger: time_pattern
       minutes: "/30"
       id: time_trigger
+    - trigger: state
+      entity_id: input_boolean.climate_manual_control_living
+      from: "on"
+      to: "off"
+      id: override_cleared
     - trigger: state
       entity_id: input_select.occupancy
       to: Home
@@ -1078,6 +1101,9 @@
         # Comfort change: always allow — react immediately to discomfort
         - condition: trigger
           id: comfort_change
+        # Manual override cleared: resume auto control immediately
+        - condition: trigger
+          id: override_cleared
         # Time trigger: re-check while running, or recover from off when
         # comfort has drifted away from Neutral
         - condition: and
@@ -1138,6 +1164,11 @@
       minutes: "/30"
       id: time_trigger
     - trigger: state
+      entity_id: input_boolean.climate_manual_control_master
+      from: "on"
+      to: "off"
+      id: override_cleared
+    - trigger: state
       entity_id: input_select.occupancy
       to: Home
       id: occupancy_change
@@ -1183,6 +1214,9 @@
         # Comfort change: always allow — react immediately to discomfort
         - condition: trigger
           id: comfort_change
+        # Manual override cleared: resume auto control immediately
+        - condition: trigger
+          id: override_cleared
         # Time trigger: re-check while running, or recover from off when
         # comfort has drifted away from Neutral
         - condition: and
@@ -1308,6 +1342,11 @@
       minutes: "/30"
       id: time_trigger
     - trigger: state
+      entity_id: input_boolean.climate_manual_control_otto
+      from: "on"
+      to: "off"
+      id: override_cleared
+    - trigger: state
       entity_id: input_select.occupancy
       to: Home
       id: occupancy_change
@@ -1353,6 +1392,9 @@
         # Comfort change: always allow — react immediately to discomfort
         - condition: trigger
           id: comfort_change
+        # Manual override cleared: resume auto control immediately
+        - condition: trigger
+          id: override_cleared
         # Time trigger: re-check while running, or recover from off when
         # comfort has drifted away from Neutral
         - condition: and
