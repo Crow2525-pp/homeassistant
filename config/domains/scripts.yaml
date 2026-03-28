@@ -1038,10 +1038,13 @@ set_hidden_smartir_fan_mode:
     fan_mode:
       description: "Hidden SmartIR fan mode to send"
       example: "powerful"
+    hvac_mode_override:
+      description: "Optional explicit HVAC mode to use instead of reading current state"
+      example: "cool"
   sequence:
     - variables:
         device_commands: !include smartir_hidden_mode_commands.yaml
-        hvac_mode: "{{ states(climate_entity) }}"
+        hvac_mode: "{{ hvac_mode_override | default(states(climate_entity)) }}"
         device_code: >-
           {% if climate_entity in ['climate.masterbed_room_ac', 'climate.kids_room_ac', 'climate.study_room_ac'] %}
             1003
@@ -1098,44 +1101,92 @@ set_hidden_smartir_fan_mode:
             while the HVAC mode is {{ hvac_mode }} at target {{ target_temperature | default('n/a', true) }}.
   mode: single
 
-activate_masterbed_powerful_fan:
-  alias: "Master Bedroom Powerful Fan (20m)"
-  description: "Trigger the hidden 20-minute powerful fan mode while the master bedroom AC is already running"
+activate_masterbed_powerful_cool:
+  alias: "Master Bedroom Cool Powerful (20m)"
+  description: "Trigger the hidden 20-minute powerful fan mode in cool for the master bedroom AC"
   sequence:
     - action: script.set_hidden_smartir_fan_mode
       data:
         climate_entity: climate.masterbed_room_ac
         fan_mode: powerful
+        hvac_mode_override: cool
   mode: single
 
-activate_kids_powerful_fan:
-  alias: "Otto and Henry's Room Powerful Fan (20m)"
-  description: "Trigger the hidden 20-minute powerful fan mode while the kids room AC is already running"
+activate_masterbed_powerful_heat:
+  alias: "Master Bedroom Heat Powerful (20m)"
+  description: "Trigger the hidden 20-minute powerful fan mode in heat for the master bedroom AC"
+  sequence:
+    - action: script.set_hidden_smartir_fan_mode
+      data:
+        climate_entity: climate.masterbed_room_ac
+        fan_mode: powerful
+        hvac_mode_override: heat
+  mode: single
+
+activate_kids_powerful_cool:
+  alias: "Kids Room Cool Powerful (20m)"
+  description: "Trigger the hidden 20-minute powerful fan mode in cool for the kids room AC"
   sequence:
     - action: script.set_hidden_smartir_fan_mode
       data:
         climate_entity: climate.kids_room_ac
         fan_mode: powerful
+        hvac_mode_override: cool
   mode: single
 
-activate_study_powerful_fan:
-  alias: "Lucas's Room Powerful Fan (20m)"
-  description: "Trigger the hidden 20-minute powerful fan mode while the study AC is already running"
+activate_kids_powerful_heat:
+  alias: "Kids Room Heat Powerful (20m)"
+  description: "Trigger the hidden 20-minute powerful fan mode in heat for the kids room AC"
+  sequence:
+    - action: script.set_hidden_smartir_fan_mode
+      data:
+        climate_entity: climate.kids_room_ac
+        fan_mode: powerful
+        hvac_mode_override: heat
+  mode: single
+
+activate_study_powerful_cool:
+  alias: "Study Cool Powerful (20m)"
+  description: "Trigger the hidden 20-minute powerful fan mode in cool for the study AC"
   sequence:
     - action: script.set_hidden_smartir_fan_mode
       data:
         climate_entity: climate.study_room_ac
         fan_mode: powerful
+        hvac_mode_override: cool
   mode: single
 
-activate_rumpus_powerful_fan:
-  alias: "Rumpus Powerful Fan (20m)"
-  description: "Trigger the hidden 20-minute powerful fan mode while the rumpus AC is already running"
+activate_study_powerful_heat:
+  alias: "Study Heat Powerful (20m)"
+  description: "Trigger the hidden 20-minute powerful fan mode in heat for the study AC"
+  sequence:
+    - action: script.set_hidden_smartir_fan_mode
+      data:
+        climate_entity: climate.study_room_ac
+        fan_mode: powerful
+        hvac_mode_override: heat
+  mode: single
+
+activate_rumpus_powerful_cool:
+  alias: "Rumpus Cool Powerful (20m)"
+  description: "Trigger the hidden 20-minute powerful fan mode in cool for the rumpus AC"
   sequence:
     - action: script.set_hidden_smartir_fan_mode
       data:
         climate_entity: climate.rumpus_ac
         fan_mode: powerful
+        hvac_mode_override: cool
+  mode: single
+
+activate_rumpus_powerful_heat:
+  alias: "Rumpus Heat Powerful (20m)"
+  description: "Trigger the hidden 20-minute powerful fan mode in heat for the rumpus AC"
+  sequence:
+    - action: script.set_hidden_smartir_fan_mode
+      data:
+        climate_entity: climate.rumpus_ac
+        fan_mode: powerful
+        hvac_mode_override: heat
   mode: single
 
 activate_rumpus_quiet_fan:
