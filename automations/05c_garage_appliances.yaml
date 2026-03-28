@@ -236,8 +236,8 @@
           entity_id: media_player.kitchen
       start_appliance_power: 10
       include_start_notify: enable_start_notify_options
-      end_appliance_power: 10
-      end_time_delay: 1
+      end_appliance_power: 3
+      end_time_delay: 5
       start_time_delay: 1
       end_repeat_count: 1
       start_message: YES! Another load of washing is ON :)
