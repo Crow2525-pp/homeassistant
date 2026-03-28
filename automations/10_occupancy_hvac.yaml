@@ -1,11 +1,13 @@
 ---
 # ============================================================================
-# OCCUPANCY-BASED HVAC AUTOMATIONS
+# OCCUPANCY-BASED HVAC & MEDIA AUTOMATIONS
 # ============================================================================
 # Automatically turns all climate/HVAC entities on or off based on the
-# occupancy selector (input_select.occupancy).
+# occupancy selector (input_select.occupancy). Also shuts off living-room
+# media devices (WiiM amp, TV) when away — unless guest mode is active.
 #
 # Away / Holiday → turn off ALL climate entities (energy saving)
+#                → turn off living-room media (unless guest mode is on)
 # Home / Sleeping (returning from Away or Holiday) → turn on active rooms only
 #   per-room, respecting each room's manual override flag.
 #
@@ -22,16 +24,19 @@
 #   - Away shutdown includes all rooms regardless of disabled status (energy safety)
 #   - Return-home turn-on respects per-room manual override flags
 #   - Time-based automations (20_time_based_hvac.yaml) handle preset/mode after power-on
+#   - Media shutoff respects guest mode (input_boolean.study_occupied)
 # ============================================================================
 
 # ----------------------------------------------------------------------------
 # AWAY / HOLIDAY  →  Turn off all HVAC
 # ----------------------------------------------------------------------------
 - id: occupancy_hvac_away_shutdown
-  alias: "Occupancy - HVAC Off When Away or Holiday"
+  alias: "Occupancy - Leaving Turn Off (HVAC / Media)"
   description: >
-    Turns off every climate entity when the household becomes Away or goes on
-    Holiday. No manual-override gate — energy safety takes priority.
+    Turns off HVAC and media when the household goes Away or Holiday.
+    HVAC turn-off is unconditional (energy safety). Media devices only
+    turn off when guest mode (input_boolean.study_occupied) is off, so
+    guests can keep using media while the household is away.
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -53,6 +58,18 @@
           - climate.study_room_ac
           - climate.henry_s_room_versatile_thermostat
           - climate.rumpus_ac
+    # Turn off living-room media devices only when guest mode is off
+    - if:
+        - condition: state
+          entity_id: input_boolean.study_occupied
+          state: "off"
+      then:
+        - action: media_player.turn_off
+          target:
+            entity_id: media_player.living_room_wiimamp
+        - action: remote.turn_off
+          target:
+            entity_id: remote.sony_kd_55x8500c
   mode: single
 
 # ----------------------------------------------------------------------------
