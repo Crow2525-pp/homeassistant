@@ -44,7 +44,7 @@
       area_id:
       - front_entrance
       - master_bedroom
-      - back_garden
+      - outside
     data:
       brightness_pct: 100
   mode: single
@@ -128,7 +128,7 @@
     target:
       area_id:
       - master_bedroom
-      - back_garden
+      - outside
     action: light.turn_off
   mode: single
 - id: '1649148675412'
@@ -199,7 +199,7 @@
     target:
       area_id:
       - master_bedroom
-      - back_garden
+      - outside
       - front_entrance
     action: light.turn_off
   mode: single
@@ -371,7 +371,7 @@
         action: light.turn_on
         target:
           area_id:
-          - back_garden
+          - outside
           entity_id: light.lounge
     - conditions:
       - condition: trigger
@@ -397,7 +397,7 @@
         data: {}
         target:
           entity_id: light.lounge
-          area_id: back_garden
+          area_id: outside
     - conditions:
       - condition: trigger
         id:
@@ -412,7 +412,7 @@
         data: {}
         target:
           entity_id: light.lounge
-          area_id: back_garden
+          area_id: outside
   mode: restart
 - id: '1694596580092'
   alias: Living Room - Sync TV Power and Lighting
