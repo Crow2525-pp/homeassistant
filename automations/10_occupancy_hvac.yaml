@@ -1,13 +1,12 @@
 ---
 # ============================================================================
-# OCCUPANCY-BASED HVAC & MEDIA AUTOMATIONS
+# OCCUPANCY-BASED HVAC, MEDIA & LIGHTING AUTOMATIONS
 # ============================================================================
-# Automatically turns all climate/HVAC entities on or off based on the
-# occupancy selector (input_select.occupancy). Also shuts off living-room
-# media devices (WiiM amp, TV) when away — unless guest mode is active.
+# Automatically manages climate, media, and lighting based on the occupancy
+# selector (input_select.occupancy).
 #
-# Away / Holiday → turn off ALL climate entities (energy saving)
-#                → turn off living-room media (unless guest mode is on)
+# Away / Holiday (guest mode OFF) → turn off ALL: HVAC, media, lights
+# Away / Holiday (guest mode ON)  → skip shutdown (guests are present)
 # Home / Sleeping (returning from Away or Holiday) → turn on active rooms only
 #   per-room, respecting each room's manual override flag.
 #
@@ -21,22 +20,22 @@
 #   Study/Lucas   : climate.study_room_ac, climate.henry_s_room_versatile_thermostat
 #
 # Notes:
-#   - Away shutdown includes all rooms regardless of disabled status (energy safety)
+#   - Guest mode (input_boolean.study_occupied) gates the entire away shutdown
+#   - Guest mode requires explicit notification response (no timeout default)
 #   - Return-home turn-on respects per-room manual override flags
 #   - Time-based automations (20_time_based_hvac.yaml) handle preset/mode after power-on
-#   - Media shutoff respects guest mode (input_boolean.study_occupied)
 # ============================================================================
 
 # ----------------------------------------------------------------------------
-# AWAY / HOLIDAY  →  Turn off all HVAC
+# AWAY / HOLIDAY  →  Turn off everything (unless guests are present)
 # ----------------------------------------------------------------------------
 - id: occupancy_hvac_away_shutdown
-  alias: "Occupancy - Leaving Turn Off (HVAC / Media)"
+  alias: "Occupancy - Leaving Turn Off (HVAC / Media / Lights)"
   description: >
-    Turns off HVAC and media when the household goes Away or Holiday.
-    HVAC turn-off is unconditional (energy safety). Media devices only
-    turn off when guest mode (input_boolean.study_occupied) is off, so
-    guests can keep using media while the household is away.
+    Turns off HVAC, media, and lights when the household goes Away or Holiday.
+    Entire shutdown is skipped when guest mode (input_boolean.study_occupied)
+    is on — guest mode requires an explicit notification response, so if it
+    is active a guest is confirmed present and everything should stay on.
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -44,7 +43,10 @@
     - trigger: state
       entity_id: input_select.occupancy
       to: Holiday
-  conditions: []
+  conditions:
+    - condition: state
+      entity_id: input_boolean.study_occupied
+      state: "off"
   actions:
     - action: climate.turn_off
       target:
@@ -58,18 +60,22 @@
           - climate.study_room_ac
           - climate.henry_s_room_versatile_thermostat
           - climate.rumpus_ac
-    # Turn off living-room media devices only when guest mode is off
-    - if:
-        - condition: state
-          entity_id: input_boolean.study_occupied
-          state: "off"
-      then:
-        - action: media_player.turn_off
-          target:
-            entity_id: media_player.living_room_wiimamp
-        - action: remote.turn_off
-          target:
-            entity_id: remote.sony_kd_55x8500c
+    - action: media_player.turn_off
+      target:
+        entity_id: media_player.living_room_wiimamp
+    - action: remote.turn_off
+      target:
+        entity_id: remote.sony_kd_55x8500c
+    - action: light.turn_off
+      target:
+        entity_id:
+          - light.lounge
+          - light.masterbed_lights
+          - light.reading_light
+          - light.sleeping_light_2
+          - light.study_ceiling_light
+          - light.tv_back_lightstrip
+          - light.outdoor_switch_socket_1
   mode: single
 
 # ----------------------------------------------------------------------------
