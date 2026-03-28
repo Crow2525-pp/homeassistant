@@ -1,0 +1,121 @@
+---
+# ============================================================================
+# GUEST DEVICE DETECTION
+# ============================================================================
+# Detects when an unknown device connects to the home WiFi network via the
+# UniFi integration and sends an actionable notification to activate guest mode.
+#
+# Known household devices are listed in the template below. Any UniFi device
+# tracker that transitions to 'home' and is NOT in this list will trigger
+# a notification to both phones.
+#
+# To add a new known device: add its device_tracker entity_id to the
+# 'known_devices' list in the template trigger below.
+# ============================================================================
+
+- id: guest_device_detected_notification
+  alias: "Occupancy - Guest Device Detected on WiFi"
+  description: >
+    Sends an actionable notification to both phones when an unrecognised device
+    connects to the home WiFi. Tapping the action activates guest mode
+    (input_boolean.study_occupied). Only fires when occupancy is Home or
+    Sleeping and guest mode is not already on.
+  triggers:
+    - trigger: template
+      value_template: >
+        {% set known_devices = [
+          'device_tracker.unifi_default_b8_7b_d4_f8_8a_31',
+          'device_tracker.unifi_default_1c_f2_9a_0b_34_9e',
+          'device_tracker.unifi_default_2e_0d_2c_65_84_9c',
+          'device_tracker.unifi_default_00_22_6c_33_96_09',
+          'device_tracker.unifi_default_76_23_a6_ee_d2_0c',
+          'device_tracker.unifi_default_8c_8c_aa_9d_77_b5',
+          'device_tracker.unifi_default_34_5a_60_a4_cb_fb',
+          'device_tracker.unifi_default_c4_dd_57_78_bd_2c',
+          'device_tracker.unifi_default_0c_7e_24_58_96_67',
+          'device_tracker.unifi_default_b8_f7_75_20_3f_c3',
+          'device_tracker.unifi_default_c6_35_53_da_d0_1b'
+        ] %}
+        {% set unknown_home = states.device_tracker
+          | selectattr('entity_id', 'match', 'device_tracker\\.unifi_default_')
+          | selectattr('state', 'eq', 'home')
+          | rejectattr('entity_id', 'in', known_devices)
+          | list | count %}
+        {{ unknown_home > 0 }}
+  conditions:
+    - condition: state
+      entity_id: input_boolean.study_occupied
+      state: "off"
+    - condition: state
+      entity_id: input_select.occupancy
+      state:
+        - Home
+        - Sleeping
+  actions:
+    - variables:
+        known_devices:
+          - device_tracker.unifi_default_b8_7b_d4_f8_8a_31
+          - device_tracker.unifi_default_1c_f2_9a_0b_34_9e
+          - device_tracker.unifi_default_2e_0d_2c_65_84_9c
+          - device_tracker.unifi_default_00_22_6c_33_96_09
+          - device_tracker.unifi_default_76_23_a6_ee_d2_0c
+          - device_tracker.unifi_default_8c_8c_aa_9d_77_b5
+          - device_tracker.unifi_default_34_5a_60_a4_cb_fb
+          - device_tracker.unifi_default_c4_dd_57_78_bd_2c
+          - device_tracker.unifi_default_0c_7e_24_58_96_67
+          - device_tracker.unifi_default_b8_f7_75_20_3f_c3
+          - device_tracker.unifi_default_c6_35_53_da_d0_1b
+        new_devices: >
+          {% set result = states.device_tracker
+            | selectattr('entity_id', 'match', 'device_tracker\\.unifi_default_')
+            | selectattr('state', 'eq', 'home')
+            | rejectattr('entity_id', 'in', known_devices)
+            | map(attribute='name')
+            | list %}
+          {{ result | join(', ') if result | length > 0 else 'Unknown device' }}
+    - action: notify.mobile_app_samsung_galaxy_s22_ultra
+      data:
+        title: "Guest Device Detected"
+        message: "New device on WiFi: {{ new_devices }}. Activate guest mode?"
+        data:
+          actions:
+            - action: ACTIVATE_GUEST_MODE
+              title: "Activate Guest Mode"
+            - action: DISMISS_GUEST_ALERT
+              title: "Dismiss"
+    - action: notify.mobile_app_slvdh
+      data:
+        title: "Guest Device Detected"
+        message: "New device on WiFi: {{ new_devices }}. Activate guest mode?"
+        data:
+          actions:
+            - action: ACTIVATE_GUEST_MODE
+              title: "Activate Guest Mode"
+            - action: DISMISS_GUEST_ALERT
+              title: "Dismiss"
+  mode: single
+
+- id: guest_mode_activate_from_notification
+  alias: "Occupancy - Activate Guest Mode from Notification"
+  description: >
+    Turns on guest mode (input_boolean.study_occupied) when the user taps the
+    actionable notification button from the guest device detection alert.
+  triggers:
+    - trigger: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: ACTIVATE_GUEST_MODE
+  conditions: []
+  actions:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.study_occupied
+    - action: notify.mobile_app_samsung_galaxy_s22_ultra
+      data:
+        title: "Guest Mode Activated"
+        message: "Guest mode is now on. Study and rumpus rooms will follow guest schedules."
+    - action: notify.mobile_app_slvdh
+      data:
+        title: "Guest Mode Activated"
+        message: "Guest mode is now on. Study and rumpus rooms will follow guest schedules."
+  mode: single
