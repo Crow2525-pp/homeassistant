@@ -40,18 +40,24 @@
     manual triggers.
   triggers:
   - at: '21:00:00'
+    id: fallback_time
     enabled: false
     trigger: time
   - entity_id:
     - input_select.occupancy
     from: Home
+    id: occupancy_sleeping
     to: Sleeping
     trigger: state
-  - at: input_datetime.bedtime_phil_steph
+  - at: input_datetime.bedtime_master_bedroom
+    id: bedtime_time
     trigger: time
   - trigger: numeric_state
+    id: sleep_confidence
     entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
     above: 95
+    for:
+      minutes: 10
   conditions:
   - condition: time
     before: 06:00:00
@@ -64,6 +70,19 @@
     - fri
     - sat
     after: '19:00:00'
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: alarm_control_panel.alarmo
+      state: armed_night
+  - condition: or
+    conditions:
+    - condition: not
+      conditions:
+      - condition: trigger
+        id: sleep_confidence
+    - condition: time
+      before: 01:00:00
   actions:
   - choose:
     - conditions:
@@ -111,10 +130,16 @@
     - action: alarm_control_panel.alarm_arm_night
       target:
         entity_id: alarm_control_panel.alarmo
-  - action: notify.mobile_app_samsung_galaxy_s22_ultra
-    data:
-      message: Alarmo Armed
-    enabled: true
+  - choose:
+    - conditions:
+      - condition: not
+        conditions:
+        - condition: trigger
+          id: occupancy_sleeping
+      sequence:
+      - action: notify.mobile_app_samsung_galaxy_s22_ultra
+        data:
+          message: Alarmo Armed
   - data:
       message: Home has detected youre not at home. Are you coming home?
       title: 'Action: are you coming home tonight?'
@@ -126,18 +151,26 @@
   description: Disarms Alarmo when someone wakes up during the early-morning routine.
   trigger:
   - trigger: numeric_state
+    id: sleep_confidence
     entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
     below: 80
+    for:
+      minutes: 10
   - trigger: numeric_state
+    id: floors_descended
     entity_id: sensor.slvdh_floors_descended
     above: 1
   - platform: time
+    id: morning_failsafe
     at: 07:00:00
   condition:
   - condition: state
     entity_id: binary_sensor.someone_home
     state: 'on'
     alias: Someone Home
+  - condition: time
+    after: 05:00:00
+    before: 09:00:00
   - condition: state
     entity_id: alarm_control_panel.alarmo
     state: armed_night

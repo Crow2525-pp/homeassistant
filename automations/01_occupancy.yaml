@@ -112,7 +112,7 @@
     above: 99
     enabled: false
   - platform: time
-    at: input_datetime.wakeup_time_phil_steph
+    at: input_datetime.wakeup_time_master_bedroom
   - platform: state
     entity_id:
     - input_button.wake_up_start
