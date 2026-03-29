@@ -27,7 +27,7 @@
 # will fail safe (no action on unknown/unavailable sensor states).
 #
 # Sensor sources (all Indoor Comfort Thermal Sensation):
-# - Living Room:    sensor.living_room_indoor_comfort_ts
+# - Living Room:    sensor.living_room_thermal_comfort_ts
 # - Rumpus:         sensor.rumpus_indoor_comfort_ts
 # - Master Bedroom: sensor.master_bedroom_indoor_comfort_ts
 # - Kids Room:      sensor.kids_room_indoor_comfort_ts
@@ -111,7 +111,7 @@
                 - choose:
                     - conditions:
                         - condition: state
-                          entity_id: sensor.living_room_indoor_comfort_ts
+                          entity_id: sensor.living_room_thermal_comfort_ts
                           state:
                             - Cold
                             - Cool
@@ -123,7 +123,7 @@
                             hvac_mode: heat
                     - conditions:
                         - condition: state
-                          entity_id: sensor.living_room_indoor_comfort_ts
+                          entity_id: sensor.living_room_thermal_comfort_ts
                           state:
                             - Slightly Warm
                             - Warm
@@ -1433,7 +1433,7 @@
       id: occupancy_change
     # React immediately when comfort leaves the neutral zone
     - trigger: state
-      entity_id: sensor.living_room_indoor_comfort_ts
+      entity_id: sensor.living_room_thermal_comfort_ts
       to:
         - Cold
         - Cool
@@ -1500,7 +1500,7 @@
                 - condition: not
                   conditions:
                     - condition: state
-                      entity_id: sensor.living_room_indoor_comfort_ts
+                      entity_id: sensor.living_room_thermal_comfort_ts
                       state: Neutral
   actions:
     - variables:
@@ -1538,7 +1538,7 @@
             - choose:
                 - conditions:
                     - condition: state
-                      entity_id: sensor.living_room_indoor_comfort_ts
+                      entity_id: sensor.living_room_thermal_comfort_ts
                       state:
                         - Cold
                         - Cool
@@ -1550,7 +1550,7 @@
                         hvac_mode: heat
                 - conditions:
                     - condition: state
-                      entity_id: sensor.living_room_indoor_comfort_ts
+                      entity_id: sensor.living_room_thermal_comfort_ts
                       state:
                         - Slightly Warm
                         - Warm
@@ -1576,7 +1576,7 @@
         - choose:
             - conditions:
                 - condition: state
-                  entity_id: sensor.living_room_indoor_comfort_ts
+                  entity_id: sensor.living_room_thermal_comfort_ts
                   state:
                     - Cold
                     - Cool
@@ -1588,7 +1588,7 @@
                     hvac_mode: heat
             - conditions:
                 - condition: state
-                  entity_id: sensor.living_room_indoor_comfort_ts
+                  entity_id: sensor.living_room_thermal_comfort_ts
                   state:
                     - Slightly Warm
                     - Warm
@@ -1980,7 +1980,7 @@
       at: input_datetime.preheat_time_living_room
   conditions:
     - condition: state
-      entity_id: sensor.living_room_indoor_comfort_ts
+      entity_id: sensor.living_room_thermal_comfort_ts
       state:
         - Cold
         - Cool
