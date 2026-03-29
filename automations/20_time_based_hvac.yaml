@@ -134,12 +134,6 @@
                             entity_id: climate.living_room_ac_2
                           data:
                             hvac_mode: cool
-                  default:
-                    # Neutral / Slightly Cool: room is comfortable enough,
-                    # no active heating or cooling needed
-                    - action: climate.turn_off
-                      target:
-                        entity_id: climate.living_room_ac_2
               else:
                 - action: climate.turn_off
                   target:
