@@ -326,8 +326,9 @@
   description: >
     Standalone daytime comfort control for the master bedroom during workday
     WFH periods. This does not depend on the generic half-hourly recheck
-    automation. When the workday/WFH gate is active, Cold/Cool/Slightly Cool
-    heat, Slightly Warm/Warm/Hot cool, and Neutral turns the AC off.
+    automation. When the workday/WFH gate is active, sustained
+    Cold/Cool/Slightly Cool heats, sustained Slightly Warm/Warm/Hot cools, and
+    Neutral turns the AC off after a longer settle period.
   triggers:
     - trigger: state
       entity_id: binary_sensor.working_from_home
@@ -337,25 +338,20 @@
       id: workday_change
     - trigger: state
       entity_id: sensor.master_bedroom_indoor_comfort_ts
-      id: comfort_change
-    - trigger: state
-      entity_id: input_select.occupancy
       to:
-        - Home
-        - Sleeping
-      id: occupancy_change
+        - Cold
+        - Cool
+        - Slightly Cool
+        - Slightly Warm
+        - Warm
+        - Hot
+      for: "00:10:00"
+      id: discomfort_stable
     - trigger: state
-      entity_id: input_boolean.climate_manual_control_master
-      from: "on"
-      to: "off"
-      id: override_cleared
-    - trigger: state
-      entity_id: climate.masterbed_room_ac
-      to: "off"
-      id: climate_off
-    - trigger: homeassistant
-      event: start
-      id: ha_start
+      entity_id: sensor.master_bedroom_indoor_comfort_ts
+      to: Neutral
+      for: "00:15:00"
+      id: neutral_stable
   conditions:
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
