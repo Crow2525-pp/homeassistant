@@ -2,7 +2,7 @@
 - id: '1649147714100'
   alias: Open Garage When Phil or Steph Arrive Home
   description: Opens the garage door and disarms Alarmo when Phil or Steph arrive
-    home and the car is connected.
+    home and either Phil's Android Auto or Steph's iPhone activity indicates driving.
   triggers:
   - platform: zone
     entity_id: device_tracker.sm_s908e
@@ -13,9 +13,14 @@
     zone: zone.home
     event: enter
   conditions:
-  - condition: state
-    entity_id: binary_sensor.sm_s908e_android_auto
-    state: 'on'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: binary_sensor.samsung_galaxy_s22_ultra_android_auto
+      state: 'on'
+    - condition: state
+      entity_id: sensor.slvdh_activity
+      state: Automotive
   actions:
   - action: cover.open_cover
     target:
