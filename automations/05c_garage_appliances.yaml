@@ -591,6 +591,9 @@
   - trigger: time
     at: 06:30:00
   conditions:
+  - condition: state
+    entity_id: input_boolean.study_occupied
+    state: 'off'
   - condition: or
     conditions:
     - condition: state
@@ -601,16 +604,11 @@
       state: Sleeping
   actions:
   - action: media_player.volume_set
-    metadata: {}
     data:
       volume_level: 0.2
     target:
-      entity_id: media_player.wiim_amp_pro_ebe4
-  - action: media_player.play_media
-    metadata: {}
-    data: {}
-    target:
-      entity_id: media_player.wiim_amp_pro_ebe4
+      entity_id: media_player.living_room_wiimamp
+  - action: script.spotify_tv
   mode: single
 - id: '1705440129170'
   alias: Living Room Remote - Mijia Switch Actions
