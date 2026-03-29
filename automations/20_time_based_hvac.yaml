@@ -162,15 +162,15 @@
   mode: single
 
 # ============================================================================
-# MASTER BEDROOM - Off at wake, frost/boost at bedtime (if sleeping)
+# MASTER BEDROOM - Comfort at wake, frost/boost at bedtime (if sleeping)
 # ============================================================================
 
 - id: master_bedroom_time_based_day
-  alias: "HVAC - Master Bedroom - Wake Up (Off)"
+  alias: "HVAC - Master Bedroom - Wake Up Comfort"
   description: >
-    At wake time, auto-clear manual override and turn off AC. The master
-    bedroom does not run HVAC during the day. Night behaviour is handled by
-    the bedtime automation.
+    At wake time, auto-clear manual override, set comfort preset and decide
+    heat/cool based on Indoor Comfort thermal sensation. Cold/Cool → heat,
+    Slightly Cool/Neutral → no mode change, Slightly Warm+ → cool.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
@@ -188,9 +188,37 @@
     - action: input_boolean.turn_off
       target:
         entity_id: input_boolean.climate_manual_control_master
-    - action: climate.turn_off
+    - action: climate.set_preset_mode
       target:
         entity_id: climate.masterbed_room_ac
+      data:
+        preset_mode: comfort
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
+              state:
+                - Cold
+                - Cool
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: heat
+        - conditions:
+            - condition: state
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
+              state:
+                - Slightly Warm
+                - Warm
+                - Hot
+          sequence:
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: cool
   mode: single
 
 - id: master_bedroom_time_based_night
@@ -322,20 +350,21 @@
   mode: single
 
 - id: master_bedroom_workday_wfh_daytime_comfort
-  alias: "HVAC - Master Bedroom - Workday WFH Daytime Comfort"
+  alias: "HVAC - Master Bedroom - WFH Daytime Comfort"
   description: >
-    Standalone daytime comfort control for the master bedroom during workday
-    WFH periods. This does not depend on the generic half-hourly recheck
-    automation. When the workday/WFH gate is active, sustained
-    Cold/Cool/Slightly Cool heats, sustained Slightly Warm/Warm/Hot cools, and
-    Neutral turns the AC off after a longer settle period.
+    Keeps the master bedroom comfortable while working from home. Activates
+    when WFH begins (PC / desk turns on) and reacts to thermal comfort
+    changes. Cold/Hot → high fan, Cool/Warm → mid fan, Slightly Cool/Warm →
+    low fan. Neutral → AC off. Turns off when WFH ends.
   triggers:
     - trigger: state
       entity_id: binary_sensor.working_from_home
-      id: wfh_change
+      to: "on"
+      id: wfh_start
     - trigger: state
-      entity_id: binary_sensor.workday_sensor
-      id: workday_change
+      entity_id: binary_sensor.working_from_home
+      to: "off"
+      id: wfh_end
     - trigger: state
       entity_id: sensor.master_bedroom_indoor_comfort_ts
       to:
@@ -378,59 +407,130 @@
         {{ not (now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake) }}
   actions:
     - choose:
+        # --- WFH ended → turn off ---
         - conditions:
-            - condition: state
-              entity_id: binary_sensor.workday_sensor
-              state: "on"
+            - condition: trigger
+              id: wfh_end
+          sequence:
+            - action: climate.turn_off
+              target:
+                entity_id: climate.masterbed_room_ac
+        # --- WFH active: Cold/Cool → heat, high/mid fan ---
+        - conditions:
             - condition: state
               entity_id: binary_sensor.working_from_home
               state: "on"
+            - condition: state
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
+              state:
+                - Cold
+                - Cool
           sequence:
-            - choose:
-                - conditions:
-                    - condition: state
-                      entity_id: sensor.master_bedroom_indoor_comfort_ts
-                      state:
-                        - Cold
-                        - Cool
-                        - Slightly Cool
-                  sequence:
-                    - action: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_room_ac
-                      data:
-                        preset_mode: comfort
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_room_ac
-                      data:
-                        hvac_mode: heat
-                - conditions:
-                    - condition: state
-                      entity_id: sensor.master_bedroom_indoor_comfort_ts
-                      state:
-                        - Slightly Warm
-                        - Warm
-                        - Hot
-                  sequence:
-                    - action: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_room_ac
-                      data:
-                        preset_mode: comfort
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_room_ac
-                      data:
-                        hvac_mode: cool
-              default:
-                - action: climate.turn_off
-                  target:
-                    entity_id: climate.masterbed_room_ac
-      default:
-        - action: climate.turn_off
-          target:
-            entity_id: climate.masterbed_room_ac
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: comfort
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: heat
+            - action: climate.set_fan_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                fan_mode: >
+                  {% set ts = states('sensor.master_bedroom_indoor_comfort_ts') %}
+                  {{ 'high' if ts == 'Cold' else 'mid' }}
+        # --- WFH active: Slightly Cool → heat, low fan ---
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.working_from_home
+              state: "on"
+            - condition: state
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
+              state: Slightly Cool
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: comfort
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: heat
+            - action: climate.set_fan_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                fan_mode: low
+        # --- WFH active: Slightly Warm → cool, low fan ---
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.working_from_home
+              state: "on"
+            - condition: state
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
+              state: Slightly Warm
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: comfort
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: cool
+            - action: climate.set_fan_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                fan_mode: low
+        # --- WFH active: Warm/Hot → cool, mid/high fan ---
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.working_from_home
+              state: "on"
+            - condition: state
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
+              state:
+                - Warm
+                - Hot
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: comfort
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: cool
+            - action: climate.set_fan_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                fan_mode: >
+                  {% set ts = states('sensor.master_bedroom_indoor_comfort_ts') %}
+                  {{ 'high' if ts == 'Hot' else 'mid' }}
+        # --- WFH active: Neutral → turn off ---
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.working_from_home
+              state: "on"
+            - condition: state
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
+              state: Neutral
+          sequence:
+            - action: climate.turn_off
+              target:
+                entity_id: climate.masterbed_room_ac
   mode: restart
 
 # ============================================================================
