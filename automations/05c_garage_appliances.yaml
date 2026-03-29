@@ -840,12 +840,6 @@
       device_id: 8cb8be820d24cc85cc448e17a28fb15d
       command: remote_button_short_press
     id: Once
-  - platform: event
-    event_type: zha_event
-    event_data:
-      device_id: 8cb8be820d24cc85cc448e17a28fb15d
-      command: remote_button_short_press
-    id: Held
   conditions: []
   actions:
   - choose:
