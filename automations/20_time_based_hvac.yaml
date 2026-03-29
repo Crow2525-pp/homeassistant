@@ -354,8 +354,8 @@
   description: >
     Keeps the master bedroom comfortable while working from home. Activates
     when WFH begins (PC / desk turns on) and reacts to thermal comfort
-    changes. Cold/Hot → high fan, Cool/Warm → mid fan, Slightly Cool/Warm →
-    low fan. Neutral → AC off. Turns off when WFH ends.
+    changes. Cold/Cool/Slightly Cool → heat + comfort, Slightly Warm/Warm/Hot
+    → cool + comfort, Neutral → AC off. Turns off when WFH ends.
   triggers:
     - trigger: state
       entity_id: binary_sensor.working_from_home
@@ -415,7 +415,7 @@
             - action: climate.turn_off
               target:
                 entity_id: climate.masterbed_room_ac
-        # --- WFH active: Cold/Cool → heat, high/mid fan ---
+        # --- WFH active: Cold/Cool/Slightly Cool → heat + comfort ---
         - conditions:
             - condition: state
               entity_id: binary_sensor.working_from_home
@@ -425,6 +425,7 @@
               state:
                 - Cold
                 - Cool
+                - Slightly Cool
           sequence:
             - action: climate.set_preset_mode
               target:
@@ -436,62 +437,7 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
-            - action: climate.set_fan_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                fan_mode: >
-                  {% set ts = states('sensor.master_bedroom_indoor_comfort_ts') %}
-                  {{ 'high' if ts == 'Cold' else 'mid' }}
-        # --- WFH active: Slightly Cool → heat, low fan ---
-        - conditions:
-            - condition: state
-              entity_id: binary_sensor.working_from_home
-              state: "on"
-            - condition: state
-              entity_id: sensor.master_bedroom_indoor_comfort_ts
-              state: Slightly Cool
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                preset_mode: comfort
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                hvac_mode: heat
-            - action: climate.set_fan_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                fan_mode: low
-        # --- WFH active: Slightly Warm → cool, low fan ---
-        - conditions:
-            - condition: state
-              entity_id: binary_sensor.working_from_home
-              state: "on"
-            - condition: state
-              entity_id: sensor.master_bedroom_indoor_comfort_ts
-              state: Slightly Warm
-          sequence:
-            - action: climate.set_preset_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                preset_mode: comfort
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                hvac_mode: cool
-            - action: climate.set_fan_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                fan_mode: low
-        # --- WFH active: Warm/Hot → cool, mid/high fan ---
+        # --- WFH active: Slightly Warm/Warm/Hot → cool + comfort ---
         - conditions:
             - condition: state
               entity_id: binary_sensor.working_from_home
@@ -499,6 +445,7 @@
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
               state:
+                - Slightly Warm
                 - Warm
                 - Hot
           sequence:
@@ -512,13 +459,6 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-            - action: climate.set_fan_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                fan_mode: >
-                  {% set ts = states('sensor.master_bedroom_indoor_comfort_ts') %}
-                  {{ 'high' if ts == 'Hot' else 'mid' }}
         # --- WFH active: Neutral → turn off ---
         - conditions:
             - condition: state
