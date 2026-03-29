@@ -771,7 +771,7 @@
         metadata: {}
         data: {}
         target:
-          entity_id: light.living_room_light_socket_1
+          entity_id: light.lounge
     - conditions:
       - condition: trigger
         id:

@@ -42,7 +42,7 @@
     # Step 2: Turn on kitchen lights
     - service: light.turn_on
       target:
-        entity_id: light.living_room_light_socket_1
+        entity_id: light.lounge
       data:
         brightness_pct: 50
         transition: 2
