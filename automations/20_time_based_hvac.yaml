@@ -1596,6 +1596,12 @@
       entity_id: input_select.occupancy
       to: Sleeping
       id: occupancy_change
+    - trigger: state
+      entity_id: binary_sensor.working_from_home
+      id: wfh_change
+    - trigger: state
+      entity_id: binary_sensor.workday_sensor
+      id: workday_change
     # React immediately when comfort leaves the neutral zone
     - trigger: state
       entity_id: sensor.master_bedroom_indoor_comfort_ts
@@ -1637,6 +1643,11 @@
         # Manual override cleared: resume auto control immediately
         - condition: trigger
           id: override_cleared
+        # Workday/WFH changes: switch the daytime gate promptly
+        - condition: trigger
+          id: wfh_change
+        - condition: trigger
+          id: workday_change
         # Time trigger: re-check while running, or recover from off when
         # comfort has drifted away from Neutral
         - condition: and
@@ -1669,8 +1680,57 @@
           {% set bed = states('input_datetime.bedtime_master_bedroom') %}
           {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
           {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
+        is_workday_wfh_daytime: >
+          {% set bed = states('input_datetime.bedtime_master_bedroom') %}
+          {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
+          {% set is_daytime = not (now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake) %}
+          {{ is_daytime
+             and is_state('binary_sensor.workday_sensor', 'on')
+             and is_state('binary_sensor.working_from_home', 'on') }}
     - choose:
-        # Cold/Cool → heat (night: frost preset; day: no preset change)
+        - conditions:
+            - condition: template
+              value_template: "{{ is_workday_wfh_daytime | trim == 'True' }}"
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: sensor.master_bedroom_indoor_comfort_ts
+                      state:
+                        - Cold
+                        - Cool
+                        - Slightly Cool
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_room_ac
+                      data:
+                        hvac_mode: heat
+                - conditions:
+                    - condition: state
+                      entity_id: sensor.master_bedroom_indoor_comfort_ts
+                      state:
+                        - Slightly Warm
+                        - Warm
+                        - Hot
+                  sequence:
+                    - action: climate.set_hvac_mode
+                      target:
+                        entity_id: climate.masterbed_room_ac
+                      data:
+                        hvac_mode: cool
+              default:
+                - action: climate.turn_off
+                  target:
+                    entity_id: climate.masterbed_room_ac
+        - conditions:
+            - condition: template
+              value_template: "{{ is_nighttime | trim != 'True' }}"
+          sequence:
+            - action: climate.turn_off
+              target:
+                entity_id: climate.masterbed_room_ac
+        # Night: Cold/Cool → heat with frost preset
         - conditions:
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
@@ -1678,21 +1738,17 @@
                 - Cold
                 - Cool
           sequence:
-            - if:
-                - condition: template
-                  value_template: "{{ is_nighttime }}"
-              then:
-                - action: climate.set_preset_mode
-                  target:
-                    entity_id: climate.masterbed_room_ac
-                  data:
-                    preset_mode: frost
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: frost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: heat
-        # --- Slightly Warm+ → cool (night Auto: boost preset; day: no preset change) ---
+        # Night: Slightly Warm+ → cool with boost preset
         - conditions:
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
@@ -1701,21 +1757,17 @@
                 - Warm
                 - Hot
           sequence:
-            - if:
-                - condition: template
-                  value_template: "{{ is_nighttime }}"
-              then:
-                - action: climate.set_preset_mode
-                  target:
-                    entity_id: climate.masterbed_room_ac
-                  data:
-                    preset_mode: boost
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: boost
             - action: climate.set_hvac_mode
               target:
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-        # --- Slightly Cool / Neutral — comfortable zone ---
+        # Night: Slightly Cool / Neutral — favor cool, never turn off
         - conditions:
             - condition: state
               entity_id: sensor.master_bedroom_indoor_comfort_ts
@@ -1723,36 +1775,16 @@
                 - Slightly Cool
                 - Neutral
           sequence:
-            - choose:
-                # Night: favor cool, never turn off
-                - conditions:
-                    - condition: template
-                      value_template: "{{ is_nighttime }}"
-                  sequence:
-                    - action: climate.set_preset_mode
-                      target:
-                        entity_id: climate.masterbed_room_ac
-                      data:
-                        preset_mode: boost
-                    - action: climate.set_hvac_mode
-                      target:
-                        entity_id: climate.masterbed_room_ac
-                      data:
-                        hvac_mode: cool
-              default:
-                # Day: only turn off if Neutral has been stable 15+ min
-                # (prevents rapid on/off cycling near the comfort boundary)
-                - if:
-                    - condition: state
-                      entity_id: sensor.master_bedroom_indoor_comfort_ts
-                      state:
-                        - Slightly Cool
-                        - Neutral
-                      for: "00:15:00"
-                  then:
-                    - action: climate.turn_off
-                      target:
-                        entity_id: climate.masterbed_room_ac
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: boost
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: cool
       # default: unexpected sensor state — no action (fail safe)
   mode: single
 
