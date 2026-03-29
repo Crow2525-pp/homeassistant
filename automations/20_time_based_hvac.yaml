@@ -162,15 +162,15 @@
   mode: single
 
 # ============================================================================
-# MASTER BEDROOM - Comfort at wake, frost/boost at bedtime (if sleeping)
+# MASTER BEDROOM - Off at wake, frost/boost at bedtime (if sleeping)
 # ============================================================================
 
 - id: master_bedroom_time_based_day
-  alias: "HVAC - Master Bedroom - Wake Up Comfort"
+  alias: "HVAC - Master Bedroom - Wake Up (Off)"
   description: >
-    At wake time, auto-clear manual override, set comfort preset and decide
-    heat/cool based on Indoor Comfort thermal sensation. Cold/Cool → heat,
-    Slightly Cool/Neutral → no mode change, Slightly Warm+ → cool.
+    At wake time, auto-clear manual override and turn off AC. The master
+    bedroom does not run HVAC during the day. Night behaviour is handled by
+    the bedtime automation.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
@@ -188,37 +188,9 @@
     - action: input_boolean.turn_off
       target:
         entity_id: input_boolean.climate_manual_control_master
-    - action: climate.set_preset_mode
+    - action: climate.turn_off
       target:
         entity_id: climate.masterbed_room_ac
-      data:
-        preset_mode: comfort
-    - choose:
-        - conditions:
-            - condition: state
-              entity_id: sensor.master_bedroom_indoor_comfort_ts
-              state:
-                - Cold
-                - Cool
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                hvac_mode: heat
-        - conditions:
-            - condition: state
-              entity_id: sensor.master_bedroom_indoor_comfort_ts
-              state:
-                - Slightly Warm
-                - Warm
-                - Hot
-          sequence:
-            - action: climate.set_hvac_mode
-              target:
-                entity_id: climate.masterbed_room_ac
-              data:
-                hvac_mode: cool
   mode: single
 
 - id: master_bedroom_time_based_night
