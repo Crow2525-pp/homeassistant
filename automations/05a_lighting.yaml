@@ -282,7 +282,8 @@
         data:
           brightness_pct: 1
         action: light.turn_on
-  mode: single
+  mode: queued
+  max: 2
 - id: '1703583740639'
   alias: Front Entrance - Motion-Activated Light
   description: Turns on the front entrance lights when motion is detected and switches
