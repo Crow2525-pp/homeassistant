@@ -147,12 +147,14 @@
     #     data:
     #       tag: "morning_preheat"
 
-    # Step 5: Set maximum heating duration safety timer
-    # Automatically shut off after 1 hour if target not reached
-    - delay:
-        hours: 1
+    # Step 5: Wait until 8:00 AM cutoff
+    # Preheat should not run past 8:00 AM regardless of conditions
+    - wait_for_trigger:
+        - trigger: time
+          at: "08:00:00"
+      timeout: "02:30:00"
 
-    # Step 6: Safety shutdown after max duration
+    # Step 6: Deactivate heating at 8 AM cutoff
     - service: script.deactivate_climate
       data:
         climate_entity: climate.living_room_ac_2  # CUSTOMIZE: Your climate entity
