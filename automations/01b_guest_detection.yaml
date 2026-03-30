@@ -131,7 +131,8 @@
         {{ entity_id.startswith('device_tracker.unifi_default_')
            and to_state is not none
            and to_state.state == 'home'
-           and (from_state is none or from_state.state != 'home') }}
+           and from_state is not none
+           and from_state.state != 'home' }}
     - condition: template
       value_template: >
         {% set entity_id = trigger.event.data.entity_id %}
@@ -148,6 +149,10 @@
     - condition: state
       entity_id: input_boolean.study_occupied
       state: "off"
+    - condition: template
+      value_template: >
+        {{ states('person.phil_patterson') not in ['unknown', 'unavailable']
+           and states('person.stephanie_patterson') not in ['unknown', 'unavailable'] }}
     - condition: not
       conditions:
         - condition: state
