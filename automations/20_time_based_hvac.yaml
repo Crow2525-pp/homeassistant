@@ -2,11 +2,15 @@
 # ============================================================================
 # TIME-BASED HVAC AUTOMATIONS
 # ============================================================================
-# This file implements per-room climate control based on bedtime and occupancy.
+# This file implements per-room climate control based on occupancy plus
+# room-specific wake/bed schedules.
 #
 # Logic:
 # - Gates: occupancy must be Home or Sleeping
-# - Bed time triggers auto-clear manual overrides, then apply the overnight mode
+# - Scheduled wake/bed transitions auto-clear manual overrides where used
+# - Bed time triggers then apply the overnight mode
+# - Living room daytime control is occupancy-driven; early-morning heat still
+#   comes from the separate preheat automation
 # - Bed time (bedrooms): always heat or cool — AC stays on all night
 #     Cold / Cool → frost+heat; everything else → boost+cool (favor cooling)
 # - Bed time (living/communal): frost/boost if cold/hot; off if comfortable
@@ -109,8 +113,8 @@
   alias: "HVAC - Master Bedroom - Wake Up (Off)"
   description: >
     At wake time, auto-clear manual override and turn the AC off so the
-    overnight cycle ends deterministically. Daytime rechecks can later resume
-    climate control if the room drifts outside the comfort band.
+    overnight cycle ends deterministically. Daytime HVAC stays off until a
+    later occupancy-driven or bedtime path turns it back on again.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
@@ -392,8 +396,8 @@
   alias: "HVAC - Kids Room - Wake Up (Off)"
   description: >
     At wake time, auto-clear manual override and turn the AC off so the
-    overnight cycle ends deterministically. Daytime rechecks can later resume
-    climate control if the room drifts outside the comfort band.
+    overnight cycle ends deterministically. Daytime HVAC stays off until a
+    later occupancy-driven or bedtime path turns it back on again.
   triggers:
     - trigger: time
       at: input_datetime.wakeup_time_ottos_room
@@ -920,9 +924,7 @@
           {% set wake = states('input_datetime.wakeup_time_rumpus') %}
         {% endif %}
         {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
-    # Only turn on if the room actually needs heating or cooling —
-    # avoids a race with the Re-check automation which would immediately
-    # turn the AC off again when comfort is Neutral.
+    # Only turn on if the room actually needs heating or cooling.
     - condition: state
       entity_id: sensor.rumpus_indoor_comfort_ts
       state:

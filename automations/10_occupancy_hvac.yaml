@@ -153,10 +153,11 @@
 - id: occupancy_hvac_exit_sleeping
   alias: "Occupancy - HVAC Off When Waking"
   description: >
-    Turns off the overnight bedroom and pre-heat HVAC paths when household
-    occupancy changes from Sleeping to Home. This provides a daytime exit path
-    after removing the wake-up and half-hourly HVAC automations, while still
-    respecting each room's manual override flag.
+    Turns off overnight HVAC paths when household occupancy changes from
+    Sleeping to Home. This provides the daytime exit for living-room preheat
+    and guest-room overnight schedules, while complementing the dedicated
+    bedroom wake-off timers and still respecting each room's manual override
+    flag.
   triggers:
     - trigger: state
       entity_id: input_select.occupancy
@@ -199,4 +200,27 @@
             entity_id:
               - climate.kids_room_ac
               - climate.otto_s_room
+
+    # Study / Lucas Room during guest stays
+    - if:
+        - condition: state
+          entity_id: input_boolean.study_occupied
+          state: "on"
+        - condition: state
+          entity_id: input_boolean.climate_manual_control_study
+          state: "off"
+      then:
+        - action: climate.turn_off
+          target:
+            entity_id: climate.study_room_ac
+
+    # Rumpus
+    - if:
+        - condition: state
+          entity_id: input_boolean.climate_manual_control_rumpus
+          state: "off"
+      then:
+        - action: climate.turn_off
+          target:
+            entity_id: climate.rumpus_ac
   mode: single
