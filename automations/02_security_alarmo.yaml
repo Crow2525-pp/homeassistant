@@ -237,25 +237,128 @@
         target:
           entity_id: alarm_control_panel.alarmo
   mode: single
+# --------------------------------------------------------------------------
+# Bedtime security checklist
+# --------------------------------------------------------------------------
+# Fires 45 minutes after occupancy switches to Sleeping. Only sends a
+# notification when something needs attention. If the garage door is open
+# the notification includes an actionable button to close it.
+# --------------------------------------------------------------------------
 - id: bedtime_security_checklist
-  alias: Night - Bedtime Security Checklist
-  description: Provides a security checklist notification when switching to sleeping
-    mode
+  alias: "Night - Bedtime Security Checklist"
+  description: >
+    Checks doors, garage, HVAC, lights, washing machine, water leaks, and
+    alarm state 45 minutes after switching to sleeping mode. Only notifies
+    when at least one issue is found.
   triggers:
-  - trigger: state
-    entity_id: input_select.occupancy
-    to: Sleeping
+    - trigger: state
+      entity_id: input_select.occupancy
+      to: Sleeping
+      for:
+        minutes: 45
   actions:
-  - delay:
-      minutes: 2
-  - action: notify.mobile_app_samsung_galaxy_s22_ultra
-    data:
-      title: "\U0001F319 Bedtime Checklist"
-      message: "{% set issues = [] %}\n{% if is_state('cover.smart_garage_door_garage',
-        'open') %}{% set issues = issues + ['\U0001F697 Garage door open'] %}{% endif
-        %}\n{% if is_state('binary_sensor.downstairs_doors', 'on') %}{% set issues
-        = issues + ['\U0001F6AA Door open downstairs'] %}{% endif %}\n{% if states('climate.living_room_ac_2')
-        in ['cool', 'heat'] %}{% set issues = issues + ['❄️ Living room AC still on']
-        %}{% endif %}\n{% if issues | length > 0 %}{{ issues | join('\\n') }}{% else
-        %}✅ All secure - sleep well!{% endif %}\n"
+    - variables:
+        issues: >
+          {% set ns = namespace(items=[]) %}
+          {% if is_state('binary_sensor.front_door_sensor_opening', 'on') %}
+            {% set ns.items = ns.items + ['Front door open'] %}
+          {% endif %}
+          {% if is_state('binary_sensor.side_garage_door_sensor_magnet_opening', 'on') %}
+            {% set ns.items = ns.items + ['Side garage door open'] %}
+          {% endif %}
+          {% if is_state('binary_sensor.balcony_door_sensor_magnet_opening_2', 'on') %}
+            {% set ns.items = ns.items + ['Balcony door open'] %}
+          {% endif %}
+          {% if is_state('binary_sensor.interior_garage_door_sensor_magnet_opening', 'on') %}
+            {% set ns.items = ns.items + ['Interior garage door open'] %}
+          {% endif %}
+          {% if is_state('cover.smart_garage_door_garage', 'open') %}
+            {% set ns.items = ns.items + ['Garage door open'] %}
+          {% endif %}
+          {% if states('climate.living_room_ac_2') not in ['off', 'unavailable', 'unknown'] %}
+            {% set ns.items = ns.items + ['Living room AC still on'] %}
+          {% endif %}
+          {% if states('climate.study_room_ac') not in ['off', 'unavailable', 'unknown']
+             and not is_state('input_boolean.study_occupied', 'on') %}
+            {% set ns.items = ns.items + ['Study AC still on'] %}
+          {% endif %}
+          {% if is_state('light.lounge', 'on') %}
+            {% set ns.items = ns.items + ['Lounge light on'] %}
+          {% endif %}
+          {% if is_state('light.floor_lamp_socket_1', 'on') %}
+            {% set ns.items = ns.items + ['Floor lamp on'] %}
+          {% endif %}
+          {% if is_state('light.tv_backlight', 'on') %}
+            {% set ns.items = ns.items + ['TV backlight on'] %}
+          {% endif %}
+          {% if is_state('input_boolean.washing_machine_on', 'off') %}
+            {% set changed = states.input_boolean.washing_machine_on.last_changed %}
+            {% if changed is defined and changed %}
+              {% set ts = as_timestamp(changed) %}
+              {% if ts >= as_timestamp(today_at('19:00'))
+                 and ts < as_timestamp(today_at('22:00')) %}
+                {% set ns.items = ns.items + ['Washing finished - move to dryer'] %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+          {% if is_state('binary_sensor.aqara_water_leak_sensor_water_leak', 'on') %}
+            {% set ns.items = ns.items + ['Water leak detected (sensor 1)'] %}
+          {% endif %}
+          {% if is_state('binary_sensor.aqara_water_leak_sensor_water_leak_2', 'on') %}
+            {% set ns.items = ns.items + ['Water leak detected (sensor 2)'] %}
+          {% endif %}
+          {% if not is_state('alarm_control_panel.alarmo', 'armed_night') %}
+            {% set ns.items = ns.items + ['Alarm not in night mode (' ~ states('alarm_control_panel.alarmo') ~ ')'] %}
+          {% endif %}
+          {{ ns.items }}
+        garage_open: "{{ is_state('cover.smart_garage_door_garage', 'open') }}"
+    - condition: template
+      value_template: "{{ issues | length > 0 }}"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ garage_open }}"
+          sequence:
+            - action: notify.mobile_app_samsung_galaxy_s22_ultra
+              data:
+                title: "Bedtime Checklist"
+                message: "{{ issues | join('\n') }}"
+                data:
+                  actions:
+                    - action: CLOSE_GARAGE_BEDTIME
+                      title: "Close Garage"
+                    - action: DISMISS_BEDTIME_CHECKLIST
+                      title: "Dismiss"
+      default:
+        - action: notify.mobile_app_samsung_galaxy_s22_ultra
+          data:
+            title: "Bedtime Checklist"
+            message: "{{ issues | join('\n') }}"
+            data:
+              actions:
+                - action: DISMISS_BEDTIME_CHECKLIST
+                  title: "Dismiss"
+  mode: single
+
+# --------------------------------------------------------------------------
+# Close garage door from bedtime checklist notification
+# --------------------------------------------------------------------------
+- id: bedtime_close_garage_from_notification
+  alias: "Night - Close Garage from Bedtime Checklist"
+  description: >
+    Closes the garage door and confirms via notification when the action
+    button on the bedtime checklist is tapped.
+  triggers:
+    - trigger: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: CLOSE_GARAGE_BEDTIME
+  actions:
+    - action: cover.close_cover
+      target:
+        entity_id: cover.smart_garage_door_garage
+    - action: notify.mobile_app_samsung_galaxy_s22_ultra
+      data:
+        title: "Garage Door"
+        message: "Garage door closing."
   mode: single
