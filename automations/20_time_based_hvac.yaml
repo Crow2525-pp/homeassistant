@@ -1731,6 +1731,10 @@
 
 - id: master_bedroom_hourly_recheck
   alias: "HVAC - Master Bedroom - Half-Hourly Mode Re-check"
+  description: >
+    Handles master bedroom climate outside the dedicated daytime WFH comfort
+    automation. When WFH is active during daytime, this automation stands down
+    so only one controller drives the AC.
   triggers:
     - trigger: time_pattern
       minutes: "/30"
@@ -1771,6 +1775,16 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: binary_sensor.working_from_home
+          state: "off"
+        - condition: template
+          value_template: >
+            {% set bed = states('input_datetime.bedtime_master_bedroom') %}
+            {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
+            {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
     - condition: or
       conditions:
         # Occupancy change: skip AC-state check — AC was just turned on by return-home
