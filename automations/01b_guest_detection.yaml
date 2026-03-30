@@ -9,8 +9,12 @@
 # tracker that transitions to 'home' and is NOT in this list will trigger
 # a notification to both phones.
 #
-# To add a new known device: add its device_tracker entity_id to the
-# 'known_devices' list in the template trigger below.
+# To add a new known device permanently: add its device_tracker entity_id to
+# the 'known_devices' list in the template trigger below.
+#
+# To safelist a device dynamically: tap "Safelist Device" on the notification,
+# or add its MAC suffix (e.g. b8_7b_d4_f8_8a_31) to the
+# input_text.safelisted_wifi_macs helper (comma-separated).
 # ============================================================================
 
 - id: guest_device_detected_notification
@@ -18,8 +22,9 @@
   description: >
     Sends an actionable notification to both phones when an unrecognised device
     connects to the home WiFi. Tapping the action activates guest mode
-    (input_boolean.study_occupied). Only fires when occupancy is Home or
-    Sleeping and guest mode is not already on.
+    (input_boolean.study_occupied) or safelists the device so it never triggers
+    again. Only fires when occupancy is Home or Sleeping and guest mode is not
+    already on.
   triggers:
     - trigger: template
       value_template: >
@@ -36,10 +41,15 @@
           'device_tracker.unifi_default_b8_f7_75_20_3f_c3',
           'device_tracker.unifi_default_c6_35_53_da_d0_1b'
         ] %}
+        {% set safelist_raw = states('input_text.safelisted_wifi_macs') %}
+        {% set safelisted = safelist_raw.split(',') | map('trim') | reject('eq', '')
+          | map('regex_replace', '^', 'device_tracker.unifi_default_') | list
+          if safelist_raw not in ['', 'unknown', 'unavailable'] else [] %}
+        {% set all_known = known_devices + safelisted %}
         {% set unknown_home = states.device_tracker
           | selectattr('entity_id', 'match', 'device_tracker\\.unifi_default_')
           | selectattr('state', 'eq', 'home')
-          | rejectattr('entity_id', 'in', known_devices)
+          | rejectattr('entity_id', 'in', all_known)
           | list | count %}
         {{ unknown_home > 0 }}
   conditions:
@@ -65,20 +75,36 @@
           - device_tracker.unifi_default_0c_7e_24_58_96_67
           - device_tracker.unifi_default_b8_f7_75_20_3f_c3
           - device_tracker.unifi_default_c6_35_53_da_d0_1b
-        new_devices: >
-          {% set result = states.device_tracker
+        safelist_raw: "{{ states('input_text.safelisted_wifi_macs') }}"
+        safelisted: >
+          {% set raw = safelist_raw %}
+          {% if raw not in ['', 'unknown', 'unavailable'] %}
+            {{ raw.split(',') | map('trim') | reject('eq', '')
+              | map('regex_replace', '^', 'device_tracker.unifi_default_') | list }}
+          {% else %}
+            {{ [] }}
+          {% endif %}
+        all_known: "{{ known_devices + safelisted }}"
+        new_device_entities: >
+          {{ states.device_tracker
             | selectattr('entity_id', 'match', 'device_tracker\\.unifi_default_')
             | selectattr('state', 'eq', 'home')
-            | rejectattr('entity_id', 'in', known_devices)
-            | map(attribute='name')
-            | list %}
-          {{ result | join(', ') if result | length > 0 else 'Unknown device' }}
+            | rejectattr('entity_id', 'in', all_known)
+            | list }}
+        new_devices: >
+          {{ new_device_entities | map(attribute='name') | list | join(', ')
+            if new_device_entities | length > 0 else 'Unknown device' }}
+        new_device_macs: >
+          {{ new_device_entities | map(attribute='entity_id')
+            | map('replace', 'device_tracker.unifi_default_', '') | list }}
     - action: notify.mobile_app_samsung_galaxy_s22_ultra
       data:
         title: "Guest Device Detected"
         message: "New device on WiFi: {{ new_devices }}. Activate guest mode?"
         data:
           actions:
+            - action: "SAFELIST_DEVICE_{{ new_device_macs | join(',') }}"
+              title: "Safelist Device"
             - action: ACTIVATE_GUEST_MODE
               title: "Activate Guest Mode"
             - action: DISMISS_GUEST_ALERT
@@ -89,6 +115,8 @@
         message: "New device on WiFi: {{ new_devices }}. Activate guest mode?"
         data:
           actions:
+            - action: "SAFELIST_DEVICE_{{ new_device_macs | join(',') }}"
+              title: "Safelist Device"
             - action: ACTIVATE_GUEST_MODE
               title: "Activate Guest Mode"
             - action: DISMISS_GUEST_ALERT
@@ -118,4 +146,41 @@
       data:
         title: "Guest Mode Activated"
         message: "Guest mode is now on. Study and rumpus rooms will follow guest schedules."
+  mode: single
+
+- id: safelist_wifi_device_from_notification
+  alias: "Occupancy - Safelist WiFi Device from Notification"
+  description: >
+    Adds the detected device MAC(s) to input_text.safelisted_wifi_macs when
+    the user taps the "Safelist Device" notification action. The MAC suffixes
+    are encoded in the action string (SAFELIST_DEVICE_<mac>[,<mac>...]).
+  triggers:
+    - trigger: event
+      event_type: mobile_app_notification_action
+  conditions:
+    - condition: template
+      value_template: "{{ trigger.event.data.action is defined and trigger.event.data.action.startswith('SAFELIST_DEVICE_') }}"
+  actions:
+    - variables:
+        new_macs: "{{ trigger.event.data.action | replace('SAFELIST_DEVICE_', '') }}"
+        current: "{{ states('input_text.safelisted_wifi_macs') }}"
+        updated: >
+          {% set cur = current if current not in ['', 'unknown', 'unavailable'] else '' %}
+          {% set existing = cur.split(',') | map('trim') | reject('eq', '') | list %}
+          {% set incoming = new_macs.split(',') | map('trim') | reject('eq', '') | list %}
+          {% set merged = existing + (incoming | reject('in', existing) | list) %}
+          {{ merged | join(',') }}
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.safelisted_wifi_macs
+      data:
+        value: "{{ updated }}"
+    - action: notify.mobile_app_samsung_galaxy_s22_ultra
+      data:
+        title: "Device Safelisted"
+        message: "MAC(s) {{ new_macs }} added to safelist. This device won't trigger alerts again."
+    - action: notify.mobile_app_slvdh
+      data:
+        title: "Device Safelisted"
+        message: "MAC(s) {{ new_macs }} added to safelist. This device won't trigger alerts again."
   mode: single
