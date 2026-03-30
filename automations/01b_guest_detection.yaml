@@ -2,31 +2,50 @@
 # ============================================================================
 # GUEST DEVICE DETECTION
 # ============================================================================
-# Detects when an unknown device connects to the home WiFi network via the
-# UniFi integration and sends an actionable notification to activate guest mode.
+# Two-tier WiFi device detection via the UniFi integration:
 #
-# Known household devices are listed in the template below. Any UniFi device
-# tracker that transitions to 'home' and is NOT in this list will trigger
-# a notification to both phones.
+# 1. UNKNOWN DEVICE - a MAC not in known_devices or the safelisted_wifi_macs
+#    helper. Sends a rich notification (name, MAC, IP, manufacturer) with
+#    options to safelist the device or activate guest mode.
 #
-# To add a new known device permanently: add its device_tracker entity_id to
-# the 'known_devices' list in the template trigger below.
+# 2. KNOWN GUEST DEVICE - a MAC in safelisted_wifi_macs that connects while
+#    both Phil and Steph are away from home. Automatically activates guest
+#    mode and notifies.
 #
-# To safelist a device dynamically: tap "Safelist Device" on the notification,
-# or add its MAC suffix (e.g. b8_7b_d4_f8_8a_31) to the
-# input_text.safelisted_wifi_macs helper (comma-separated).
+# To add a household device permanently: add its device_tracker entity_id to
+# the 'known_devices' list in the templates below.
+#
+# To safelist a guest device dynamically: tap "Safelist Device" on the
+# notification, or add its MAC address (for example b8:7b:d4:f8:8a:31) to the
+# input_text.safelisted_wifi_macs helper (comma-separated). Legacy underscore
+# suffixes such as b8_7b_d4_f8_8a_31 are still accepted.
 # ============================================================================
 
+# --------------------------------------------------------------------------
+# 1. Unknown device detected - notify to assign
+# --------------------------------------------------------------------------
 - id: guest_device_detected_notification
-  alias: "Occupancy - Guest Device Detected on WiFi"
+  alias: "Occupancy - Unknown Device on WiFi"
   description: >
-    Sends an actionable notification to both phones when an unrecognised device
-    connects to the home WiFi. Tapping the action activates guest mode
-    (input_boolean.study_occupied) or safelists the device so it never triggers
-    again. Only fires when occupancy is Home or Sleeping and guest mode is not
-    already on.
+    Sends a detailed notification when a UniFi client arrives on WiFi and is
+    not in the household list or guest safelist. Includes UniFi metadata such
+    as MAC, IP, SSID, AP MAC, vendor, and the guest flag. Offers actions to
+    safelist the device or activate guest mode.
   triggers:
-    - trigger: template
+    - trigger: event
+      event_type: state_changed
+  conditions:
+    - condition: template
+      value_template: >
+        {% set entity_id = trigger.event.data.entity_id
+          if trigger.event.data.entity_id is defined else '' %}
+        {% set from_state = trigger.event.data.old_state %}
+        {% set to_state = trigger.event.data.new_state %}
+        {{ entity_id.startswith('device_tracker.unifi_default_')
+           and to_state is not none
+           and to_state.state == 'home'
+           and (from_state is none or from_state.state != 'home') }}
+    - condition: template
       value_template: >
         {% set known_devices = [
           'device_tracker.unifi_default_b8_7b_d4_f8_8a_31',
@@ -41,88 +60,174 @@
           'device_tracker.unifi_default_b8_f7_75_20_3f_c3',
           'device_tracker.unifi_default_c6_35_53_da_d0_1b'
         ] %}
-        {% set safelist_raw = states('input_text.safelisted_wifi_macs') %}
-        {% set safelisted = safelist_raw.split(',') | map('trim') | reject('eq', '')
-          | map('regex_replace', '^', 'device_tracker.unifi_default_') | list
-          if safelist_raw not in ['', 'unknown', 'unavailable'] else [] %}
-        {% set all_known = known_devices + safelisted %}
-        {% set unknown_home = states.device_tracker
-          | selectattr('entity_id', 'match', 'device_tracker\\.unifi_default_')
-          | selectattr('state', 'eq', 'home')
-          | rejectattr('entity_id', 'in', all_known)
-          | list | count %}
-        {{ unknown_home > 0 }}
-  conditions:
-    - condition: state
-      entity_id: input_boolean.study_occupied
-      state: "off"
-    - condition: state
-      entity_id: input_select.occupancy
-      state:
-        - Home
-        - Sleeping
+        {% set entity_id = trigger.event.data.entity_id %}
+        {% set suffix = entity_id | replace('device_tracker.unifi_default_', '') %}
+        {% set mac = (trigger.event.data.new_state.attributes.get('mac', '') | lower) %}
+        {% set raw = states('input_text.safelisted_wifi_macs') %}
+        {% set safelisted = raw.split(',')
+          | map('trim')
+          | reject('eq', '')
+          | map('lower')
+          | list if raw not in ['', 'unknown', 'unavailable'] else [] %}
+        {{ entity_id not in known_devices
+           and suffix not in safelisted
+           and mac not in safelisted }}
   actions:
     - variables:
-        known_devices:
-          - device_tracker.unifi_default_b8_7b_d4_f8_8a_31
-          - device_tracker.unifi_default_1c_f2_9a_0b_34_9e
-          - device_tracker.unifi_default_2e_0d_2c_65_84_9c
-          - device_tracker.unifi_default_00_22_6c_33_96_09
-          - device_tracker.unifi_default_76_23_a6_ee_d2_0c
-          - device_tracker.unifi_default_8c_8c_aa_9d_77_b5
-          - device_tracker.unifi_default_34_5a_60_a4_cb_fb
-          - device_tracker.unifi_default_c4_dd_57_78_bd_2c
-          - device_tracker.unifi_default_0c_7e_24_58_96_67
-          - device_tracker.unifi_default_b8_f7_75_20_3f_c3
-          - device_tracker.unifi_default_c6_35_53_da_d0_1b
-        safelist_raw: "{{ states('input_text.safelisted_wifi_macs') }}"
-        safelisted: >
-          {% set raw = safelist_raw %}
-          {% if raw not in ['', 'unknown', 'unavailable'] %}
-            {{ raw.split(',') | map('trim') | reject('eq', '')
-              | map('regex_replace', '^', 'device_tracker.unifi_default_') | list }}
-          {% else %}
-            {{ [] }}
-          {% endif %}
-        all_known: "{{ known_devices + safelisted }}"
-        new_device_entities: >
-          {{ states.device_tracker
-            | selectattr('entity_id', 'match', 'device_tracker\\.unifi_default_')
-            | selectattr('state', 'eq', 'home')
-            | rejectattr('entity_id', 'in', all_known)
-            | list }}
-        new_devices: >
-          {{ new_device_entities | map(attribute='name') | list | join(', ')
-            if new_device_entities | length > 0 else 'Unknown device' }}
-        new_device_macs: >
-          {{ new_device_entities | map(attribute='entity_id')
-            | map('replace', 'device_tracker.unifi_default_', '') | list }}
+        device_entity_id: "{{ trigger.event.data.entity_id }}"
+        device_suffix: >
+          {{ device_entity_id | replace('device_tracker.unifi_default_', '') }}
+        device_name: >
+          {% set device = trigger.event.data.new_state %}
+          {% set host_name = device.attributes.get('host_name', '') %}
+          {% set fallback = device.name if device is not none else device_entity_id %}
+          {{ host_name if host_name else fallback }}
+        device_mac: >
+          {% set device = trigger.event.data.new_state %}
+          {% set mac = device.attributes.get('mac', '') if device is not none else '' %}
+          {{ mac | lower if mac else device_suffix | replace('_', ':') }}
+        device_ip: "{{ trigger.event.data.new_state.attributes.get('ip', '?') }}"
+        device_oui: "{{ trigger.event.data.new_state.attributes.get('oui', '') }}"
+        device_essid: "{{ trigger.event.data.new_state.attributes.get('essid', '') }}"
+        device_ap_mac: "{{ trigger.event.data.new_state.attributes.get('ap_mac', '') }}"
+        device_guest_flag: >
+          {{ 'yes' if trigger.event.data.new_state.attributes.get('is_guest', false)
+             else 'no' }}
+        device_details: >
+          {% set ns = namespace(lines=[]) %}
+          {% set ns.lines = ns.lines + ['Name: ' ~ device_name] %}
+          {% set ns.lines = ns.lines + ['MAC: ' ~ device_mac] %}
+          {% set ns.lines = ns.lines + ['IP: ' ~ device_ip] %}
+          {% if device_oui %}{% set ns.lines = ns.lines + ['Vendor: ' ~ device_oui] %}{% endif %}
+          {% if device_essid %}{% set ns.lines = ns.lines + ['SSID: ' ~ device_essid] %}{% endif %}
+          {% if device_ap_mac %}{% set ns.lines = ns.lines + ['AP MAC: ' ~ device_ap_mac] %}{% endif %}
+          {% set ns.lines = ns.lines + ['UniFi guest: ' ~ device_guest_flag] %}
+          {{ ns.lines | join('\n') }}
     - action: notify.mobile_app_samsung_galaxy_s22_ultra
       data:
-        title: "Guest Device Detected"
-        message: "New device on WiFi: {{ new_devices }}. Activate guest mode?"
+        title: "Unknown Device on WiFi"
+        message: "{{ device_details }}"
         data:
           actions:
-            - action: "SAFELIST_DEVICE_{{ new_device_macs | join(',') }}"
-              title: "Safelist Device"
+            - action: "SAFELIST_DEVICE_{{ device_suffix }}"
+              title: "Safelist as Guest"
             - action: ACTIVATE_GUEST_MODE
               title: "Activate Guest Mode"
             - action: DISMISS_GUEST_ALERT
               title: "Dismiss"
     - action: notify.mobile_app_slvdh
       data:
-        title: "Guest Device Detected"
-        message: "New device on WiFi: {{ new_devices }}. Activate guest mode?"
+        title: "Unknown Device on WiFi"
+        message: "{{ device_details }}"
         data:
           actions:
-            - action: "SAFELIST_DEVICE_{{ new_device_macs | join(',') }}"
-              title: "Safelist Device"
+            - action: "SAFELIST_DEVICE_{{ device_suffix }}"
+              title: "Safelist as Guest"
             - action: ACTIVATE_GUEST_MODE
               title: "Activate Guest Mode"
             - action: DISMISS_GUEST_ALERT
               title: "Dismiss"
+  mode: queued
+  max: 10
+
+# --------------------------------------------------------------------------
+# 2. Known guest device detected while both residents are away
+# --------------------------------------------------------------------------
+- id: guest_device_auto_guest_mode
+  alias: "Occupancy - Known Guest Arrives While Away"
+  description: >
+    When a safelisted guest device joins WiFi and both Phil and Steph are away
+    from home, automatically activate guest mode and notify both phones.
+  triggers:
+    - trigger: event
+      event_type: state_changed
+  conditions:
+    - condition: template
+      value_template: >
+        {% set entity_id = trigger.event.data.entity_id
+          if trigger.event.data.entity_id is defined else '' %}
+        {% set from_state = trigger.event.data.old_state %}
+        {% set to_state = trigger.event.data.new_state %}
+        {{ entity_id.startswith('device_tracker.unifi_default_')
+           and to_state is not none
+           and to_state.state == 'home'
+           and (from_state is none or from_state.state != 'home') }}
+    - condition: template
+      value_template: >
+        {% set entity_id = trigger.event.data.entity_id %}
+        {% set suffix = entity_id | replace('device_tracker.unifi_default_', '') %}
+        {% set mac = (trigger.event.data.new_state.attributes.get('mac', '') | lower) %}
+        {% set raw = states('input_text.safelisted_wifi_macs') %}
+        {% set safelisted = raw.split(',')
+          | map('trim')
+          | reject('eq', '')
+          | map('lower')
+          | list if raw not in ['', 'unknown', 'unavailable'] else [] %}
+        {{ suffix in safelisted or mac in safelisted }}
+    - condition: state
+      entity_id: input_boolean.study_occupied
+      state: "off"
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: person.phil_patterson
+          state: "home"
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: person.stephanie_patterson
+          state: "home"
+  actions:
+    - variables:
+        device_entity_id: "{{ trigger.event.data.entity_id }}"
+        device_suffix: >
+          {{ device_entity_id | replace('device_tracker.unifi_default_', '') }}
+        device_name: >
+          {% set device = trigger.event.data.new_state %}
+          {% set host_name = device.attributes.get('host_name', '') %}
+          {% set fallback = device.name if device is not none else device_entity_id %}
+          {{ host_name if host_name else fallback }}
+        device_mac: >
+          {% set device = trigger.event.data.new_state %}
+          {% set mac = device.attributes.get('mac', '') if device is not none else '' %}
+          {{ mac | lower if mac else device_suffix | replace('_', ':') }}
+        device_ip: "{{ trigger.event.data.new_state.attributes.get('ip', '?') }}"
+        device_oui: "{{ trigger.event.data.new_state.attributes.get('oui', '') }}"
+        device_essid: "{{ trigger.event.data.new_state.attributes.get('essid', '') }}"
+        device_ap_mac: "{{ trigger.event.data.new_state.attributes.get('ap_mac', '') }}"
+        guest_details: >
+          {% set ns = namespace(lines=[]) %}
+          {% set ns.lines = ns.lines + ['Name: ' ~ device_name] %}
+          {% set ns.lines = ns.lines + ['MAC: ' ~ device_mac] %}
+          {% set ns.lines = ns.lines + ['IP: ' ~ device_ip] %}
+          {% if device_oui %}{% set ns.lines = ns.lines + ['Vendor: ' ~ device_oui] %}{% endif %}
+          {% if device_essid %}{% set ns.lines = ns.lines + ['SSID: ' ~ device_essid] %}{% endif %}
+          {% if device_ap_mac %}{% set ns.lines = ns.lines + ['AP MAC: ' ~ device_ap_mac] %}{% endif %}
+          {{ ns.lines | join('\n') }}
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.study_occupied
+    - action: notify.mobile_app_samsung_galaxy_s22_ultra
+      data:
+        title: "Guest Mode Auto-Activated"
+        message: >
+          Known guest device detected while you're away. Guest schedules are
+          now active.
+
+          {{ guest_details }}
+    - action: notify.mobile_app_slvdh
+      data:
+        title: "Guest Mode Auto-Activated"
+        message: >
+          Known guest device detected while you're away. Guest schedules are
+          now active.
+
+          {{ guest_details }}
   mode: single
 
+# --------------------------------------------------------------------------
+# 3. Activate guest mode from notification action
+# --------------------------------------------------------------------------
 - id: guest_mode_activate_from_notification
   alias: "Occupancy - Activate Guest Mode from Notification"
   description: >
@@ -148,6 +253,9 @@
         message: "Guest mode is now on. Study and rumpus rooms will follow guest schedules."
   mode: single
 
+# --------------------------------------------------------------------------
+# 4. Safelist device from notification action
+# --------------------------------------------------------------------------
 - id: safelist_wifi_device_from_notification
   alias: "Occupancy - Safelist WiFi Device from Notification"
   description: >
@@ -159,15 +267,20 @@
       event_type: mobile_app_notification_action
   conditions:
     - condition: template
-      value_template: "{{ trigger.event.data.action is defined and trigger.event.data.action.startswith('SAFELIST_DEVICE_') }}"
+      value_template: >
+        {{ trigger.event.data.action is defined and
+           trigger.event.data.action.startswith('SAFELIST_DEVICE_') }}
   actions:
     - variables:
-        new_macs: "{{ trigger.event.data.action | replace('SAFELIST_DEVICE_', '') }}"
+        new_suffixes: "{{ trigger.event.data.action | replace('SAFELIST_DEVICE_', '') }}"
         current: "{{ states('input_text.safelisted_wifi_macs') }}"
+        incoming_macs: >
+          {% set suffixes = new_suffixes.split(',') | map('trim') | reject('eq', '') | list %}
+          {{ suffixes | map('replace', '_', ':') | map('lower') | list }}
         updated: >
           {% set cur = current if current not in ['', 'unknown', 'unavailable'] else '' %}
-          {% set existing = cur.split(',') | map('trim') | reject('eq', '') | list %}
-          {% set incoming = new_macs.split(',') | map('trim') | reject('eq', '') | list %}
+          {% set existing = cur.split(',') | map('trim') | reject('eq', '') | map('lower') | list %}
+          {% set incoming = incoming_macs %}
           {% set merged = existing + (incoming | reject('in', existing) | list) %}
           {{ merged | join(',') }}
     - action: input_text.set_value
@@ -178,9 +291,15 @@
     - action: notify.mobile_app_samsung_galaxy_s22_ultra
       data:
         title: "Device Safelisted"
-        message: "MAC(s) {{ new_macs }} added to safelist. This device won't trigger alerts again."
+        message: >
+          MAC {{ incoming_macs | join(', ') }} added to safelist. This device
+          is now treated as a known guest and will auto-activate guest mode
+          when you're both away.
     - action: notify.mobile_app_slvdh
       data:
         title: "Device Safelisted"
-        message: "MAC(s) {{ new_macs }} added to safelist. This device won't trigger alerts again."
+        message: >
+          MAC {{ incoming_macs | join(', ') }} added to safelist. This device
+          is now treated as a known guest and will auto-activate guest mode
+          when you're both away.
   mode: single
