@@ -223,7 +223,7 @@
     - action: input_boolean.turn_on
       target:
         entity_id: input_boolean.study_occupied
-    - action: notify.mobile_app_samsung_galaxy_s22_ultra
+    - action: notify.std_information
       data:
         title: "Guest Mode Activated"
         message: "Guest mode is now on. Study and rumpus rooms will follow guest schedules."
@@ -264,7 +264,7 @@
         entity_id: input_text.safelisted_wifi_macs
       data:
         value: "{{ updated }}"
-    - action: notify.mobile_app_samsung_galaxy_s22_ultra
+    - action: notify.std_information
       data:
         title: "Device Safelisted"
         message: >

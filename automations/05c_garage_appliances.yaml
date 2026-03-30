@@ -47,28 +47,21 @@
     entity_id: cover.smart_garage_door_garage
     state: open
   actions:
-  - data:
-      message: 'Garage Door open for {{ relative_time(states.binary_sensor.garage_door_alert_active.last_changed)
-        }} \   Alerts on: Alerts on: {{ states.cover | selectattr(''entity_id'', ''eq'',
-        ''cover.smart_garage_door_garage'') | selectattr(''state'', ''eq'', ''on'')
-        | map(attribute=''attributes.friendly_name'') | list | join('', '') }} \  Triggered:
-        {{ as_timestamp(states.binary_sensor.garage_door_alert_active.last_changed)
-        | timestamp_custom(''%A %I:%M%p (%d-%b-%Y)'') }}
-
-        '
-      title: 7580 Info - Garage Door Open
-    service: notify.STD_Information
   - service: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
+      title: Garage Door Open
       message: Garage door left open
       data:
+        tag: garage_door_open
         actions:
         - action: CLOSE_GARAGE
           title: Close Garage Door
   - service: notify.mobile_app_slvdh
     data:
+      title: Garage Door Open
       message: Garage door left open
       data:
+        tag: garage_door_open
         actions:
         - action: CLOSE_GARAGE
           title: Close Garage Door
@@ -239,7 +232,7 @@
         target:
           entity_id: media_player.kitchen
       start_appliance_power: 10
-      include_start_notify: enable_start_notify_options
+      include_start_notify: disable_start_notify_options
       end_appliance_power: 3
       end_time_delay: 5
       start_time_delay: 1
@@ -265,7 +258,7 @@
       start_notify_device:
       - c054264b79e6739a057236f3a3c512b4
       - 58e2eb1fec0eb5ec9ce450433d074fcf
-      include_start_notify: enable_start_notify_options
+      include_start_notify: disable_start_notify_options
       start_notify_data:
       - channel
       start_notify_channel: Washing
@@ -412,7 +405,7 @@
     input:
       end_power_consumption: input_number.dishwasher_power_tracker_end
       start_appliance_power: 15
-      include_start_notify: enable_start_notify_options
+      include_start_notify: disable_start_notify_options
       start_notify_device:
       - 58e2eb1fec0eb5ec9ce450433d074fcf
       - c054264b79e6739a057236f3a3c512b4
@@ -928,58 +921,6 @@
         action: input_boolean.turn_off
         data: {}
   mode: single
-- id: '1711621732424'
-  alias: Maintenance - Clean Master Toilets
-  description: Tracks master ensuite cleaning via weekly schedule or NFC tag scans.
-  triggers:
-  - alias: On schedule
-    id: schedule
-    at: 08:00:00
-    trigger: time
-  - alias: When associated NFC tag is scanned
-    id: tag_scan
-    tag_id: 14544260-abc9-4e84-be5b-20b3df57978d
-    trigger: tag
-  conditions:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Home
-    - condition: state
-      entity_id: input_select.occupancy
-      state: Sleeping
-  actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: tag_scan
-      sequence:
-      - service: input_datetime.set_datetime
-        target:
-          entity_id: input_datetime.masterbed_toilet_last_cleaned
-        data:
-          timestamp: '{{ now().timestamp() }}'
-      - service: notify.mobile_app_samsung_galaxy_s22_ultra
-        data:
-          title: Master ensuite cleaned
-          message: Toilets marked as done
-      - service: notify.mobile_app_slvdh
-        data:
-          title: Master ensuite cleaned
-          message: Toilets marked as done
-  mode: single
-  max_exceeded: silent
-  variables:
-    tracker: input_datetime.masterbed_toilet_last_cleaned
-    interval_days: 7
-    days_since_last_cleaned: "{% set value = states(tracker) %} {% if value in ['unknown',
-      'unavailable', ''] %}\n  {{ interval_days + 1 }}\n{% else %}\n  {% set last
-      = value | as_datetime %}\n  {{ (now().date() - last.date()).days }}\n{% endif
-      %}"
-    overdue_days: '{% set diff = (days_since_last_cleaned | int) - interval_days %}
-      {{ diff if diff > 0 else 0 }}'
-    overdue: '{{ (days_since_last_cleaned | int) > interval_days }}'
 - id: '1742615433146'
   alias: Maintenance - Update Cleaning Timestamp via NFC
   description: Records the last-cleaned timestamps when toilet maintenance NFC tags
@@ -999,8 +940,8 @@
     trigger: tag
   actions:
   - data:
-      name: RFID Debug
-      message: 'Trigger ID: {{ trigger.id }}'
+      name: Maintenance
+      message: 'Toilet cleaning timestamp updated: {{ trigger.id }}'
     service: logbook.log
   - choose:
     - conditions:
@@ -1012,14 +953,6 @@
         data:
           timestamp: '{{ now().timestamp() }}'
         service: input_datetime.set_datetime
-      - service: notify.mobile_app_samsung_galaxy_s22_ultra
-        data:
-          title: Downstairs toilet cleaned
-          message: Toilet marked as done
-      - service: notify.mobile_app_slvdh
-        data:
-          title: Downstairs toilet cleaned
-          message: Toilet marked as done
     - conditions:
       - condition: template
         value_template: '{{ trigger.id == ''masterbed_toilet'' }}'
@@ -1038,14 +971,6 @@
         data:
           timestamp: '{{ now().timestamp() }}'
         service: input_datetime.set_datetime
-      - service: notify.mobile_app_samsung_galaxy_s22_ultra
-        data:
-          title: Oma's toilet cleaned
-          message: Toilet marked as done
-      - service: notify.mobile_app_slvdh
-        data:
-          title: Oma's toilet cleaned
-          message: Toilet marked as done
     - conditions:
       - condition: template
         value_template: '{{ trigger.id == ''kids_toilet'' }}'
@@ -1055,142 +980,6 @@
         data:
           timestamp: '{{ now().timestamp() }}'
         service: input_datetime.set_datetime
-      - service: notify.mobile_app_samsung_galaxy_s22_ultra
-        data:
-          title: Kids toilet cleaned
-          message: Toilet marked as done
-      - service: notify.mobile_app_slvdh
-        data:
-          title: Kids toilet cleaned
-          message: Toilet marked as done
-  mode: single
-- id: ac_filter_living_room_reminder
-  alias: Maintenance - Living Room AC Filter Reminder
-  description: Reminds to change Living Room AC filter every 90 days
-  triggers:
-  - trigger: time
-    at: 09:00:00
-  conditions:
-  - condition: template
-    value_template: "{% set last = states('input_datetime.ac_filter_living_room')
-      %} {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n  {{
-      (as_timestamp(now()) - as_timestamp(last)) / 86400 > 90 }}\n{% endif %}\n"
-  actions:
-  - action: notify.std_information
-    data:
-      title: "\U0001F527 Living Room AC Filter Due"
-      message: 'Living Room AC filter needs replacement
-
-        {% set last = states(''input_datetime.ac_filter_living_room'') %}
-
-        {% if last not in [''unknown'', ''unavailable'', ''''] %}
-
-        Last changed {{ relative_time(states(''input_datetime.ac_filter_living_room''))
-        }} ago
-
-        {% else %}
-
-        No change date recorded
-
-        {% endif %}
-
-        '
-  mode: single
-- id: ac_filter_master_bedroom_reminder
-  alias: Maintenance - Master Bedroom AC Filter Reminder
-  description: Reminds to change Master Bedroom AC filter every 90 days
-  triggers:
-  - trigger: time
-    at: 09:00:00
-  conditions:
-  - condition: template
-    value_template: "{% set last = states('input_datetime.ac_filter_master_bedroom')
-      %} {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n  {{
-      (as_timestamp(now()) - as_timestamp(last)) / 86400 > 90 }}\n{% endif %}\n"
-  actions:
-  - action: notify.std_information
-    data:
-      title: "\U0001F527 Master Bedroom AC Filter Due"
-      message: 'Master Bedroom AC filter needs replacement
-
-        {% set last = states(''input_datetime.ac_filter_master_bedroom'') %}
-
-        {% if last not in [''unknown'', ''unavailable'', ''''] %}
-
-        Last changed {{ relative_time(states(''input_datetime.ac_filter_master_bedroom''))
-        }} ago
-
-        {% else %}
-
-        No change date recorded
-
-        {% endif %}
-
-        '
-  mode: single
-- id: ac_filter_otto_room_reminder
-  alias: Maintenance - Otto's Room AC Filter Reminder
-  description: Reminds to change Otto's Room AC filter every 90 days
-  triggers:
-  - trigger: time
-    at: 09:00:00
-  conditions:
-  - condition: template
-    value_template: "{% set last = states('input_datetime.ac_filter_otto_room') %}
-      {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n  {{ (as_timestamp(now())
-      - as_timestamp(last)) / 86400 > 90 }}\n{% endif %}\n"
-  actions:
-  - action: notify.std_information
-    data:
-      title: "\U0001F527 Otto's Room AC Filter Due"
-      message: 'Otto''s Room AC filter needs replacement
-
-        {% set last = states(''input_datetime.ac_filter_otto_room'') %}
-
-        {% if last not in [''unknown'', ''unavailable'', ''''] %}
-
-        Last changed {{ relative_time(states(''input_datetime.ac_filter_otto_room''))
-        }} ago
-
-        {% else %}
-
-        No change date recorded
-
-        {% endif %}
-
-        '
-  mode: single
-- id: ac_filter_study_henry_reminder
-  alias: Maintenance - Study/Henry's Room AC Filter Reminder
-  description: Reminds to change Study/Henry's Room AC filter every 90 days
-  triggers:
-  - trigger: time
-    at: 09:00:00
-  conditions:
-  - condition: template
-    value_template: "{% set last = states('input_datetime.ac_filter_study_henry')
-      %} {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n  {{
-      (as_timestamp(now()) - as_timestamp(last)) / 86400 > 90 }}\n{% endif %}\n"
-  actions:
-  - action: notify.std_information
-    data:
-      title: "\U0001F527 Study/Henry's Room AC Filter Due"
-      message: 'Study/Henry''s Room AC filter needs replacement
-
-        {% set last = states(''input_datetime.ac_filter_study_henry'') %}
-
-        {% if last not in [''unknown'', ''unavailable'', ''''] %}
-
-        Last changed {{ relative_time(states(''input_datetime.ac_filter_study_henry''))
-        }} ago
-
-        {% else %}
-
-        No change date recorded
-
-        {% endif %}
-
-        '
   mode: single
 - id: ac_filter_living_room_changed
   alias: Maintenance - Living Room AC Filter Changed (NFC)
@@ -1289,11 +1078,9 @@
 
         '
   actions:
-  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+  - service: notify.std_information
     data:
-      message: Fish aren't fed - morning
-  - service: notify.mobile_app_slvdh
-    data:
+      title: Aquarium Reminder
       message: Fish aren't fed - morning
   mode: single
 - id: '1744580871551'
@@ -1310,11 +1097,9 @@
 
       '
   actions:
-  - service: notify.mobile_app_samsung_galaxy_s22_ultra
+  - service: notify.std_information
     data:
-      message: Fish aren't fed - dinner
-  - service: notify.mobile_app_slvdh
-    data:
+      title: Aquarium Reminder
       message: Fish aren't fed - dinner
   mode: single
 - id: '1747000000001'
@@ -1402,11 +1187,7 @@
           | length > 0 %} {% if overdue_items | length > 0 %}\n{% endif %} \U0001F4CB
           DUE TODAY: {% for item in due_items %} • {{ item }} {% endfor %} {% endif
           %}\n"
-    - service: notify.mobile_app_samsung_galaxy_s22_ultra
-      data:
-        title: "\U0001F527 Maintenance Reminder"
-        message: '{{ message_body }}'
-    - service: notify.mobile_app_slvdh
+    - service: notify.std_information
       data:
         title: "\U0001F527 Maintenance Reminder"
         message: '{{ message_body }}'
@@ -1457,11 +1238,7 @@
   - action: switch.turn_off
     target:
       entity_id: switch.water_switch_switch
-  - service: notify.mobile_app_samsung_galaxy_s22_ultra
-    data:
-      title: Water Shutoff
-      message: Irrigation automatically stopped after 10 minutes
-  - service: notify.mobile_app_slvdh
+  - service: notify.std_information
     data:
       title: Water Shutoff
       message: Irrigation automatically stopped after 10 minutes
@@ -1478,11 +1255,7 @@
     to: 'on'
   condition: []
   action:
-  - service: notify.mobile_app_samsung_galaxy_s22_ultra
-    data:
-      title: Water leak detected
-      message: Water leak detected at front door or laundry
-  - service: notify.mobile_app_slvdh
+  - service: notify.std_critical
     data:
       title: Water leak detected
       message: Water leak detected at front door or laundry
@@ -1495,11 +1268,7 @@
     path: sbyx/low-battery-level-detection-notification-for-all-battery-sensors.yaml
     input:
       actions:
-      - action: notify.mobile_app_samsung_galaxy_s22_ultra
-        data:
-          message: '{{sensors}}'
-          title: Low battery warning
-      - action: notify.mobile_app_slvdh
+      - action: notify.std_information
         data:
           message: '{{sensors}}'
           title: Low battery warning

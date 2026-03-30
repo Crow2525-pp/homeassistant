@@ -20,6 +20,12 @@
     state:
     - Home
     - Sleeping
+  - condition: or
+    conditions:
+    - condition: time
+      after: '20:00:00'
+    - condition: time
+      before: '06:00:00'
   actions:
   - action: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
@@ -45,6 +51,12 @@
     state:
     - Home
     - Sleeping
+  - condition: or
+    conditions:
+    - condition: time
+      after: '20:00:00'
+    - condition: time
+      before: '06:00:00'
   actions:
   - action: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
