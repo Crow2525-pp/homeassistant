@@ -321,6 +321,130 @@
         entity_id: climate.masterbed_room_ac
   mode: single
 
+- id: master_bedroom_workday_wfh_daytime_comfort
+  alias: "HVAC - Master Bedroom - WFH Daytime Comfort"
+  description: >
+    Keeps the master bedroom comfortable while working from home. Activates
+    when WFH begins (PC / desk turns on) and reacts to thermal comfort
+    changes. Cold/Cool/Slightly Cool → heat + comfort, Slightly Warm/Warm/Hot
+    → cool + comfort, Neutral → AC off. Turns off when WFH ends.
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.working_from_home
+      to: "on"
+      id: wfh_start
+    - trigger: state
+      entity_id: binary_sensor.working_from_home
+      to: "off"
+      id: wfh_end
+    - trigger: state
+      entity_id: sensor.master_bedroom_indoor_comfort_ts
+      to:
+        - Cold
+        - Cool
+        - Slightly Cool
+        - Slightly Warm
+        - Warm
+        - Hot
+      for: "00:10:00"
+      id: discomfort_stable
+    - trigger: state
+      entity_id: sensor.master_bedroom_indoor_comfort_ts
+      to: Neutral
+      for: "00:15:00"
+      id: neutral_stable
+  conditions:
+    - condition: state
+      entity_id: input_boolean.climate_manual_control_master
+      state: "off"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: sensor.master_bedroom_indoor_comfort_ts
+          state:
+            - unknown
+            - unavailable
+    - condition: template
+      value_template: >
+        {% set bed = states('input_datetime.bedtime_master_bedroom') %}
+        {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
+        {{ not (now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake) }}
+  actions:
+    - choose:
+        # --- WFH ended → turn off ---
+        - conditions:
+            - condition: trigger
+              id: wfh_end
+          sequence:
+            - action: climate.turn_off
+              target:
+                entity_id: climate.masterbed_room_ac
+        # --- WFH active: Cold/Cool/Slightly Cool → heat + comfort ---
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.working_from_home
+              state: "on"
+            - condition: state
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
+              state:
+                - Cold
+                - Cool
+                - Slightly Cool
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: comfort
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: heat
+        # --- WFH active: Slightly Warm/Warm/Hot → cool + comfort ---
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.working_from_home
+              state: "on"
+            - condition: state
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
+              state:
+                - Slightly Warm
+                - Warm
+                - Hot
+          sequence:
+            - action: climate.set_preset_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                preset_mode: comfort
+            - action: climate.set_hvac_mode
+              target:
+                entity_id: climate.masterbed_room_ac
+              data:
+                hvac_mode: cool
+        # --- WFH active: Neutral → turn off ---
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.working_from_home
+              state: "on"
+            - condition: state
+              entity_id: sensor.master_bedroom_indoor_comfort_ts
+              state: Neutral
+          sequence:
+            - action: climate.turn_off
+              target:
+                entity_id: climate.masterbed_room_ac
+  mode: restart
+
 # ============================================================================
 # KIDS ROOM (Henry & Otto) - Off at wake, frost/boost at bedtime (if sleeping)
 # ============================================================================
@@ -1551,6 +1675,10 @@
 
 - id: master_bedroom_hourly_recheck
   alias: "HVAC - Master Bedroom - Half-Hourly Mode Re-check"
+  description: >
+    Handles master bedroom climate outside the dedicated daytime WFH comfort
+    automation. When WFH is active during daytime, this automation stands down
+    so only one controller drives the AC.
   triggers:
     - trigger: time_pattern
       minutes: "/30"
@@ -1591,6 +1719,18 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
+    - condition: or
+      conditions:
+        - condition: not
+          conditions:
+            - condition: state
+              entity_id: binary_sensor.working_from_home
+              state: "on"
+        - condition: template
+          value_template: >
+            {% set bed = states('input_datetime.bedtime_master_bedroom') %}
+            {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
+            {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
     - condition: or
       conditions:
         # Occupancy change: skip AC-state check — AC was just turned on by return-home
