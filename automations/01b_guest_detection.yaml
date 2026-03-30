@@ -10,9 +10,9 @@
 #    MAC, IP, manufacturer) with options to safelist the device or activate
 #    guest mode.
 #
-# 2. KNOWN GUEST DEVICE - a MAC in safelisted_wifi_macs that connects while
-#    both Phil and Steph are away from home. Automatically activates guest
-#    mode and notifies.
+# 2. KNOWN GUEST DEVICE - a device labeled guest_wifi, or a MAC in
+#    safelisted_wifi_macs, that connects while both Phil and Steph are away
+#    from home. Automatically activates guest mode and notifies.
 #
 # To add a household device permanently: apply the 'presence' label to its
 # device_tracker entity in Home Assistant.
@@ -47,7 +47,8 @@
         {{ entity_id.startswith('device_tracker.unifi_default_')
            and to_state is not none
            and to_state.state == 'home'
-           and (from_state is none or from_state.state != 'home') }}
+           and from_state is not none
+           and from_state.state != 'home' }}
     - condition: template
       value_template: >
         {% set entity_id = trigger.event.data.entity_id %}
@@ -145,7 +146,9 @@
           | reject('eq', '')
           | map('lower')
           | list if raw not in ['', 'unknown', 'unavailable'] else [] %}
-        {{ 'guest_wifi' in entity_labels or suffix in safelisted or mac in safelisted }}
+        {{ ('guest_wifi' in entity_labels and 'presence' not in entity_labels)
+           or suffix in safelisted
+           or mac in safelisted }}
     - condition: state
       entity_id: input_boolean.study_occupied
       state: "off"
