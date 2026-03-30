@@ -1777,9 +1777,11 @@
           state: Sleeping
     - condition: or
       conditions:
-        - condition: state
-          entity_id: binary_sensor.working_from_home
-          state: "off"
+        - condition: not
+          conditions:
+            - condition: state
+              entity_id: binary_sensor.working_from_home
+              state: "on"
         - condition: template
           value_template: >
             {% set bed = states('input_datetime.bedtime_master_bedroom') %}
