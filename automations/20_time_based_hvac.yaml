@@ -538,6 +538,63 @@
   mode: single
 
 # ============================================================================
+# BEDROOM WAKE-UP SHUTDOWN
+# Dedicated wake-time off automations for the bedroom HVACs.
+# ============================================================================
+
+- id: master_bedroom_wakeup_turn_off
+  alias: "HVAC - Master Bedroom - Wake Up Turn Off"
+  description: >
+    Dedicated wake-time shutdown for the master bedroom HVAC. Clears manual
+    override and turns the AC off at the configured wake time.
+  triggers:
+    - trigger: time
+      at: input_datetime.wakeup_time_master_bedroom
+  conditions:
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+  actions:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.climate_manual_control_master
+    - action: climate.turn_off
+      target:
+        entity_id: climate.masterbed_room_ac
+  mode: single
+
+- id: ottos_room_wakeup_turn_off
+  alias: "HVAC - Kids Room - Wake Up Turn Off"
+  description: >
+    Dedicated wake-time shutdown for the kids room HVAC. Clears manual
+    override and turns the AC off at the configured wake time.
+  triggers:
+    - trigger: time
+      at: input_datetime.wakeup_time_ottos_room
+  conditions:
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Home
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Sleeping
+  actions:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.climate_manual_control_otto
+    - action: climate.turn_off
+      target:
+        entity_id: climate.kids_room_ac
+  mode: single
+
+# ============================================================================
 # STUDY ROOM - guest kid room
 # Runs only when Guest Staying is on and follows the kids room schedule so the
 # study behaves like a guest/kid bedroom without changing the base room helpers.
