@@ -4,21 +4,24 @@
 # ============================================================================
 # Two-tier WiFi device detection via the UniFi integration:
 #
-# 1. UNKNOWN DEVICE - a MAC not in known_devices or the safelisted_wifi_macs
-#    helper. Sends a rich notification (name, MAC, IP, manufacturer) with
-#    options to safelist the device or activate guest mode.
+# 1. UNKNOWN DEVICE - a UniFi tracker that is not labeled as a household
+#    presence device, not labeled as a guest_wifi device, and not present in
+#    the legacy safelisted_wifi_macs helper. Sends a rich notification (name,
+#    MAC, IP, manufacturer) with options to safelist the device or activate
+#    guest mode.
 #
 # 2. KNOWN GUEST DEVICE - a MAC in safelisted_wifi_macs that connects while
 #    both Phil and Steph are away from home. Automatically activates guest
 #    mode and notifies.
 #
-# To add a household device permanently: add its device_tracker entity_id to
-# the 'known_devices' list in the templates below.
+# To add a household device permanently: apply the 'presence' label to its
+# device_tracker entity in Home Assistant.
 #
-# To safelist a guest device dynamically: tap "Safelist Device" on the
-# notification, or add its MAC address (for example b8:7b:d4:f8:8a:31) to the
-# input_text.safelisted_wifi_macs helper (comma-separated). Legacy underscore
-# suffixes such as b8_7b_d4_f8_8a_31 are still accepted.
+# To safelist a guest device: preferably apply the 'guest_wifi' label to the
+# device_tracker entity in Home Assistant. The phone notification flow and the
+# input_text.safelisted_wifi_macs helper remain as a legacy fallback for quick
+# MAC-based safelisting. Legacy underscore suffixes such as
+# b8_7b_d4_f8_8a_31 are still accepted.
 # ============================================================================
 
 # --------------------------------------------------------------------------
@@ -47,29 +50,18 @@
            and (from_state is none or from_state.state != 'home') }}
     - condition: template
       value_template: >
-        {% set known_devices = [
-          'device_tracker.unifi_default_b8_7b_d4_f8_8a_31',
-          'device_tracker.unifi_default_1c_f2_9a_0b_34_9e',
-          'device_tracker.unifi_default_2e_0d_2c_65_84_9c',
-          'device_tracker.unifi_default_00_22_6c_33_96_09',
-          'device_tracker.unifi_default_76_23_a6_ee_d2_0c',
-          'device_tracker.unifi_default_8c_8c_aa_9d_77_b5',
-          'device_tracker.unifi_default_34_5a_60_a4_cb_fb',
-          'device_tracker.unifi_default_c4_dd_57_78_bd_2c',
-          'device_tracker.unifi_default_0c_7e_24_58_96_67',
-          'device_tracker.unifi_default_b8_f7_75_20_3f_c3',
-          'device_tracker.unifi_default_c6_35_53_da_d0_1b'
-        ] %}
         {% set entity_id = trigger.event.data.entity_id %}
         {% set suffix = entity_id | replace('device_tracker.unifi_default_', '') %}
         {% set mac = (trigger.event.data.new_state.attributes.get('mac', '') | lower) %}
+        {% set entity_labels = labels(entity_id) %}
         {% set raw = states('input_text.safelisted_wifi_macs') %}
         {% set safelisted = raw.split(',')
           | map('trim')
           | reject('eq', '')
           | map('lower')
           | list if raw not in ['', 'unknown', 'unavailable'] else [] %}
-        {{ entity_id not in known_devices
+        {{ 'presence' not in entity_labels
+           and 'guest_wifi' not in entity_labels
            and suffix not in safelisted
            and mac not in safelisted }}
   actions:
@@ -145,13 +137,14 @@
         {% set entity_id = trigger.event.data.entity_id %}
         {% set suffix = entity_id | replace('device_tracker.unifi_default_', '') %}
         {% set mac = (trigger.event.data.new_state.attributes.get('mac', '') | lower) %}
+        {% set entity_labels = labels(entity_id) %}
         {% set raw = states('input_text.safelisted_wifi_macs') %}
         {% set safelisted = raw.split(',')
           | map('trim')
           | reject('eq', '')
           | map('lower')
           | list if raw not in ['', 'unknown', 'unavailable'] else [] %}
-        {{ suffix in safelisted or mac in safelisted }}
+        {{ 'guest_wifi' in entity_labels or suffix in safelisted or mac in safelisted }}
     - condition: state
       entity_id: input_boolean.study_occupied
       state: "off"
