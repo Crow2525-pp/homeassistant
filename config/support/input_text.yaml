@@ -9,3 +9,8 @@ cover_status_helper_curtains:
   max: 254
   initial: "unknown"
   icon: mdi:curtains
+safelisted_wifi_macs:
+  name: Safelisted WiFi MACs
+  max: 255
+  initial: ""
+  icon: mdi:wifi-check
