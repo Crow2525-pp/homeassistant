@@ -583,7 +583,7 @@
   mode: single
 - id: '1752525370218'
   alias: Morning - Start Music Routine
-  description: Starts the morning music playlist at the scheduled time.
+  description: Starts the configured morning Spotify item at the scheduled time.
   triggers:
   - trigger: time
     at: 06:30:00
@@ -606,6 +606,9 @@
     target:
       entity_id: media_player.living_room_wiimamp
   - action: script.spotify_tv
+    data:
+      media_content_id: spotify:album:1r0nF1ODyJtad2W9EPbGrT
+      media_content_type: music
   mode: single
 - id: '1705440129170'
   alias: Living Room Remote - Mijia Switch Actions

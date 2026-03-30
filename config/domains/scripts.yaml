@@ -357,6 +357,13 @@ led_off_henry:
   icon: mdi:roller-shade
 spotify_tv:
   alias: Spotify - WiiM Amp
+  fields:
+    media_content_id:
+      description: Optional Spotify URI to start after selecting the WiiM Amp output.
+      example: spotify:track:1KOvMqTti6wDKF56zJPdUg
+    media_content_type:
+      description: Optional media type for play_media. Use music for tracks/albums and playlist for playlists.
+      example: music
   sequence:
   - choose:
       - conditions:
@@ -380,9 +387,22 @@ spotify_tv:
             data:
               source: 'WiiM Amp'
     default: []
-  - action: media_player.media_play
-    target:
-      entity_id: media_player.spotify_philip_patterson
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ media_content_id is defined and (media_content_id | string | trim) != '' }}
+        sequence:
+          - action: media_player.play_media
+            target:
+              entity_id: media_player.spotify_philip_patterson
+            data:
+              media_content_id: "{{ media_content_id }}"
+              media_content_type: "{{ media_content_type | default('music') }}"
+    default:
+      - action: media_player.media_play
+        target:
+          entity_id: media_player.spotify_philip_patterson
   mode: single
   icon: mdi:spotify
 volume_talking:
