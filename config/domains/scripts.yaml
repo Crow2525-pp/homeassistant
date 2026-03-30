@@ -355,7 +355,7 @@ led_off_henry:
     data: {}
   mode: single
   icon: mdi:roller-shade
-spotify_tv:
+spotify_wiim_amp:
   alias: Spotify - WiiM Amp
   fields:
     media_content_id:
@@ -464,7 +464,7 @@ spotify:
   sequence:
   - service: script.turn_on
     target:
-      entity_id: script.spotify_tv
+      entity_id: script.spotify_wiim_amp
   icon: mdi:spotify
   mode: single
 volume_quiet:
