@@ -171,6 +171,9 @@
     target:
       entity_id:
       - light.lounge
+      area_id:
+      - front_entrance
+      - back_garden
   mode: single
   # NOTE: Intentionally uses only living room (lounge) light
   # Excludes all bedroom lights to allow users to wake naturally without disruption
@@ -211,6 +214,7 @@
       - master_bedroom
       - outside
       - front_entrance
+      - back_garden
       entity_id:
       - light.outdoor_switch_socket_1
     action: light.turn_off
