@@ -405,6 +405,41 @@ spotify_wiim_amp:
           entity_id: media_player.spotify_philip_patterson
   mode: single
   icon: mdi:spotify
+spotifyplus_device_on:
+  alias: SpotifyPlus - Turn On Device
+  fields:
+    device_id:
+      description: The Spotify Connect device name to activate.
+      example: Living Room Wiimamp
+  sequence:
+  - action: spotifyplus.player_transfer_playback
+    target:
+      entity_id: media_player.spotifyplus_philip_patterson
+    data:
+      device_id: "{{ device_id }}"
+      play: false
+      force_activate_device: true
+  mode: single
+  icon: mdi:spotify
+spotifyplus_device_off:
+  alias: SpotifyPlus - Turn Off Device
+  fields:
+    device_id:
+      description: The Spotify Connect device name to deactivate.
+      example: Living Room Wiimamp
+  sequence:
+  - action: spotifyplus.player_transfer_playback
+    target:
+      entity_id: media_player.spotifyplus_philip_patterson
+    data:
+      device_id: "{{ device_id }}"
+      play: false
+      force_activate_device: false
+  - action: media_player.media_stop
+    target:
+      entity_id: media_player.spotifyplus_philip_patterson
+  mode: single
+  icon: mdi:spotify
 volume_talking:
   alias: Volume Talking
   sequence:
