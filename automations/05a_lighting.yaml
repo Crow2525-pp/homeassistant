@@ -305,8 +305,9 @@
   max: 2
 - id: '1703583740639'
   alias: Front Entrance - Motion-Activated Light
-  description: Turns on the front entrance lights when motion is detected and switches
-    them off after the timeout.
+  description: Turns on the front entrance and study nook lights when motion is detected
+    and switches them off after the timeout. Only active between 22:15 and sunrise
+    to avoid conflicting with sunset evening lighting.
   triggers:
   - entity_id:
     - binary_sensor.motion_sensor_motion
@@ -318,7 +319,13 @@
     for:
       minutes: 2
     trigger: state
-  conditions: []
+  conditions:
+  - condition: or
+    conditions:
+    - condition: time
+      after: '22:15:00'
+    - condition: sun
+      before: sunrise
   actions:
   - choose:
     - conditions:
