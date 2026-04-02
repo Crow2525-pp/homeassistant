@@ -18,6 +18,9 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Away
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
   actions:
   - data:
       option: Away
@@ -73,6 +76,9 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
   action:
   - service: input_select.select_option
     data:
@@ -141,6 +147,9 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Home
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
   actions:
   - action: input_select.select_option
     data:

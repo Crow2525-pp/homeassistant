@@ -150,6 +150,11 @@
   - at: 05:00:00
     trigger: time
   conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
   - condition: state
     entity_id: input_boolean.automation_killswitch_living_room
     state: 'off'
@@ -222,6 +227,11 @@
   - platform: time
     at: '20:00:00'
   condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
   - condition: or
     conditions:
     - condition: state
@@ -312,6 +322,11 @@
       minutes: 2
     trigger: state
   conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
   - condition: or
     conditions:
     - condition: time
@@ -369,6 +384,11 @@
     event: sunrise
     offset: 00:20:00
   conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
   - condition: state
     entity_id: input_boolean.automation_killswitch_living_room
     state: 'off'
@@ -486,6 +506,11 @@
   - at: '16:00:00'
     trigger: time
   conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
   - condition: state
     entity_id: input_boolean.automation_killswitch_living_room
     state: 'off'

@@ -404,6 +404,11 @@
     for:
       minutes: 30
   conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
   - condition: state
     entity_id: climate.living_room_ac_2
     state: 'off'
@@ -445,6 +450,11 @@
     for:
       minutes: 30
   conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
   - condition: state
     entity_id: climate.masterbed_room_ac
     state: 'off'
