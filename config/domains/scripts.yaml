@@ -691,17 +691,16 @@ holiday_mode:
       - henry_s_room
       - master_bedroom
       - baby_room
-  # Set alarm to away/armed mode
-  - action: alarm_control_panel.alarm_arm_away
+  # Set alarm to vacation mode
+  - action: alarm_control_panel.alarm_arm_vacation
     target:
       entity_id: alarm_control_panel.alarmo
     data: {}
-  # Note: Auto-presence add-on should be manually enabled in settings
-  # Set occupancy to Away
+  # Set occupancy to Holiday
   - target:
       entity_id: input_select.occupancy
     data:
-      option: Away
+      option: Holiday
     action: input_select.select_option
   # Close garage
   - target:
