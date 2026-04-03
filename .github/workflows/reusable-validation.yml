@@ -144,6 +144,11 @@ jobs:
                    -e '/powercalc\:/,+2d' \
                    -e '/sonoff\:/,+3d' configuration.yaml
           fi
+          # SmartIR is installed via HACS and unavailable in CI;
+          # strip its platform entries so validation doesn't fail
+          for f in config/domains/fan.yaml config/domains/climate.yaml config/domains/light.yaml; do
+            [ -f "$f" ] && sed -i '/platform: smartir/,/^$/d' "$f"
+          done
       - name: Validate (stable)
         if: ${{ inputs.run_ha_stable }}
         id: ha
@@ -195,6 +200,11 @@ jobs:
                    -e '/powercalc\:/,+2d' \
                    -e '/sonoff\:/,+3d' configuration.yaml
           fi
+          # SmartIR is installed via HACS and unavailable in CI;
+          # strip its platform entries so validation doesn't fail
+          for f in config/domains/fan.yaml config/domains/climate.yaml config/domains/light.yaml; do
+            [ -f "$f" ] && sed -i '/platform: smartir/,/^$/d' "$f"
+          done
       - name: Validate (${{ matrix.version }})
         id: ha
         uses: frenck/action-home-assistant@v1
