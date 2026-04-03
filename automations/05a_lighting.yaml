@@ -155,9 +155,6 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Holiday
-  - condition: state
-    entity_id: input_boolean.automation_killswitch_living_room
-    state: 'off'
   - condition: sun
     before: sunrise
   - condition: state
