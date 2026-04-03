@@ -18,6 +18,9 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Away
+    - condition: state
+      entity_id: input_select.occupancy
+      state: Holiday
   actions:
   - data:
       option: Away
@@ -147,6 +150,79 @@
       option: Home
     target:
       entity_id: input_select.occupancy
+  mode: single
+
+- id: '1743638400001'
+  alias: Occupancy - Airport Zone Holiday Prompt
+  description: >
+    Sends an actionable notification to both phones when either Phil or Steph
+    enters the airport zone, asking whether to activate holiday mode.
+  triggers:
+    - trigger: zone
+      entity_id: person.stephanie_patterson
+      zone: zone.airport
+      event: enter
+    - trigger: zone
+      entity_id: device_tracker.sm_s908e
+      zone: zone.airport
+      event: enter
+  conditions:
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Holiday
+  actions:
+    - action: notify.mobile_app_samsung_galaxy_s22_ultra
+      data:
+        title: "Holiday Mode"
+        message: "It looks like you're at the airport. Activate holiday mode?"
+        data:
+          actions:
+            - action: ACTIVATE_HOLIDAY_MODE
+              title: "Yes, Holiday Mode"
+            - action: DISMISS_HOLIDAY_PROMPT
+              title: "No"
+    - action: notify.mobile_app_slvdh
+      data:
+        title: "Holiday Mode"
+        message: "It looks like you're at the airport. Activate holiday mode?"
+        data:
+          actions:
+            - action: ACTIVATE_HOLIDAY_MODE
+              title: "Yes, Holiday Mode"
+            - action: DISMISS_HOLIDAY_PROMPT
+              title: "No"
+  mode: single
+
+- id: '1743638400002'
+  alias: Occupancy - Activate Holiday Mode from Notification
+  description: >
+    Activates holiday mode when either Phil or Steph taps the actionable
+    notification from the airport zone prompt.
+  triggers:
+    - trigger: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: ACTIVATE_HOLIDAY_MODE
+  conditions: []
+  actions:
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.occupancy
+      data:
+        option: Holiday
+    - action: alarm_control_panel.alarm_arm_vacation
+      target:
+        entity_id: alarm_control_panel.alarmo
+    - action: notify.mobile_app_samsung_galaxy_s22_ultra
+      data:
+        title: "Holiday Mode Active"
+        message: "House is in holiday mode. HVAC, lights, and media will shut down. Have a great trip!"
+    - action: notify.mobile_app_slvdh
+      data:
+        title: "Holiday Mode Active"
+        message: "House is in holiday mode. HVAC, lights, and media will shut down. Have a great trip!"
   mode: single
 
 - id: '1735500000002'

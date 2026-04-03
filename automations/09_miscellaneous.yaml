@@ -39,6 +39,11 @@
       at: input_datetime.wakeup_time_master_bedroom
       id: wakeup
   conditions:
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Holiday
     - condition: state
       entity_id: input_boolean.fan_manual_control_master
       state: "off"
@@ -131,6 +136,11 @@
         - "off"
       id: cooling_stopped
   conditions:
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state: Holiday
     - condition: state
       entity_id: input_boolean.fan_manual_control_master
       state: "off"
