@@ -67,3 +67,5 @@ timer: !include config/support/timer.yaml
 alert: !include config/support/alert.yaml
 
 shell_command: !include config/support/shell_command.yaml
+
+utility_meter: !include config/support/utility_meter.yaml

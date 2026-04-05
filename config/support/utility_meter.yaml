@@ -1,0 +1,19 @@
+# Work location utility meters
+# These accumulate daily hours from history_stats sensors incrementally,
+# avoiding expensive multi-month history queries on every update.
+
+# Calendar year (resets Jan 1) - for tax purposes
+wfh_hours_this_year:
+  source: sensor.wfh_hours_today
+  cycle: yearly
+office_hours_this_year:
+  source: sensor.office_hours_today
+  cycle: yearly
+
+# Australian financial year (resets July 1)
+wfh_hours_this_financial_year:
+  source: sensor.wfh_hours_today
+  cron: "0 0 1 7 *"
+office_hours_this_financial_year:
+  source: sensor.office_hours_today
+  cron: "0 0 1 7 *"

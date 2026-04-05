@@ -6,38 +6,40 @@
   away_timeout: 120 # number of seconds after which the enitity will get status not_ho
 
 
-# Work location statistics - 4 weeks
+# Work location statistics - 4 weeks (count of state changes, updated every 30 min)
 - platform: history_stats
   name: WFH Days Last 4 Weeks
   entity_id: binary_sensor.working_from_home
   state: 'on'
-  type: time
+  type: count
   duration:
     days: 28
   end: "{{ now() }}"
+  scan_interval: 1800
 - platform: history_stats
   name: Office Days Last 4 Weeks
   entity_id: binary_sensor.working_at_office
   state: 'on'
-  type: time
+  type: count
   duration:
     days: 28
   end: "{{ now() }}"
+  scan_interval: 1800
 
-# Work location statistics - This year (for tax)
+# Daily work location hours (lightweight 1-day lookback, feeds utility meters)
 - platform: history_stats
-  name: WFH Days This Year
+  name: WFH Hours Today
   entity_id: binary_sensor.working_from_home
   state: 'on'
   type: time
-  start: "{{ now().replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0) }}"
+  start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
   end: "{{ now() }}"
 - platform: history_stats
-  name: Office Days This Year
+  name: Office Hours Today
   entity_id: binary_sensor.working_at_office
   state: 'on'
   type: time
-  start: "{{ now().replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0) }}"
+  start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
   end: "{{ now() }}"
 
 # News headlines (ABC Victoria)
@@ -49,28 +51,6 @@
 #   date_format: "%a %I:%M %p"
 #   scan_interval: 1800
 
-# Work location statistics - This financial year (July 1 - June 30)
-- platform: history_stats
-  name: WFH Days This Financial Year
-  entity_id: binary_sensor.working_from_home
-  state: 'on'
-  type: time
-  start: >
-    {% if now().month >= 7 %}
-      {{ now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) }}
-    {% else %}
-      {{ (now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=365)) }}
-    {% endif %}
-  end: "{{ now() }}"
-- platform: history_stats
-  name: Office Days This Financial Year
-  entity_id: binary_sensor.working_at_office
-  state: 'on'
-  type: time
-  start: >
-    {% if now().month >= 7 %}
-      {{ now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) }}
-    {% else %}
-      {{ (now().replace(month=7, day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=365)) }}
-    {% endif %}
-  end: "{{ now() }}"
+# Year and financial year totals are now tracked by utility_meter
+# helpers (see config/support/utility_meter.yaml) which accumulate
+# incrementally instead of querying months of history on every update.
