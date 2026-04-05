@@ -40,7 +40,7 @@
     Updates clothing insulation and metabolic rate based on bedtime/wake time
     for Indoor Thermal Comfort (ASHRAE 55) sensors. Adult rooms follow master
     bedroom schedule; kids room follows its own earlier bedtime.
-  triggers:
+  trigger:
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
     - trigger: time
@@ -51,8 +51,8 @@
       at: input_datetime.bedtime_ottos_room
     - trigger: homeassistant
       event: start
-  conditions: []
-  actions:
+  condition: []
+  action:
     - variables:
         clo_day: 1.1
         clo_night: 1.5

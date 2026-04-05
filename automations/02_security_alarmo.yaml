@@ -38,7 +38,7 @@
   alias: Alarmo - Arm Night Routine
   description: Arms Alarmo in night mode during bedtime hours based on occupancy or
     manual triggers.
-  triggers:
+  trigger:
   - at: '21:00:00'
     id: fallback_time
     enabled: false
@@ -58,7 +58,7 @@
     above: 95
     for:
       minutes: 10
-  conditions:
+  condition:
   - condition: time
     before: 06:00:00
     weekday:
@@ -83,7 +83,7 @@
         id: sleep_confidence
     - condition: time
       before: 01:00:00
-  actions:
+  action:
   - choose:
     - conditions:
       - condition: state
@@ -250,13 +250,13 @@
     Checks doors, garage, HVAC, lights, washing machine, water leaks, and
     alarm state 45 minutes after switching to sleeping mode. Only notifies
     when at least one issue is found.
-  triggers:
+  trigger:
     - trigger: state
       entity_id: input_select.occupancy
       to: Sleeping
       for:
         minutes: 45
-  actions:
+  action:
     - variables:
         issues: >
           {% set ns = namespace(items=[]) %}
@@ -348,12 +348,12 @@
   description: >
     Closes the garage door and confirms via notification when the action
     button on the bedtime checklist is tapped.
-  triggers:
+  trigger:
     - trigger: event
       event_type: mobile_app_notification_action
       event_data:
         action: CLOSE_GARAGE_BEDTIME
-  actions:
+  action:
     - action: cover.close_cover
       target:
         entity_id: cover.smart_garage_door_garage

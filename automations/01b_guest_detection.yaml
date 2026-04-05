@@ -34,10 +34,10 @@
     not in the household list or guest safelist. Includes UniFi metadata such
     as MAC, IP, SSID, AP MAC, vendor, and the guest flag. Offers actions to
     safelist the device or activate guest mode.
-  triggers:
+  trigger:
     - trigger: event
       event_type: state_changed
-  conditions:
+  condition:
     - condition: template
       value_template: >
         {% set entity_id = trigger.event.data.entity_id
@@ -65,7 +65,7 @@
            and 'guest_wifi' not in entity_labels
            and suffix not in safelisted
            and mac not in safelisted }}
-  actions:
+  action:
     - variables:
         device_entity_id: "{{ trigger.event.data.entity_id }}"
         device_suffix: >
@@ -119,10 +119,10 @@
   description: >
     When a safelisted guest device joins WiFi and both Phil and Steph are away
     from home, automatically activate guest mode and send a notification.
-  triggers:
+  trigger:
     - trigger: event
       event_type: state_changed
-  conditions:
+  condition:
     - condition: template
       value_template: >
         {% set entity_id = trigger.event.data.entity_id
@@ -166,7 +166,7 @@
         - condition: state
           entity_id: person.stephanie_patterson
           state: "home"
-  actions:
+  action:
     - variables:
         device_entity_id: "{{ trigger.event.data.entity_id }}"
         device_suffix: >
@@ -214,13 +214,13 @@
   description: >
     Turns on guest mode (input_boolean.study_occupied) when the user taps the
     actionable notification button from the guest device detection alert.
-  triggers:
+  trigger:
     - trigger: event
       event_type: mobile_app_notification_action
       event_data:
         action: ACTIVATE_GUEST_MODE
-  conditions: []
-  actions:
+  condition: []
+  action:
     - action: input_boolean.turn_on
       target:
         entity_id: input_boolean.study_occupied
@@ -239,15 +239,15 @@
     Adds the detected device MAC(s) to input_text.safelisted_wifi_macs when
     the user taps the "Safelist Device" notification action. The MAC suffixes
     are encoded in the action string (SAFELIST_DEVICE_<mac>[,<mac>...]).
-  triggers:
+  trigger:
     - trigger: event
       event_type: mobile_app_notification_action
-  conditions:
+  condition:
     - condition: template
       value_template: >
         {{ trigger.event.data.action is defined and
            trigger.event.data.action.startswith('SAFELIST_DEVICE_') }}
-  actions:
+  action:
     - variables:
         new_suffixes: "{{ trigger.event.data.action | replace('SAFELIST_DEVICE_', '') }}"
         current: "{{ states('input_text.safelisted_wifi_macs') }}"

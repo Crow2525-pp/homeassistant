@@ -3,12 +3,12 @@
   alias: Living Areas - Lights On Before Sunset
   description: Turns on the evening scene and area lighting when the sun elevation
     drops below 5 degrees and someone is home.
-  triggers:
+  trigger:
   - entity_id: sun.sun
     attribute: elevation
     below: '5'
     trigger: numeric_state
-  conditions:
+  condition:
   - condition: not
     conditions:
     - condition: state
@@ -17,7 +17,7 @@
   - condition: state
     entity_id: binary_sensor.someone_home
     state: 'on'
-  actions:
+  action:
   # Living room scene - only if living room killswitch is off
   - if:
     - condition: state
@@ -54,14 +54,14 @@
   alias: Living Areas - Lights Off for Night Routine
   description: Turns off lounge and surrounding lights at 22:15 or when the early
     bedtime calendar event starts.
-  triggers:
+  trigger:
   - at: '22:15:00'
     trigger: time
   - event: start
     offset: 0:0:0
     entity_id: calendar.early_to_bed
     trigger: calendar
-  conditions:
+  condition:
   - condition: or
     conditions:
     - condition: state
@@ -70,7 +70,7 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Home
-  actions:
+  action:
   # Living room TV and climate - only if living room killswitch is off
   - if:
     - condition: state
@@ -140,7 +140,7 @@
   alias: Morning Wake-Up Lighting Routine
   description: Turns on living room light at 05:00 AM for morning wake-up. Excludes
     all bedroom lights to allow natural waking.
-  triggers:
+  trigger:
   - trigger: numeric_state
     entity_id: sensor.samsung_galaxy_s22_ultra_sleep_confidence
     below: 80
@@ -149,7 +149,7 @@
     above: 1
   - at: 05:00:00
     trigger: time
-  conditions:
+  condition:
   - condition: not
     conditions:
     - condition: state
@@ -161,7 +161,7 @@
     entity_id: binary_sensor.someone_home
     state: 'on'
     alias: Someone Home
-  actions:
+  action:
   - action: light.turn_on
     metadata: {}
     data: {}
@@ -178,12 +178,12 @@
   alias: Morning Shutdown for Stray Lights
   description: Turns off selected lights shortly after sunrise if they were left on
     overnight.
-  triggers:
+  trigger:
   - event: sunrise
     offset: 00:15:00
     trigger: sun
-  conditions: []
-  actions:
+  condition: []
+  action:
   # Turn off living room lights - only if living room killswitch is off
   - if:
     - condition: state
@@ -266,7 +266,7 @@
   alias: Master Bedroom - Bedside Lights at 1 Percent
   description: Forces the bedside reading and sleeping lights to 1 percent brightness
     between 20:00 and 08:00.
-  triggers:
+  trigger:
   - trigger: state
     entity_id: light.reading_light
     to: 'on'
@@ -275,11 +275,11 @@
     entity_id: light.sleeping_light_2
     to: 'on'
     id: Sleeping
-  conditions:
+  condition:
   - condition: time
     before: 08:00:00
     after: '20:00:00'
-  actions:
+  action:
   - alias: Set Triggered Light to 1 Percent
     choose:
     - conditions:
@@ -307,7 +307,7 @@
   description: Turns on the front entrance and study nook lights when motion is detected
     and switches them off after the timeout. Only active between 22:15 and sunrise
     to avoid conflicting with sunset evening lighting.
-  triggers:
+  trigger:
   - entity_id:
     - binary_sensor.motion_sensor_motion
     to: 'on'
@@ -318,7 +318,7 @@
     for:
       minutes: 2
     trigger: state
-  conditions:
+  condition:
   - condition: not
     conditions:
     - condition: state
@@ -330,7 +330,7 @@
       after: '22:15:00'
     - condition: sun
       before: sunrise
-  actions:
+  action:
   - choose:
     - conditions:
       - condition: state
@@ -362,7 +362,7 @@
   alias: Living Room - Motion Lighting
   description: Controls living room lighting based on motion detection during set
     hours.
-  triggers:
+  trigger:
   - entity_id:
     - binary_sensor.aqara_motion_and_light_sensor_p2_occupancy
     to: 'on'
@@ -380,7 +380,7 @@
   - trigger: sun
     event: sunrise
     offset: 00:20:00
-  conditions:
+  condition:
   - condition: not
     conditions:
     - condition: state
@@ -392,7 +392,7 @@
   - condition: numeric_state
     entity_id: sensor.aqara_motion_and_light_sensor_p2_illuminance_lux
     below: 30
-  actions:
+  action:
   - choose:
     - conditions:
       - condition: trigger
@@ -497,12 +497,12 @@
   alias: Living Room - Adjust Floor Lamp for Solar Output
   description: Dims or brightens the living room floor lamp based on available solar
     production.
-  triggers:
+  trigger:
   - entity_id: sensor.gosungrow_virtual_1205796_1_1_1_p24
     trigger: state
   - at: '16:00:00'
     trigger: time
-  conditions:
+  condition:
   - condition: not
     conditions:
     - condition: state
@@ -514,7 +514,7 @@
   - condition: time
     after: 06:00:00
     before: '16:00:00'
-  actions:
+  action:
   - choose:
     - conditions:
       - condition: time
@@ -543,15 +543,15 @@
 - id: '1734000000002'
   alias: Outdoor Holiday Lights - Sunset to 9:45pm
   description: Turns outdoor Christmas lights on at sunset and off at 9:45pm.
-  triggers:
+  trigger:
   - trigger: sun
     event: sunset
     id: turn_on
   - trigger: time
     at: '21:45:00'
     id: turn_off
-  conditions: []
-  actions:
+  condition: []
+  action:
   - choose:
     - conditions:
       - condition: trigger
@@ -570,7 +570,7 @@
 - id: '1734000000001'
   alias: Holiday Lights - Auto On/Off Schedule
   description: Keeps Christmas lights on except between 1am and 5am during holiday season.
-  triggers:
+  trigger:
   - trigger: time
     at: '05:00:00'
     id: turn_on
@@ -581,11 +581,11 @@
     entity_id: binary_sensor.holiday_season
     to: 'on'
     id: season_start
-  conditions:
+  condition:
   - condition: state
     entity_id: binary_sensor.holiday_season
     state: 'on'
-  actions:
+  action:
   - choose:
     - conditions:
       - condition: or
@@ -615,7 +615,7 @@
   alias: Study Remote - Toggle Computer Desk
   description: Lets the spare remote toggle the study computer desk smart switch without
     having to pull out a phone
-  triggers:
+  trigger:
   - platform: event
     event_type: zha_event
     event_data:
@@ -626,8 +626,8 @@
     event_data:
       device_id: a957c4c649b876f99732f7bd44193c43
       command: remote_button_short_press
-  conditions: []
-  actions:
+  condition: []
+  action:
   - action: switch.toggle
     metadata: {}
     data: {}
@@ -637,11 +637,11 @@
 - id: '1685157513874'
   alias: Study Desk NFC - Toggle Desk Switch
   description: Toggles the study desk switch when its NFC tag is scanned.
-  triggers:
+  trigger:
   - tag_id: c99ee431-d1d8-497c-9f0f-214994610aa6
     trigger: tag
-  conditions: []
-  actions:
+  condition: []
+  action:
   - action: switch.toggle
     target:
       entity_id: switch.computer_plug_switch
@@ -650,7 +650,7 @@
   alias: Study - Start Workday Desk Routine
   description: Turns on the study desk light and preps climate when the workday toggle
     activates.
-  triggers:
+  trigger:
   - trigger: state
     entity_id: switch.working_from_home
     to: 'on'
@@ -659,8 +659,8 @@
     entity_id: switch.working_from_home
     to: 'off'
     id: 'Off'
-  conditions: []
-  actions:
+  condition: []
+  action:
   - choose:
     - conditions:
       - condition: trigger
@@ -759,7 +759,7 @@
 - id: '1762940525728'
   alias: Living Room - Lights Off When Watching TV
   description: Turns off selected lights when the living room TV is in use.
-  triggers:
+  trigger:
   - trigger: state
     entity_id:
     - media_player.tv
@@ -790,14 +790,14 @@
     for:
       seconds: 30
     id: TurnedOff
-  conditions:
+  condition:
   - condition: state
     entity_id: input_boolean.automation_killswitch_living_room
     state: 'off'
   - condition: sun
     after: sunset
     before: sunrise
-  actions:
+  action:
   - choose:
     - conditions:
       - condition: trigger

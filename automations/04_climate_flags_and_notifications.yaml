@@ -3,11 +3,11 @@
   alias: Climate Flags - Mark Hot Day
   description: Sets the hot-day helper booleans based on the early-morning forecast.
     depending on the forecast
-  triggers:
+  trigger:
   - at: 04:30:00
     trigger: time
-  conditions: []
-  actions:
+  condition: []
+  action:
   - action: input_datetime.set_datetime
     target:
       entity_id: input_datetime.last_trigger_climate_flags_mark_hot_day
@@ -148,12 +148,12 @@
     warm season check (summer/autumn/spring) and cold season check (winter).
 
     '
-  triggers:
+  trigger:
   - trigger: time
     at: '15:30:00'
     id: afternoon_check
-  conditions: []
-  actions:
+  condition: []
+  action:
   - action: input_boolean.turn_off
     target:
       entity_id:
@@ -296,11 +296,11 @@
   description: Daily anomaly detection for automation trigger patterns. Identifies
     over-triggering, under-triggering, and system health issues. Runs at 23:30 to
     analyze the day's data before daily reset at midnight.
-  triggers:
+  trigger:
   - trigger: time
     at: '23:30:00'
-  conditions: []
-  actions:
+  condition: []
+  action:
   - choose:
     - conditions:
       - condition: numeric_state
@@ -395,7 +395,7 @@
 - id: '1727826100000'
   alias: Smart Climate Notification - Living Room
   description: Suggests climate control when solar excess available and room uncomfortable
-  triggers:
+  trigger:
   - trigger: state
     entity_id: sensor.living_room_climate_suggestion
     to:
@@ -403,7 +403,7 @@
     - cool_now
     for:
       minutes: 30
-  conditions:
+  condition:
   - condition: not
     conditions:
     - condition: state
@@ -416,7 +416,7 @@
     value_template: "{% set last = states('input_datetime.last_climate_notification_living')
       %} {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n  {{
       (as_timestamp(now()) - as_timestamp(last)) > 7200 }}\n{% endif %}\n"
-  actions:
+  action:
   - service: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
       title: ☀️ Climate Suggestion - Living Room
@@ -439,7 +439,7 @@
 - id: '1727826100001'
   alias: Smart Climate Notification - Master Bedroom
   description: Suggests climate control when solar excess available and room uncomfortable
-  triggers:
+  trigger:
   - trigger: state
     entity_id: sensor.master_bedroom_climate_suggestion
     to:
@@ -449,7 +449,7 @@
     - cool_needed
     for:
       minutes: 30
-  conditions:
+  condition:
   - condition: not
     conditions:
     - condition: state
@@ -468,7 +468,7 @@
     value_template: "{% set last = states('input_datetime.last_climate_notification_master')
       %} {% if last in ['unknown', 'unavailable', ''] %}\n  true\n{% else %}\n  {{
       (as_timestamp(now()) - as_timestamp(last)) > 7200 }}\n{% endif %}\n"
-  actions:
+  action:
   - service: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
       title: ☀️ Climate Suggestion - Master Bedroom
@@ -491,12 +491,12 @@
 - id: '1727826100002'
   alias: Handle Climate Notification Action - Living Room
   description: Turn on living room climate when user taps notification
-  triggers:
+  trigger:
   - trigger: event
     event_type: mobile_app_notification_action
     event_data:
       action: CLIMATE_LIVING_ON
-  actions:
+  action:
   - action: climate.turn_on
     target:
       entity_id: climate.living_room_ac_2
@@ -516,12 +516,12 @@
 - id: '1727826100003'
   alias: Handle Climate Notification Action - Master Bedroom
   description: Turns on master bedroom climate when the user approves a notification
-  triggers:
+  trigger:
   - trigger: event
     event_type: mobile_app_notification_action
     event_data:
       action: CLIMATE_MASTER_ON
-  actions:
+  action:
   - choose:
     - conditions:
       - condition: state
@@ -582,14 +582,14 @@
   alias: Automation Tracker - Manual Climate Control (Living Room)
   description: Captures manual climate changes in the living room to pause conflicting
     automations.
-  triggers:
+  trigger:
   - trigger: state
     entity_id:
     - climate.living_room_ac_2
-  conditions:
+  condition:
   - condition: template
     value_template: '{{ trigger.to_state.context.user_id is not none }}'
-  actions:
+  action:
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.climate_manual_control_living
@@ -619,14 +619,14 @@
   alias: Automation Tracker - Manual Climate Control (Master Bedroom)
   description: Logs manual climate adjustments in the master bedroom to prevent automation
     interference.
-  triggers:
+  trigger:
   - trigger: state
     entity_id:
     - climate.masterbed_room_ac
-  conditions:
+  condition:
   - condition: template
     value_template: '{{ trigger.to_state.context.user_id is not none }}'
-  actions:
+  action:
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.climate_manual_control_master
@@ -656,14 +656,14 @@
   alias: Automation Tracker - Manual Climate Control (Otto's Room)
   description: Tracks manual thermostat tweaks in Otto's room and pauses automations
     accordingly.
-  triggers:
+  trigger:
   - trigger: state
     entity_id:
     - climate.kids_room_ac
-  conditions:
+  condition:
   - condition: template
     value_template: '{{ trigger.to_state.context.user_id is not none }}'
-  actions:
+  action:
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.climate_manual_control_otto
@@ -693,14 +693,14 @@
   alias: Automation Tracker - Manual Climate Control (Study / Henry's Room)
   description: Monitors manual climate changes in the study/Henry's room to suspend
     automation changes.
-  triggers:
+  trigger:
   - trigger: state
     entity_id:
     - climate.study_room_ac
-  conditions:
+  condition:
   - condition: template
     value_template: '{{ trigger.to_state.context.user_id is not none }}'
-  actions:
+  action:
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.climate_manual_control_study
@@ -729,14 +729,14 @@
 - id: '1727826000006'
   alias: Automation Tracker - Manual Climate Control (Rumpus)
   description: Tracks manual climate changes in the rumpus to pause conflicting automations.
-  triggers:
+  trigger:
   - trigger: state
     entity_id:
     - climate.rumpus_ac
-  conditions:
+  condition:
   - condition: template
     value_template: '{{ trigger.to_state.context.user_id is not none }}'
-  actions:
+  action:
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.climate_manual_control_rumpus
@@ -807,7 +807,7 @@
   description: Comprehensive season-aware climate control for master bedroom. Manages
     temperature, humidity, blinds, fan, and AC with different strategies for summer/winter/shoulder
     seasons. Respects manual overrides, door state, and working-from-home schedule.
-  triggers:
+  trigger:
   - platform: numeric_state
     entity_id: sensor.masterbed_temperature
     above: input_number.master_bedroom_temp_comfort_high
@@ -850,12 +850,12 @@
     id: evening
   - platform: homeassistant
     event: start
-  conditions:
+  condition:
   - condition: state
     entity_id: input_boolean.hvac_master_bedroom_should_be_on
     state: 'on'
     alias: Master Bedroom HVAC Master On
-  actions:
+  action:
   - action: input_datetime.set_datetime
     target:
       entity_id: input_datetime.last_trigger_seasonal_climate_manager
@@ -1322,7 +1322,7 @@
   description: Automatically sets the climate season based on the current month for
     Melbourne climate patterns (Summer Dec-Feb, Autumn Mar-May, Winter Jun-Aug, Spring
     Sep-Nov)
-  triggers:
+  trigger:
   - platform: time
     at: 04:30:00
   - platform: homeassistant
@@ -1330,8 +1330,8 @@
   - platform: time
     at: 00:01:00
     id: month_change
-  conditions: []
-  actions:
+  condition: []
+  action:
   - choose:
     - conditions:
       # Australian astronomical seasons (Southern Hemisphere)

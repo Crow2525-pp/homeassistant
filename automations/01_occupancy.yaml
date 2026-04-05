@@ -3,7 +3,7 @@
   alias: Set Occupancy to Away
   description: Switches the occupancy selector to Away after 10 minutes with no one
     in the home zone.
-  triggers:
+  trigger:
   - entity_id:
     - zone.home
     to: '0'
@@ -12,7 +12,7 @@
       minutes: 10
       seconds: 0
     trigger: state
-  conditions:
+  condition:
   - condition: not
     conditions:
     - condition: state
@@ -21,7 +21,7 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Holiday
-  actions:
+  action:
   - data:
       option: Away
     target:
@@ -32,11 +32,11 @@
   alias: Reset Daily Automation Trigger Counters (Midnight)
   description: Resets all daily trigger counters at midnight. Used to track how many
     times each climate automation has triggered throughout the day.
-  triggers:
+  trigger:
   - at: 00:00:00
     trigger: time
-  conditions: []
-  actions:
+  condition: []
+  action:
   - action: input_number.set_value
     target:
       entity_id:
@@ -87,13 +87,13 @@
   alias: Occupancy - Set Holiday Mode from Alarmo
   description: Sets the occupancy selector to Holiday whenever Alarmo enters the holiday
     state.
-  triggers:
+  trigger:
   - trigger: state
     entity_id:
     - alarm_control_panel.alarmo
     to: armed_vacation
-  conditions: []
-  actions:
+  condition: []
+  action:
   - action: input_select.select_option
     metadata: {}
     data:
@@ -134,17 +134,17 @@
 - id: '1735500000001'
   alias: Occupancy - Phil Garmin Home Tracking
   description: Sets occupancy to Home when Phil's Garmin shows he's in the home area
-  triggers:
+  trigger:
   - trigger: state
     entity_id: sensor.phil_s_garmin_area
     to: home
-  conditions:
+  condition:
   - condition: not
     conditions:
     - condition: state
       entity_id: input_select.occupancy
       state: Home
-  actions:
+  action:
   - action: input_select.select_option
     data:
       option: Home
@@ -157,7 +157,7 @@
   description: >
     Sends an actionable notification to both phones when either Phil or Steph
     enters the airport zone, asking whether to activate holiday mode.
-  triggers:
+  trigger:
     - trigger: zone
       entity_id: person.stephanie_patterson
       zone: zone.airport
@@ -166,13 +166,13 @@
       entity_id: device_tracker.sm_s908e
       zone: zone.airport
       event: enter
-  conditions:
+  condition:
     - condition: not
       conditions:
         - condition: state
           entity_id: input_select.occupancy
           state: Holiday
-  actions:
+  action:
     - action: notify.mobile_app_samsung_galaxy_s22_ultra
       data:
         title: "Holiday Mode"
@@ -200,13 +200,13 @@
   description: >
     Activates holiday mode when either Phil or Steph taps the actionable
     notification from the airport zone prompt.
-  triggers:
+  trigger:
     - trigger: event
       event_type: mobile_app_notification_action
       event_data:
         action: ACTIVATE_HOLIDAY_MODE
-  conditions: []
-  actions:
+  condition: []
+  action:
     - action: input_select.select_option
       target:
         entity_id: input_select.occupancy
@@ -228,13 +228,13 @@
 - id: '1735500000002'
   alias: Occupancy - Phil Garmin Away Tracking
   description: Sets occupancy to Away when Phil's Garmin shows he's away from home for 10 minutes and no one else is home
-  triggers:
+  trigger:
   - trigger: state
     entity_id: sensor.phil_s_garmin_area
     from: home
     for:
       minutes: 10
-  conditions:
+  condition:
   - condition: state
     entity_id: input_select.occupancy
     state: Home
@@ -244,7 +244,7 @@
   - condition: state
     entity_id: zone.home
     state: '0'
-  actions:
+  action:
   - action: input_select.select_option
     data:
       option: Away
