@@ -1338,12 +1338,12 @@
 - sensor:
     # Last 4 weeks counts
     - name: "WFH Days Count"
-      state: "{{ (states('sensor.wfh_days_last_4_weeks') | float(0) / 9) | round(1) }}"
+      state: "{{ states('sensor.wfh_days_last_4_weeks') | float(0) | round(0) }}"
       unit_of_measurement: "days"
       icon: mdi:home-account
 
     - name: "Office Days Count"
-      state: "{{ (states('sensor.office_days_last_4_weeks') | float(0) / 9) | round(1) }}"
+      state: "{{ states('sensor.office_days_last_4_weeks') | float(0) | round(0) }}"
       unit_of_measurement: "days"
       icon: mdi:office-building
 
@@ -1366,29 +1366,29 @@
         sm_s908e_source: "{{ state_attr('device_tracker.sm_s908e', 'source') }}"
 
     - name: "Total Work Days Count"
-      state: "{{ ((states('sensor.wfh_days_last_4_weeks') | float(0) + states('sensor.office_days_last_4_weeks') | float(0)) / 9) | round(1) }}"
+      state: "{{ (states('sensor.wfh_days_last_4_weeks') | float(0) + states('sensor.office_days_last_4_weeks') | float(0)) | round(0) }}"
       unit_of_measurement: "days"
       icon: mdi:calendar-check
 
-    # This year counts (for tax)
+    # This year counts (for tax) - utility meters accumulate hours, divide by 9 for days
     - name: "WFH Days This Year Count"
-      state: "{{ (states('sensor.wfh_days_this_year') | float(0) / 9) | round(0) }}"
+      state: "{{ (states('sensor.wfh_hours_this_year') | float(0) / 9) | round(0) }}"
       unit_of_measurement: "days"
       icon: mdi:home-account
 
     - name: "Office Days This Year Count"
-      state: "{{ (states('sensor.office_days_this_year') | float(0) / 9) | round(0) }}"
+      state: "{{ (states('sensor.office_hours_this_year') | float(0) / 9) | round(0) }}"
       unit_of_measurement: "days"
       icon: mdi:office-building
 
     # Financial year counts (July 1 - June 30, for Australian tax)
     - name: "WFH Days Financial Year Count"
-      state: "{{ (states('sensor.wfh_days_this_financial_year') | float(0) / 9) | round(0) }}"
+      state: "{{ (states('sensor.wfh_hours_this_financial_year') | float(0) / 9) | round(0) }}"
       unit_of_measurement: "days"
       icon: mdi:home-account
 
     - name: "Office Days Financial Year Count"
-      state: "{{ (states('sensor.office_days_this_financial_year') | float(0) / 9) | round(0) }}"
+      state: "{{ (states('sensor.office_hours_this_financial_year') | float(0) / 9) | round(0) }}"
       unit_of_measurement: "days"
       icon: mdi:office-building
 
