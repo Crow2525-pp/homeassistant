@@ -359,3 +359,21 @@ climate_flags_mark_hot_day_triggers_today:
   initial: 0
   unit_of_measurement: triggers
   icon: mdi:counter
+
+# EOFY Work Location Snapshots (written on June 30 before utility meter resets)
+prev_fy_wfh_days:
+  name: Previous FY - WFH Days
+  min: 0
+  max: 365
+  step: 1
+  initial: 0
+  unit_of_measurement: days
+  icon: mdi:home-account
+prev_fy_office_days:
+  name: Previous FY - Office Days
+  min: 0
+  max: 365
+  step: 1
+  initial: 0
+  unit_of_measurement: days
+  icon: mdi:office-building

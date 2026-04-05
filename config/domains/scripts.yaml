@@ -1330,19 +1330,28 @@ computer_power_off:
 
 work_location_report:
   alias: "Report - Work Location Summary"
-  description: "On-demand WFH vs office day counts for the current financial year and last 4 weeks"
+  description: "On-demand WFH vs office day counts for current and previous financial year, plus last 4 weeks"
   icon: mdi:briefcase-check
   sequence:
     - variables:
+        prev_wfh: "{{ states('input_number.prev_fy_wfh_days') | int(0) }}"
+        prev_office: "{{ states('input_number.prev_fy_office_days') | int(0) }}"
+        prev_total: "{{ prev_wfh + prev_office }}"
+        has_prev: "{{ prev_total > 0 }}"
         report_msg: >
-          FY Work Location Summary (as at {{ now().strftime('%d %b %Y') }})
+          Work Location Summary ({{ now().strftime('%d %b %Y') }})
 
-          --- Financial Year ---
+          --- Current Financial Year ---
           WFH: {{ states('sensor.wfh_days_financial_year_count') }} days
           Office: {{ states('sensor.office_days_financial_year_count') }} days
           Total: {{ (states('sensor.wfh_days_financial_year_count') | float(0) + states('sensor.office_days_financial_year_count') | float(0)) | round(0) }} days
 
-          --- Last 4 Weeks ---
+          {% if has_prev %}--- Previous Financial Year ---
+          WFH: {{ prev_wfh }} days
+          Office: {{ prev_office }} days
+          Total: {{ prev_total }} days
+
+          {% endif %}--- Last 4 Weeks ---
           WFH: {{ states('sensor.wfh_days_count') }} days
           Office: {{ states('sensor.office_days_count') }} days
           Total: {{ states('sensor.total_work_days_count') }} days
@@ -1352,4 +1361,3 @@ work_location_report:
         message: "{{ report_msg }}"
         notification_id: work_location_report
   mode: single
-  icon: mdi:power-off
