@@ -1338,12 +1338,12 @@
 - sensor:
     # Last 4 weeks counts
     - name: "WFH Days Count"
-      state: "{{ states('sensor.wfh_days_last_4_weeks') | float(0) | round(0) }}"
+      state: "{{ (states('sensor.wfh_days_last_4_weeks') | float(0) / 9) | round(1) }}"
       unit_of_measurement: "days"
       icon: mdi:home-account
 
     - name: "Office Days Count"
-      state: "{{ states('sensor.office_days_last_4_weeks') | float(0) | round(0) }}"
+      state: "{{ (states('sensor.office_days_last_4_weeks') | float(0) / 9) | round(1) }}"
       unit_of_measurement: "days"
       icon: mdi:office-building
 
@@ -1366,7 +1366,7 @@
         sm_s908e_source: "{{ state_attr('device_tracker.sm_s908e', 'source') }}"
 
     - name: "Total Work Days Count"
-      state: "{{ (states('sensor.wfh_days_last_4_weeks') | float(0) + states('sensor.office_days_last_4_weeks') | float(0)) | round(0) }}"
+      state: "{{ ((states('sensor.wfh_days_last_4_weeks') | float(0) + states('sensor.office_days_last_4_weeks') | float(0)) / 9) | round(1) }}"
       unit_of_measurement: "days"
       icon: mdi:calendar-check
 

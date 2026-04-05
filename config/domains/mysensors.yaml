@@ -6,12 +6,12 @@
   away_timeout: 120 # number of seconds after which the enitity will get status not_ho
 
 
-# Work location statistics - 4 weeks (count of state changes, updated every 30 min)
+# Work location statistics - 4 weeks (hours, updated every 30 min)
 - platform: history_stats
   name: WFH Days Last 4 Weeks
   entity_id: binary_sensor.working_from_home
   state: 'on'
-  type: count
+  type: time
   duration:
     days: 28
   end: "{{ now() }}"
@@ -20,7 +20,7 @@
   name: Office Days Last 4 Weeks
   entity_id: binary_sensor.working_at_office
   state: 'on'
-  type: count
+  type: time
   duration:
     days: 28
   end: "{{ now() }}"
