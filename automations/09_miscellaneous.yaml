@@ -20,21 +20,28 @@
     - condition: template
       value_template: "{{ now().month == 6 and now().day == 25 }}"
   actions:
+    - variables:
+        report_msg: >
+          FY{{ (now().year - 1) }}/{{ now().year }} Work Location Summary (as at {{ now().strftime('%d %b %Y') }})
+
+          WFH: {{ states('sensor.wfh_days_financial_year_count') }} days
+          Office: {{ states('sensor.office_days_financial_year_count') }} days
+          Total: {{ (states('sensor.wfh_days_financial_year_count') | float(0) + states('sensor.office_days_financial_year_count') | float(0)) | round(0) }} days
+
+          Financial year ends June 30. Review for tax purposes.
     - action: notify.mobile_app_samsung_galaxy_s22_ultra
       data:
         title: "EOFY Work Location Report"
-        message: >
-          📊 FY{{ (now().year - 1) }}/{{ now().year }} Work Location Summary (as at {{ now().strftime('%d %b %Y') }})
-
-          🏠 WFH: {{ states('sensor.wfh_days_financial_year_count') }} days
-          🏢 Office: {{ states('sensor.office_days_financial_year_count') }} days
-          📅 Total: {{ (states('sensor.wfh_days_financial_year_count') | float(0) + states('sensor.office_days_financial_year_count') | float(0)) | round(0) }} days
-
-          Financial year ends June 30. Review for tax purposes.
+        message: "{{ report_msg }}"
         data:
           sticky: "true"
           channel: "Reports"
           importance: high
+    - action: persistent_notification.create
+      data:
+        title: "EOFY Work Location Report"
+        message: "{{ report_msg }}"
+        notification_id: eofy_work_location_report
   mode: single
 
 ####################################################################
