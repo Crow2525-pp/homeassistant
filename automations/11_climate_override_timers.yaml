@@ -23,7 +23,7 @@
     is extended to last until wake time so it does not expire mid-sleep.
     Outside nighttime the timer runs for the default 4 hours (14400 seconds).
     If the override is toggled off and on again, the timer restarts.
-  triggers:
+  trigger:
     - trigger: state
       entity_id:
         - input_boolean.climate_manual_control_living
@@ -32,7 +32,7 @@
         - input_boolean.climate_manual_control_study
         - input_boolean.climate_manual_control_rumpus
       to: "on"
-  actions:
+  action:
     - variables:
         timer_map:
           input_boolean.climate_manual_control_living: timer.climate_override_living
@@ -84,7 +84,7 @@
   description: >
     When a climate manual override is turned off (by the user or by an
     automation), cancel the corresponding expiry timer.
-  triggers:
+  trigger:
     - trigger: state
       entity_id:
         - input_boolean.climate_manual_control_living
@@ -93,7 +93,7 @@
         - input_boolean.climate_manual_control_study
         - input_boolean.climate_manual_control_rumpus
       to: "off"
-  actions:
+  action:
     - variables:
         timer_map:
           input_boolean.climate_manual_control_living: timer.climate_override_living
@@ -114,7 +114,7 @@
   description: >
     When a 4-hour override timer finishes, turn off the corresponding
     manual override boolean so the room returns to automatic control.
-  triggers:
+  trigger:
     - trigger: event
       event_type: timer.finished
       event_data:
@@ -135,7 +135,7 @@
       event_type: timer.finished
       event_data:
         entity_id: timer.climate_override_rumpus
-  actions:
+  action:
     - variables:
         override_map:
           timer.climate_override_living: input_boolean.climate_manual_control_living

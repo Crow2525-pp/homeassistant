@@ -15,7 +15,7 @@
 - id: '1749858009259'
   alias: Outdoor Blinds - Cover Control Automation
   description: Coordinates cover control automation behaviour for the outdoor blinds.
-  conditions:
+  condition:
   - condition: state
     entity_id: input_boolean.blind_manual_control
     state: 'off'
@@ -191,15 +191,15 @@
   alias: Automation Tracker - Manual Blind Control
   description: Records when manual blind control is enabled so blueprint automation
     can respect the override (pauses for 2 hours).
-  triggers:
+  trigger:
   - trigger: state
     entity_id:
     - cover.roller_blinds_chan1
     attribute: current_position
-  conditions:
+  condition:
   - condition: template
     value_template: '{{ trigger.to_state.context.user_id is not none }}'
-  actions:
+  action:
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.blind_manual_control

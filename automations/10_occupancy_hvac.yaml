@@ -36,18 +36,18 @@
     Entire shutdown is skipped when guest mode (input_boolean.study_occupied)
     is on — guest mode requires an explicit notification response, so if it
     is active a guest is confirmed present and everything should stay on.
-  triggers:
+  trigger:
     - trigger: state
       entity_id: input_select.occupancy
       to: Away
     - trigger: state
       entity_id: input_select.occupancy
       to: Holiday
-  conditions:
+  condition:
     - condition: state
       entity_id: input_boolean.study_occupied
       state: "off"
-  actions:
+  action:
     - action: climate.turn_off
       target:
         entity_id:
@@ -89,20 +89,20 @@
     under manual control are left untouched. The living room only resumes when
     occupancy returns to Home so Sleeping keeps it off overnight. Time-based
     automations then handle preset and mode selection.
-  triggers:
+  trigger:
     - trigger: state
       entity_id: input_select.occupancy
       to: Home
     - trigger: state
       entity_id: input_select.occupancy
       to: Sleeping
-  conditions:
+  condition:
     # Only act when transitioning from Away or Holiday
     - condition: template
       value_template: >
         {{ trigger.from_state is not none and
            trigger.from_state.state in ['Away', 'Holiday'] }}
-  actions:
+  action:
     # Living Room
     - if:
         - condition: state
@@ -158,13 +158,13 @@
     and guest-room overnight schedules, while complementing the dedicated
     bedroom wake-off timers and still respecting each room's manual override
     flag.
-  triggers:
+  trigger:
     - trigger: state
       entity_id: input_select.occupancy
       from: Sleeping
       to: Home
-  conditions: []
-  actions:
+  condition: []
+  action:
     # Living Room
     - if:
         - condition: state

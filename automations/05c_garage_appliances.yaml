@@ -3,7 +3,7 @@
   alias: Open Garage When Phil or Steph Arrive Home
   description: Opens the garage door and disarms Alarmo when Phil or Steph arrive
     home while driving. Checks Android Auto for Phil, iPhone activity for Steph.
-  triggers:
+  trigger:
   - platform: zone
     entity_id: device_tracker.sm_s908e
     zone: zone.home
@@ -12,7 +12,7 @@
     entity_id: device_tracker.slvdh_2
     zone: zone.home
     event: enter
-  conditions:
+  condition:
   - condition: template
     value_template: >-
       {% if trigger.entity_id == 'device_tracker.sm_s908e' %}
@@ -20,7 +20,7 @@
       {% elif trigger.entity_id == 'device_tracker.slvdh_2' %}
         {{ is_state('sensor.slvdh_activity', 'Automotive') }}
       {% endif %}
-  actions:
+  action:
   - action: cover.open_cover
     target:
       entity_id: cover.smart_garage_door_garage
@@ -31,7 +31,7 @@
 - id: '1713092115962'
   alias: Nightly Garage Door Check
   description: Nightly Garage Door Check
-  triggers:
+  trigger:
   - entity_id:
     - cover.smart_garage_door_garage
     to: open
@@ -42,11 +42,11 @@
       seconds: 0
   - trigger: time
     at: '21:00:00'
-  conditions:
+  condition:
   - condition: state
     entity_id: cover.smart_garage_door_garage
     state: open
-  actions:
+  action:
   - service: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
       title: Garage Door Open
@@ -70,12 +70,12 @@
   alias: Garage - Handle Close Notification Action
   description: Executes the garage close action when the mobile notification button
     is pressed.
-  triggers:
+  trigger:
   - trigger: event
     event_type: mobile_app_notification_action
     event_data:
       action: CLOSE_GARAGE
-  actions:
+  action:
   - action: cover.close_cover
     target:
       entity_id: cover.smart_garage_door_garage
@@ -84,12 +84,12 @@
   alias: Garage Door - Cast Front Door Camera on Open
   description: Casts the front door camera to the kitchen display when the garage
     door opens
-  triggers:
+  trigger:
   - trigger: state
     entity_id: cover.smart_garage_door_garage
     to: open
-  conditions: []
-  actions:
+  condition: []
+  action:
   - service: camera.play_stream
     data:
       media_player: media_player.kitchen
@@ -100,13 +100,13 @@
 - id: garage_door_close_stop_kitchen
   alias: Garage Door - Stop Kitchen Stream on Close
   description: Stops any kitchen playback once the garage door closes
-  triggers:
+  trigger:
   - trigger: state
     entity_id: cover.smart_garage_door_garage
     to: closed
     from: open
-  conditions: []
-  actions:
+  condition: []
+  action:
   - service: media_player.media_stop
     target:
       entity_id: media_player.kitchen
@@ -481,7 +481,7 @@
   alias: Appliances - Timeout Failsafe
   description: Automatically turns off appliance trackers after timeout to prevent
     stuck states
-  triggers:
+  trigger:
   - trigger: state
     entity_id:
     - input_boolean.dishwasher_on
@@ -490,7 +490,7 @@
     to: 'on'
     for:
       hours: 1
-  actions:
+  action:
   - action: input_boolean.turn_off
     target:
       entity_id: '{{ trigger.entity_id }}'
@@ -504,7 +504,7 @@
   alias: Media - Toggle Amp and Backlight
   description: Synchronises the media amplifier outlet and TV backlight with remote
     power events. TV backlights if it is after sundown
-  triggers:
+  trigger:
   - entity_id: remote.sony_kd_55x8500c
     from: 'off'
     to: 'on'
@@ -523,8 +523,8 @@
     to: unavailable
     id: tv_unavailable
     trigger: state
-  conditions: []
-  actions:
+  condition: []
+  action:
   - alias: Amp and backlight on/off
     choose:
     - conditions:
@@ -569,11 +569,11 @@
 - id: '1749730336110'
   alias: Living Room Audio - Control WiiM Amp Volume
   description: Sets and tracks the WiiM Amp volume based on scripted adjustments.
-  triggers:
+  trigger:
   - trigger: time
     at: 06:30:00
-  conditions: []
-  actions:
+  condition: []
+  action:
   - action: media_player.volume_set
     metadata: {}
     data:
@@ -584,10 +584,10 @@
 - id: '1752525370218'
   alias: Morning - Start Music Routine
   description: Starts the configured morning Spotify item at the scheduled time.
-  triggers:
+  trigger:
   - trigger: time
     at: 06:30:00
-  conditions:
+  condition:
   - condition: state
     entity_id: input_boolean.study_occupied
     state: 'off'
@@ -599,7 +599,7 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Sleeping
-  actions:
+  action:
   - action: media_player.volume_set
     data:
       volume_level: 0.05
@@ -613,12 +613,12 @@
 - id: '1705440129170'
   alias: Living Room Remote - Mijia Switch Actions
   description: Maps the Mijia wireless remote events to lighting and scene shortcuts.
-  triggers:
+  trigger:
   - event_type: zha_event
     event_data:
       device_id: 5858e6f215e4bc4f5876cb1e82be3dd5
     trigger: event
-  actions:
+  action:
   - variables:
       click_type: '{{ trigger.event.data.args.click_type }}'
       attrname: '{{ trigger.event.data.args.attribute_name }}'
@@ -698,7 +698,7 @@
 - id: '1738224719290'
   alias: Master Bedroom Remote - Control Reading Light
   description: Maps bedside remote presses to toggling and dimming the reading light.
-  triggers:
+  trigger:
   - platform: event
     event_type: zha_event
     event_data:
@@ -717,8 +717,8 @@
       device_id: f085406cb09d1a8a9f10f0b500c48ebe
       command: remote_button_double_press
     id: Double
-  conditions: []
-  actions:
+  condition: []
+  action:
   - choose:
     - conditions:
       - condition: trigger
@@ -765,7 +765,7 @@
   alias: Master Bedroom Remote - Control Sleeping Light
   description: Maps bedside remote presses to control the sleeping light brightness
     and power.
-  triggers:
+  trigger:
   - platform: event
     event_type: zha_event
     event_data:
@@ -778,8 +778,8 @@
       device_id: 8c730c300afc8f900acf8e9782eb6d62
       command: remote_button_double_press
     id: Double
-  conditions: []
-  actions:
+  condition: []
+  action:
   - choose:
     - conditions:
       - condition: trigger
@@ -825,7 +825,7 @@
 - id: '1738720805420'
   alias: Master Bedroom Remote - Toggle Room Lighting
   description: Uses the bedside remote to toggle the master bedroom lighting group.
-  triggers:
+  trigger:
   - platform: event
     event_type: zha_event
     event_data:
@@ -838,8 +838,8 @@
       device_id: 8cb8be820d24cc85cc448e17a28fb15d
       command: remote_button_short_press
     id: Once
-  conditions: []
-  actions:
+  condition: []
+  action:
   - choose:
     - conditions:
       - condition: or
@@ -928,7 +928,7 @@
   alias: Maintenance - Update Cleaning Timestamp via NFC
   description: Records the last-cleaned timestamps when toilet maintenance NFC tags
     are scanned.
-  triggers:
+  trigger:
   - tag_id: 859e3818-e623-47aa-9062-d89afd44489b
     id: downstairs_toilet
     trigger: tag
@@ -941,7 +941,7 @@
   - tag_id: 69410df3-68be-4aec-9721-f933de3c73de
     id: kids_toilet
     trigger: tag
-  actions:
+  action:
   - data:
       name: Maintenance
       message: 'Toilet cleaning timestamp updated: {{ trigger.id }}'
@@ -987,10 +987,10 @@
 - id: ac_filter_living_room_changed
   alias: Maintenance - Living Room AC Filter Changed (NFC)
   description: Updates the filter change date when NFC tag is scanned
-  triggers:
+  trigger:
   - trigger: tag
     tag_id: 3ebca478-9cfc-4707-8d0c-280dfd3cd383
-  actions:
+  action:
   - action: input_datetime.set_datetime
     target:
       entity_id: input_datetime.ac_filter_living_room
@@ -1004,10 +1004,10 @@
 - id: ac_filter_master_bedroom_changed
   alias: Maintenance - Master Bedroom AC Filter Changed (NFC)
   description: Updates the filter change date when NFC tag is scanned
-  triggers:
+  trigger:
   - trigger: tag
     tag_id: REPLACE_WITH_YOUR_NFC_TAG_ID
-  actions:
+  action:
   - action: input_datetime.set_datetime
     target:
       entity_id: input_datetime.ac_filter_master_bedroom
@@ -1021,10 +1021,10 @@
 - id: ac_filter_otto_room_changed
   alias: Maintenance - Otto's Room AC Filter Changed (NFC)
   description: Updates the filter change date when NFC tag is scanned
-  triggers:
+  trigger:
   - trigger: tag
     tag_id: REPLACE_WITH_YOUR_NFC_TAG_ID
-  actions:
+  action:
   - action: input_datetime.set_datetime
     target:
       entity_id: input_datetime.ac_filter_otto_room
@@ -1038,10 +1038,10 @@
 - id: ac_filter_study_henry_changed
   alias: Maintenance - Study/Henry's Room AC Filter Changed (NFC)
   description: Updates the filter change date when NFC tag is scanned
-  triggers:
+  trigger:
   - trigger: tag
     tag_id: REPLACE_WITH_YOUR_NFC_TAG_ID
-  actions:
+  action:
   - action: input_datetime.set_datetime
     target:
       entity_id: input_datetime.ac_filter_study_henry
@@ -1055,10 +1055,10 @@
 - id: '1744580704061'
   alias: Aquarium NFC - Log Feeding Time
   description: Updates the fish feeding timestamp when the aquarium NFC tag is scanned.
-  triggers:
+  trigger:
   - tag_id: 8bc95efa-4e0c-410c-93a1-dea4085761ee
     trigger: tag
-  actions:
+  action:
   - target:
       entity_id: input_datetime.fish_last_fed
     data:
@@ -1068,10 +1068,10 @@
 - id: '1744580844831'
   alias: Aquarium - Morning Feed Reminder
   description: Reminds the household at 8am if the fish haven't been fed.
-  triggers:
+  trigger:
   - at: 08:00:00
     trigger: time
-  conditions:
+  condition:
   - condition: or
     conditions:
     - condition: template
@@ -1080,7 +1080,7 @@
         != now_date or fed_time.hour < 6 or fed_time.hour >= 8 }}
 
         '
-  actions:
+  action:
   - service: notify.std_information
     data:
       title: Aquarium Reminder
@@ -1089,17 +1089,17 @@
 - id: '1744580871551'
   alias: Aquarium - Dinner Feed Reminder
   description: Reminds the household at 9pm if the fish haven't been fed.
-  triggers:
+  trigger:
   - at: '21:00:00'
     trigger: time
-  conditions:
+  condition:
   - condition: template
     value_template: '{% set fed = states(''input_datetime.fish_last_fed'') %} {% set
       now_date = now().date() %} {% set fed_time = as_datetime(fed) %} {{ fed_time.date()
       != now_date or fed_time.hour < 16 or fed_time.hour >= 21 }}
 
       '
-  actions:
+  action:
   - service: notify.std_information
     data:
       title: Aquarium Reminder
@@ -1109,10 +1109,10 @@
   alias: Maintenance - Consolidated Daily Check
   description: Checks all maintenance items daily and sends a single consolidated
     notification
-  triggers:
+  trigger:
   - at: 08:00:00
     trigger: time
-  conditions:
+  condition:
   - condition: or
     conditions:
     - condition: state
@@ -1121,7 +1121,7 @@
     - condition: state
       entity_id: input_select.occupancy
       state: Sleeping
-  actions:
+  action:
   - variables:
       toilets:
       - name: Master Toilet
@@ -1199,15 +1199,15 @@
   alias: Garden - Run Sprinklers at Sunrise if Hot
   description: Runs the sprinkler zone for hot days at sunrise when extreme heat is
     forecast.
-  triggers:
+  trigger:
   - trigger: sun
     event: sunrise
     offset: 0
-  conditions:
+  condition:
   - condition: state
     entity_id: input_boolean.super_hot_today
     state: 'on'
-  actions:
+  action:
   - action: switch.turn_on
     metadata: {}
     data: {}
@@ -1227,12 +1227,12 @@
 - id: '1735867240188'
   alias: Irrigation - Limit Watering to 10 Minutes
   description: Stops the irrigation run after ten minutes to prevent over-watering.
-  triggers:
+  trigger:
   - trigger: state
     entity_id: switch.water_switch_switch
     to: 'on'
-  conditions: []
-  actions:
+  condition: []
+  action:
   - delay:
       hours: 0
       minutes: 10
@@ -1285,7 +1285,7 @@
   alias: Otto's Room - Night Door Alert
   description: Announces when Otto's door opens during quiet hours or while the door
     alarm is active.
-  triggers:
+  trigger:
   - trigger: state
     entity_id:
     - binary_sensor.otto_room_door_sensor_opening
@@ -1293,7 +1293,7 @@
     from: 'off'
     for:
       seconds: 2
-  conditions:
+  condition:
   - condition: state
     entity_id: input_boolean.otto_automation_killswitch
     state: 'off'
@@ -1308,7 +1308,7 @@
     - condition: time
       after: '19:00:00'
       before: '22:30:00'
-  actions:
+  action:
   - action: tts.cloud_say
     metadata: {}
     data:
@@ -1383,14 +1383,14 @@
 - id: morning_energy_climate_summary
   alias: Morning - Energy & Climate Summary
   description: Sends a morning summary of weather, solar production, and temperature
-  triggers:
+  trigger:
   - trigger: time
     at: '10:00:00'
-  conditions:
+  condition:
   - condition: state
     entity_id: binary_sensor.someone_home
     state: 'on'
-  actions:
+  action:
   - action: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
       title: ☀️ Good Morning - Daily Summary
@@ -1403,17 +1403,17 @@
 - id: high_power_usage_warning
   alias: Energy - High Power Usage Warning
   description: Alerts when power consumption is high with minimal solar production
-  triggers:
+  trigger:
   - trigger: numeric_state
     entity_id: sensor.gosungrow_virtual_1205796_7_1_1_p8018
     above: 5000
     for:
       minutes: 15
-  conditions:
+  condition:
   - condition: numeric_state
     entity_id: sensor.gosungrow_virtual_1205796_1_1_1_p24
     below: 2000
-  actions:
+  action:
   - action: notify.std_warning
     data:
       title: ⚡ High Grid Import
@@ -1458,15 +1458,15 @@
   alias: Living Room - Keep IR Controller Powered
   description: Ensures the living room IR controller USB power outlets stay on. on
     - converted to state trigger from polling
-  triggers:
+  trigger:
   - trigger: state
     entity_id:
     - switch.computer_desk_light_socket_2
     to: 'off'
     for:
       seconds: 30
-  conditions: []
-  actions:
+  condition: []
+  action:
   - action: switch.turn_on
     target:
       entity_id: switch.computer_desk_light_socket_2
@@ -1478,7 +1478,7 @@
   - platform: state
     entity_id: switch.computer_desk_light_socket_2
     to: 'off'
-  actions:
+  action:
   - action: switch.turn_on
     target:
       entity_id: switch.computer_desk_light_socket_2
@@ -1486,17 +1486,17 @@
 - id: solar_kitchen_chime
   alias: Solar Available - Kitchen Chime
   description: Plays a subtle chime on kitchen speaker when excess solar is available
-  triggers:
+  trigger:
   - trigger: state
     entity_id: binary_sensor.solar_excess_available
     to: 'on'
     for:
       minutes: 15
-  conditions:
+  condition:
   - condition: time
     after: 08:00:00
     before: '20:00:00'
-  actions:
+  action:
   - action: media_player.play_media
     target:
       entity_id: media_player.kitchen

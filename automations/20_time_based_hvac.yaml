@@ -58,14 +58,14 @@
     turn the living room AC off for the night. The separate
     living_room_preheat_530am automation still handles early-morning pre-heat.
     Bedtime still auto-clears the manual override.
-  triggers:
+  trigger:
     - trigger: state
       entity_id: input_select.occupancy
       id: occupancy_change
     - trigger: time
       at: input_datetime.bedtime_living_room
       id: bed_time
-  actions:
+  action:
     - choose:
         # Occupancy change: turn on when entering Home from any non-Home state
         - conditions:
@@ -115,11 +115,11 @@
     At wake time, auto-clear manual override and turn the AC off so the
     overnight cycle ends deterministically. Daytime HVAC stays off until a
     later occupancy-driven or bedtime path turns it back on again.
-  triggers:
+  trigger:
     - trigger: time
       at: input_datetime.wakeup_time_master_bedroom
       id: wake_time
-  conditions:
+  condition:
     - condition: or
       conditions:
         - condition: state
@@ -128,7 +128,7 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-  actions:
+  action:
     - action: input_boolean.turn_off
       target:
         entity_id: input_boolean.climate_manual_control_master
@@ -143,11 +143,11 @@
     on all night. User selects Heat/Cool/Auto via input_select.bedtime_hvac_mode.
     Heat → frost+heat, Cool → boost+cool, Auto → comfort-sensor fallback.
     If sensor is unknown/unavailable in Auto mode, no action (fail safe).
-  triggers:
+  trigger:
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
       id: bed_time
-  conditions:
+  condition:
     - condition: or
       conditions:
         - condition: state
@@ -156,7 +156,7 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-  actions:
+  action:
     - action: input_boolean.turn_off
       target:
         entity_id: input_boolean.climate_manual_control_master
@@ -243,14 +243,14 @@
 - id: master_bedroom_away_mode
   alias: "HVAC - Master Bedroom - Occupancy On"
   description: "Turn master bedroom on when arriving to Home/Sleeping."
-  triggers:
+  trigger:
     - trigger: state
       entity_id: input_select.occupancy
       to:
         - Home
         - Sleeping
       id: home
-  conditions:
+  condition:
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
       state: "off"
@@ -258,7 +258,7 @@
       value_template: >
         {{ trigger.from_state is not none
            and trigger.from_state.state not in ['Home', 'Sleeping'] }}
-  actions:
+  action:
     - action: climate.turn_on
       target:
         entity_id: climate.masterbed_room_ac
@@ -271,7 +271,7 @@
     when WFH begins (PC / desk turns on) and reacts to thermal comfort
     changes. Cold/Cool/Slightly Cool → heat + comfort, Slightly Warm/Warm/Hot
     → cool + comfort, Neutral → AC off. Turns off when WFH ends.
-  triggers:
+  trigger:
     - trigger: state
       entity_id: binary_sensor.working_from_home
       to: "on"
@@ -296,7 +296,7 @@
       to: Neutral
       for: "00:15:00"
       id: neutral_stable
-  conditions:
+  condition:
     - condition: state
       entity_id: input_boolean.climate_manual_control_master
       state: "off"
@@ -320,7 +320,7 @@
         {% set bed = states('input_datetime.bedtime_master_bedroom') %}
         {% set wake = states('input_datetime.wakeup_time_master_bedroom') %}
         {{ not (now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake) }}
-  actions:
+  action:
     - choose:
         # --- WFH ended → turn off ---
         - conditions:
@@ -398,11 +398,11 @@
     At wake time, auto-clear manual override and turn the AC off so the
     overnight cycle ends deterministically. Daytime HVAC stays off until a
     later occupancy-driven or bedtime path turns it back on again.
-  triggers:
+  trigger:
     - trigger: time
       at: input_datetime.wakeup_time_ottos_room
       id: wake_time
-  conditions:
+  condition:
     - condition: or
       conditions:
         - condition: state
@@ -411,7 +411,7 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-  actions:
+  action:
     - action: input_boolean.turn_off
       target:
         entity_id: input_boolean.climate_manual_control_otto
@@ -426,11 +426,11 @@
     on all night. User selects Heat/Cool/Auto via input_select.bedtime_hvac_mode.
     Heat → frost+heat, Cool → boost+cool, Auto → comfort-sensor fallback.
     If sensor is unknown/unavailable in Auto mode, no action (fail safe).
-  triggers:
+  trigger:
     - trigger: time
       at: input_datetime.bedtime_ottos_room
       id: bed_time
-  conditions:
+  condition:
     - condition: or
       conditions:
         - condition: state
@@ -439,7 +439,7 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-  actions:
+  action:
     - action: input_boolean.turn_off
       target:
         entity_id: input_boolean.climate_manual_control_otto
@@ -526,14 +526,14 @@
 - id: ottos_room_away_mode
   alias: "HVAC - Kids Room - Occupancy On"
   description: "Turn Kids Room on when arriving to Home/Sleeping."
-  triggers:
+  trigger:
     - trigger: state
       entity_id: input_select.occupancy
       to:
         - Home
         - Sleeping
       id: home
-  conditions:
+  condition:
     - condition: state
       entity_id: input_boolean.climate_manual_control_otto
       state: "off"
@@ -541,7 +541,7 @@
       value_template: >
         {{ trigger.from_state is not none
            and trigger.from_state.state not in ['Home', 'Sleeping'] }}
-  actions:
+  action:
     - action: climate.turn_on
       target:
         entity_id: climate.kids_room_ac
@@ -561,11 +561,11 @@
     set heat or cool through the night. User selects Heat/Cool/Auto via
     input_select.bedtime_hvac_mode. Auto → comfort-sensor fallback.
     If sensor is unknown/unavailable in Auto mode, no action (fail safe).
-  triggers:
+  trigger:
     - trigger: time
       at: input_datetime.bedtime_ottos_room
       id: bed_time
-  conditions:
+  condition:
     - condition: state
       entity_id: input_boolean.study_occupied
       state: "on"
@@ -577,7 +577,7 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-  actions:
+  action:
     - action: input_boolean.turn_off
       target:
         entity_id: input_boolean.climate_manual_control_study
@@ -666,14 +666,14 @@
   description: >
     Turn Study Room on when arriving to Home/Sleeping during guest stays, but
     only at night (study has no daytime HVAC).
-  triggers:
+  trigger:
     - trigger: state
       entity_id: input_select.occupancy
       to:
         - Home
         - Sleeping
       id: home
-  conditions:
+  condition:
     - condition: state
       entity_id: input_boolean.climate_manual_control_study
       state: "off"
@@ -690,7 +690,7 @@
         {% set bed = states('input_datetime.bedtime_ottos_room') %}
         {% set wake = states('input_datetime.wakeup_time_ottos_room') %}
         {{ now().strftime('%H:%M:%S') >= bed or now().strftime('%H:%M:%S') < wake }}
-  actions:
+  action:
     - action: climate.turn_on
       target:
         entity_id: climate.study_room_ac
@@ -708,14 +708,14 @@
     User selects Heat/Cool/Auto via input_select.bedtime_hvac_mode.
     Auto → comfort-sensor fallback. If sensor is unknown/unavailable in Auto
     mode, no action (fail safe).
-  triggers:
+  trigger:
     - trigger: time
       at: input_datetime.bedtime_rumpus
       id: bed_time
     - trigger: time
       at: input_datetime.bedtime_master_bedroom
       id: guest_bed_time
-  conditions:
+  condition:
     - condition: or
       conditions:
         - condition: state
@@ -724,7 +724,7 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-  actions:
+  action:
     - choose:
         # === Guest staying: follow master bedroom bedtime ===
         - conditions:
@@ -899,14 +899,14 @@
   description: >
     Turn Rumpus on when arriving to Home/Sleeping, but only during the active
     nighttime schedule.
-  triggers:
+  trigger:
     - trigger: state
       entity_id: input_select.occupancy
       to:
         - Home
         - Sleeping
       id: home
-  conditions:
+  condition:
     - condition: state
       entity_id: input_boolean.climate_manual_control_rumpus
       state: "off"
@@ -933,7 +933,7 @@
         - Slightly Warm
         - Warm
         - Hot
-  actions:
+  action:
     - action: climate.turn_on
       target:
         entity_id: climate.rumpus_ac
@@ -951,10 +951,10 @@
     default 05:30), if the living room feels cold (Indoor Comfort TS is Cold
     or Cool), auto-clear manual override and set comfort preset + heat so the
     room is warm before wake time.
-  triggers:
+  trigger:
     - trigger: time
       at: input_datetime.preheat_time_living_room
-  conditions:
+  condition:
     - condition: state
       entity_id: sensor.living_room_thermal_comfort_ts
       state:
@@ -968,7 +968,7 @@
         - condition: state
           entity_id: input_select.occupancy
           state: Sleeping
-  actions:
+  action:
     - action: input_boolean.turn_off
       target:
         entity_id: input_boolean.climate_manual_control_living

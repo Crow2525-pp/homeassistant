@@ -10,11 +10,11 @@
   alias: Front Door Camera - Motion Detection
   description: Sends notification and displays camera when Blue Iris detects motion
     at front door
-  triggers:
+  trigger:
   - trigger: state
     entity_id: binary_sensor.blue_iris_cam_front_door
     to: 'on'
-  conditions:
+  condition:
   - condition: state
     entity_id: input_select.occupancy
     state:
@@ -26,7 +26,7 @@
       after: '20:00:00'
     - condition: time
       before: '06:00:00'
-  actions:
+  action:
   - action: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
       title: Front Door Motion Detected
@@ -41,11 +41,11 @@
 - id: driveway_camera_motion_detection
   alias: Driveway Camera - Motion Detection
   description: Sends notification when Blue Iris detects motion in the driveway
-  triggers:
+  trigger:
   - trigger: state
     entity_id: binary_sensor.blue_iris_cam_driveway
     to: 'on'
-  conditions:
+  condition:
   - condition: state
     entity_id: input_select.occupancy
     state:
@@ -57,7 +57,7 @@
       after: '20:00:00'
     - condition: time
       before: '06:00:00'
-  actions:
+  action:
   - action: notify.mobile_app_samsung_galaxy_s22_ultra
     data:
       title: Driveway Motion Detected
