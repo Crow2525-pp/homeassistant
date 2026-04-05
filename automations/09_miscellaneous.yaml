@@ -1,5 +1,43 @@
 ---
 ####################################################################
+# EOFY Work Location Report
+#
+# Sends a mobile notification on June 25 each year with WFH vs
+# office day counts for the Australian financial year (Jul 1 – Jun 30).
+# Data comes from utility_meter sensors that accumulate daily hours,
+# converted to approximate day counts (÷ 9 hours/day).
+####################################################################
+- id: eofy_work_location_report
+  alias: "Report - EOFY Work Location Summary"
+  description: >
+    Annual notification summarising WFH and office days for the
+    Australian financial year, sent a few days before June 30 to
+    allow time for any corrections.
+  triggers:
+    - trigger: time
+      at: "09:00:00"
+  conditions:
+    - condition: template
+      value_template: "{{ now().month == 6 and now().day == 25 }}"
+  actions:
+    - action: notify.mobile_app_samsung_galaxy_s22_ultra
+      data:
+        title: "EOFY Work Location Report"
+        message: >
+          📊 FY{{ (now().year - 1) }}/{{ now().year }} Work Location Summary (as at {{ now().strftime('%d %b %Y') }})
+
+          🏠 WFH: {{ states('sensor.wfh_days_financial_year_count') }} days
+          🏢 Office: {{ states('sensor.office_days_financial_year_count') }} days
+          📅 Total: {{ (states('sensor.wfh_days_financial_year_count') | float(0) + states('sensor.office_days_financial_year_count') | float(0)) | round(0) }} days
+
+          Financial year ends June 30. Review for tax purposes.
+        data:
+          sticky: "true"
+          channel: "Reports"
+          importance: high
+  mode: single
+
+####################################################################
 # Master Bedroom Fan – Nighttime (bedtime → wakeup)
 #
 # Keeps the ceiling fan running overnight while the AC cools.
