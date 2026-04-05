@@ -1327,4 +1327,29 @@ computer_power_off:
         title: "Computer Power"
         message: "Computer powered off via outlet"
   mode: single
+
+work_location_report:
+  alias: "Report - Work Location Summary"
+  description: "On-demand WFH vs office day counts for the current financial year and last 4 weeks"
+  icon: mdi:briefcase-check
+  sequence:
+    - variables:
+        report_msg: >
+          FY Work Location Summary (as at {{ now().strftime('%d %b %Y') }})
+
+          --- Financial Year ---
+          WFH: {{ states('sensor.wfh_days_financial_year_count') }} days
+          Office: {{ states('sensor.office_days_financial_year_count') }} days
+          Total: {{ (states('sensor.wfh_days_financial_year_count') | float(0) + states('sensor.office_days_financial_year_count') | float(0)) | round(0) }} days
+
+          --- Last 4 Weeks ---
+          WFH: {{ states('sensor.wfh_days_count') }} days
+          Office: {{ states('sensor.office_days_count') }} days
+          Total: {{ states('sensor.total_work_days_count') }} days
+    - action: persistent_notification.create
+      data:
+        title: "Work Location Report"
+        message: "{{ report_msg }}"
+        notification_id: work_location_report
+  mode: single
   icon: mdi:power-off
