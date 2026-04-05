@@ -156,7 +156,10 @@ jobs:
         with:
           path: "./"
           secrets: ./secrets.yaml.example
-          version: "stable"
+          # Temporary pin: HA Core 2026.4.x crashes in check_config for this repo
+          # with KeyError('triggers') during template/automation/script validation.
+          # 2026.3.4 is the last known good version from CI.
+          version: "2026.3.4"
       - name: Summarize results
         if: always()  # ensures summary is written even if job fails
         run: |
@@ -164,7 +167,7 @@ jobs:
             echo "## 🏠 Home Assistant Config Validation"
             echo ""
             if [ "${{ inputs.run_ha_stable }}" = "true" ]; then
-              echo "- **Version tested:** stable"
+              echo "- **Version tested:** 2026.3.4"
               echo "- **Workflow run:** [View logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
               echo ""
               if [[ "${{ steps.ha.outcome }}" == "success" ]]; then
