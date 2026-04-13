@@ -12,5 +12,4 @@ cover_status_helper_curtains:
 safelisted_wifi_macs:
   name: Safelisted WiFi MACs
   max: 255
-  initial: ""
   icon: mdi:wifi-check
