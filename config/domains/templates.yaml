@@ -1757,6 +1757,54 @@
           Cool
         {% endif %}
 
+# ============================================================================
+# LAUNDRY STATUS TRACKING
+# ============================================================================
+# Tracks how long laundry has been waiting to be moved to the dryer
+- sensor:
+    - name: "Laundry Waiting Duration"
+      unique_id: laundry_waiting_duration
+      state: >
+        {% if is_state('input_boolean.laundry_needs_moving', 'on') %}
+          {% set changed = states.input_boolean.laundry_needs_moving.last_changed %}
+          {% if changed is not none %}
+            {% set elapsed = (as_timestamp(now()) - as_timestamp(changed)) / 60 %}
+            {{ elapsed | round(0) }}
+          {% else %}
+            0
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+      unit_of_measurement: "min"
+      icon: >
+        {% if is_state('input_boolean.laundry_needs_moving', 'on') %}
+          mdi:washing-machine-alert
+        {% else %}
+          mdi:washing-machine
+        {% endif %}
+      attributes:
+        friendly_name: "Laundry Waiting Duration"
+        waiting_since: >
+          {% if is_state('input_boolean.laundry_needs_moving', 'on') %}
+            {{ states.input_boolean.laundry_needs_moving.last_changed | as_local }}
+          {% else %}
+            N/A
+          {% endif %}
+        status: >
+          {% if is_state('input_boolean.laundry_needs_moving', 'on') %}
+            {% set elapsed = ((as_timestamp(now()) - as_timestamp(states.input_boolean.laundry_needs_moving.last_changed)) / 60) | round(0) %}
+            {% if elapsed > 120 %}
+              Overdue - {{ (elapsed / 60) | round(1) }}h waiting
+            {% elif elapsed > 60 %}
+              Waiting over an hour
+            {% else %}
+              Waiting {{ elapsed }} minutes
+            {% endif %}
+          {% else %}
+            All clear
+          {% endif %}
+
 - light:
     - unique_id: tv_backlight
       name: "TV Back Lightstrip"

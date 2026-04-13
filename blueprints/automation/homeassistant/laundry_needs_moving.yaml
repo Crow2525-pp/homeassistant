@@ -1,0 +1,102 @@
+blueprint:
+  name: Laundry Needs Moving to Dryer
+  description: >
+    Monitors the washing machine and dryer status. When the washing machine
+    finishes a cycle, an input_boolean flag is immediately turned on to
+    indicate that laundry is sitting in the washer and needs to be moved
+    to the dryer.
+
+    The flag automatically clears when the dryer starts.
+
+    Use the flag (`input_boolean.laundry_needs_moving`) on a dashboard card
+    for a persistent visual reminder — no push notifications needed.
+
+    **Required helpers (created separately):**
+    - `input_boolean.laundry_needs_moving`
+
+    **Relies on existing appliance tracking helpers:**
+    - `input_boolean.washing_machine_on` (set by Blackshome appliance blueprint)
+    - `input_boolean.dryer_on` (set by Blackshome appliance blueprint)
+  domain: automation
+  input:
+    washer_status:
+      name: Washing Machine Status Entity
+      description: >
+        The input_boolean that tracks whether the washing machine is currently
+        running. This is turned on/off by the appliance power monitoring blueprint.
+      selector:
+        entity:
+          filter:
+            domain: input_boolean
+      default: input_boolean.washing_machine_on
+
+    dryer_status:
+      name: Dryer Status Entity
+      description: >
+        The input_boolean that tracks whether the dryer is currently running.
+        This is turned on/off by the appliance power monitoring blueprint.
+      selector:
+        entity:
+          filter:
+            domain: input_boolean
+      default: input_boolean.dryer_on
+
+    laundry_flag:
+      name: Laundry Needs Moving Flag
+      description: >
+        The input_boolean that will be turned on when laundry is waiting in the
+        washer and has not been moved to the dryer. Used for dashboard display.
+      selector:
+        entity:
+          filter:
+            domain: input_boolean
+      default: input_boolean.laundry_needs_moving
+
+variables:
+  washer_entity: !input washer_status
+  dryer_entity: !input dryer_status
+  flag_entity: !input laundry_flag
+
+trigger:
+  # Trigger 1: Washing machine finishes (turns off)
+  - id: washer_finished
+    platform: state
+    entity_id: !input washer_status
+    from: "on"
+    to: "off"
+
+  # Trigger 2: Dryer starts — clear the flag
+  - id: dryer_started
+    platform: state
+    entity_id: !input dryer_status
+    from: "off"
+    to: "on"
+
+  # Trigger 3: Manual dismissal — flag turned off by user via dashboard
+  - id: flag_dismissed
+    platform: state
+    entity_id: !input laundry_flag
+    from: "on"
+    to: "off"
+
+action:
+  - choose:
+      # --- Washing machine finished: flag immediately ---
+      - conditions:
+          - condition: trigger
+            id: washer_finished
+        sequence:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: !input laundry_flag
+
+      # --- Dryer started: clear the flag ---
+      - conditions:
+          - condition: trigger
+            id: dryer_started
+        sequence:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: !input laundry_flag
+
+mode: single

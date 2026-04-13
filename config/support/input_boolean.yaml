@@ -94,3 +94,8 @@ automation_killswitch_kitchen:
   name: Kitchen Automation Killswitch
   icon: mdi:stop-circle
   initial: false
+# Laundry Status Tracking
+laundry_needs_moving:
+  name: Laundry Needs Moving to Dryer
+  icon: mdi:washing-machine-alert
+  initial: false
