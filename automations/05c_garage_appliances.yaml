@@ -477,6 +477,18 @@
       cycle_counter_helper: counter.dishwasher_counter
       include_service_reminder: enable_service_reminder
       service_reminder_counter_helper: counter.dishwasher_counter
+- id: laundry_needs_moving_to_dryer
+  alias: Laundry - Needs Moving to Dryer
+  description: >
+    Flags when washing has finished but hasn't been moved to the dryer.
+    Uses the laundry_needs_moving blueprint to set a persistent dashboard flag.
+  use_blueprint:
+    path: homeassistant/laundry_needs_moving.yaml
+    input:
+      washer_status: input_boolean.washing_machine_on
+      dryer_status: input_boolean.dryer_on
+      laundry_flag: input_boolean.laundry_needs_moving
+      wait_minutes: 30
 - id: appliance_timeout_failsafe
   alias: Appliances - Timeout Failsafe
   description: Automatically turns off appliance trackers after timeout to prevent
