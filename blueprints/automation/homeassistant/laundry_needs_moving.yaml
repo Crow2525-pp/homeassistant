@@ -2,9 +2,9 @@ blueprint:
   name: Laundry Needs Moving to Dryer
   description: >
     Monitors the washing machine and dryer status. When the washing machine
-    finishes a cycle and the dryer does not start within a configurable delay,
-    an input_boolean flag is turned on to indicate that laundry is sitting in
-    the washer and needs to be moved to the dryer.
+    finishes a cycle, an input_boolean flag is immediately turned on to
+    indicate that laundry is sitting in the washer and needs to be moved
+    to the dryer.
 
     The flag automatically clears when the dryer starts.
 
@@ -52,26 +52,10 @@ blueprint:
             domain: input_boolean
       default: input_boolean.laundry_needs_moving
 
-    wait_minutes:
-      name: Wait Time (minutes)
-      description: >
-        How many minutes to wait after the washing machine finishes before
-        flagging that laundry needs moving. This gives someone time to move
-        the laundry before the reminder appears.
-      selector:
-        number:
-          min: 5
-          max: 180
-          step: 5
-          unit_of_measurement: minutes
-          mode: slider
-      default: 30
-
 variables:
   washer_entity: !input washer_status
   dryer_entity: !input dryer_status
   flag_entity: !input laundry_flag
-  delay_minutes: !input wait_minutes
 
 trigger:
   # Trigger 1: Washing machine finishes (turns off)
@@ -97,21 +81,11 @@ trigger:
 
 action:
   - choose:
-      # --- Washing machine finished: wait, then check if dryer started ---
+      # --- Washing machine finished: flag immediately ---
       - conditions:
           - condition: trigger
             id: washer_finished
         sequence:
-          - delay:
-              minutes: "{{ delay_minutes }}"
-          # After waiting, check if dryer started in the meantime
-          - condition: template
-            value_template: >
-              {{ is_state(dryer_entity, 'off') }}
-          # Also check washing machine didn't start again (new load)
-          - condition: template
-            value_template: >
-              {{ is_state(washer_entity, 'off') }}
           - action: input_boolean.turn_on
             target:
               entity_id: !input laundry_flag
@@ -125,4 +99,4 @@ action:
             target:
               entity_id: !input laundry_flag
 
-mode: restart
+mode: single

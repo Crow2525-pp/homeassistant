@@ -488,7 +488,6 @@
       washer_status: input_boolean.washing_machine_on
       dryer_status: input_boolean.dryer_on
       laundry_flag: input_boolean.laundry_needs_moving
-      wait_minutes: 30
 - id: appliance_timeout_failsafe
   alias: Appliances - Timeout Failsafe
   description: Automatically turns off appliance trackers after timeout to prevent
