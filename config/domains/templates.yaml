@@ -1555,30 +1555,11 @@
         {% endif %}
       # Quick, non-blocking actions
       open_cover:
-        - service: input_select.select_option
-          target:
-            entity_id: input_select.roller_blind_state
-          data:
-            option: "opening"
-        - service: script.roller_blinds_up
-        - service: timer.start
-          target:
-            entity_id: timer.roller_blind_timer
-          data:
-            duration: "00:18:00"
+        - service: script.roller_blinds_open_estimated
       close_cover:
-        - service: input_select.select_option
-          target:
-            entity_id: input_select.roller_blind_state
-          data:
-            option: "closing"
-        - service: script.roller_blinds_down
-        - service: timer.start
-          target:
-            entity_id: timer.roller_blind_timer
-          data:
-            duration: "00:18:00"
+        - service: script.roller_blinds_close_estimated
       stop_cover:
+        - service: script.roller_blinds_sync_estimated_position
         - service: script.roller_blinds_stop
         - service: timer.cancel
           target:
@@ -1590,64 +1571,9 @@
             option: "{{ 'open' if states('input_number.roller_blind_position') | int(0) > 50 else 'closed' }}"
       # Allow setting position (CCA needs this)
       set_cover_position:
-        # Always set target position first
-        - service: input_number.set_value
-          target:
-            entity_id: input_number.roller_blind_target_position
+        - service: script.roller_blinds_set_position_estimated
           data:
-            value: "{{ position }}"
-        # Then start appropriate movement (only if difference > 5%)
-        - choose:
-            # If target is 100, open fully
-            - conditions: "{{ position == 100 }}"
-              sequence:
-                - service: input_select.select_option
-                  target:
-                    entity_id: input_select.roller_blind_state
-                  data:
-                    option: "opening"
-                - service: script.roller_blinds_up
-                - service: timer.start
-                  target:
-                    entity_id: timer.roller_blind_timer
-                  data:
-                    duration: "00:18:00"
-            # If target is 0, close fully
-            - conditions: "{{ position == 0 }}"
-              sequence:
-                - service: input_select.select_option
-                  target:
-                    entity_id: input_select.roller_blind_state
-                  data:
-                    option: "closing"
-                - service: script.roller_blinds_down
-                - service: timer.start
-                  target:
-                    entity_id: timer.roller_blind_timer
-                  data:
-                    duration: "00:18:00"
-            # For partial positions, only move if difference > 5%
-            - conditions: >-
-                {{ position > 0 and position < 100 and
-                   (position - states('input_number.roller_blind_position') | int(0)) | abs > 5 }}
-              sequence:
-                - service: input_select.select_option
-                  target:
-                    entity_id: input_select.roller_blind_state
-                  data:
-                    option: "{{ 'opening' if position > states('input_number.roller_blind_position') | int(0) else 'closing' }}"
-                - choose:
-                    - conditions: "{{ position > states('input_number.roller_blind_position') | int(0) }}"
-                      sequence:
-                        - service: script.roller_blinds_up
-                    - conditions: "{{ position < states('input_number.roller_blind_position') | int(0) }}"
-                      sequence:
-                        - service: script.roller_blinds_down
-                - service: timer.start
-                  target:
-                    entity_id: timer.roller_blind_timer
-                  data:
-                    duration: "00:18:00"
+            position: "{{ position }}"
 
 # ============================================================================
 # LIGHT TEMPLATES
