@@ -1559,6 +1559,7 @@
       close_cover:
         - service: script.roller_blinds_close_estimated
       stop_cover:
+        - service: script.roller_blinds_sync_estimated_position
         - service: script.roller_blinds_stop
         - service: timer.cancel
           target:

@@ -187,6 +187,7 @@ roller_blinds_set_position_simple:
 roller_blinds_open_estimated:
   alias: Roller Blinds Open (Estimated)
   sequence:
+  - service: script.roller_blinds_sync_estimated_position
   - service: input_number.set_value
     target:
       entity_id: input_number.roller_blind_target_position
@@ -213,6 +214,7 @@ roller_blinds_open_estimated:
 roller_blinds_close_estimated:
   alias: Roller Blinds Close (Estimated)
   sequence:
+  - service: script.roller_blinds_sync_estimated_position
   - service: input_number.set_value
     target:
       entity_id: input_number.roller_blind_target_position
@@ -243,6 +245,7 @@ roller_blinds_set_position_estimated:
       description: Target position percentage
       example: 50
   sequence:
+  - service: script.roller_blinds_sync_estimated_position
   - service: input_number.set_value
     target:
       entity_id: input_number.roller_blind_target_position
@@ -282,6 +285,36 @@ roller_blinds_set_position_estimated:
             00:00:{{ '%02d' % [seconds, 1] | max }}
     default: []
   mode: restart
+  icon: mdi:blinds
+
+roller_blinds_sync_estimated_position:
+  alias: Roller Blinds Sync Estimated Position
+  sequence:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: timer.roller_blind_timer
+        state: active
+      - condition: template
+        value_template: "{{ states('input_select.roller_blind_state') in ['opening', 'closing'] }}"
+      sequence:
+      - variables:
+          start_position: "{{ states('input_number.roller_blind_position') | float(0) }}"
+          total_seconds: "{{ as_timedelta(state_attr('timer.roller_blind_timer', 'duration')).total_seconds() | float(0) }}"
+          remaining_seconds: "{{ as_timedelta(state_attr('timer.roller_blind_timer', 'remaining')).total_seconds() | float(0) }}"
+          elapsed_percent: "{{ ((total_seconds - remaining_seconds) / 0.08) | float(0) }}"
+          estimated_position: >-
+            {% if is_state('input_select.roller_blind_state', 'opening') %}
+              {{ [start_position + elapsed_percent, 100] | min }}
+            {% else %}
+              {{ [start_position - elapsed_percent, 0] | max }}
+            {% endif %}
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.roller_blind_position
+        data:
+          value: "{{ estimated_position }}"
+  mode: queued
   icon: mdi:blinds
 
 spotify_music_tv:
