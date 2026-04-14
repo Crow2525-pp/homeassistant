@@ -204,7 +204,7 @@ roller_blinds_open_estimated:
       entity_id: timer.roller_blind_timer
     data:
       duration: >-
-        {% set seconds = (((100 - states('input_number.roller_blind_position') | float(0)) * 0.08)
+        {% set seconds = (((100 - states('input_number.roller_blind_position') | float(0)) * 0.16)
            | round(0)
            | int) %}
         00:00:{{ '%02d' % [seconds, 1] | max }}
@@ -231,7 +231,7 @@ roller_blinds_close_estimated:
       entity_id: timer.roller_blind_timer
     data:
       duration: >-
-        {% set seconds = ((states('input_number.roller_blind_position') | float(0) * 0.08)
+        {% set seconds = ((states('input_number.roller_blind_position') | float(0) * 0.16)
            | round(0)
            | int) %}
         00:00:{{ '%02d' % [seconds, 1] | max }}
@@ -279,7 +279,7 @@ roller_blinds_set_position_estimated:
           entity_id: timer.roller_blind_timer
         data:
           duration: >-
-            {% set seconds = (((position - states('input_number.roller_blind_position') | float(0)) | abs * 0.08)
+            {% set seconds = (((position - states('input_number.roller_blind_position') | float(0)) | abs * 0.16)
                | round(0)
                | int) %}
             00:00:{{ '%02d' % [seconds, 1] | max }}
@@ -302,7 +302,7 @@ roller_blinds_sync_estimated_position:
           start_position: "{{ states('input_number.roller_blind_position') | float(0) }}"
           total_seconds: "{{ as_timedelta(state_attr('timer.roller_blind_timer', 'duration')).total_seconds() | float(0) }}"
           remaining_seconds: "{{ as_timedelta(state_attr('timer.roller_blind_timer', 'remaining')).total_seconds() | float(0) }}"
-          elapsed_percent: "{{ ((total_seconds - remaining_seconds) / 0.08) | float(0) }}"
+          elapsed_percent: "{{ ((total_seconds - remaining_seconds) / 0.16) | float(0) }}"
           estimated_position: >-
             {% if is_state('input_select.roller_blind_state', 'opening') %}
               {{ [start_position + elapsed_percent, 100] | min }}
