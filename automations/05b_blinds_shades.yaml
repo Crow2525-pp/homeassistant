@@ -209,3 +209,28 @@
     target:
       entity_id: input_boolean.blind_manual_control
   mode: restart
+
+- id: '1760000000001'
+  alias: Roller Blind - Finalise Estimated Position
+  description: Stops the blind and commits the target position when the movement
+    timer finishes.
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.roller_blind_timer
+  condition: []
+  action:
+  - service: script.roller_blinds_stop
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.roller_blind_position
+    data:
+      value: "{{ states('input_number.roller_blind_target_position') | float(0) }}"
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.roller_blind_state
+    data:
+      option: >-
+        {{ 'closed' if states('input_number.roller_blind_target_position') | float(0) <= 0 else 'open' }}
+  mode: single
