@@ -212,8 +212,7 @@
 
 - id: '1760000000001'
   alias: Roller Blind - Finalise Estimated Position
-  description: Stops the blind and commits the target position when the movement
-    timer finishes.
+  description: Legacy timer finalisation path retained but neutralised for midpoint-only control.
   trigger:
   - platform: event
     event_type: timer.finished
@@ -222,15 +221,5 @@
   condition: []
   action:
   - service: script.roller_blinds_stop
-  - service: input_number.set_value
-    target:
-      entity_id: input_number.roller_blind_position
-    data:
-      value: "{{ states('input_number.roller_blind_target_position') | float(0) }}"
-  - service: input_select.select_option
-    target:
-      entity_id: input_select.roller_blind_state
-    data:
-      option: >-
-        {{ 'closed' if states('input_number.roller_blind_target_position') | float(0) <= 0 else 'open' }}
+  - service: script.roller_blinds_sync_estimated_position
   mode: single

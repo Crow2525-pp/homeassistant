@@ -1568,7 +1568,7 @@
           target:
             entity_id: input_select.roller_blind_state
           data:
-            option: "{{ 'open' if states('input_number.roller_blind_position') | int(0) > 50 else 'closed' }}"
+            option: open
       # Allow setting position (CCA needs this)
       set_cover_position:
         - service: script.roller_blinds_set_position_estimated
