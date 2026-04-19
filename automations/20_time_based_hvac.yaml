@@ -167,7 +167,7 @@
         - conditions:
             - condition: state
               entity_id: input_select.bedtime_hvac_mode
-              state: Off
+              state: "Off"
           sequence:
             - action: climate.turn_off
               target:
@@ -459,7 +459,7 @@
         - conditions:
             - condition: state
               entity_id: input_select.bedtime_hvac_mode
-              state: Off
+              state: "Off"
           sequence:
             - action: climate.turn_off
               target:
@@ -606,7 +606,7 @@
         - conditions:
             - condition: state
               entity_id: input_select.bedtime_hvac_mode
-              state: Off
+              state: "Off"
           sequence:
             - action: climate.turn_off
               target:
@@ -771,7 +771,7 @@
                 - conditions:
                     - condition: state
                       entity_id: input_select.bedtime_hvac_mode
-                      state: Off
+                      state: "Off"
                   sequence:
                     - action: climate.turn_off
                       target:
