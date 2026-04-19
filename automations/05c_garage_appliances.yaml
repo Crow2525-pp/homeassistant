@@ -751,9 +751,6 @@
           - condition: or
             conditions:
             - condition: state
-              entity_id: light.computer_desk_light_socket_1
-              state: 'on'
-            - condition: state
               entity_id: light.reading_light
               state: 'on'
             - condition: state
@@ -812,9 +809,6 @@
           - condition: or
             conditions:
             - condition: state
-              entity_id: light.computer_desk_light_socket_1
-              state: 'on'
-            - condition: state
               entity_id: light.reading_light
               state: 'on'
             - condition: state
@@ -860,9 +854,6 @@
           state: 'on'
         - condition: state
           entity_id: light.sleeping_light_2
-          state: 'on'
-        - condition: state
-          entity_id: switch.computer_desk_light_child_lock
           state: 'on'
       sequence:
       - action: light.turn_off
@@ -1464,35 +1455,6 @@
   - service: frontend.set_theme
     data:
       name: waves
-  mode: single
-- id: '1730921531314'
-  alias: Living Room - Keep IR Controller Powered
-  description: Ensures the living room IR controller USB power outlets stay on. on
-    - converted to state trigger from polling
-  trigger:
-  - trigger: state
-    entity_id:
-    - switch.computer_desk_light_socket_2
-    to: 'off'
-    for:
-      seconds: 30
-  condition: []
-  action:
-  - action: switch.turn_on
-    target:
-      entity_id: switch.computer_desk_light_socket_2
-  mode: single
-- id: keep_computer_desk_light_socket_2_on
-  alias: Keep Computer Desk Light Socket 2 Always On
-  description: Ensures switch.computer_desk_light_socket_2 is always turned on
-  trigger:
-  - platform: state
-    entity_id: switch.computer_desk_light_socket_2
-    to: 'off'
-  action:
-  - action: switch.turn_on
-    target:
-      entity_id: switch.computer_desk_light_socket_2
   mode: single
 - id: solar_kitchen_chime
   alias: Solar Available - Kitchen Chime
