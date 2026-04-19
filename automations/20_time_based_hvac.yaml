@@ -141,9 +141,9 @@
 - id: master_bedroom_time_based_night
   alias: "HVAC - Master Bedroom - Bedtime"
   description: >
-    At bedtime, auto-clear manual override, always set heat or cool — AC stays
-    on all night. User selects Heat/Cool/Auto via input_select.bedtime_hvac_mode.
-    Heat → frost+heat, Cool → boost+cool, Auto → comfort-sensor fallback.
+    At bedtime, auto-clear manual override and apply the selected bedroom HVAC mode.
+    User selects Heat/Cool/Auto/Off via input_select.bedtime_hvac_mode.
+    Heat → frost+heat, Cool → boost+cool, Auto → comfort-sensor fallback, Off → turn off.
     If sensor is unknown/unavailable in Auto mode, no action (fail safe).
   trigger:
     - trigger: time
@@ -163,6 +163,15 @@
       target:
         entity_id: input_boolean.climate_manual_control_master
     - choose:
+        # --- User forced Off ---
+        - conditions:
+            - condition: state
+              entity_id: input_select.bedtime_hvac_mode
+              state: Off
+          sequence:
+            - action: climate.turn_off
+              target:
+                entity_id: climate.masterbed_room_ac
         # --- User forced Heat ---
         - conditions:
             - condition: state
@@ -424,9 +433,9 @@
 - id: ottos_room_time_based_night
   alias: "HVAC - Kids Room - Bedtime"
   description: >
-    At bedtime, auto-clear manual override, always set heat or cool — AC stays
-    on all night. User selects Heat/Cool/Auto via input_select.bedtime_hvac_mode.
-    Heat → frost+heat, Cool → boost+cool, Auto → comfort-sensor fallback.
+    At bedtime, auto-clear manual override and apply the selected bedroom HVAC mode.
+    User selects Heat/Cool/Auto/Off via input_select.bedtime_hvac_mode.
+    Heat → frost+heat, Cool → boost+cool, Auto → comfort-sensor fallback, Off → turn off.
     If sensor is unknown/unavailable in Auto mode, no action (fail safe).
   trigger:
     - trigger: time
@@ -446,6 +455,15 @@
       target:
         entity_id: input_boolean.climate_manual_control_otto
     - choose:
+        # --- User forced Off ---
+        - conditions:
+            - condition: state
+              entity_id: input_select.bedtime_hvac_mode
+              state: Off
+          sequence:
+            - action: climate.turn_off
+              target:
+                entity_id: climate.kids_room_ac
         # --- User forced Heat ---
         - conditions:
             - condition: state
@@ -559,9 +577,9 @@
   alias: "HVAC - Study Room - Bedtime"
   description: >
     When Guest Staying is on, the study follows the kids bedtime so it behaves
-    like a guest/kid bedroom. At bedtime, auto-clear manual override and always
-    set heat or cool through the night. User selects Heat/Cool/Auto via
-    input_select.bedtime_hvac_mode. Auto → comfort-sensor fallback.
+    like a guest/kid bedroom. At bedtime, auto-clear manual override and apply
+    the selected bedroom HVAC mode. User selects Heat/Cool/Auto/Off via
+    input_select.bedtime_hvac_mode. Auto → comfort-sensor fallback, Off → turn off.
     If sensor is unknown/unavailable in Auto mode, no action (fail safe).
   trigger:
     - trigger: time
@@ -584,6 +602,15 @@
       target:
         entity_id: input_boolean.climate_manual_control_study
     - choose:
+        # --- User forced Off ---
+        - conditions:
+            - condition: state
+              entity_id: input_select.bedtime_hvac_mode
+              state: Off
+          sequence:
+            - action: climate.turn_off
+              target:
+                entity_id: climate.study_room_ac
         # --- User forced Heat ---
         - conditions:
             - condition: state
@@ -707,9 +734,9 @@
   description: >
     Uses the rumpus bedtime normally. When Guest Staying is on, it follows the
     master bedroom bedtime so the rumpus behaves like an adult guest room.
-    User selects Heat/Cool/Auto via input_select.bedtime_hvac_mode.
-    Auto → comfort-sensor fallback. If sensor is unknown/unavailable in Auto
-    mode, no action (fail safe).
+    User selects Heat/Cool/Auto/Off via input_select.bedtime_hvac_mode.
+    Auto → comfort-sensor fallback, Off → turn off. If sensor is unknown/unavailable
+    in Auto mode, no action (fail safe).
   trigger:
     - trigger: time
       at: input_datetime.bedtime_rumpus
@@ -740,6 +767,15 @@
               target:
                 entity_id: input_boolean.climate_manual_control_rumpus
             - choose:
+                # --- User forced Off ---
+                - conditions:
+                    - condition: state
+                      entity_id: input_select.bedtime_hvac_mode
+                      state: Off
+                  sequence:
+                    - action: climate.turn_off
+                      target:
+                        entity_id: climate.rumpus_ac
                 # --- User forced Heat ---
                 - conditions:
                     - condition: state
