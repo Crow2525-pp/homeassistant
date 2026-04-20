@@ -15,16 +15,29 @@ Exit codes:
 """
 
 import json
-import os
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import List, Set, Tuple
 
 # Set UTF-8 encoding for Windows compatibility
 if sys.platform == 'win32':
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
+
+DEFAULT_PATTERNS = [
+    "automations/**/*.yaml",
+    "automations/**/*.yml",
+    "config/**/*.yaml",
+    "config/**/*.yml",
+    "lovelace/**/*.yaml",
+    "lovelace/**/*.yml",
+    "ui_lovelace_minimalist/**/*.yaml",
+    "ui_lovelace_minimalist/**/*.yml",
+    "custom_components/ui_lovelace_minimalist/lovelace/**/*.yaml",
+    "custom_components/ui_lovelace_minimalist/lovelace/**/*.yml",
+]
 
 
 class EntityValidator:
@@ -141,13 +154,16 @@ class EntityValidator:
     def validate_directory(self, directory: str = ".", patterns: List[str] = None) -> None:
         """Recursively validate all YAML files in directory."""
         if patterns is None:
-            patterns = ["automations/**/*.yaml", "config/**/*.yaml", "lovelace/**/*.yaml"]
+            patterns = DEFAULT_PATTERNS
 
-        dir_path = self.ha_config_dir / directory
-        yaml_files = []
+        yaml_files = set()
 
         for pattern in patterns:
-            yaml_files.extend(self.ha_config_dir.glob(pattern))
+            yaml_files.update(
+                file_path
+                for file_path in self.ha_config_dir.glob(pattern)
+                if file_path.is_file()
+            )
 
         if not yaml_files:
             print("⚠️  No YAML files found")

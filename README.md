@@ -7,7 +7,8 @@ My personal Home Assistant setup.
 - `configuration.yaml` - Main HA config
 - `automations/` - Automation YAML files
 - `config/` - Additional configuration
-- `lovelace/` - Dashboard UI
+- `config/lovelace/` - Dashboard YAML used by the main HA config
+- `ui_lovelace_minimalist/` - UI Lovelace Minimalist dashboard source
 - `esphome/` - ESPHome device configs
 - `zigbee2mqtt/` - Zigbee2MQTT config
 - `custom_components/` - Custom integrations (HACS)
