@@ -20,24 +20,18 @@ import sys
 from pathlib import Path
 from typing import List, Set, Tuple
 
-# Set UTF-8 encoding for Windows compatibility
-if sys.platform == 'win32':
-    import io
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-
 
 DEFAULT_PATTERNS = [
     "automations/**/*.yaml",
     "automations/**/*.yml",
     "config/**/*.yaml",
     "config/**/*.yml",
-    "lovelace/**/*.yaml",
-    "lovelace/**/*.yml",
-    "ui_lovelace_minimalist/**/*.yaml",
-    "ui_lovelace_minimalist/**/*.yml",
-    "custom_components/ui_lovelace_minimalist/lovelace/**/*.yaml",
-    "custom_components/ui_lovelace_minimalist/lovelace/**/*.yml",
 ]
+
+# Set UTF-8 encoding for Windows compatibility
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 
 class EntityValidator:
