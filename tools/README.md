@@ -112,10 +112,10 @@ python tools/validate_entities.py --report validation_report.md
 ```
 
 This tool:
-- Scans Home Assistant YAML under automations/, config/, legacy lovelace/,
-  ui_lovelace_minimalist/, and the bundled UI Lovelace Minimalist dashboard
-- Extracts entity ID references
+- Scans Home Assistant YAML under automations/, config/, and config/lovelace/
+- Extracts entity ID references, including multiline `entity_id` lists
 - Validates against the entity registry (.storage/core.entity_registry)
+- Writes a report artifact when `--report` is provided, even for passing runs
 - Reports any invalid or missing entities
 
 ### Maintenance Tools

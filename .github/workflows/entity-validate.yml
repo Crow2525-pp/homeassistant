@@ -11,8 +11,9 @@ on:
       - '**.yml'
       - 'automations/**'
       - 'config/**'
-      - 'lovelace/**'
+      - 'config/lovelace/**'
       - 'tools/validate_entities.py'
+      - 'tests/test_validate_entities.py'
   push:
     branches:
       - master
@@ -23,8 +24,9 @@ on:
       - '**.yml'
       - 'automations/**'
       - 'config/**'
-      - 'lovelace/**'
+      - 'config/lovelace/**'
       - 'tools/validate_entities.py'
+      - 'tests/test_validate_entities.py'
 
 permissions:
   contents: read
@@ -58,6 +60,10 @@ jobs:
           python tools/validate_entities.py \
             --config-dir . \
             --report entity-validation-report.md
+
+      - name: Run entity validator unit tests
+        run: |
+          python -m pytest tests/test_validate_entities.py
 
       - name: Upload validation report
         if: always()
