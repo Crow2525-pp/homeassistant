@@ -29,6 +29,15 @@ The Entity Reference Validator is a Python-based tool that catches entity ID typ
 
 ### Local Usage
 
+Install the validator test dependencies in a virtual environment:
+
+```bash
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements-dev.txt
+```
+
 Run the validator manually:
 
 ```bash
@@ -40,6 +49,9 @@ python tools/validate_entities.py --report validation-report.md
 
 # Custom config directory
 python tools/validate_entities.py --config-dir /path/to/ha/config
+
+# Unit tests
+python -m pytest tests/test_validate_entities.py
 ```
 
 **Output:**
