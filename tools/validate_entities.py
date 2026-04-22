@@ -30,6 +30,8 @@ DEFAULT_PATTERNS = [
     "config/**/*.yml",
 ]
 
+TEMPLATE_MARKERS = ("{{", "{%", "{#")
+
 # Set UTF-8 encoding for Windows compatibility
 if sys.platform == 'win32':
     import io
@@ -109,6 +111,9 @@ class EntityValidator:
         seen = {(entity_id, line_num) for entity_id, line_num in references}
 
         def add_reference(value: str, line_number: int) -> None:
+            if self._is_dynamic_entity_reference(value):
+                return
+
             entity_id = value.strip().lower()
             key = (entity_id, line_number)
             if "." in entity_id and key not in seen:
@@ -150,6 +155,11 @@ class EntityValidator:
 
         walk(parsed)
         return references
+
+    def _is_dynamic_entity_reference(self, entity_id: str) -> bool:
+        """Return True for template-driven entity references that cannot be statically validated."""
+        stripped = entity_id.strip()
+        return any(marker in stripped for marker in TEMPLATE_MARKERS)
 
     def _is_valid_entity_id_format(self, entity_id: str) -> bool:
         """Check if entity ID follows valid format."""

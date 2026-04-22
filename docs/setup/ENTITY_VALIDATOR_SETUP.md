@@ -166,14 +166,14 @@ Check:
 # View actual entity ID in Developer Tools > States
 ```
 
-### False positives
+### Dynamic and templated entity IDs
 
-The validator may flag:
-- Template expressions: `entity_id: "{{ variable }}"`
-- Dynamically generated entity IDs
-- Comments containing entity-like strings
+The validator skips template-driven references such as:
+- `entity_id: "{{ variable }}"`
+- `entity_id: "{{ timer_map[trigger.entity_id] }}"`
 
-These are informational - review and adjust as needed.
+Those values are resolved at runtime, so they cannot be statically validated against the entity registry.
+Plain entity IDs in the same file are still checked normally.
 
 ---
 
