@@ -64,6 +64,7 @@ secrets.yaml
 !.github/workflows/entity-validate.yml
 !.github/workflows/deploy.yml
 !.yamllint
+!requirements-dev.txt
 !secrets.yaml.example
 !docs/GITHUB_ACTIONS_SETUP.md
 

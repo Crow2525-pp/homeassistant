@@ -54,6 +54,11 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install validator dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+
       - name: Validate entity references
         id: validate
         run: |
@@ -79,7 +84,9 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const report = fs.readFileSync('entity-validation-report.md', 'utf8');
+            const report = fs.existsSync('entity-validation-report.md')
+              ? fs.readFileSync('entity-validation-report.md', 'utf8')
+              : 'Validation failed before the report file was created. Check the workflow logs for the original error.';
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

@@ -66,3 +66,24 @@ def test_save_report_creates_output_when_validation_passes(tmp_path: Path) -> No
     contents = report_path.read_text(encoding="utf-8")
     assert "**Valid references:** 1" in contents
     assert "**Invalid references:** 0" in contents
+
+
+def test_ignores_templated_entity_ids_but_keeps_static_references(tmp_path: Path) -> None:
+    write_registry(tmp_path, "input_boolean.kitchen_override", "timer.kitchen_override")
+    (tmp_path / "automations").mkdir()
+    (tmp_path / "automations" / "templated.yaml").write_text(
+        "trigger:\n"
+        "  - trigger: state\n"
+        "    entity_id: input_boolean.kitchen_override\n"
+        "action:\n"
+        "  - action: timer.start\n"
+        "    target:\n"
+        "      entity_id: \"{{ timer_map[trigger.entity_id] }}\"\n",
+        encoding="utf-8",
+    )
+
+    validator = EntityValidator(str(tmp_path))
+    validator.validate_directory()
+
+    assert validator.valid_refs == 1
+    assert validator.errors == []

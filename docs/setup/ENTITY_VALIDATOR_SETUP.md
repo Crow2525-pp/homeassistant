@@ -29,6 +29,15 @@ The Entity Reference Validator is a Python-based tool that catches entity ID typ
 
 ### Local Usage
 
+Install the validator test dependencies in a virtual environment:
+
+```bash
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements-dev.txt
+```
+
 Run the validator manually:
 
 ```bash
@@ -40,6 +49,9 @@ python tools/validate_entities.py --report validation-report.md
 
 # Custom config directory
 python tools/validate_entities.py --config-dir /path/to/ha/config
+
+# Unit tests
+python -m pytest tests/test_validate_entities.py
 ```
 
 **Output:**
@@ -166,14 +178,14 @@ Check:
 # View actual entity ID in Developer Tools > States
 ```
 
-### False positives
+### Dynamic and templated entity IDs
 
-The validator may flag:
-- Template expressions: `entity_id: "{{ variable }}"`
-- Dynamically generated entity IDs
-- Comments containing entity-like strings
+The validator skips template-driven references such as:
+- `entity_id: "{{ variable }}"`
+- `entity_id: "{{ timer_map[trigger.entity_id] }}"`
 
-These are informational - review and adjust as needed.
+Those values are resolved at runtime, so they cannot be statically validated against the entity registry.
+Plain entity IDs in the same file are still checked normally.
 
 ---
 
