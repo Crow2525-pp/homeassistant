@@ -15,11 +15,20 @@ Exit codes:
 """
 
 import json
-import os
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import List, Set, Tuple
+
+import yaml
+
+
+DEFAULT_PATTERNS = [
+    "automations/**/*.yaml",
+    "automations/**/*.yml",
+    "config/**/*.yaml",
+    "config/**/*.yml",
+]
 
 # Set UTF-8 encoding for Windows compatibility
 if sys.platform == 'win32':
@@ -70,30 +79,76 @@ class EntityValidator:
 
         Returns list of (entity_id, line_number) tuples.
         """
-        references = []
+        references: List[Tuple[str, int]] = []
+        lines = content.split("\n")
 
-        # Pattern for entity references in YAML
-        # Matches: entity_id: light.lounge, target: { entity_id: switch.kitchen }, etc.
+        # Fast path for common single-line cases
         patterns = [
-            r"entity_id:\s*([a-z_]+\.[a-z0-9_]+)",  # entity_id: domain.name
-            r"entity_id:\s*-\s*([a-z_]+\.[a-z0-9_]+)",  # entity_id: \n  - domain.name
-            r"entity_id:\s*\[\s*([a-z_,\s.0-9_]+)\s*\]",  # entity_id: [domain.name, ...]
-            r"target:\s*\{?\s*entity_id:\s*([a-z_]+\.[a-z0-9_]+)",  # target: { entity_id: ...
-            r"service_entity_id:\s*([a-z_]+\.[a-z0-9_]+)",  # service_entity_id: domain.name
+            r"entity_id:\s*([a-z_]+\.[a-z0-9_]+)",
+            r"entity_id:\s*-\s*([a-z_]+\.[a-z0-9_]+)",
+            r"entity_id:\s*\[\s*([a-z_,\s.0-9_]+)\s*\]",
+            r"target:\s*\{?\s*entity_id:\s*([a-z_]+\.[a-z0-9_]+)",
+            r"service_entity_id:\s*([a-z_]+\.[a-z0-9_]+)",
         ]
 
-        lines = content.split("\n")
         for line_num, line in enumerate(lines, 1):
             for pattern in patterns:
-                matches = re.finditer(pattern, line, re.IGNORECASE)
-                for match in matches:
+                for match in re.finditer(pattern, line, re.IGNORECASE):
                     entity_str = match.group(1)
-                    # Handle comma-separated lists
                     for entity_id in entity_str.split(","):
                         entity_id = entity_id.strip()
                         if entity_id and "." in entity_id:
                             references.append((entity_id.lower(), line_num))
 
+        # YAML-aware fallback for multiline lists and nested targets
+        try:
+            parsed = yaml.safe_load(content)
+        except yaml.YAMLError:
+            return references
+
+        seen = {(entity_id, line_num) for entity_id, line_num in references}
+
+        def add_reference(value: str, line_number: int) -> None:
+            entity_id = value.strip().lower()
+            key = (entity_id, line_number)
+            if "." in entity_id and key not in seen:
+                seen.add(key)
+                references.append(key)
+
+        def walk(node: object) -> None:
+            if isinstance(node, dict):
+                for key, value in node.items():
+                    if key in {"entity_id", "service_entity_id", "entity"}:
+                        line_number = getattr(value, "_yaml_line", 1)
+                        if isinstance(value, str):
+                            for entity_id in value.split(","):
+                                add_reference(entity_id, line_number)
+                        elif isinstance(value, list):
+                            for item in value:
+                                if isinstance(item, str):
+                                    add_reference(item, getattr(item, "_yaml_line", line_number))
+                    walk(value)
+            elif isinstance(node, list):
+                for item in node:
+                    walk(item)
+
+        class LineLoader(yaml.SafeLoader):
+            pass
+
+        def construct_str(loader: LineLoader, node: yaml.nodes.ScalarNode):
+            value = yaml.SafeLoader.construct_scalar(loader, node)
+            wrapped = type("LineTrackedStr", (str,), {}) (value)
+            wrapped._yaml_line = node.start_mark.line + 1
+            return wrapped
+
+        LineLoader.add_constructor("tag:yaml.org,2002:str", construct_str)
+
+        try:
+            parsed = yaml.load(content, Loader=LineLoader)
+        except yaml.YAMLError:
+            return references
+
+        walk(parsed)
         return references
 
     def _is_valid_entity_id_format(self, entity_id: str) -> bool:
@@ -141,13 +196,16 @@ class EntityValidator:
     def validate_directory(self, directory: str = ".", patterns: List[str] = None) -> None:
         """Recursively validate all YAML files in directory."""
         if patterns is None:
-            patterns = ["automations/**/*.yaml", "config/**/*.yaml", "lovelace/**/*.yaml"]
+            patterns = DEFAULT_PATTERNS
 
-        dir_path = self.ha_config_dir / directory
-        yaml_files = []
+        yaml_files = set()
 
         for pattern in patterns:
-            yaml_files.extend(self.ha_config_dir.glob(pattern))
+            yaml_files.update(
+                file_path
+                for file_path in self.ha_config_dir.glob(pattern)
+                if file_path.is_file()
+            )
 
         if not yaml_files:
             print("⚠️  No YAML files found")
@@ -195,7 +253,9 @@ class EntityValidator:
 
         # Save report to file if requested
         if output_file:
-            self._save_report(output_file)
+            output_path = Path(output_file)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            self._save_report(str(output_path))
             print(f"📄 Report saved to: {output_file}")
 
         print("="*70 + "\n")
