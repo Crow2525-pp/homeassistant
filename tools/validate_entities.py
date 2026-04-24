@@ -6,7 +6,7 @@ This script validates that all entity references in YAML files actually exist
 in the Home Assistant entity registry.
 
 Usage:
-    python validate_entities.py [--verbose] [--report FILE]
+    python validate_entities.py [--verbose] [--report FILE] [targets ...]
 
 Exit codes:
     0 - All entities valid
@@ -18,7 +18,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import List, Set, Tuple
+from typing import Iterable, List, Set, Tuple
 
 import yaml
 
@@ -30,6 +30,7 @@ DEFAULT_PATTERNS = [
     "config/**/*.yml",
 ]
 
+YAML_SUFFIXES = {".yaml", ".yml"}
 TEMPLATE_MARKERS = ("{{", "{%", "{#")
 
 # Set UTF-8 encoding for Windows compatibility
@@ -102,12 +103,6 @@ class EntityValidator:
                         if entity_id and "." in entity_id:
                             references.append((entity_id.lower(), line_num))
 
-        # YAML-aware fallback for multiline lists and nested targets
-        try:
-            parsed = yaml.safe_load(content)
-        except yaml.YAMLError:
-            return references
-
         seen = {(entity_id, line_num) for entity_id, line_num in references}
 
         def add_reference(value: str, line_number: int) -> None:
@@ -142,7 +137,7 @@ class EntityValidator:
 
         def construct_str(loader: LineLoader, node: yaml.nodes.ScalarNode):
             value = yaml.SafeLoader.construct_scalar(loader, node)
-            wrapped = type("LineTrackedStr", (str,), {}) (value)
+            wrapped = type("LineTrackedStr", (str,), {})(value)
             wrapped._yaml_line = node.start_mark.line + 1
             return wrapped
 
@@ -203,26 +198,56 @@ class EntityValidator:
                 # No registry - just count valid format entities
                 self.valid_refs += 1
 
-    def validate_directory(self, directory: str = ".", patterns: List[str] = None) -> None:
-        """Recursively validate all YAML files in directory."""
-        if patterns is None:
-            patterns = DEFAULT_PATTERNS
-
+    def _iter_yaml_files(self, targets: List[str] = None, patterns: List[str] = None) -> Iterable[Path]:
+        """Yield YAML files selected via explicit targets or default glob patterns."""
         yaml_files = set()
 
-        for pattern in patterns:
-            yaml_files.update(
-                file_path
-                for file_path in self.ha_config_dir.glob(pattern)
-                if file_path.is_file()
-            )
+        if targets:
+            for target in targets:
+                target_path = Path(target)
+                if not target_path.is_absolute():
+                    target_path = self.ha_config_dir / target_path
+
+                if not target_path.exists():
+                    self.warnings.append(f"{target}: Path not found")
+                    continue
+
+                if target_path.is_dir():
+                    yaml_files.update(
+                        file_path
+                        for suffix in sorted(YAML_SUFFIXES)
+                        for file_path in target_path.rglob(f"*{suffix}")
+                        if file_path.is_file()
+                    )
+                    continue
+
+                if target_path.suffix.lower() in YAML_SUFFIXES:
+                    yaml_files.add(target_path)
+                else:
+                    self.warnings.append(f"{target}: Skipping non-YAML file")
+        else:
+            if patterns is None:
+                patterns = DEFAULT_PATTERNS
+
+            for pattern in patterns:
+                yaml_files.update(
+                    file_path
+                    for file_path in self.ha_config_dir.glob(pattern)
+                    if file_path.is_file()
+                )
+
+        return sorted(yaml_files)
+
+    def validate_directory(self, directory: str = ".", patterns: List[str] = None, targets: List[str] = None) -> None:
+        """Validate YAML files selected by targets or default repository patterns."""
+        yaml_files = self._iter_yaml_files(targets=targets, patterns=patterns)
 
         if not yaml_files:
             print("⚠️  No YAML files found")
             return
 
         print(f"📄 Checking {len(yaml_files)} YAML files...")
-        for file_path in sorted(yaml_files):
+        for file_path in yaml_files:
             self.validate_file(file_path)
 
     def report(self, verbose: bool = False, output_file: str = None) -> int:
@@ -313,6 +338,14 @@ def main():
         "--report",
         help="Save detailed report to this file"
     )
+    parser.add_argument(
+        "targets",
+        nargs="*",
+        help=(
+            "Optional YAML files or directories to validate relative to --config-dir. "
+            "If omitted, validate the default automations/ and config/ scope."
+        )
+    )
 
     args = parser.parse_args()
 
@@ -324,7 +357,7 @@ def main():
 
     # Run validation
     validator = EntityValidator(args.config_dir)
-    validator.validate_directory()
+    validator.validate_directory(targets=args.targets)
     exit_code = validator.report(verbose=args.verbose, output_file=args.report)
 
     sys.exit(exit_code)

@@ -49,6 +49,41 @@ def test_extracts_multiline_entity_id_lists(tmp_path: Path) -> None:
     assert validator.errors == []
 
 
+def test_validate_directory_can_target_specific_file(tmp_path: Path) -> None:
+    write_registry(tmp_path, "light.kitchen")
+    (tmp_path / "automations").mkdir()
+    (tmp_path / "config").mkdir()
+    (tmp_path / "automations" / "lights.yaml").write_text(
+        "entity_id: light.kitchen\n", encoding="utf-8"
+    )
+    (tmp_path / "config" / "bad.yaml").write_text(
+        "entity_id: switch.missing\n", encoding="utf-8"
+    )
+
+    validator = EntityValidator(str(tmp_path))
+    validator.validate_directory(targets=["automations/lights.yaml"])
+
+    assert validator.valid_refs == 1
+    assert validator.errors == []
+
+
+def test_validate_directory_warns_for_missing_or_non_yaml_targets(tmp_path: Path) -> None:
+    write_registry(tmp_path, "light.kitchen")
+    (tmp_path / "automations").mkdir()
+    (tmp_path / "automations" / "lights.yaml").write_text(
+        "entity_id: light.kitchen\n", encoding="utf-8"
+    )
+    (tmp_path / "README.md").write_text("not yaml\n", encoding="utf-8")
+
+    validator = EntityValidator(str(tmp_path))
+    validator.validate_directory(targets=["README.md", "missing.yaml", "automations"])
+
+    assert validator.valid_refs == 1
+    assert validator.errors == []
+    assert "README.md: Skipping non-YAML file" in validator.warnings
+    assert "missing.yaml: Path not found" in validator.warnings
+
+
 def test_save_report_creates_output_when_validation_passes(tmp_path: Path) -> None:
     write_registry(tmp_path, "light.kitchen")
     (tmp_path / "automations").mkdir()

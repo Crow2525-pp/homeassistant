@@ -45,11 +45,14 @@ Run the validator manually:
 # Basic validation
 python tools/validate_entities.py
 
+# Validate only specific files or directories
+python tools/validate_entities.py automations/05a_lighting.yaml config/lovelace/
+
 # With detailed report
 python tools/validate_entities.py --report validation-report.md
 
 # Custom config directory
-python tools/validate_entities.py --config-dir /path/to/ha/config
+python tools/validate_entities.py --config-dir /path/to/ha/config automations/
 
 # Unit tests
 python -m pytest tests/test_validate_entities.py
@@ -63,7 +66,9 @@ pre-commit install
 pre-commit run ha-entity-validator --all-files
 ```
 
-Once installed, the hook runs automatically whenever tracked automation or `config/` YAML changes, or when the validator itself is edited.
+Once installed, pre-commit now uses two validator hooks:
+- changed YAML under `automations/` and `config/` is validated file-by-file for faster commits
+- edits to the validator or its tests still trigger a full repository scan so validator changes cannot silently regress coverage
 
 **Output:**
 - ✅ **Summary** - Count of valid/invalid references
@@ -78,10 +83,11 @@ Once installed, the hook runs automatically whenever tracked automation or `conf
 ### Validation Process
 
 1. **Load Entity Registry** - Reads `.storage/core.entity_registry` (if available)
-2. **Scan YAML Files** - Finds all entity references using regex patterns
-3. **Validate Format** - Checks each reference follows `domain.name` format
-4. **Check Registry** - Verifies entity exists in registry (if available)
-5. **Report Results** - Lists all errors with file and line numbers
+2. **Select YAML Files** - Uses explicit CLI targets when provided, otherwise scans the default automations/ and config/ scope
+3. **Scan Entity References** - Finds all entity references using regex patterns
+4. **Validate Format** - Checks each reference follows `domain.name` format
+5. **Check Registry** - Verifies entity exists in registry (if available)
+6. **Report Results** - Lists all errors with file and line numbers
 
 ---
 
