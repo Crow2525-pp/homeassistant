@@ -16,6 +16,7 @@ The Entity Reference Validator is a Python-based tool that catches entity ID typ
 - Checks entity IDs against Home Assistant entity registry
 - Reports any missing or invalid entities
 - Runs automatically on every PR and push (via GitHub Actions)
+- Runs locally via pre-commit before commits when hooks are installed
 
 **Why it matters:**
 - Catches typos like `light.floor_lamp_socket_1` (doesn't exist)
@@ -53,6 +54,16 @@ python tools/validate_entities.py --config-dir /path/to/ha/config
 # Unit tests
 python -m pytest tests/test_validate_entities.py
 ```
+
+Enable the local pre-commit hook so entity reference mistakes are caught before a commit lands:
+
+```bash
+python -m pip install pre-commit
+pre-commit install
+pre-commit run ha-entity-validator --all-files
+```
+
+Once installed, the hook runs automatically whenever tracked automation or `config/` YAML changes, or when the validator itself is edited.
 
 **Output:**
 - ✅ **Summary** - Count of valid/invalid references

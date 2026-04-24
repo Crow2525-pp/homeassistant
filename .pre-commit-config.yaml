@@ -102,6 +102,23 @@ repos:
             www/.*
           )$
 
+  - repo: local
+    hooks:
+      - id: ha-entity-validator
+        name: Home Assistant entity reference validator
+        entry: python tools/validate_entities.py --config-dir .
+        language: python
+        additional_dependencies:
+          - pyyaml
+        pass_filenames: false
+        files: |
+          (?x)^(
+            automations/.*\.(yaml|yml)|
+            config/.*\.(yaml|yml)|
+            tools/validate_entities\.py|
+            tests/test_validate_entities\.py
+          )$
+
   # ============================================================================
   # PRETTIER (Optional - Format YAML, Markdown, JSON)
   # ============================================================================
