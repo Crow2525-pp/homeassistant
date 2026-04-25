@@ -248,7 +248,7 @@
                 entity_id: climate.masterbed_room_ac
               data:
                 hvac_mode: cool
-      # default: Auto + sensor unknown/unavailable — no action (fail safe)
+        # default: Auto + sensor unknown/unavailable — no action (fail safe)
   mode: single
 
 - id: master_bedroom_away_mode
@@ -540,7 +540,7 @@
                 entity_id: climate.kids_room_ac
               data:
                 hvac_mode: cool
-      # default: Auto + sensor unknown/unavailable — no action (fail safe)
+        # default: Auto + sensor unknown/unavailable — no action (fail safe)
   mode: single
 
 - id: ottos_room_away_mode
@@ -687,7 +687,7 @@
                 entity_id: climate.study_room_ac
               data:
                 hvac_mode: cool
-      # default: Auto + sensor unknown/unavailable — no action (fail safe)
+        # default: Auto + sensor unknown/unavailable — no action (fail safe)
   mode: single
 
 - id: lucas_room_away_mode
