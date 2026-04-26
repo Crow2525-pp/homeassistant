@@ -107,9 +107,9 @@
         name: "Morning Lights"
         message: "Morning lights activated ({{ states('input_select.morning_lights_rooms') }})"
 
-    # Step 3 (Optional): Gradual brightness increase
-    # Uncomment to gradually increase brightness from 30% to 50% over 10 minutes
-    # - delay:
+      # Step 3 (Optional): Gradual brightness increase
+      # Uncomment to gradually increase brightness from 30% to 50% over 10 minutes
+      # - delay:
     #     minutes: 5
     # - service: light.turn_on
     #   target:

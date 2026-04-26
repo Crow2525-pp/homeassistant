@@ -142,9 +142,9 @@
               - climate.kids_room_ac
               - climate.otto_s_room
 
-    # Study intentionally omitted — disabled room not turned on at return-home.
-    # Rumpus handled by rumpus_away_mode in 20_time_based_hvac.yaml.
-    # Away shutdown above still turns all rooms off for energy safety.
+  # Study intentionally omitted — disabled room not turned on at return-home.
+  # Rumpus handled by rumpus_away_mode in 20_time_based_hvac.yaml.
+  # Away shutdown above still turns all rooms off for energy safety.
   mode: single
 
 # ----------------------------------------------------------------------------
