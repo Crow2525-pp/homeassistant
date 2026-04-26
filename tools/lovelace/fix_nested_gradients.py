@@ -8,6 +8,7 @@ To: linear-gradient(...)
 import re
 from pathlib import Path
 
+
 def fix_nested_gradient(match):
     """Extract the inner gradient from a nested pattern."""
     full_match = match.group(0)
@@ -19,7 +20,7 @@ def fix_nested_gradient(match):
 
 def fix_file(file_path: Path) -> int:
     """Fix nested gradients in a single file. Returns number of fixes."""
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding='utf-8') as f:
         content = f.read()
 
     original_content = content
@@ -58,7 +59,7 @@ def main():
             total_fixes += fixes
 
     print(f"\n{'='*60}")
-    print(f"SUMMARY:")
+    print("SUMMARY:")
     print(f"Files fixed: {files_fixed}")
     print(f"Total nested gradients fixed: {total_fixes}")
     print(f"{'='*60}")

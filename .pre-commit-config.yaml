@@ -102,6 +102,31 @@ repos:
             www/.*
           )$
 
+  # ============================================================================
+  # PYTHON CODE QUALITY (Ruff)
+  # ============================================================================
+  # Ruff - Fast Python linter and formatter (replaces flake8, isort, black)
+  # Runs security checks, style enforcement, and code quality validation
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      # Ruff linter - checks for errors, style violations, security issues
+      - id: ruff
+        args: ['--fix']
+        exclude: |
+          (?x)^(
+            \.venv/.*|
+            custom_components/.*/
+          )$
+
+      # Ruff formatter - consistent code formatting (like black)
+      - id: ruff-format
+        exclude: |
+          (?x)^(
+            \.venv/.*|
+            custom_components/.*/
+          )$
+
   - repo: local
     hooks:
       - id: ha-entity-validator

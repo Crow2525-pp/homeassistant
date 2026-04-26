@@ -6,9 +6,10 @@ Fix broken gradient syntax from incorrect replacements.
 import re
 from pathlib import Path
 
+
 def fix_file(file_path: Path) -> int:
     """Fix broken gradients in a single file. Returns number of fixes."""
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding='utf-8') as f:
         content = f.read()
 
     original_content = content
@@ -57,7 +58,7 @@ def main():
             total_fixes += fixes
 
     print(f"\n{'='*60}")
-    print(f"SUMMARY:")
+    print("SUMMARY:")
     print(f"Files fixed: {files_fixed}")
     print(f"Total broken gradients fixed: {total_fixes}")
     print(f"{'='*60}")

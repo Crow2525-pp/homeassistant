@@ -15,7 +15,7 @@ except ImportError:  # Allow running as a standalone script
 def add_styling_to_file(file_path: Path) -> bool:
     """Add card_mod styling to file if it doesn't have any. Returns True if modified."""
 
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding='utf-8') as f:
         content = f.read()
 
     # Skip if already has card_mod

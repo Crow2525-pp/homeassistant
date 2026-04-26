@@ -17,11 +17,10 @@ Exit codes:
 import json
 import re
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, List, Set, Tuple
 
 import yaml
-
 
 DEFAULT_PATTERNS = [
     "automations/**/*.yaml",
@@ -49,7 +48,7 @@ class EntityValidator:
         self.warnings = []
         self.valid_refs = 0
 
-    def _load_entity_registry(self) -> Set[str]:
+    def _load_entity_registry(self) -> set[str]:
         """Load all valid entity IDs from Home Assistant entity registry."""
         registry_path = self.ha_config_dir / ".storage" / "core.entity_registry"
 
@@ -61,7 +60,7 @@ class EntityValidator:
             return valid_entities
 
         try:
-            with open(registry_path, "r") as f:
+            with open(registry_path) as f:
                 data = json.load(f)
 
             # Extract all entity IDs from the registry
@@ -77,12 +76,12 @@ class EntityValidator:
             print(f"⚠️  Failed to load entity registry: {e}")
             return valid_entities
 
-    def _extract_entity_references(self, content: str, file_path: str) -> List[Tuple[str, int]]:
+    def _extract_entity_references(self, content: str, file_path: str) -> list[tuple[str, int]]:
         """Extract all entity ID references from YAML content.
 
         Returns list of (entity_id, line_number) tuples.
         """
-        references: List[Tuple[str, int]] = []
+        references: list[tuple[str, int]] = []
         lines = content.split("\n")
 
         # Fast path for common single-line cases
@@ -164,7 +163,7 @@ class EntityValidator:
     def validate_file(self, file_path: Path) -> None:
         """Validate all entity references in a YAML file."""
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
         except Exception as e:
             self.warnings.append(f"{file_path}: Could not read file: {e}")
@@ -198,7 +197,7 @@ class EntityValidator:
                 # No registry - just count valid format entities
                 self.valid_refs += 1
 
-    def _iter_yaml_files(self, targets: List[str] = None, patterns: List[str] = None) -> Iterable[Path]:
+    def _iter_yaml_files(self, targets: list[str] = None, patterns: list[str] = None) -> Iterable[Path]:
         """Yield YAML files selected via explicit targets or default glob patterns."""
         yaml_files = set()
 
@@ -238,7 +237,7 @@ class EntityValidator:
 
         return sorted(yaml_files)
 
-    def validate_directory(self, directory: str = ".", patterns: List[str] = None, targets: List[str] = None) -> None:
+    def validate_directory(self, directory: str = ".", patterns: list[str] = None, targets: list[str] = None) -> None:
         """Validate YAML files selected by targets or default repository patterns."""
         yaml_files = self._iter_yaml_files(targets=targets, patterns=patterns)
 
@@ -257,7 +256,7 @@ class EntityValidator:
         print("="*70)
 
         # Summary
-        print(f"\n📊 Summary:")
+        print("\n📊 Summary:")
         print(f"   Valid entity references: {self.valid_refs}")
         print(f"   Invalid references found: {len(self.errors)}")
         print(f"   Warnings: {len(self.warnings)}")

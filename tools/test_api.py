@@ -38,7 +38,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     import requests
@@ -93,15 +93,15 @@ class HomeAssistantAPI:
                 print(f"Response: {e.response.text}")
             sys.exit(1)
 
-    def get_config(self) -> Dict:
+    def get_config(self) -> dict:
         """Get Home Assistant configuration."""
         return self._request('GET', 'config')
 
-    def get_states(self) -> List[Dict]:
+    def get_states(self) -> list[dict]:
         """Get all entity states."""
         return self._request('GET', 'states')
 
-    def get_state(self, entity_id: str) -> Optional[Dict]:
+    def get_state(self, entity_id: str) -> dict | None:
         """Get state of a specific entity.
 
         Args:
@@ -115,7 +115,7 @@ class HomeAssistantAPI:
         except SystemExit:
             return None
 
-    def check_entities(self, entity_ids: List[str]) -> Dict[str, bool]:
+    def check_entities(self, entity_ids: list[str]) -> dict[str, bool]:
         """Check if multiple entities exist.
 
         Args:
@@ -128,7 +128,7 @@ class HomeAssistantAPI:
         existing_ids = {state['entity_id'] for state in states}
         return {entity_id: entity_id in existing_ids for entity_id in entity_ids}
 
-    def list_entities(self, domain: Optional[str] = None) -> List[str]:
+    def list_entities(self, domain: str | None = None) -> list[str]:
         """List all entities, optionally filtered by domain.
 
         Args:
@@ -205,7 +205,7 @@ def cmd_get(api: HomeAssistantAPI, entity_id: str) -> None:
         sys.exit(1)
 
 
-def cmd_states(api: HomeAssistantAPI, domain: Optional[str] = None) -> None:
+def cmd_states(api: HomeAssistantAPI, domain: str | None = None) -> None:
     """List all entity states."""
     states = api.get_states()
 
@@ -219,7 +219,7 @@ def cmd_states(api: HomeAssistantAPI, domain: Optional[str] = None) -> None:
         print(f"  {state['entity_id']}: {state['state']}")
 
 
-def cmd_list(api: HomeAssistantAPI, domain: Optional[str] = None) -> None:
+def cmd_list(api: HomeAssistantAPI, domain: str | None = None) -> None:
     """List entity IDs."""
     entities = api.list_entities(domain)
 
@@ -232,7 +232,7 @@ def cmd_list(api: HomeAssistantAPI, domain: Optional[str] = None) -> None:
         print(f"  {entity_id}")
 
 
-def cmd_check(api: HomeAssistantAPI, entity_ids: List[str]) -> None:
+def cmd_check(api: HomeAssistantAPI, entity_ids: list[str]) -> None:
     """Check if entities exist."""
     results = api.check_entities(entity_ids)
 
