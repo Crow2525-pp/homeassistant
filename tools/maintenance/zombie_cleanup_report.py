@@ -8,9 +8,10 @@ import json
 from collections import defaultdict
 from datetime import datetime
 
+
 def load_json(filepath):
     """Load JSON file."""
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, encoding='utf-8') as f:
         return json.load(f)
 
 def generate_report():

@@ -9,9 +9,7 @@ Recursively processes Lovelace YAML files to:
 """
 
 import re
-from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Tuple, Set
 
 import yaml
 
@@ -33,7 +31,7 @@ CARD_STYLES = {
 # Default style for cards without styling
 DEFAULT_CARD_STYLE = '<<: *card_navy'
 
-def extract_colors_from_text(text: str) -> Set[str]:
+def extract_colors_from_text(text: str) -> set[str]:
     """Extract all color values from text."""
     colors = set()
 
@@ -64,7 +62,7 @@ def normalize_color(color: str) -> str:
         return color.upper()
     return color
 
-def replace_colors_in_text(text: str, replacements: Dict[str, Tuple[str, str]]) -> Tuple[str, List[str]]:
+def replace_colors_in_text(text: str, replacements: dict[str, tuple[str, str]]) -> tuple[str, list[str]]:
     """Replace hardcoded colors with theme references."""
     replaced = []
     result = text
@@ -125,7 +123,7 @@ def should_add_styling(card_dict: dict) -> bool:
     # Add styling if it's a styleable type and doesn't have card_mod
     return card_type in styleable_types and not has_card_mod(card_dict)
 
-def process_yaml_file(file_path: Path, dry_run: bool = True) -> Dict:
+def process_yaml_file(file_path: Path, dry_run: bool = True) -> dict:
     """Process a single YAML file."""
     results = {
         'file': str(file_path),
@@ -136,7 +134,7 @@ def process_yaml_file(file_path: Path, dry_run: bool = True) -> Dict:
     }
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             content = f.read()
 
         # Extract all colors from the file
@@ -183,8 +181,8 @@ def process_yaml_file(file_path: Path, dry_run: bool = True) -> Dict:
 def main():
     """Main execution function."""
     import argparse
-    import sys
     import io
+    import sys
 
     # Fix Windows console encoding issues
     if sys.platform == 'win32':
@@ -238,7 +236,7 @@ def main():
                 total_changes += len(results['colors_replaced'])
 
             if results['unknown_colors']:
-                print(f"   [WARN] Unknown colors found:")
+                print("   [WARN] Unknown colors found:")
                 for color in results['unknown_colors']:
                     print(f"      - {color}")
                     all_unknown_colors.add(color)

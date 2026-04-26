@@ -1,0 +1,100 @@
+# ============================================================================
+# RUFF CONFIGURATION
+# ============================================================================
+# Ruff is a fast Python linter and formatter
+# Documentation: https://docs.astral.sh/ruff/
+# ============================================================================
+
+[tool.ruff]
+# Target Python 3.11+ (Home Assistant minimum version)
+target-version = "py311"
+
+# Line length to match Home Assistant style
+line-length = 100
+
+# Exclude specific directories
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    ".pytest_cache",
+    ".storage",
+    "deps",
+    "www",
+    "custom_components",
+]
+
+[tool.ruff.lint]
+# Enable specific rule sets
+# E/W = pycodestyle errors and warnings
+# F = pyflakes
+# I = isort (import sorting)
+# N = pep8-naming
+# UP = pyupgrade (modern Python syntax)
+# B = flake8-bugbear (common bugs)
+# S = flake8-bandit (security)
+# C4 = flake8-comprehensions
+# T20 = flake8-print (catch debug prints)
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "S",   # flake8-bandit
+    "C4",  # flake8-comprehensions
+    "T20", # flake8-print
+]
+
+# Disable specific rules that conflict with Home Assistant patterns
+ignore = [
+    "S101",  # Allow assert statements (used in tests)
+    "S104",  # Allow binding to 0.0.0.0 (common in HA tools)
+    "S105",  # Allow hardcoded password strings in examples
+    "S106",  # Allow hardcoded password function args in examples
+    "S108",  # Allow insecure temp file usage (needed for testing)
+    "T201",  # Allow print statements (tools use print for output)
+]
+
+# Allow autofix for specific rule categories
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+# Test files can use additional patterns
+"tests/**/*.py" = [
+    "S101",  # assert allowed in tests
+]
+
+# Tools can print to stdout
+"tools/**/*.py" = [
+    "T201",  # print allowed in CLI tools
+]
+
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "double"
+
+# Indent with spaces (4 spaces per level)
+indent-style = "space"
+
+# Unix line endings
+line-ending = "lf"
+
+# ============================================================================
+# PYTEST CONFIGURATION
+# ============================================================================
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# Show extra test summary info
+addopts = [
+    "-v",
+    "--strict-markers",
+]

@@ -4,7 +4,6 @@ Fix YAML anchor references that don't work across files.
 Replaces anchor references with actual color values.
 """
 
-import re
 from pathlib import Path
 
 try:
@@ -15,7 +14,7 @@ except ImportError:  # Allow running as a standalone script
 def fix_file(file_path: Path) -> int:
     """Fix anchor references in a single file. Returns number of replacements."""
 
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding='utf-8') as f:
         content = f.read()
 
     original_content = content
@@ -56,7 +55,7 @@ def main():
             total_replacements += replacements
 
     print(f"\n{'='*60}")
-    print(f"SUMMARY:")
+    print("SUMMARY:")
     print(f"Files modified: {files_modified}")
     print(f"Total replacements: {total_replacements}")
     print(f"{'='*60}")
