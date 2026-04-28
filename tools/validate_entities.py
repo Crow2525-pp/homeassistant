@@ -27,6 +27,8 @@ DEFAULT_PATTERNS = [
     "automations/**/*.yml",
     "config/**/*.yaml",
     "config/**/*.yml",
+    "ui_lovelace_minimalist/**/*.yaml",
+    "ui_lovelace_minimalist/**/*.yml",
 ]
 
 YAML_SUFFIXES = {".yaml", ".yml"}
@@ -143,7 +145,7 @@ class EntityValidator:
         LineLoader.add_constructor("tag:yaml.org,2002:str", construct_str)
 
         try:
-            parsed = yaml.load(content, Loader=LineLoader)
+            parsed = yaml.load(content, Loader=LineLoader)  # noqa: S506
         except yaml.YAMLError:
             return references
 
@@ -197,7 +199,9 @@ class EntityValidator:
                 # No registry - just count valid format entities
                 self.valid_refs += 1
 
-    def _iter_yaml_files(self, targets: list[str] = None, patterns: list[str] = None) -> Iterable[Path]:
+    def _iter_yaml_files(
+        self, targets: list[str] = None, patterns: list[str] = None
+    ) -> Iterable[Path]:
         """Yield YAML files selected via explicit targets or default glob patterns."""
         yaml_files = set()
 
@@ -237,7 +241,12 @@ class EntityValidator:
 
         return sorted(yaml_files)
 
-    def validate_directory(self, directory: str = ".", patterns: list[str] = None, targets: list[str] = None) -> None:
+    def validate_directory(
+        self,
+        directory: str = ".",
+        patterns: list[str] = None,
+        targets: list[str] = None,
+    ) -> None:
         """Validate YAML files selected by targets or default repository patterns."""
         yaml_files = self._iter_yaml_files(targets=targets, patterns=patterns)
 
