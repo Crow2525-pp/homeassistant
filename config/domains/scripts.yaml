@@ -714,7 +714,8 @@ leaving_home:
   mode: single
   icon: mdi:home-export-outline
 arriving_home:
-  alias: Arriving Home
+  alias: Arriving Home - Ground Floor
+  description: Turns on ground-floor lights when arriving home after dark.
   sequence:
   - choose:
     - conditions:
@@ -755,9 +756,9 @@ arriving_home:
           area_id:
           - living_room
           - master_bedroom
-  - condition: state
-    entity_id: sun.sun
-    state: below_horizon
+  - condition: sun
+    after: sunset
+    before: sunrise
   - action: light.turn_on
     target:
       area_id:
