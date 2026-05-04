@@ -16,22 +16,45 @@ def write_registry(tmp_path: Path, *entity_ids: str) -> None:
 def test_validate_directory_uses_default_scope_only(tmp_path: Path) -> None:
     write_registry(tmp_path, "light.kitchen")
     (tmp_path / "automations").mkdir()
+    (tmp_path / "config" / "lovelace").mkdir(parents=True)
     (tmp_path / "ui_lovelace_minimalist" / "dashboard").mkdir(parents=True)
+    (
+        tmp_path
+        / "custom_components"
+        / "ui_lovelace_minimalist"
+        / "lovelace"
+        / "cards"
+    ).mkdir(parents=True)
     (tmp_path / "lovelace").mkdir()
+    (tmp_path / "docs" / "archive").mkdir(parents=True)
     (tmp_path / "automations" / "lights.yaml").write_text(
         "entity_id: light.kitchen\n", encoding="utf-8"
     )
-    (tmp_path / "lovelace" / "legacy.yaml").write_text(
+    (tmp_path / "config" / "lovelace" / "dashboard.yaml").write_text(
         "entity_id: light.kitchen\n", encoding="utf-8"
     )
     (tmp_path / "ui_lovelace_minimalist" / "dashboard" / "ui-lovelace.yaml").write_text(
+        "entity_id: light.kitchen\n", encoding="utf-8"
+    )
+    (
+        tmp_path
+        / "custom_components"
+        / "ui_lovelace_minimalist"
+        / "lovelace"
+        / "cards"
+        / "badge.yaml"
+    ).write_text("entity_id: light.kitchen\n", encoding="utf-8")
+    (tmp_path / "lovelace" / "legacy.yaml").write_text(
+        "entity_id: light.kitchen\n", encoding="utf-8"
+    )
+    (tmp_path / "docs" / "archive" / "snapshot.yaml").write_text(
         "entity_id: light.kitchen\n", encoding="utf-8"
     )
 
     validator = EntityValidator(str(tmp_path))
     validator.validate_directory()
 
-    assert validator.valid_refs == 2
+    assert validator.valid_refs == 4
     assert validator.errors == []
 
 

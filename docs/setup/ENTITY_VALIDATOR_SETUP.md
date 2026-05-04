@@ -11,7 +11,7 @@
 The Entity Reference Validator is a Python-based tool that catches entity ID typos and invalid references before they cause Home Assistant to fail.
 
 **What it does:**
-- Scans Home Assistant YAML in automations/, config/, and config/lovelace/
+- Scans Home Assistant YAML in automations/, config/, config/lovelace/, ui_lovelace_minimalist/, and custom_components/ui_lovelace_minimalist/lovelace/
 - Verifies all entity references follow `domain.name` format
 - Checks entity IDs against Home Assistant entity registry
 - Reports any missing or invalid entities
@@ -83,7 +83,7 @@ Once installed, pre-commit now uses two validator hooks:
 ### Validation Process
 
 1. **Load Entity Registry** - Reads `.storage/core.entity_registry` (if available)
-2. **Select YAML Files** - Uses explicit CLI targets when provided, otherwise scans the default automations/ and config/ scope
+2. **Select YAML Files** - Uses explicit CLI targets when provided, otherwise scans the default automations/, config/, and active dashboard YAML scope
 3. **Scan Entity References** - Finds all entity references using regex patterns
 4. **Validate Format** - Checks each reference follows `domain.name` format
 5. **Check Registry** - Verifies entity exists in registry (if available)

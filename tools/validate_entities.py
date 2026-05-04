@@ -27,8 +27,12 @@ DEFAULT_PATTERNS = [
     "automations/**/*.yml",
     "config/**/*.yaml",
     "config/**/*.yml",
+    "config/lovelace/**/*.yaml",
+    "config/lovelace/**/*.yml",
     "ui_lovelace_minimalist/**/*.yaml",
     "ui_lovelace_minimalist/**/*.yml",
+    "custom_components/ui_lovelace_minimalist/lovelace/**/*.yaml",
+    "custom_components/ui_lovelace_minimalist/lovelace/**/*.yml",
 ]
 
 YAML_SUFFIXES = {".yaml", ".yml"}
@@ -351,7 +355,7 @@ def main():
         nargs="*",
         help=(
             "Optional YAML files or directories to validate relative to --config-dir. "
-            "If omitted, validate the default automations/ and config/ scope."
+            "If omitted, validate the default automations/, config/, and dashboard YAML scope."
         )
     )
 
