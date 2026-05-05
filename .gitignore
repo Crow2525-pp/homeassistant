@@ -74,3 +74,6 @@ secrets.yaml
 
 # Pre-commit hooks
 !.pre-commit-config.yaml
+
+!tests/
+!tests/**
