@@ -102,7 +102,6 @@ def generate_report():
     print("4. DEVICES WITH NO ENTITIES (can likely be removed)")
     print("=" * 80)
 
-    device_id_map = {d['id']: d for d in device_list}
     empty_devices = []
 
     for device in device_list:

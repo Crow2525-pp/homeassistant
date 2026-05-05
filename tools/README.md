@@ -35,6 +35,13 @@ Test and validate Home Assistant entity states using the REST API.
    pip install requests pyyaml
    ```
 
+#### CLI flags
+
+- `--timeout SECONDS` sets the HTTP timeout for every API call, default `10`
+- Network timeouts fail fast with a clear error instead of hanging indefinitely
+- Auth failures now report a specific token/config hint
+- Missing entities still return a clean not-found result for `get` and `check`
+
 #### Usage Examples
 
 ```bash
