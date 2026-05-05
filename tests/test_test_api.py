@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import argparse
+
 import requests
 
+from tools import test_api
 from tools.test_api import (
     DEFAULT_TIMEOUT,
     HomeAssistantAPI,
@@ -140,3 +143,67 @@ def test_missing_endpoint_raises_not_found(monkeypatch) -> None:
         assert "config" in str(exc)
     else:
         raise AssertionError("Expected HomeAssistantNotFoundError")
+
+
+def test_positive_timeout_rejects_zero() -> None:
+    try:
+        test_api.positive_timeout("0")
+    except argparse.ArgumentTypeError as exc:
+        assert "greater than 0" in str(exc)
+    else:
+        raise AssertionError("Expected ArgumentTypeError")
+
+
+class StubAPI:
+    def __init__(self) -> None:
+        self.called: tuple[str, object] | None = None
+
+    def get_state(self, entity_id: str):
+        self.called = ("get", entity_id)
+        return None
+
+    def get_states(self):
+        self.called = ("states", None)
+        return []
+
+    def list_entities(self, domain: str | None = None):
+        self.called = ("list", domain)
+        return []
+
+    def check_entities(self, entity_ids: list[str]):
+        self.called = ("check", entity_ids)
+        return dict.fromkeys(entity_ids, True)
+
+    def get_config(self):
+        self.called = ("config", None)
+        return {"version": "test"}
+
+
+def test_run_command_routes_to_expected_handler(capsys) -> None:
+    api = StubAPI()
+    args = argparse.Namespace(command="config")
+
+    test_api.run_command(api, args)
+
+    captured = capsys.readouterr()
+    assert api.called == ("config", None)
+    assert "Home Assistant Configuration:" in captured.out
+
+
+def test_main_prints_actionable_errors(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(test_api, "load_config", lambda: ("http://ha.local:8123", "token"))
+
+    class FailingAPI:
+        def __init__(self, url: str, token: str, timeout: float) -> None:
+            self.timeout = timeout
+
+        def get_config(self):
+            raise HomeAssistantAuthError("Authentication failed. Check ha_api_token.")
+
+    monkeypatch.setattr(test_api, "HomeAssistantAPI", FailingAPI)
+
+    exit_code = test_api.main(["--timeout", "3", "config"])
+
+    captured = capsys.readouterr()
+    assert exit_code == 1
+    assert "Error: Authentication failed" in captured.err

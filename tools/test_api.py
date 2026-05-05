@@ -29,6 +29,14 @@ except ImportError:
 DEFAULT_TIMEOUT = 10.0
 
 
+def positive_timeout(value: str) -> float:
+    """Argparse type for positive timeout values."""
+    timeout = float(value)
+    if timeout <= 0:
+        raise argparse.ArgumentTypeError("timeout must be greater than 0")
+    return timeout
+
+
 class HomeAssistantAPIError(RuntimeError):
     """Base error for Home Assistant API failures."""
 
@@ -228,7 +236,7 @@ def cmd_config(api: HomeAssistantAPI) -> None:
     print_json(config)
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Home Assistant API testing tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -243,7 +251,7 @@ Examples:
     )
     parser.add_argument(
         "--timeout",
-        type=float,
+        type=positive_timeout,
         default=DEFAULT_TIMEOUT,
         help=f"HTTP timeout in seconds (default: {DEFAULT_TIMEOUT:g})",
     )
@@ -262,8 +270,25 @@ Examples:
     check_parser.add_argument("entity_ids", nargs="+", help="Entity IDs to check")
 
     subparsers.add_parser("config", help="Get Home Assistant configuration")
+    return parser
 
-    args = parser.parse_args()
+
+def run_command(api: HomeAssistantAPI, args: argparse.Namespace) -> None:
+    if args.command == "get":
+        cmd_get(api, args.entity_id)
+    elif args.command == "states":
+        cmd_states(api, args.domain)
+    elif args.command == "list":
+        cmd_list(api, args.domain)
+    elif args.command == "check":
+        cmd_check(api, args.entity_ids)
+    elif args.command == "config":
+        cmd_config(api)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
     if not args.command:
         parser.print_help()
         return 1
@@ -271,16 +296,7 @@ Examples:
     try:
         url, token = load_config()
         api = HomeAssistantAPI(url, token, timeout=args.timeout)
-        if args.command == "get":
-            cmd_get(api, args.entity_id)
-        elif args.command == "states":
-            cmd_states(api, args.domain)
-        elif args.command == "list":
-            cmd_list(api, args.domain)
-        elif args.command == "check":
-            cmd_check(api, args.entity_ids)
-        elif args.command == "config":
-            cmd_config(api)
+        run_command(api, args)
     except HomeAssistantAPIError as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
