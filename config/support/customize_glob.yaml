@@ -1,0 +1,8 @@
+# GoSungrow sensors with state_class: measurement but no unit — causes HA ERROR log spam
+# These three namespaces are safe to glob: all sensors in them are non-numeric (names, IDs, URLs, etc.)
+sensor.gosungrow_getpsdetail_*:
+  state_class: null
+sensor.gosungrow_getpslist_*:
+  state_class: null
+sensor.gosungrow_querydevicelist_*:
+  state_class: null

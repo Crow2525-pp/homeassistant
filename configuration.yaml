@@ -4,6 +4,7 @@ default_config:
 # Customize entities
 homeassistant:
   customize: !include config/support/customize.yaml
+  customize_glob: !include config/support/customize_glob.yaml
 
 # Text to speech
 tts: !include config/support/tts.yaml

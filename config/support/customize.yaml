@@ -298,3 +298,68 @@ calendar.early_to_bed:
 sensor.samsung_galaxy_s22_ultra_sleep_confidence:
   friendly_name: "Phil Sleep Status"
   category: presence
+
+# GoSungrow virtual sensors — state_class: measurement removed (string values, no unit)
+# These are non-numeric (environment stats, identifiers); real power/energy sensors above are excluded
+sensor.gosungrow_virtual_1205796_22_247_1_p23011:
+  state_class: null
+sensor.gosungrow_virtual_1205796_22_247_1_p23014:
+  state_class: null
+sensor.gosungrow_virtual_1205796_7_1_1_p8014:
+  state_class: null
+sensor.gosungrow_virtual_1205796_p83036:
+  state_class: null
+sensor.gosungrow_virtual_1205796_p83043:
+  state_class: null
+sensor.gosungrow_virtual_1205796_p83044:
+  state_class: null
+sensor.gosungrow_virtual_1205796_p83045:
+  state_class: null
+sensor.gosungrow_virtual_1205796_p83121:
+  state_class: null
+sensor.gosungrow_virtual_1205796_p83125:
+  state_class: null
+sensor.gosungrow_virtual_1205796_p83126:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_p83048:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_p83049:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_p83050:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_p83051:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_p83054:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_p83055:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_p83070:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_p83076:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_p83077:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_p83081:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_p83089:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_p83120:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_param_co2:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_param_coal:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_param_income:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_param_meter:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_param_nox:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_param_powder:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_param_so2:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_param_tree:
+  state_class: null
+sensor.gosungrow_virtual_devices_1205796_param_water:
+  state_class: null
