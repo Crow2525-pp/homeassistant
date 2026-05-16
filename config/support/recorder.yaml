@@ -11,6 +11,7 @@ exclude:
     - sensor.*_last_temperature_date
     - sensor.*_last_external_temperature_date
     - update.*
+    - sensor.gosungrow_*
   domains:
     - button
     - device_tracker

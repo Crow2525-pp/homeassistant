@@ -684,7 +684,7 @@
         {% set inside_state = states('sensor.masterbed_temperature') %}
         {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
         {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
-          unknown
+          unavailable
         {% else %}
           {{ (inside_state | float(0) - outside_state | float(0)) | round(1) }}
         {% endif %}
@@ -716,7 +716,7 @@
         {% set inside_state = states('sensor.living_room_temperature_offset') %}
         {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
         {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
-          unknown
+          unavailable
         {% else %}
           {{ (inside_state | float(0) - outside_state | float(0)) | round(1) }}
         {% endif %}
@@ -748,7 +748,7 @@
         {% set inside_state = states('sensor.study_temperature') %}
         {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
         {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
-          unknown
+          unavailable
         {% else %}
           {{ (inside_state | float(0) - outside_state | float(0)) | round(1) }}
         {% endif %}
@@ -780,7 +780,7 @@
         {% set inside_state = states('sensor.kids_temperature') %}
         {% set outside_state = state_attr('weather.braybrook', 'temperature') %}
         {% if inside_state in ['unknown', 'unavailable'] or outside_state in [None, 'unknown', 'unavailable'] %}
-          unknown
+          unavailable
         {% else %}
           {{ (inside_state | float(0) - outside_state | float(0)) | round(1) }}
         {% endif %}
