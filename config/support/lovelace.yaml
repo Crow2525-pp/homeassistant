@@ -32,6 +32,8 @@ resources:
     type: module
   - url: /hacsfiles/week-planner-card/week-planner-card.js
     type: module
+  - url: /hacsfiles/atomic-calendar-revive/atomic-calendar-revive.js
+    type: module
   - url: /hacsfiles/lovelace-navbar-card/navbar-card.js
     type: module
   - url: /local/community/lovelace-layout-card/layout-card.js
