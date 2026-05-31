@@ -1,98 +1,118 @@
 ---
 # ============================================================================
-# MOTION DETECTION AUTOMATION
+# FRIGATE PERSON DETECTION AUTOMATIONS
 # ============================================================================
-# Purpose: Alert on outside motion during night hours
-# Documentation: docs/setup/MOTION_FACE_DETECTION_SETUP.md
+# Purpose: Alert on relevant person detections from Frigate without duplicate spam.
 # ============================================================================
 
-- id: front_door_camera_motion_detection
-  alias: Front Door Camera - Motion Detection
-  description: Sends notification and displays camera when Blue Iris detects motion
-    at front door
+- id: front_door_frigate_person_detection
+  alias: Front Door - Frigate Person Detection
+  description: Sends a high-priority notification when Frigate detects a person at the front door during security-relevant periods.
   trigger:
-  - trigger: state
-    entity_id: binary_sensor.blue_iris_cam_front_door
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: input_select.occupancy
-    state:
-    - Home
-    - Sleeping
-  - condition: or
-    conditions:
-    - condition: time
-      after: '20:00:00'
-    - condition: time
-      before: '06:00:00'
-  action:
-  - action: notify.mobile_app_samsung_galaxy_s22_ultra
-    data:
-      title: Front Door Motion Detected
-      message: "{{ states('sensor.bi_front_door_memo') }}"
-      data:
-        image: /api/camera_proxy/camera.bi_front_door_camera
-        clickAction: /lovelace/security
-        tag: front_door_motion
-        ttl: 0
-        priority: high
-  mode: single
-- id: driveway_camera_motion_detection
-  alias: Driveway Camera - Motion Detection
-  description: Sends notification when Blue Iris detects motion in the driveway
-  trigger:
-  - trigger: state
-    entity_id: binary_sensor.blue_iris_cam_driveway
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: input_select.occupancy
-    state:
-    - Home
-    - Sleeping
-  - condition: or
-    conditions:
-    - condition: time
-      after: '20:00:00'
-    - condition: time
-      before: '06:00:00'
-  action:
-  - action: notify.mobile_app_samsung_galaxy_s22_ultra
-    data:
-      title: Driveway Motion Detected
-      message: "{{ states('sensor.bi_driveway_memo') }}"
-      data:
-        image: /api/camera_proxy/camera.driveway_cam_fluent
-        clickAction: /lovelace/security
-        tag: driveway_motion
-        ttl: 0
-        priority: high
-  mode: single
-- id: motion_detection_outside
-  alias: "Security - Outside Motion Detection"
-  description: "Alert on outside motion during night hours (8 PM - 6 AM)"
-
-  trigger:
-    - platform: state
-      entity_id: binary_sensor.frigate_person_detected
+    - trigger: state
+      entity_id: binary_sensor.front_door_person_occupancy
       to: "on"
       for:
         seconds: 2
-
   condition:
-    # Night mode (8 PM - 6 AM)
     - condition: or
       conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state:
+            - Away
+            - Sleeping
         - condition: time
           after: "20:00:00"
         - condition: time
           before: "06:00:00"
-
   action:
-    - service: notify.persistent_notification
-      data:
-        title: "Motion Detected"
-        message: "Outside motion detected at {{ now().strftime('%I:%M %p') }}"
-
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: alarm_control_panel.alarmo
+              state:
+                - armed_away
+                - armed_night
+          sequence:
+            - action: notify.std_critical
+              data:
+                title: Front Door Person Detected
+                message: Frigate detected a person at the front door while Alarmo is armed.
+                data:
+                  image: /api/camera_proxy/camera.front_door
+                  clickAction: /lovelace/security
+                  tag: frigate_front_door_person
+                  ttl: 0
+                  priority: high
+      default:
+        - action: notify.family_mobile
+          data:
+            title: Front Door Person Detected
+            message: Frigate detected a person at the front door.
+            data:
+              image: /api/camera_proxy/camera.front_door
+              clickAction: /lovelace/security
+              tag: frigate_front_door_person
+              ttl: 0
+              priority: high
+    - delay:
+        minutes: 15
   mode: single
+  max_exceeded: silent
+
+- id: driveway_frigate_person_detection
+  alias: Driveway - Frigate Person Detection
+  description: Sends a high-priority notification when Frigate detects a person in the driveway during security-relevant periods.
+  trigger:
+    - trigger: state
+      entity_id: binary_sensor.driveway_person_occupancy
+      to: "on"
+      for:
+        seconds: 2
+  condition:
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.occupancy
+          state:
+            - Away
+            - Sleeping
+        - condition: time
+          after: "20:00:00"
+        - condition: time
+          before: "06:00:00"
+  action:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: alarm_control_panel.alarmo
+              state:
+                - armed_away
+                - armed_night
+          sequence:
+            - action: notify.std_critical
+              data:
+                title: Driveway Person Detected
+                message: Frigate detected a person in the driveway while Alarmo is armed.
+                data:
+                  image: /api/camera_proxy/camera.driveway
+                  clickAction: /lovelace/security
+                  tag: frigate_driveway_person
+                  ttl: 0
+                  priority: high
+      default:
+        - action: notify.family_mobile
+          data:
+            title: Driveway Person Detected
+            message: Frigate detected a person in the driveway.
+            data:
+              image: /api/camera_proxy/camera.driveway
+              clickAction: /lovelace/security
+              tag: frigate_driveway_person
+              ttl: 0
+              priority: high
+    - delay:
+        minutes: 15
+  mode: single
+  max_exceeded: silent
