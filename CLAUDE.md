@@ -18,6 +18,8 @@
 
 Only inspect the live checkout with read-only commands such as `git status`, `git diff`, and entity/config reads unless the explicit task is to recover from a dirty working tree.
 
+If the Git Pull app has already failed because the live checkout was dirty, cleaning the git tree is only the recovery step. Start or restart the Git Pull app afterward and verify a fresh pull succeeds so the live checkout receives the current merged `master` commit.
+
 Example workflow:
 ```bash
 git checkout -b descriptive-branch-name
