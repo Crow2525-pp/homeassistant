@@ -1,7 +1,7 @@
 ---
 - id: '1681337163617'
   alias: Set Occupancy to Away
-  description: Switches the occupancy selector to Away after 10 minutes with no one
+  description: Switches the occupancy selector to Away after 2 minutes with no one
     in the home zone.
   trigger:
   - entity_id:
@@ -9,7 +9,7 @@
     to: '0'
     for:
       hours: 0
-      minutes: 10
+      minutes: 2
       seconds: 0
     trigger: state
   condition:
