@@ -1,117 +1,87 @@
 ---
 # ============================================================================
-# FRIGATE PERSON DETECTION AUTOMATIONS
+# FRIGATE ALARM DETECTION AUTOMATIONS
 # ============================================================================
-# Purpose: Alert on relevant person detections from Frigate without duplicate spam.
+# Purpose: Alert on person/car detections from Frigate while Alarmo is armed.
 # ============================================================================
 
 - id: front_door_frigate_person_detection
-  alias: Front Door - Frigate Person Detection
-  description: Sends a high-priority notification when Frigate detects a person at the front door during security-relevant periods.
+  alias: Front Door - Frigate Alarm Detection
+  description: Sends a critical notification when Frigate detects a person or car at the front door while Alarmo is armed.
   trigger:
     - trigger: state
       entity_id: binary_sensor.front_door_person_occupancy
       to: "on"
       for:
         seconds: 2
+    - trigger: state
+      entity_id: binary_sensor.front_door_car_occupancy
+      to: "on"
+      for:
+        seconds: 2
   condition:
-    - condition: or
-      conditions:
-        - condition: state
-          entity_id: input_select.occupancy
-          state:
-            - Away
-            - Sleeping
-        - condition: time
-          after: "20:00:00"
-        - condition: time
-          before: "06:00:00"
+    - condition: state
+      entity_id: alarm_control_panel.alarmo
+      state:
+        - armed_away
+        - armed_custom_bypass
+        - armed_home
+        - armed_night
+        - armed_vacation
   action:
-    - choose:
-        - conditions:
-            - condition: state
-              entity_id: alarm_control_panel.alarmo
-              state:
-                - armed_away
-                - armed_night
-          sequence:
-            - action: notify.std_critical
-              data:
-                title: Front Door Person Detected
-                message: Frigate detected a person at the front door while Alarmo is armed.
-                data:
-                  image: /api/camera_proxy/camera.front_door
-                  clickAction: /lovelace/security
-                  tag: frigate_front_door_person
-                  ttl: 0
-                  priority: high
-      default:
-        - action: notify.family_mobile
-          data:
-            title: Front Door Person Detected
-            message: Frigate detected a person at the front door.
-            data:
-              image: /api/camera_proxy/camera.front_door
-              clickAction: /lovelace/security
-              tag: frigate_front_door_person
-              ttl: 0
-              priority: high
+    - variables:
+        detected_object: "{{ 'car' if trigger.entity_id == 'binary_sensor.front_door_car_occupancy' else 'person' }}"
+    - action: notify.std_critical
+      data:
+        title: "Front Door {{ detected_object | title }} Detected"
+        message: "Frigate detected a {{ detected_object }} at the front door while Alarmo is armed."
+        data:
+          image: /api/camera_proxy/camera.front_door
+          clickAction: /lovelace/security
+          tag: "frigate_front_door_{{ detected_object }}"
+          ttl: 0
+          priority: high
     - delay:
         minutes: 15
   mode: single
   max_exceeded: silent
 
 - id: driveway_frigate_person_detection
-  alias: Driveway - Frigate Person Detection
-  description: Sends a high-priority notification when Frigate detects a person in the driveway during security-relevant periods.
+  alias: Driveway - Frigate Alarm Detection
+  description: Sends a critical notification when Frigate detects a person or car in the driveway while Alarmo is armed.
   trigger:
     - trigger: state
       entity_id: binary_sensor.driveway_person_occupancy
       to: "on"
       for:
         seconds: 2
+    - trigger: state
+      entity_id: binary_sensor.driveway_car_occupancy
+      to: "on"
+      for:
+        seconds: 2
   condition:
-    - condition: or
-      conditions:
-        - condition: state
-          entity_id: input_select.occupancy
-          state:
-            - Away
-            - Sleeping
-        - condition: time
-          after: "20:00:00"
-        - condition: time
-          before: "06:00:00"
+    - condition: state
+      entity_id: alarm_control_panel.alarmo
+      state:
+        - armed_away
+        - armed_custom_bypass
+        - armed_home
+        - armed_night
+        - armed_vacation
   action:
-    - choose:
-        - conditions:
-            - condition: state
-              entity_id: alarm_control_panel.alarmo
-              state:
-                - armed_away
-                - armed_night
-          sequence:
-            - action: notify.std_critical
-              data:
-                title: Driveway Person Detected
-                message: Frigate detected a person in the driveway while Alarmo is armed.
-                data:
-                  image: /api/camera_proxy/camera.driveway
-                  clickAction: /lovelace/security
-                  tag: frigate_driveway_person
-                  ttl: 0
-                  priority: high
-      default:
-        - action: notify.family_mobile
-          data:
-            title: Driveway Person Detected
-            message: Frigate detected a person in the driveway.
-            data:
-              image: /api/camera_proxy/camera.driveway
-              clickAction: /lovelace/security
-              tag: frigate_driveway_person
-              ttl: 0
-              priority: high
+    - variables:
+        detected_object: "{{ 'car' if trigger.entity_id == 'binary_sensor.driveway_car_occupancy' else 'person' }}"
+    - action: notify.std_critical
+      data:
+        title: "Driveway {{ detected_object | title }} Detected"
+        message: "Frigate detected a {{ detected_object }} in the driveway while Alarmo is armed."
+        data:
+          image: /api/camera_proxy/camera.driveway
+          clickAction: /lovelace/security
+          tag: "frigate_driveway_{{ detected_object }}"
+          ttl: 0
+          priority: high
     - delay:
         minutes: 15
   mode: single
