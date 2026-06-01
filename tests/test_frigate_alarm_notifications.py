@@ -35,26 +35,38 @@ def trigger_entities(automation: dict) -> set[str]:
     }
 
 
-def test_frigate_alarm_alerts_only_watch_front_door_person_and_car_sensors() -> None:
+def test_frigate_alarm_alerts_watch_front_door_person_and_car_sensors() -> None:
     automation = automation_by_id("front_door_frigate_person_detection")
 
     assert trigger_entities(automation) == {
         "binary_sensor.front_door_person_occupancy",
         "binary_sensor.front_door_car_occupancy",
     }
+
+
+def test_frigate_alarm_alerts_watch_only_in_yard_zone_for_driveway_camera() -> None:
+    automation = automation_by_id("in_yard_frigate_detection")
+
+    assert trigger_entities(automation) == {"binary_sensor.in_yard_all_occupancy"}
     assert "driveway_frigate_person_detection" not in automation_ids()
+    assert "binary_sensor.driveway_person_occupancy" not in trigger_entities(automation)
+    assert "binary_sensor.driveway_car_occupancy" not in trigger_entities(automation)
 
 
-def test_front_door_frigate_alarm_alert_is_gated_by_alarmo_armed_state() -> None:
-    conditions = automation_by_id("front_door_frigate_person_detection")["condition"]
+def test_frigate_alarm_alerts_are_gated_by_alarmo_armed_state() -> None:
+    for automation_id in (
+        "front_door_frigate_person_detection",
+        "in_yard_frigate_detection",
+    ):
+        conditions = automation_by_id(automation_id)["condition"]
 
-    assert conditions == [
-        {
-            "condition": "state",
-            "entity_id": "alarm_control_panel.alarmo",
-            "state": sorted(ARMED_ALARMO_STATES),
-        }
-    ]
+        assert conditions == [
+            {
+                "condition": "state",
+                "entity_id": "alarm_control_panel.alarmo",
+                "state": sorted(ARMED_ALARMO_STATES),
+            }
+        ]
 
 
 def test_front_door_frigate_alarm_alert_uses_critical_family_notification() -> None:
@@ -74,6 +86,23 @@ def test_front_door_frigate_alarm_alert_uses_critical_family_notification() -> N
     }
 
 
+def test_in_yard_frigate_alarm_alert_uses_driveway_camera_notification() -> None:
+    actions = automation_by_id("in_yard_frigate_detection")["action"]
+    notification = next(action for action in actions if action.get("action") == "notify.std_critical")
+
+    assert notification["data"]["title"] == "Front Yard Activity Detected"
+    assert notification["data"]["message"] == (
+        "Frigate detected a person or car in the front yard while Alarmo is armed."
+    )
+    assert notification["data"]["data"] == {
+        "image": "/api/camera_proxy/camera.driveway",
+        "clickAction": "/lovelace/security",
+        "tag": "frigate_in_yard_activity",
+        "ttl": 0,
+        "priority": "high",
+    }
+
+
 def test_front_door_frigate_alarm_alert_maps_car_trigger_to_car_label() -> None:
     actions = automation_by_id("front_door_frigate_person_detection")["action"]
     variables = next(action for action in actions if "variables" in action)
@@ -83,9 +112,13 @@ def test_front_door_frigate_alarm_alert_maps_car_trigger_to_car_label() -> None:
     )
 
 
-def test_front_door_frigate_alarm_alert_has_duplicate_cooldown() -> None:
-    automation = automation_by_id("front_door_frigate_person_detection")
+def test_frigate_alarm_alerts_have_duplicate_cooldown() -> None:
+    for automation_id in (
+        "front_door_frigate_person_detection",
+        "in_yard_frigate_detection",
+    ):
+        automation = automation_by_id(automation_id)
 
-    assert {"delay": {"minutes": 15}} in automation["action"]
-    assert automation["mode"] == "single"
-    assert automation["max_exceeded"] == "silent"
+        assert {"delay": {"minutes": 15}} in automation["action"]
+        assert automation["mode"] == "single"
+        assert automation["max_exceeded"] == "silent"
