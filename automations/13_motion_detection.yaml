@@ -2,7 +2,7 @@
 # ============================================================================
 # FRIGATE ALARM DETECTION AUTOMATIONS
 # ============================================================================
-# Purpose: Alert on person/car detections from Frigate while Alarmo is armed.
+# Purpose: Alert on front door person/car detections from Frigate while Alarmo is armed.
 # ============================================================================
 
 - id: front_door_frigate_person_detection
@@ -39,47 +39,6 @@
           image: /api/camera_proxy/camera.front_door
           clickAction: /lovelace/security
           tag: "frigate_front_door_{{ detected_object }}"
-          ttl: 0
-          priority: high
-    - delay:
-        minutes: 15
-  mode: single
-  max_exceeded: silent
-
-- id: driveway_frigate_person_detection
-  alias: Driveway - Frigate Alarm Detection
-  description: Sends a critical notification when Frigate detects a person or car in the driveway while Alarmo is armed.
-  trigger:
-    - trigger: state
-      entity_id: binary_sensor.driveway_person_occupancy
-      to: "on"
-      for:
-        seconds: 2
-    - trigger: state
-      entity_id: binary_sensor.driveway_car_occupancy
-      to: "on"
-      for:
-        seconds: 2
-  condition:
-    - condition: state
-      entity_id: alarm_control_panel.alarmo
-      state:
-        - armed_away
-        - armed_custom_bypass
-        - armed_home
-        - armed_night
-        - armed_vacation
-  action:
-    - variables:
-        detected_object: "{{ 'car' if trigger.entity_id == 'binary_sensor.driveway_car_occupancy' else 'person' }}"
-    - action: notify.std_critical
-      data:
-        title: "Driveway {{ detected_object | title }} Detected"
-        message: "Frigate detected a {{ detected_object }} in the driveway while Alarmo is armed."
-        data:
-          image: /api/camera_proxy/camera.driveway
-          clickAction: /lovelace/security
-          tag: "frigate_driveway_{{ detected_object }}"
           ttl: 0
           priority: high
     - delay:
