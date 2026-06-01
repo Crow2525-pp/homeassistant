@@ -45,3 +45,37 @@
         minutes: 15
   mode: single
   max_exceeded: silent
+
+- id: in_yard_frigate_detection
+  alias: Front Yard - Frigate Alarm Detection
+  description: Sends a critical notification when Frigate detects a person or car in the front yard while Alarmo is armed.
+  trigger:
+    - trigger: state
+      entity_id: binary_sensor.in_yard_all_occupancy
+      to: "on"
+      for:
+        seconds: 2
+  condition:
+    - condition: state
+      entity_id: alarm_control_panel.alarmo
+      state:
+        - armed_away
+        - armed_custom_bypass
+        - armed_home
+        - armed_night
+        - armed_vacation
+  action:
+    - action: notify.std_critical
+      data:
+        title: Front Yard Activity Detected
+        message: Frigate detected a person or car in the front yard while Alarmo is armed.
+        data:
+          image: /api/camera_proxy/camera.driveway
+          clickAction: /lovelace/security
+          tag: frigate_in_yard_activity
+          ttl: 0
+          priority: high
+    - delay:
+        minutes: 15
+  mode: single
+  max_exceeded: silent
